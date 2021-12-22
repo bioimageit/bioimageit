@@ -69,10 +69,14 @@ All the instructions to install a custom version of the BioImageIT `API` are ava
 # Demo
 
 ## BioImageIT demo with the graphical interface 
+
+### Tutorials
 - [Experiment data management](https://bioimageit.github.io/bioimageit_gui/tutorial_experiment.html)
 - [Find a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_finder.html)
 - [Run a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_runner.html)
 - [Design a data processing pipeline](https://bioimageit.github.io/bioimageit_gui/tutorial_pipeline.html)
+
+### Videos
 - [Data management video](https://www.youtube.com/watch?v=Ce0hLhO3Qis)
 - [Data processing video](https://www.youtube.com/watch?v=cpN4dzASNu0)
 
