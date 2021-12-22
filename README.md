@@ -33,18 +33,18 @@ Open science and FAIR principles are major topics in the field of modern microsc
 
 ## Hardware Requirements
 
-The BioImageIT software requires only a standard computer with enough RAM to support the operations defined by a user. For minimal performance, this will be a computer with about 4 GB of RAM. For optimal performance, we recommend a computer with the following specs:
+The `BioImageIT` software requires only a standard computer with enough RAM to support the operations defined by a user. For minimal performance, this will be a computer with about 4 GB of RAM. For optimal performance, we recommend a computer with the following specs:
 
 RAM: 16+ GB  
 CPU: 4+ cores, 3.3+ GHz/core
 
-BioImageIT data processing algorithm are wrapped versions of existing libraries. The hardware requirements will then vary depending of the data processing pipeline defined by the user. For instance, a GPU is needed when running deep learning models.
+`BioImageIT` data processing algorithm are wrapped versions of existing libraries. The hardware requirements will then vary depending of the data processing pipeline defined by the user. For instance, a GPU is needed when running deep learning models.
 
 ## Software Requirements
 
 ### OS Requirements
 
-The BioImageIT development version is tested on *Windows 10*, *MacOS* and *Linux* operating systems. The developmental version of the package has been tested on the following systems:
+The `BioImageIT` development version is tested on *Windows 10*, *MacOS* and *Linux* operating systems. The developmental version of the package has been tested on the following systems:
 
 Linux: Ubuntu 21.04 
 Mac OSX: Mac OS Catalina 10.15.11    
@@ -52,19 +52,19 @@ Windows: 10
 
 # Installation Guide
 
-`BioImageIT` is an integration of existing open-source data management and analysis software. The install can then be very different depending on the user need. We provide a pre-packaged version that corresponds to the main usage, and a documentation to manually install BioImageIT components. 
+`BioImageIT` is an integration of existing open-source data management and analysis software. The install can then be very different depending on the user need. We provide a pre-packaged version that corresponds to the main usage, and a documentation to manually install `BioImageIT` components. 
 
 ## Pre-packaged install
 
-- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/blob/main/windows/BioimageIT_installer.exe) allows to install the latest version of BioImageIT. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=917InvFkivA) 
+- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/blob/main/windows/BioimageIT_installer.exe) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=917InvFkivA) 
 
-- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/mac/install.sh) allows to install the latest version of BioImageIT. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=pMD_pjPF3Y4) 
+- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/mac/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=pMD_pjPF3Y4) 
 
-- Linux: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/linux/install.sh) allows to install the latest version of BioImageIT. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=ohKKkMb54k4) 
+- Linux: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=ohKKkMb54k4) 
 
 ## Custom install
 
-All the instructions to install a custom version of the BioImageIT `API` are available with the `bioimageit_core` developers documentation: [https://bioimageit.github.io/bioimageit_core/install.html](https://bioimageit.github.io/bioimageit_core/install.html)
+All the instructions to install a custom version of the `BioImageIT API` are available with the `bioimageit_core` developers documentation: [https://bioimageit.github.io/bioimageit_core/install.html](https://bioimageit.github.io/bioimageit_core/install.html)
 
 # Demo
 
