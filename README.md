@@ -69,19 +69,19 @@ All the instructions to install a custom version of the BioImageIT `API` are ava
 # Demo
 
 ## BioImageIT demo with the graphical interface 
-[Experiment data management](https://bioimageit.github.io/bioimageit_gui/tutorial_experiment.html)
-[Find a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_finder.html)
-[Run a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_runner.html)
-[Design a data processing pipeline](https://bioimageit.github.io/bioimageit_gui/tutorial_pipeline.html)
+- [Experiment data management](https://bioimageit.github.io/bioimageit_gui/tutorial_experiment.html)
+- [Find a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_finder.html)
+- [Run a processing tool](https://bioimageit.github.io/bioimageit_gui/tutorial_runner.html)
+- [Design a data processing pipeline](https://bioimageit.github.io/bioimageit_gui/tutorial_pipeline.html)
 
-[Data management video](https://www.youtube.com/watch?v=Ce0hLhO3Qis)
-[Data processing video](https://www.youtube.com/watch?v=cpN4dzASNu0)
+- [Data management video](https://www.youtube.com/watch?v=Ce0hLhO3Qis)
+- [Data processing video](https://www.youtube.com/watch?v=cpN4dzASNu0)
 
 ## BioImageIT API demo
 
-[Experiment data management](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial1-experiment.ipynb)
-[Run a processing tool](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial2-runner.ipynb)
-[Design a data processing pipeline](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial3-pipeline.ipynb)
+- [Experiment data management](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial1-experiment.ipynb)
+- [Run a processing tool](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial2-runner.ipynb)
+- [Design a data processing pipeline](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial3-pipeline.ipynb)
 
 # Results
 
