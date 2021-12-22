@@ -18,16 +18,16 @@ Open science and FAIR principles are major topics in the field of modern microsc
 
 # Project Contents
 
-- [bioimageit_core](https://github.com/bioimageit/bioimageit_core): Python `API` package for BioImageIT python scripting.
+- [bioimageit_core](https://github.com/bioimageit/bioimageit_core): Python `API` package for `BioImageIT` python scripting.
 - [bioimageit_formats](https://github.com/bioimageit/bioimageit_formats): Python `API` to wrap reader and writer for bio-imaging data.
-- [bioimageit_gui](https://github.com/bioimageit/bioimageit_formats): The BioImageIT software (graphical interface).
+- [bioimageit_gui](https://github.com/bioimageit/bioimageit_formats): The `BioImageIT` software (graphical interface).
 - [bioimageit_viewer](https://github.com/bioimageit/bioimageit_viewer): Python Qt integration of data viewers (ex: napari for ND images).
 - [bioimageit_tools](https://github.com/bioimageit/bioimageit_tools): Repository of wrappers than integrate existing data processing tools to BioImageIT.
 - [bioimageit-recipies](https://github.com/bioimageit/bioimageit-recipies): Repository of Conda recipes to integrate existing data processing tools using Conda.
 - [bioimageit-toolboxes](https://github.com/bioimageit/bioimageit-toolboxes): Repository to define data processing toolboxes available in BioImageIT.
 - [bioimageit-notebooks](https://github.com/bioimageit/bioimageit-notebooks): Tutorials written with Jupyter notebooks to demonstrate the BioImageIT API.
-- [bioimageit-package](https://github.com/bioimageit/bioimageit-package): Scripts needed to package BioImageIT for Linux, MacOS and Windows.
-- [bioimageit-install](https://github.com/bioimageit/bioimageit-install): Scripts to automate the BioImageIT install for Linux, MacOS and Windows.
+- [bioimageit-package](https://github.com/bioimageit/bioimageit-package): Scripts needed to package `BioImageIT` for Linux, MacOS and Windows.
+- [bioimageit-install](https://github.com/bioimageit/bioimageit-install): Scripts to automate the `BioImageIT` install for Linux, MacOS and Windows.
 
 # System Requirements
 
