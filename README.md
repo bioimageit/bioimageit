@@ -62,6 +62,8 @@ Windows: 10
 
 - Linux: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=ohKKkMb54k4) 
 
+The typical install time in a desktop computer is 6 minutes (measured in a Macbook pro 2012, Intel core i7, 8Go RAM). The install time may vary depending on the internet connection speed.
+
 ## Custom install
 
 All the instructions to install a custom version of the `BioImageIT API` are available with the `bioimageit_core` developers documentation: [https://bioimageit.github.io/bioimageit_core/install.html](https://bioimageit.github.io/bioimageit_core/install.html)
@@ -86,8 +88,8 @@ All the instructions to install a custom version of the `BioImageIT API` are ava
 - [Run a processing tool](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial2-runner.ipynb)
 - [Design a data processing pipeline](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial3-pipeline.ipynb)
 
-# Results
 
-# Citation
+## Run time
 
-
+The image denoising demo with NDSafir is performed on a 3D image of size (``723 x 968 x 21`` pixels) and took 1 min 30 sec on a desktop (Intel Core i9 8 cores, 64Go RAM). 
+Notice that an image processing tool is wrapped "as it is" in `BioImageIT` and not reimplemented. This means that the computation time does not depend on `BioImageIT` but on the original software implementation.
