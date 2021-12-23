@@ -46,9 +46,9 @@ CPU: 4+ cores, 3.3+ GHz/core
 
 The `BioImageIT` development version is tested on *Windows 10*, *MacOS* and *Linux* operating systems. The developmental version of the package has been tested on the following systems:
 
-Linux: Ubuntu 21.04 
-Mac OSX: Mac OS Catalina 10.15.11    
-Windows: 10 
+- Linux: Ubuntu 21.04 
+- Mac OSX: Mac OS Catalina 10.15.11    
+- Windows: 10 
 
 # Installation Guide
 
