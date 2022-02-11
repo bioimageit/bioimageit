@@ -3,7 +3,7 @@
 ## Contents
 
 - [Overview](#overview)
-- [Repo Contents](#project-contents)
+- [Project Contents](#project-contents)
 - [System Requirements](#system-requirements)
 - [Installation Guide](#installation-guide)
 - [Demo](#demo)
