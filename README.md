@@ -9,8 +9,7 @@
 - [Demo](#demo)
 - [Results](#results)
 - [License](./LICENSE)
-- [Issues](https://github.com/bioimageit/bioimageit/issuess)
-- [Citation](#citation)
+- [Issues](https://github.com/bioimageit/bioimageit/issues)
 
 # Overview
 
