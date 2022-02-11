@@ -9,7 +9,7 @@
 - [Demo](#demo)
 - [Results](#results)
 - [License](./LICENSE)
-- [Issues](https://github.com/ebridge2/lol/issues)
+- [Issues](https://github.com/bioimageit/bioimageit/issuess)
 - [Citation](#citation)
 
 # Overview
