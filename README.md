@@ -7,7 +7,6 @@
 - [System Requirements](#system-requirements)
 - [Installation Guide](#installation-guide)
 - [Demo](#demo)
-- [Results](#results)
 - [License](./LICENSE)
 - [Issues](https://github.com/bioimageit/bioimageit/issues)
 
