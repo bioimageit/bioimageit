@@ -54,11 +54,11 @@ The `BioImageIT` development version is tested on *Windows 10*, *MacOS* and *Lin
 
 ## Pre-packaged install
 
-- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/blob/main/windows/BioimageIT_installer.exe) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=917InvFkivA) 
+- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.0/windows/BioImageIT_install.exe) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=917InvFkivA) 
 
-- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/mac/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=pMD_pjPF3Y4) 
+- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.0/mac/BioImageIT_install.dmg) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=pMD_pjPF3Y4) 
 
-- Linux: The installation script available [here](https://github.com/bioimageit/bioimageit-install/blob/main/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=ohKKkMb54k4) 
+- Linux: The installation script available [here](https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.1.0/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=ohKKkMb54k4) 
 
 The typical install time in a desktop computer is 6 minutes (measured in a Macbook pro 2012, Intel core i7, 8Go RAM). The install time may vary depending on the internet connection speed.
 
