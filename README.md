@@ -75,8 +75,8 @@ All the instructions to install a custom version of the `BioImageIT API` are ava
 - [Design a data processing pipeline](https://bioimageit.github.io/bioimageit_gui/tutorial_data_analysis.html)
 
 ### Videos
-- [Data management video](https://www.youtube.com/watch?v=Ce0hLhO3Qis)
-- [Data processing video](https://www.youtube.com/watch?v=cpN4dzASNu0)
+- [Data management video](https://www.youtube.com/watch?v=PKXsEZ0fMxk&t)
+- [Data processing video](https://www.youtube.com/watch?v=87JFlLHzsMU)
 
 ## BioImageIT API demo
 
