@@ -76,6 +76,7 @@ All the instructions to install a custom version of the `BioImageIT API` are ava
 
 ### Videos
 - [Data management video](https://www.youtube.com/watch?v=PKXsEZ0fMxk&t)
+- [Data management with OMERO video](https://www.youtube.com/watch?v=cDPn5OF9LRI)
 - [Data processing video](https://www.youtube.com/watch?v=87JFlLHzsMU)
 
 ## BioImageIT API demo
