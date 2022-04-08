@@ -81,8 +81,8 @@ All the instructions to install a custom version of the `BioImageIT API` are ava
 ## BioImageIT API demo
 
 - [Experiment data management](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial1-experiment.ipynb)
-- [Run a processing tool](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial2-runner.ipynb)
-- [Design a data processing pipeline](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial3-pipeline.ipynb)
+- [Run a processing tool](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial2-tool.ipynb)
+- [Design a data processing pipeline](https://github.com/bioimageit/bioimageit-notebooks/blob/main/tutorial3-runner.ipynb)
 
 
 ## Run time
