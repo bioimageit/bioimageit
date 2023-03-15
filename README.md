@@ -54,11 +54,11 @@ The `BioImageIT` development version is tested on *Windows 10*, *MacOS* and *Lin
 
 ## Pre-packaged install
 
-- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.1/windows/BioImageIT_install.exe) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=Z0DP0tMZPEY&t=1s) 
+- Windows 10: The installer available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.2/windows/BioImageIT_install.exe) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=Z0DP0tMZPEY&t=1s) 
 
-- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.1/mac/BioImageIT_install.dmg) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=R_dVrSbt1Ic) 
+- Mac OS: The installation script available [here](https://github.com/bioimageit/bioimageit-install/raw/v0.1.2/mac/BioImageIT_install.dmg) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=R_dVrSbt1Ic) 
 
-- Linux: The installation script available [here](https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.1.1/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=X3BJIfaIv14&t=1s) 
+- Linux: The installation script available [here](https://raw.githubusercontent.com/bioimageit/bioimageit-install/v0.1.2/linux/install.sh) allows to install the latest version of `BioImageIT`. Detailed instructions are shown in this [video](https://www.youtube.com/watch?v=X3BJIfaIv14&t=1s) 
 
 The typical install time in a desktop computer is 6 minutes (measured in a Macbook pro 2012, Intel core i7, 8Go RAM). The install time may vary depending on the internet connection speed.
 
