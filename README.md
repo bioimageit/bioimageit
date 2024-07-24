@@ -1,12 +1,11 @@
 # BioImageIT
 
-A FAIR data management and image analysis framework.
-
-FAIR stands for Findable, Accessible, Interoperable and Reusable.
+A FAIR data management and image analysis framework. FAIR stands for Findable, Accessible, Interoperable and Reusable.
 
 BioImageIT provides a node programming interface to create processing workflows from Conda packaged tools. Each tool is run in its own conda environment to avoid dependency conflicts. Data is transfered from node to node in the form of [pandas](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.attrs.html) DataFrames.
 
 This project currently heavily relies on [PyFlow](https://github.com/wonderworks-software/PyFlow).
+
 BioImageIT was made possible thanks to [omero-py](https://github.com/ome/omero-py), [pandas](https://pandas.pydata.org/), [Qt](https://doc.qt.io/), [Conda](https://conda.anaconda.org/), and many others.
 
 ## Overview
