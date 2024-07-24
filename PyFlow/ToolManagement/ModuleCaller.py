@@ -1,9 +1,10 @@
+import sys
 import logging
 import traceback
 from importlib import import_module
 from multiprocessing.connection import Listener
 
-# sys.path.append('./') # Necessary to be able to import the following when running independently from PyFlow
+sys.path.append('./') # Necessary to be able to import when running independently from PyFlow
 # from PyFlow.ToolManagement import host
 # from PyFlow.invoke_in_main import inthread
 

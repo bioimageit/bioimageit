@@ -82,7 +82,7 @@ def download(outputPath, nodeName, omero, datasetNameOrId):
 def upload(omero, datasetName, projectName, dataFramePath, columnName, metaDataColumns):
     
     # Get or create dataset
-    # Projects are not created by BioImageFlow
+    # Projects are not created by BioImageIT
     datasetId = None
     try:
         dataset = getDataset(omero, datasetName)

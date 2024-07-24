@@ -97,6 +97,7 @@ class ProgressDialog(QWidget):
         self.nSteps = None
 
     def getProgressPercentage(self):
+        if self.nNodes is None or self.nNodes == 0: return 0
         nodePercentage = 100.0 / self.nNodes
         percentage = self.currentNode * nodePercentage
         if self.nRows is None: return percentage
@@ -117,8 +118,11 @@ class ProgressDialog(QWidget):
     def log(self, message):
         if message == self.allNodesProcessedMessage:
             inmain(lambda: self.progress(message, int(100)))
-        progressPrints = re.findall(r'(\d)\/(\d)', message)
+        # Find progess prints: string in the format [[current/total]] where current is the current node, row or process step ; and total the total number of nodes, rows or process steps.
+        progressPrints = re.findall(r'\[\[(\d)\/(\d)\]\]', message)
         if len(progressPrints) > 0:
+            # Remove the [[ and ]] sequences from message
+            message = re.sub(r'\[\[|\]\]', '', message)
             if message.startswith('Process node'):
                 self.nodeName = message.split(': ')[-1]
                 self.currentNode, self.nNodes = self.parseInts(progressPrints[0])
@@ -133,7 +137,6 @@ class RunTool(ShelfTool):
     """docstring for RunTool."""
 
     req = None
-    executing = False
     cancelExecution = threading.Event()
 
     def __init__(self, initialize=True):
@@ -143,8 +146,10 @@ class RunTool(ShelfTool):
         # if RunTool.req is None:
         #     RunTool.req = iit.Request('biit/config.json')
         #     RunTool.req.connect()
-    
+
+        self.executing = False
         self.logTool = None
+        self.currentNode = None
         self.progressDialog = ProgressDialog(self)
         BiitNodeBase.log.connect(self.log)
 
@@ -299,7 +304,8 @@ class RunTool(ShelfTool):
         self.executing = True
         try:
             for n, node in enumerate(plannedNodes):
-                self.log(f'Process node {n}/{len(plannedNodes)}: {node.name}')
+                self.log(f'Process node [[{n}/{len(plannedNodes)}]]: {node.name}')
+                self.currentNode = node
                 self.execute(node)
                 if self.cancelExecution.is_set(): break
             self.log(self.progressDialog.allNodesProcessedMessage)
@@ -319,11 +325,12 @@ class RunTool(ShelfTool):
         return
     
     def cancel(self):
-        # self.executionThread
         if not self.executing:
             self.progressDialog.hide()
         else:
             self.cancelExecution.set()
+            if self.currentNode is not None:
+                self.currentNode.exitTool()
     
     def saveGraph(self):
         graphManager = self.pyFlowInstance.graphManager.get()

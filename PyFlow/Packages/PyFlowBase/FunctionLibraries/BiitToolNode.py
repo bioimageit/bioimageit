@@ -4,7 +4,7 @@ import sys
 import re
 from pathlib import Path
 from munch import Munch
-from PyFlow import GetRootPath
+from PyFlow import getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool
@@ -18,7 +18,7 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 
 
 def get_bundle_path():
-    return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else GetRootPath()
+    return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
 
 # path = Path(__file__).parent.resolve()
 # with open(path.parent.parent / 'biit' / 'config.json' if path.name == 'ToolManagement' else path / 'biit' / 'config.json', 'r') as file:
@@ -173,7 +173,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		# 	cls.connection.close()
 		# cls.status = Status.STOPPED
 		if cls.environment is not None:
-			return cls.environment.exit()
+			return environmentManager.exit(cls.environment)
 
 	def getParameterValueString(self, name, row):
 		parameterDict = self.parameters[name]
@@ -223,9 +223,9 @@ class BiitToolNode(BiitArrayNodeBase):
 		argsList = self.getArgs()
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
-			self.__class__.log.send(f'Process row {i+1}/{len(argsList)}')
+			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			args = [item for items in [(f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args], RunTool.cancelExecution)
+			self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
 		self.setExecuted(True)
 		return
 

@@ -27,9 +27,11 @@ class Tool:
 
     def initialize(self, args):
         print('Loading libraries...')
-        self.models = import_module('cellpose.models')
+        # self.models = import_module('cellpose.models')
         # self.io: cellpose.io = import_module('cellpose.io')
+        import cellpose.models
         import cellpose.io
+        self.models = cellpose.models
         self.io = cellpose.io
         self.model = self.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=args.model_name)
     
@@ -41,25 +43,25 @@ class Tool:
             sys.exit('Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
-        print(f'1/4. Load image {input_image}')
+        print(f'[[1/4]] Load image {input_image}')
         channels = json.loads(args.channels)
         image = self.io.imread(input_image)
         auto_diameter = args.auto_diameter if type(args.auto_diameter) is bool else args.auto_diameter == 'True'
 
-        print('2/4. Compute segmentation', image.shape)
+        print('[[2/4]] Compute segmentation', image.shape)
         masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
         
         input_image = Path(input_image)
 
         if args.npy:
-            print(f'3/4. Save segmentation {args.npy}')
+            print(f'[[3/4]] Save segmentation {args.npy}')
             # save results so you can load in gui
             self.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
             (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.npy)
-            print('Saved npy:', args.npy)
+            print(f'Saved npy: {args.npy}')
 
         if args.out:
-            print(f'4/4. Save segmentation {args.out}')
+            print(f'[[4/4]] Save segmentation {args.out}')
             # save results as tif
             self.io.save_masks(image, masks, flows, input_image, tif=True)
             import time
@@ -68,7 +70,7 @@ class Tool:
             output_mask = input_image.parent / f'{input_image.stem}_cp_masks.tif'
             if output_mask.exists():
                 (output_mask).rename(args.out)
-                print('Saved out:', args.out)
+                print(f'Saved out: {args.out}')
             else:
                 print('Segmentation was not generated because no masks were found.')
 

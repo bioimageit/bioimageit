@@ -20,14 +20,31 @@ class OmeroBase(BiitNodeBase):
 
     omero: OmeroService = OmeroService()
 
-    def __init__(self, name):
+    def __init__(self, name, createPins=True):
         super(OmeroBase, self).__init__(name)
         self.executed = None
+        self.lib = 'BiitLib'
+        if createPins:
+            self.createDatasetPins()
+    
+    def createDatasetPins(self):
+        self.datasetIdPin = self.createInputPin("Dataset ID (ignored if negative)", "IntPin", -1)
+        self.datasetIdPin.pinHidden = True
+
+        self.datasetNamePin = self.createInputPin("Dataset name", "StringPin", "")
+        self.datasetNamePin.pinHidden = True
+        for pin in [self.datasetIdPin, self.datasetNamePin]:
+            pin.pinHidden = True
+            pin.dataBeenSet.connect(self.dataChanged)
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
         self.setExecuted(False)
     
+    def dataChanged(self, datasetName:str):
+        self.dirty = True
+        self.setExecuted(False)
+
     def getDataset(self, project=None):
         datasetId = self.datasetIdPin.currentData() if self.datasetIdPin.currentData() >= 0 else None
         datasetName = self.datasetNamePin.currentData() if len(self.datasetNamePin.currentData()) > 0 else None
@@ -41,21 +58,10 @@ class OmeroDownload(OmeroBase):
     def __init__(self, name):
         super(OmeroDownload, self).__init__(name)
 
-        self.datasetIdPin = self.createInputPin("Dataset ID (ignored if negative)", "IntPin", -1)
-        self.datasetIdPin.dataBeenSet.connect(self.datasetChanged)
-        self.datasetIdPin.pinHidden = True
-
-        self.datasetNamePin = self.createInputPin("Dataset name", "StringPin", "")
-        self.datasetNamePin.dataBeenSet.connect(self.datasetChanged)
-        self.datasetNamePin.pinHidden = True
-
         self.outArray = self.createOutputPin("DataFrame", "AnyPin")
         self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
 
-        self.lib = 'BiitLib'
 
-    def datasetChanged(self, datasetName:str):
-        self.dirty = True
     
     @staticmethod
     def description():
@@ -135,7 +141,7 @@ class OmeroDownload(OmeroBase):
 class OmeroUpload(OmeroBase):
 
     def __init__(self, name):
-        super(OmeroUpload, self).__init__(name)
+        super(OmeroUpload, self).__init__(name, False)
 
         self.inDataFrame = self.createInputPin("DataFrame", "AnyPin", None)
         self.inDataFrame.enableOptions(PinOptions.AllowAny)
@@ -143,16 +149,14 @@ class OmeroUpload(OmeroBase):
         self.columnName = None
         self.metaDataColumnsPin = self.createInputPin("Metadata columns", "StringPin", "")
 
-        self.datasetIdPin = self.createInputPin("Dataset ID (ignored if negative)", "IntPin", -1)
-        self.datasetNamePin = self.createInputPin("Dataset name", "StringPin", "")
+        self.createDatasetPins()
 
         self.projectIdPin = self.createInputPin("Project ID (optional, ignored if negative)", "IntPin", -1)
         self.projectNamePin = self.createInputPin("Project name (optional)", "StringPin", "")
         
-        for pin in [self.metaDataColumnsPin, self.datasetIdPin, self.datasetNamePin, self.projectIdPin, self.projectNamePin]:
+        for pin in [self.metaDataColumnsPin, self.projectIdPin, self.projectNamePin]:
             pin.pinHidden = True
-        
-        self.lib = 'BiitLib'
+            pin.dataBeenSet.connect(self.dataChanged)
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
@@ -198,7 +202,7 @@ class OmeroUpload(OmeroBase):
     
     def execute(self):
         # Get or create dataset
-        # Projects are not created by BioImageFlow
+        # Projects are not created by BioImageIT
         # See self.description()
         
         datasetName = self.datasetNamePin.currentData()

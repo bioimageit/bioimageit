@@ -48,8 +48,11 @@ __PACKAGES = {}
 __PACKAGE_PATHS = {}
 __HASHABLE_TYPES = []
 
-def GetRootPath():
+def getRootPath():
     return Path(__file__).parent.parent
+
+def getImportPath(toolPath):
+    return str(toolPath.resolve().relative_to(getRootPath()).with_suffix('')).replace('/', '.')
 
 def GET_PACKAGES():
     return __PACKAGES

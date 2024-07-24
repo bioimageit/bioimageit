@@ -33,6 +33,7 @@ from PyFlow.UI.Canvas.UICommon import *
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.Core.NodeBase import NodeBase
 from PyFlow.ConfigManager import ConfigManager
+from PyFlow import getImportPath
 
 class NodeBoxLineEdit(QLineEdit):
     def __init__(self, parent, events=True):
@@ -125,6 +126,7 @@ class NodeBoxTreeWidget(QTreeWidget):
     def addNodeClass(self, nodeName, nodePath:Path):
         from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
         moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
+        # moduleImportPath = getImportPath(nodePath)
         if nodeName in self.nodeClasses:
             self.nodeClasses[nodeName] = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
         else:

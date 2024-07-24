@@ -6,7 +6,7 @@ import platform
 from PIL import Image
 from omero.gateway import BlitzGateway, DatasetWrapper, ProjectWrapper
 import omero
-# import Ice
+import Ice
 from omero_version import omero_version
 from omero.model import NamedValue
 from omero.rtypes import rstring, rbool
@@ -76,12 +76,12 @@ class OmeroService(object):
             raise DoesNotExistException(f'Provide a name or an id to retrieve an object.')
 
     def getObject(self, object:str, name:str|None=None, uid:int|None=None, opts:dict=None):
-        # try:
-        #     return self.getObjectNoReconnect(object, name, uid, opts)
-        # except Ice.ConnectionLostException as e:
-        #     self.reset()
-        #     return self.getObjectNoReconnect(object, name, uid, opts)
-        return self.getObjectNoReconnect(object, name, uid, opts)
+        try:
+            return self.getObjectNoReconnect(object, name, uid, opts)
+        except Ice.ConnectionLostException as e:
+            self.reset()
+            return self.getObjectNoReconnect(object, name, uid, opts)
+        # return self.getObjectNoReconnect(object, name, uid, opts)
     
     def getImage(self, name:str|None=None, uid:int|None=None):
         return self.getObject('image', name, uid)
@@ -295,6 +295,8 @@ class OmeroService(object):
 
     # Check if image is in dataset
     def imageInDataset(self, dataset, imagePath):
+        # if dataset was just created (returned by createDataset()), _oid is not set: there are no images in the dataset
+        if not hasattr(dataset, '_oid'): return False
         for image in dataset.listChildren():
             omero_image = self.getImage(uid=image.id)
             if omero_image.getName() == imagePath.name:

@@ -85,10 +85,10 @@ packages:
   - pytest!=8.0.* ; extra == 'testing'
   requires_python: '>=3.8'
 - kind: pypi
-  name: bioimageflow
-  version: 0.1.0
+  name: bioimageit
+  version: 0.3.0
   path: .
-  sha256: 331c6714698e6f4dba5fd102d9eb25ddabd7ec977651a3bb188b28ce98899f4b
+  sha256: 3d88e6c6d17839623cf69b78207200d1eacdab0943d6f0266067ce2c2d715660
   requires_dist:
   - omero-py==5.15.0
   - simpleitk>=2.3.1,<2.4
