@@ -20,3 +20,21 @@ The `BioImageIT` development version is tested on *Windows 10*, *MacOS* and *Lin
 - Mac OSX Intel (x86_64) and Silicon (arm64)
 - Windows: 10 (x86_64)
 
+## Usage
+
+## Installation
+
+The project uses both Conda and Pypi packages; thus [`pixi`](https://pixi.sh/latest/) is used to manage it.
+
+Install `pixi` with one of the following commands:
+- `curl -fsSL https://pixi.sh/install.sh | bash` on Linux and macOS,
+- `iwr -useb https://pixi.sh/install.ps1 | iex` in PowerShell on Windows, 
+- or `winget install prefix-dev.pixi` to use winget on Windows.
+
+You can also install [the pixi autocompletion](https://pixi.sh/latest/#autocompletion) for your shell.
+
+You might need to restart your terminal or source your shell for the changes to take effect.
+
+`pixi` automatically creates a conda environment for the project and install the dependencies when necessary.
+
+Run the project with `pixi python run pyflow.py`.

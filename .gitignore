@@ -8,3 +8,4 @@ __pycache__/
 micromamba/
 PyFlow/Configs/
 *.ini
+*.log
