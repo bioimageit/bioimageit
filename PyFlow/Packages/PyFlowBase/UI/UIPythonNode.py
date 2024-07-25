@@ -18,6 +18,7 @@ import subprocess
 import os
 import uuid
 import logging
+import tempfile
 
 from qtpy.QtWidgets import QAction
 from qtpy.QtWidgets import QFileDialog
@@ -195,7 +196,7 @@ class UIPythonNode(UINodeBase):
 
     def onEdit(self):
         editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")
-        tempFilesDir = self.canvasRef().getApp().getTempDirectory()
+        tempFilesDir = tempfile.TemporaryDirectory()
 
         if self._filePath == "":
             # if no file associated - create one

@@ -34,14 +34,6 @@ class GeneralPreferences(CategoryWidgetBase):
         self.layout.setSpacing(2)
 
         commonCategory = CollapsibleFormWidget(headName="Common")
-        defaultTempFolder = os.path.join(os.path.expanduser("~"), "PyFlowTemp")
-        defaultTempFolder = os.path.normpath(defaultTempFolder)
-        self.tempFilesDir = QLineEdit(defaultTempFolder)
-        commonCategory.addWidget("TempFilesDir", self.tempFilesDir)
-        self.additionalPackagePaths = QLineEdit("")
-        commonCategory.addWidget(
-            "Additional package locations", self.additionalPackagePaths
-        )
         self.layout.addWidget(commonCategory)
 
         self.lePythonEditor = QLineEdit("sublime_text.exe @FILE")
@@ -59,9 +51,6 @@ class GeneralPreferences(CategoryWidgetBase):
 
         self.historyDepth.editingFinished.connect(setHistoryCapacity)
         commonCategory.addWidget("History depth", self.historyDepth)
-
-        self.redirectOutput = QCheckBox(self)
-        commonCategory.addWidget("Redirect output", self.redirectOutput)
 
         omeroCategory = CollapsibleFormWidget(headName="Omero")
         self.layout.addWidget(omeroCategory)
@@ -86,9 +75,7 @@ class GeneralPreferences(CategoryWidgetBase):
 
     def initDefaults(self, settings):
         settings.setValue("EditorCmd", "sublime_text.exe @FILE")
-        settings.setValue("TempFilesDir", os.path.expanduser("~/PyFlowTemp"))
         settings.setValue("HistoryDepth", 50)
-        settings.setValue("RedirectOutput", True)
 
         settings.setValue("OmeroHost", "demo.openmicroscopy.org")
         settings.setValue("OmeroPort", 4064)
@@ -98,12 +85,7 @@ class GeneralPreferences(CategoryWidgetBase):
     def serialize(self, settings):
         settings.setValue("EditorCmd", self.lePythonEditor.text())
         settings.setValue("ImageViewerCmd", self.leImageViewer.text())
-        settings.setValue("TempFilesDir", self.tempFilesDir.text())
-        settings.setValue("ExtraPackageDirs", self.additionalPackagePaths.text())
         settings.setValue("HistoryDepth", self.historyDepth.value())
-        settings.setValue(
-            "RedirectOutput", self.redirectOutput.checkState() == QtCore.Qt.Checked
-        )
 
         settings.setValue("OmeroHost", self.host.text())
         settings.setValue("OmeroPort", self.port.value())
@@ -117,10 +99,6 @@ class GeneralPreferences(CategoryWidgetBase):
         username = settings.value("OmeroUsername")
         self.username.setText(username)
         self.password.setText(keyring.get_password("bioif-omero", username))
-        path = settings.value("TempFilesDir")
-        path = os.path.normpath(path)
-        self.tempFilesDir.setText(path)
-        self.additionalPackagePaths.setText(settings.value("ExtraPackageDirs"))
 
         try:
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))

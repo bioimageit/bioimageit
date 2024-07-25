@@ -181,23 +181,6 @@ class PyFlow(QMainWindow):
             label += "*"
         self.setWindowTitle("{0} - {1}".format(winTitle(), label))
 
-    def getTempDirectory(self):
-        """Returns unique temp directory for application instance.
-
-        This folder and all its content will be removed from disc on application shutdown.
-        """
-        if self.currentTempDir == "":
-            # create app folder in documents
-            # random string used for cases when multiple instances of app are running in the same time
-            tempDirPath = ConfigManager().getPrefsValue("PREFS", "General/TempFilesDir")
-            if tempDirPath[-1:] in ("/", "\\"):
-                tempDirPath = tempDirPath[:-1]
-            self.currentTempDir = "{0}_{1}".format(tempDirPath, generateRandomString())
-
-            if not os.path.exists(self.currentTempDir):
-                os.makedirs(self.currentTempDir)
-        return self.currentTempDir
-
     def getMenuBar(self):
         return self.menuBar
 
@@ -715,22 +698,6 @@ class PyFlow(QMainWindow):
 
         if software == "standalone":
             editableStyleSheet(instance)
-
-        try:
-            extraPackagePaths = []
-            extraPathsString = ConfigManager().getPrefsValue(
-                "PREFS", "General/ExtraPackageDirs"
-            )
-            if extraPathsString is not None:
-                extraPathsString = extraPathsString.rstrip(";")
-                extraPathsRaw = extraPathsString.split(";")
-                for rawPath in extraPathsRaw:
-                    if os.path.exists(rawPath):
-                        extraPackagePaths.append(os.path.normpath(rawPath))
-            INITIALIZE(additionalPackageLocations=extraPackagePaths, software=software)
-        except Exception as e:
-            QMessageBox.critical(None, "Fatal error", str(e))
-            return
 
         instance.startMainLoop()
 
