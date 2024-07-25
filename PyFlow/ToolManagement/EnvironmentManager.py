@@ -88,7 +88,7 @@ class ClientEnvironment(Environment):
 		# 	self.nTries += 1
 	
 	def launched(self):
-		return self.connection.writable and self.connection.readable and not self.connection.closed
+		return self.connection is not None and self.connection.writable and self.connection.readable and not self.connection.closed
 	
 	def _exit(self):
 		if self.connection is not None:
@@ -172,7 +172,7 @@ class EnvironmentManager:
 	def _executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True):
 		print('executeCommands', commands, launchedMessage)
 
-		with tempfile.NamedTemporaryFile(suffix='.bat' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
+		with tempfile.NamedTemporaryFile(suffix='.ps1' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
 			if exitIfCommandError:
 				commands = self._insertCommandErrorChecks(commands)
 			tmp.write('\n'.join(commands))
@@ -200,9 +200,11 @@ class EnvironmentManager:
 		return platform.system() == 'Windows'
 	
 	def _getCondaPaths(self):
-		condaPath = self.condaPath.resolve()
-		return condaPath, condaPath / 'bin' / 'micromamba' if platform.system() != 'Windows' else condaPath / 'Library' / 'bin' / 'micromamba.exe'
+		return self.condaPath.resolve(), Path('bin/micromamba' if platform.system() != 'Windows' else 'Library/bin/micromamba.exe')
 
+	def _setupCondaChannels(self):
+		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority strict']
+		
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
 		if condaBinPath.exists(): return []
@@ -211,27 +213,24 @@ class EnvironmentManager:
 		condaPath.mkdir(exist_ok=True, parents=True)
 		commands = []
 		if platform.system() == 'Windows':
-			commands += [f'Set-Location -Path {condaPath}', 
+			commands += [f'Set-Location -Path "{condaPath}"', 
 		   			'Invoke-Webrequest -URI https://micro.mamba.pm/api/micromamba/win-64/latest -OutFile micromamba.tar.bz2', 
 		   			'tar xf micromamba.tar.bz2']
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
-			commands += [f'cd {condaPath}', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
+			commands += [f'cd "{condaPath}"', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
 		return commands + self._setupCondaChannels()
 
-	def _setupCondaChannels(self):
-		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority strict']
-		
 	def _activateConda(self):
 		# activatePath = Path(self.condaPath) / 'condabin' / 'conda.bat' if self._isWindows() else Path(self.condaPath) / 'etc' / 'profile.d' / 'conda.sh'
 		# return f'"{activatePath}" ' if self._isWindows() else f'. "{activatePath}"'
 		condaPath, condaBinPath = self._getCondaPaths()
 		commands = self._installCondaIfNecessary()
 		if platform.system() == 'Windows':
-			commands += [f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression']
+			commands += [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression']
 		else:
-			commands += [f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"']
+			commands += [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"']
 		return commands
 
 	def _environmentExists(self, environment:str):
