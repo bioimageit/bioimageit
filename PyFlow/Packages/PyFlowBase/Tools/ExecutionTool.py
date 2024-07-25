@@ -75,10 +75,6 @@ class ExecutionTool(DockTool):
         self.setWidget(self.mainWidget)
     
     @staticmethod
-    def getDefaultWorkflowsPath():
-        return Path.home() / 'BioImageIT'
-    
-    @staticmethod
     def isMovable():
         return False
     

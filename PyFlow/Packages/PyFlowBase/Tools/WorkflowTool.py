@@ -38,8 +38,6 @@ class WorkflowTool(DockTool):
 
         self.listWidget = QtWidgets.QListWidget(self)
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.listWidget.currentItemChanged.connect(self.currentItemChanged)
-        self.listWidget.itemSelectionChanged.connect(self.itemSelectionChanged)
 
         self.newWorkflowButton = QtWidgets.QPushButton("New workflow")
         self.newWorkflowButton.clicked.connect(lambda clicked: self.createWorkflow())
@@ -83,29 +81,27 @@ class WorkflowTool(DockTool):
     def isClosable():
         return False
     
-    @staticmethod
-    def getDefaultWorkflowsPath():
-        return Path.home() / 'BioImageIT'
-    
-    @staticmethod
-    def getDefaultWorkflowPath():
-        return Path.home() / 'BioImageIT' / 'Workflow1'
-
     def setAppInstance(self, pyFlowInstance):
         super(WorkflowTool, self).setAppInstance(pyFlowInstance)
 
         # self.pyFlowInstance.newFileExecuted.connect(self.newFileExecuted)
-        
+
         workflows = self.getWorkflows()
         if len(workflows) == 0:
-            workflows = [self.createWorkflow(WorkflowTool.getDefaultWorkflowPath())]
+            workflows = [self.createWorkflow()]
         for workflow in workflows:
             self.addWorkflowToList(workflow, setCurrentItem=False)
         
+        # Connect list widget to slots
+        self.listWidget.currentItemChanged.connect(self.currentItemChanged)
+        self.listWidget.itemSelectionChanged.connect(self.itemSelectionChanged)
+
         # Load current workflow by setting the current item
         workflow = self.getCurrentWorkflow()
-        workflowIndex = self.getWorkflowIndex(workflow)
+        workflowIndex = self.getWorkflowIndex(workflow) if workflow is not None else 0
         self.listWidget.setCurrentRow(workflowIndex)
+        if workflow is None:
+            workflow = self.listWidget.currentItem().text()
         self.loadWorkflow(workflow, True)
 
     def getWorkflowIndex(self, workflowPath):
@@ -144,7 +140,8 @@ class WorkflowTool(DockTool):
         return
     
     def getCurrentWorkflow(self):
-        return Path(ConfigManager().getPrefsValue("PREFS", "General/CurrentWorkflow"))
+        currentWorkflow = ConfigManager().getPrefsValue("PREFS", "General/CurrentWorkflow")
+        return Path(currentWorkflow) if currentWorkflow is not None else None
     
     def setCurrentWorkflow(self, path):
         settings = ConfigManager().getSettings("PREFS")
@@ -182,37 +179,18 @@ class WorkflowTool(DockTool):
         self.pyFlowInstance.currentFileName = str(path / WorkflowTool.graphFileName)
         self.pyFlowInstance.save(save_as=False)
 
-    def createWorkflow(self, path=None, canOverwrite=True):
+    def createWorkflow(self, path=None):
         if path is None:
             shouldSave = self.saveGraphIfShouldSave()
             if shouldSave == QtWidgets.QMessageBox.Cancel:
                 return
             # dialog = FileDialog('directory')
             # dialog.setWindowTitle('Create workflow directory')
-            fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=Path.home())
-            if fileName and len(fileName) > 0:
-                path = Path(fileName)
-                if path.exists() and canOverwrite:
-                    answer = QtWidgets.QMessageBox.warning(
-                        self,
-                        "Overwrite?",
-                        f'The directory "{path}" exists. Do you want to overwrite it? \nWarning: this will send the directory to the trash.',
-                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    )
-                    if answer == QtWidgets.QMessageBox.Yes:
-                        send2trash(path)
-                    else:
-                        QtWidgets.QMessageBox.warning(
-                            self,
-                            "Error",
-                            f'The directory "{path}" exists. Please choose a different name.',
-                            QtWidgets.QMessageBox.Ok,
-                        )
-                        return None
-                elif path.exists() and not canOverwrite:
-                    return None
-            else:
-                return None
+            fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))
+            if fileName is None: return None
+            path = Path(fileName)
+            if path.exists():
+                send2trash(path)
         path.mkdir(exist_ok=True, parents=True)
 
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
@@ -238,19 +216,13 @@ class WorkflowTool(DockTool):
     def renameWorkflow(self):
         path = self.getCurrentWorkflow()
 
-        fileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Create new workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=path.parent)
+        fileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Create new workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(path.parent))
+        if fileName is None: return None
         newPath = Path(fileName)
-        if fileName and len(fileName) > 0:
-            if newPath.exists():
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Error: directory exists",
-                    f'The directory "{newPath}" exists. Please choose a different name.',
-                    QtWidgets.QMessageBox.Ok,
-                )
-                return None
-        else:
-            return None
+        if newPath.exists():
+            QtWidgets.QMessageBox.warning(self, "Warning: directory exists", f'The directory "{newPath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
+            send2trash(newPath)
+        
         # Rename directory
         path.rename(newPath)
         
@@ -267,26 +239,20 @@ class WorkflowTool(DockTool):
     
     def duplicateWorkflow(self):
         path = self.getCurrentWorkflow()
-        newPath = self.createWorkflow(canOverwrite=False)
+        newPath = self.createWorkflow()
         if newPath is None: return
-        newPath.unlink() # remove the new empty directory to duplicate
+        send2trash(newPath)
         shutil.copytree(path, newPath)
         return
 
     def exportWorkflow(self):
         path = self.getCurrentWorkflow()
-        zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', path.parent / f'{path.name}.zip', 'Zip files (*.zip)')
+        zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', dir= str(path.parent / f'{path.name}.zip'), filter='Zip files (*.zip)')
+        if zipFilePath is None: return
+        zipFilePath = Path(zipFilePath)
         if zipFilePath.exists():
-            answer = QtWidgets.QMessageBox.warning(
-                self,
-                "Overwrite?",
-                f'The file "{zipFilePath}" exists. Do you want to overwrite it?',
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-            )
-            if answer != QtWidgets.QMessageBox.Yes:
-                return
-            else:
-                zipFilePath.unlink()
+            QtWidgets.QMessageBox.warning(self, "Warning: file exists", f'The file "{zipFilePath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
+            send2trash(zipFilePath)
         with tempfile.TemporaryDirectory() as tmp:
             shutil.copytree(path / 'Tools', tmp / 'Tools')
             shutil.copyfile(path / WorkflowTool.graphFileName, tmp / WorkflowTool.graphFileName)
@@ -358,12 +324,14 @@ class WorkflowTool(DockTool):
 
     def loadCustomTools(self, path=None):
         path = self.getCurrentWorkflow() if path is None else Path(path)
+        if path is None: return
         for nodeBox in self.pyFlowInstance.getRegisteredTools(classNameFilters=["NodeBoxTool"]):
             nodeBox.content.addTools(path)
         return
     
     def removeCustomTools(self, path=None):
         path = self.getCurrentWorkflow() if path is None else Path(path)
+        if path is None: return
         for nodeBox in self.pyFlowInstance.getRegisteredTools(classNameFilters=["NodeBoxTool"]):
             nodeBox.content.removeTools(path)
         return
