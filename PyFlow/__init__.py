@@ -52,7 +52,7 @@ def getRootPath():
     return Path(__file__).parent.parent
 
 def getImportPath(toolPath):
-    return str(toolPath.resolve().relative_to(getRootPath()).with_suffix('')).replace('/', '.')
+    return '.'.join(toolPath.resolve().relative_to(getRootPath()).with_suffix('').parts)
 
 def GET_PACKAGES():
     return __PACKAGES
