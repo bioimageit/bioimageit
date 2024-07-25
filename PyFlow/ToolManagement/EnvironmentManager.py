@@ -165,6 +165,8 @@ class EnvironmentManager:
 				process.kill()
 				raise Exception('An error occured during the execution of the commands {commands}.')
 			outputs.append(line)
+		if process.returncode != 0:
+			raise Exception('An error occured during the execution of the commands {commands}.')
 		return (outputs, process.returncode)
 
 	# If launchMessage is defined: execute until launchMessage is print
@@ -215,7 +217,9 @@ class EnvironmentManager:
 		if platform.system() == 'Windows':
 			commands += [f'Set-Location -Path "{condaPath}"', 
 		   			'Invoke-Webrequest -URI https://micro.mamba.pm/api/micromamba/win-64/latest -OutFile micromamba.tar.bz2', 
-		   			'tar xf micromamba.tar.bz2']
+					'bzip2 -d micromamba.tar.bz2',
+		   			'tar xf micromamba.tar',
+					'Remove-Item micromamba.tar']
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
