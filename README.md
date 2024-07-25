@@ -38,3 +38,23 @@ You might need to restart your terminal or source your shell for the changes to 
 `pixi` automatically creates a conda environment for the project and install the dependencies when necessary.
 
 Run the project with `pixi python run pyflow.py`.
+
+## Development
+
+It is possible to run and debug the project with Visual Studio Code by selecting the environment interpreter (run the `Python: Select Interpreter` command and enter the path `.pixi/envs/default/`), and creating a launch file (`.vscode/launch.json`) with the following configuration:
+
+```
+{
+    "configurations": [
+        {
+            "name": "BioImageIT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pyflow.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "autoReload": {"enable": true }
+        },
+    ]
+}
+```

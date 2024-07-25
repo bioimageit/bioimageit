@@ -9,3 +9,5 @@ micromamba/
 PyFlow/Configs/
 *.ini
 *.log
+build/
+dist/

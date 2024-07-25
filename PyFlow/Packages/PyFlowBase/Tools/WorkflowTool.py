@@ -138,7 +138,7 @@ class WorkflowTool(DockTool):
     
     def addWorkflow(self, path, setCurrentItem=True):
         self.addWorkflowToList(path, setCurrentItem)
-        self.addWorkflowToPrefs()
+        self.addWorkflowToPrefs(path)
         if setCurrentItem:
             self.setCurrentWorkflow(path)
         return
