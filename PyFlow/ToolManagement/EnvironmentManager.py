@@ -183,7 +183,8 @@ class EnvironmentManager:
 			if not self._isWindows():
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
-			return subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, text=True, bufsize=1)
+			# Use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows
+			return subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', bufsize=1)
 
 	def _removeChannel(self, condaDependency):
 		return condaDependency.split('::')[1]
