@@ -7,7 +7,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(python=3.9, conda=[], pip=['cellpose==3.0.7', 'pandas==2.0.3'])
+    dependencies = dict(conda=[], pip=['cellpose==3.0.10', 'pandas==2.0.3'])
     environment = 'cellpose'
 
     @staticmethod
