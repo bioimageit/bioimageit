@@ -232,12 +232,16 @@ class EnvironmentManager:
 	def _activateConda(self):
 		# activatePath = Path(self.condaPath) / 'condabin' / 'conda.bat' if self._isWindows() else Path(self.condaPath) / 'etc' / 'profile.d' / 'conda.sh'
 		# return f'"{activatePath}" ' if self._isWindows() else f'. "{activatePath}"'
+		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
 		commands = self._installCondaIfNecessary()
 		if platform.system() == 'Windows':
-			commands += [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression']
+			commands += [f'Set-Location -Path "{condaPath}"', 
+				f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', 
+				f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression',
+				f'Set-Location -Path "{currentPath}"']
 		else:
-			commands += [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"']
+			commands += [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
 		return commands
 
 	def _environmentExists(self, environment:str):
@@ -272,9 +276,10 @@ class EnvironmentManager:
 		if self._environmentIsLaunched(environment):
 			return self.environments[environment]
 
+		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + [
 					f'{self.condaBin} activate {environment}', 
-					f'python -u PyFlow/ToolManagement/ModuleCaller.py' if customCommand is None else customCommand]
+					f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
 		process = self._executeCommands(commands, env=environmentVariables)
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish

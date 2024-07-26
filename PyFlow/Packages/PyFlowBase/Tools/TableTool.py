@@ -21,6 +21,7 @@ from multiprocessing.connection import Client
 from qtpy import QtCore, QtGui
 from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget
 
+from PyFlow import getRootPath
 from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 from PyFlow.Packages.PyFlowBase.Tools.PandasModel import PandasModel
@@ -77,7 +78,8 @@ class TableTool(DockTool):
 			del env['QT_API']
 
 		napariEnvironment = napariEnvironment if len(napariEnvironment)>0 else environment
-		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python PyFlow/Viewer/NapariManager.py', environmentVariables=env)
+		napariManagerPath = getRootPath() / 'Viewer' / 'NapariManager.py'
+		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python -u "{napariManagerPath}"', environmentVariables=env)
 
 	def tryOpenImageOnNapari(self, path, removeExistingImages):
 		self.launchNapari()
