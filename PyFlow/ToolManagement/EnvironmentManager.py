@@ -209,7 +209,7 @@ class EnvironmentManager:
 		
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
-		if condaBinPath.exists(): return []
+		if (condaPath / condaBinPath).exists(): return []
 		if platform.system() not in ['Windows', 'Linux', 'Darwin']:
 			raise Exception(f'Platform {platform.system()} is not supported.')
 		condaPath.mkdir(exist_ok=True, parents=True)
