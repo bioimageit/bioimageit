@@ -19,6 +19,8 @@ from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 from PyFlow.Core.Common import *
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget
 from PyFlow.ConfigManager import ConfigManager
+from PyFlow import getRootPath
+from PyFlow.Core.GraphManager import GraphManagerSingleton
 
 class UIScriptNode(UINodeBase):
     def __init__(self, raw_node):
@@ -26,9 +28,11 @@ class UIScriptNode(UINodeBase):
 
     def createScript(self):
         app = self.canvasRef().pyFlowInstance
-        scriptPath, _ = QFileDialog.getSaveFileName(app, "Create script", str(Path.home()), "All Files(*);;Python Files(*.py)", options = QFileDialog.HideNameFilterDetails)
+        graphManager = GraphManagerSingleton().get()
+        scriptPath, _ = QFileDialog.getSaveFileName(app, "Create script", str(Path(graphManager.workflowPath / 'Scripts').resolve()), "All Files(*);;Python Files(*.py)", options = QFileDialog.HideNameFilterDetails)
+        scriptPath.parent.mkdir(exist_ok=True, parents=True)
         self._rawNode.scriptPath = scriptPath
-        examplePath = Path(__file__).parent.parent.parent.parent / 'Scripts' / 'template.py'
+        examplePath = getRootPath() / 'PyFlow' / 'Scripts' / 'template.py'
         with open(scriptPath, 'w') as destinationFile, open(examplePath, 'r') as exampleFile:
             destinationFile.write(exampleFile.read())
         editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")

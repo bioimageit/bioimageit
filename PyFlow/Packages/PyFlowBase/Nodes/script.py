@@ -40,6 +40,8 @@ class ScriptNode(BiitArrayNodeBase):
     
     def scriptPathChanged(self, path):
         self.scriptPath = path
+        if Path(path).exists():
+            raise Exception('Script path {path} does not exist.')
         with open(path, "r") as f:
             codeString = f.read()
             mem = Py3CodeCompiler().compile(codeString, self.getName(), {})

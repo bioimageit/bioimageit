@@ -255,8 +255,9 @@ class WorkflowTool(DockTool):
             QtWidgets.QMessageBox.warning(self, "Warning: file exists", f'The file "{zipFilePath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
             send2trash(zipFilePath)
         with tempfile.TemporaryDirectory() as tmp:
-            if (path / 'Tools').exists():
-                shutil.copytree(path / 'Tools', Path(tmp) / 'Tools')
+            for name in ['Tools', 'Scripts']:
+                if (path / name).exists():
+                    shutil.copytree(path / name, Path(tmp) / name)
             shutil.copyfile(path / WorkflowTool.graphFileName, Path(tmp) / WorkflowTool.graphFileName)
             shutil.make_archive(zipFilePath.with_suffix(''), 'zip', tmp)
         return
