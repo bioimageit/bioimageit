@@ -99,7 +99,10 @@ class WorkflowTool(DockTool):
         # Load current workflow by setting the current item
         workflow = self.getCurrentWorkflow()
         workflowIndex = self.getWorkflowIndex(workflow) if workflow is not None else 0
-        self.listWidget.setCurrentRow(workflowIndex)
+        if workflowIndex is None:
+            self.addWorkflow(workflow, setCurrentItem=True)
+        else:
+            self.listWidget.setCurrentRow(workflowIndex)
         if workflow is None:
             workflow = self.listWidget.currentItem().text()
         self.loadWorkflow(workflow, True)
