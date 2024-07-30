@@ -41,7 +41,8 @@ class ScriptNode(BiitArrayNodeBase):
     def scriptPathChanged(self, path):
         self.scriptPath = path
         if not Path(path).exists():
-            raise Exception('Script path {path} does not exist.')
+            print(f'Warning: script path {path} does not exist for node {self.name}!')
+            return
         with open(path, "r") as f:
             codeString = f.read()
             mem = Py3CodeCompiler().compile(codeString, self.getName(), {})
@@ -65,6 +66,8 @@ class ScriptNode(BiitArrayNodeBase):
     def executeScript(self):
         if self.scriptPath is not None and Path(self.scriptPath).exists():
             self.processNode(True)
+        else:
+            raise Exception(f'Script path {self.scriptPath} does not exist.')
 
     @staticmethod
     def category():
