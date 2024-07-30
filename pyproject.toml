@@ -41,3 +41,11 @@ zeroc-ice = "==3.6.5"
 [tool.pixi.environments]
 default = { solve-group = "default" }
 install = { features = ["install"], solve-group = "default" }
+
+[tool.cxfreeze]
+executables = [
+    {script = "pyflow.py", base = "gui"}
+]
+
+[tool.cxfreeze.build_exe]
+excludes = ["pyinstaller"]

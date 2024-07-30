@@ -43,7 +43,9 @@ class ThumbnailGenerator:
             self.imageToThumbnail = {}
         
     def getThumbnailsPath(self):
-        return Path(self.workflowPath) / 'Thumbnails'
+        thumbnailsPath = Path(self.workflowPath) / 'Thumbnails'
+        thumbnailsPath.mkdir(exist_ok=True, parents=True)
+        return thumbnailsPath
 
     def getNodeThumbnailsPath(self, nodeName):
         return self.getThumbnailsPath() / nodeName

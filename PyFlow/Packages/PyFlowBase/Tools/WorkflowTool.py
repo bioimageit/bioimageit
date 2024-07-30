@@ -114,7 +114,7 @@ class WorkflowTool(DockTool):
         # If path exists in list: select it if setCurrentItem and return
         if workflowIndex is not None:
             if setCurrentItem:
-                self.listWidget.setCurrentIndex(workflowIndex)
+                self.listWidget.setCurrentRow(workflowIndex)
             return self.listWidget.item(workflowIndex)
         newItem = QtWidgets.QListWidgetItem()
         newItem.setText(str(path))
@@ -146,6 +146,7 @@ class WorkflowTool(DockTool):
     def setCurrentWorkflow(self, path):
         settings = ConfigManager().getSettings("PREFS")
         settings.setValue("General/CurrentWorkflow", str(path))
+        Path(path).mkdir(exist_ok=True, parents=True)
         graphManager = self.pyFlowInstance.graphManager.get()
         graphManager.workflowPath = str(path)
         self.workflowLoaded.send(path)
@@ -206,7 +207,7 @@ class WorkflowTool(DockTool):
         shouldSave = self.saveGraphIfShouldSave()
         if shouldSave == QtWidgets.QMessageBox.Cancel:
             return
-        workflowDirectory, _ = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Workflow', path, QtWidgets.QFileDialog.ShowDirsOnly)
+        workflowDirectory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Workflow', str(path), QtWidgets.QFileDialog.ShowDirsOnly)
         if workflowDirectory is None or not Path(workflowDirectory).is_dir(): return
         self.loadWorkflowNoDialog(workflowDirectory)
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
@@ -254,9 +255,10 @@ class WorkflowTool(DockTool):
             QtWidgets.QMessageBox.warning(self, "Warning: file exists", f'The file "{zipFilePath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
             send2trash(zipFilePath)
         with tempfile.TemporaryDirectory() as tmp:
-            shutil.copytree(path / 'Tools', tmp / 'Tools')
-            shutil.copyfile(path / WorkflowTool.graphFileName, tmp / WorkflowTool.graphFileName)
-            shutil.make_archive(zipFilePath, 'zip', tmp)
+            if (path / 'Tools').exists():
+                shutil.copytree(path / 'Tools', Path(tmp) / 'Tools')
+            shutil.copyfile(path / WorkflowTool.graphFileName, Path(tmp) / WorkflowTool.graphFileName)
+            shutil.make_archive(zipFilePath.with_suffix(''), 'zip', tmp)
         return
     
     def deleteWorkflow(self, askConfirmation=True):

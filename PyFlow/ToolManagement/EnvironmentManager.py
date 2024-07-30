@@ -165,6 +165,7 @@ class EnvironmentManager:
 				process.kill()
 				raise Exception('An error occured during the execution of the commands {commands}.')
 			outputs.append(line)
+		process.wait()
 		if process.returncode != 0:
 			raise Exception('An error occured during the execution of the commands {commands}.')
 		return (outputs, process.returncode)
@@ -261,7 +262,7 @@ class EnvironmentManager:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = f'python={dependencies["python"]}' if 'python' in dependencies and dependencies['python'] not in ['current', ''] else 'python'
+		pythonRequirement = f'python={dependencies["python"]}' if 'python' in dependencies and dependencies['python'] not in ['latest', ''] else 'python'
 		condaDependencies = dependencies['conda'] if 'conda' in dependencies else []
 		pipDependencies = dependencies['pip'] if 'pip' in dependencies else []
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} {pythonRequirement} {" ".join(condaDependencies)} -y']
