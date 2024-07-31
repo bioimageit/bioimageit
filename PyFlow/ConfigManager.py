@@ -20,7 +20,7 @@ from qtpy import QtCore, QtGui
 
 from PyFlow.Core.Common import *
 from PyFlow.Input import InputAction, InputManager, InputActionType
-
+from PyFlow import getRootPath
 
 @SingletonDecorator
 class ConfigManager(object):
@@ -31,7 +31,7 @@ class ConfigManager(object):
 
     CONFIGS_STORAGE = {}
 
-    CONFIGS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "Configs")
+    CONFIGS_DIR = getRootPath() / "Configs"
     INPUT_CONFIG_PATH = os.path.join(CONFIGS_DIR, "input.json")
 
     def __init__(self, *args, **kwargs):

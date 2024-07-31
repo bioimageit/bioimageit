@@ -14,6 +14,7 @@
 
 
 import sys
+import gc
 from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 import argparse
@@ -26,7 +27,9 @@ mustRestart = False
 
 def restart(app):
 	PyFlow = reload(sys.modules['biit.App']).PyFlow
-	app.quit()
+	app.exit(0)
+	del app
+	gc.collect()
 	global mustRestart
 	mustRestart = True
 
@@ -59,6 +62,7 @@ def main():
 		app.exec_()
 		global mustRestart
 		if mustRestart:
+			# QApplication.shutdown()
 			mustRestart = False
 			main()
 

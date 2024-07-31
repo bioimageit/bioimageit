@@ -191,7 +191,7 @@ class WorkflowTool(DockTool):
             # dialog = FileDialog('directory')
             # dialog.setWindowTitle('Create workflow directory')
             fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))
-            if fileName is None: return None
+            if fileName is None or len(fileName) == 0: return None
             path = Path(fileName)
             if path.exists():
                 send2trash(path)
@@ -221,7 +221,7 @@ class WorkflowTool(DockTool):
         path = self.getCurrentWorkflow()
 
         fileName, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Create new workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(path.parent))
-        if fileName is None: return None
+        if fileName is None or len(fileName) == 0: return None
         newPath = Path(fileName)
         if newPath.exists():
             QtWidgets.QMessageBox.warning(self, "Warning: directory exists", f'The directory "{newPath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
@@ -252,7 +252,7 @@ class WorkflowTool(DockTool):
     def exportWorkflow(self):
         path = self.getCurrentWorkflow()
         zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', dir= str(path.parent / f'{path.name}.zip'), filter='Zip files (*.zip)')
-        if zipFilePath is None: return
+        if zipFilePath is None or len(zipFilePath) == 0: return
         zipFilePath = Path(zipFilePath)
         if zipFilePath.exists():
             QtWidgets.QMessageBox.warning(self, "Warning: file exists", f'The file "{zipFilePath}" exists, it will be sent to the trash.', QtWidgets.QMessageBox.Ok)
