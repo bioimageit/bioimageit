@@ -22,10 +22,13 @@ import json
 from importlib import reload
 from functools import partial
 
+mustRestart = False
+
 def restart(app):
 	PyFlow = reload(sys.modules['biit.App']).PyFlow
 	app.quit()
-	main()
+	global mustRestart
+	mustRestart = True
 
 def main():
 	from biit.App import PyFlow
@@ -33,7 +36,7 @@ def main():
 	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
 	
 	app = QApplication(sys.argv)
-	
+
 	instance = PyFlow.instance(software="standalone", restart=partial(restart, app))
 	instance.updateCSS()
 	
@@ -53,7 +56,11 @@ def main():
 					instance.loadFromData(data)
 					instance.currentFileName = filePath
 
-		sys.exit(app.exec_())
+		app.exec_()
+		global mustRestart
+		if mustRestart:
+			mustRestart = False
+			main()
 
 if __name__ == "__main__":
 	main()

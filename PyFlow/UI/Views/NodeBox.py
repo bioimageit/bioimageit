@@ -581,7 +581,7 @@ class NodesBox(QFrame):
 
     def fileChanged(self, filePath):
         print('file changed:', filePath)
-        filePath = Path(filePath)
+        filePath = Path(filePath).resolve()
         if filePath.exists():
             nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()
