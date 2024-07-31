@@ -161,7 +161,7 @@ class PyFlow(QMainWindow):
 		self._currentFileName = ""
 		self.currentFileName = None
 
-	def warnNewVersion(self):
+	def warnNewVersion(self, version:str=None):
 		self.updatingVersion = False
 		answer = QMessageBox.warning(self, "New BioImageIT version", "A new version of BioImageIT was just installed, please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
 		if answer == QMessageBox.Yes:
