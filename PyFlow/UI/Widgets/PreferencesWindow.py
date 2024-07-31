@@ -56,7 +56,7 @@ class PreferencesWindow(QMainWindow):
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.resize(700, 400)
+        self.resize(1000, 800)
         self.setWindowTitle("Preferences")
         self.centralWidget = QWidget(self)
         self.centralWidget.setObjectName("centralWidget")
@@ -70,7 +70,7 @@ class PreferencesWindow(QMainWindow):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 497, 596))
+        # self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 497, 596))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
@@ -83,13 +83,13 @@ class PreferencesWindow(QMainWindow):
         self.categoriesVerticalLayout.addItem(spacer)
         self.verticalLayout_3.addLayout(self.categoriesVerticalLayout)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.scrollArea.setMinimumWidth(200)
+        self.scrollArea.setMinimumWidth(300)
         self.stackedWidget = QStackedWidget(self.splitter)
         self.stackedWidget.setObjectName("stackedWidget")
         self.stackedWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.verticalLayout.addWidget(self.splitter)
         self.setCentralWidget(self.centralWidget)
-        self.splitter.setSizes([250, 450])
+        self.splitter.setSizes([350, 450])
         self._indexes = {}
         self.categoryButtons = {}
         self.buttonsLay = QHBoxLayout()

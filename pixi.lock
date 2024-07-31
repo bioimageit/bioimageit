@@ -40,7 +40,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/0f/6c/b42660b3075ff543065b2c1c5a3d9bedaadcff8ebce2ee981be2babc2934/cryptography-43.0.0-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -75,7 +75,7 @@ environments:
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bzip2-1.0.8-hfdf4475_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ca-certificates-2024.7.4-h8857fd0_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libffi-3.4.2-h0d85af4_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libiconv-1.17-hd75f5a5_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libsqlite-3.46.0-h1b8f9f3_0.conda
@@ -97,7 +97,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cc/94/f7cf5e5134175de79ad2059edf2adce18e0685ebdb9227ff0139975d0e93/charset_normalizer-3.3.2-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -129,7 +129,7 @@ environments:
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/bzip2-1.0.8-h99b78c6_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ca-certificates-2024.7.4-hf0a4a13_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libiconv-1.17-h0d3ecfb_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.46.0-hfb93653_0.conda
@@ -151,7 +151,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/46/6a/d5c26c41c49b546860cc1acabdddf48b0b3fb2685f4f5617ac59261b44ae/charset_normalizer-3.3.2-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -206,7 +206,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a2/a0/4af29e22cb5942488cf45630cbdd7cefd908768e69bdd90280842e4e8529/charset_normalizer-3.3.2-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -278,7 +278,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/0f/6c/b42660b3075ff543065b2c1c5a3d9bedaadcff8ebce2ee981be2babc2934/cryptography-43.0.0-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -305,7 +305,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/54/24/b4293291fa1dd830f353d2cb163295742fa87f179fcc8a20a306a81978b7/SecretStorage-3.3.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/b0/4562db6223154aa4e22f939003cb92514c79f3d4dccca3444253fd17f902/Send2Trash-1.8.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/51/a0/ee460cc54e68afcf33190d198299c9579a5eafeadef0016ae8563237ccb6/setuptools-71.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/58/e0ef3b9974a04ce9cde2a7a33881ddcb2d68450803745804545cdd8d258f/setuptools-72.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/57/ba/3e38bb62b285d73e46a86f44e7765cea5c42a79b0bba867dfabbdd12b54d/shiboken6-6.7.2-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cd/d2/08e96790ba5e12cc23a7e322c2a2f4f5904acba6d831af29fa72ef5836a9/SimpleITK-2.3.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
@@ -316,7 +316,7 @@ environments:
       osx-64:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bzip2-1.0.8-hfdf4475_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ca-certificates-2024.7.4-h8857fd0_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libffi-3.4.2-h0d85af4_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libiconv-1.17-hd75f5a5_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libsqlite-3.46.0-h1b8f9f3_0.conda
@@ -339,7 +339,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cc/94/f7cf5e5134175de79ad2059edf2adce18e0685ebdb9227ff0139975d0e93/charset_normalizer-3.3.2-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -364,7 +364,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/7e/a9/2146d5117ad8a81185331e0809a6b48933c10171f5bac253c6df9fce991c/QtPy-2.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/b0/4562db6223154aa4e22f939003cb92514c79f3d4dccca3444253fd17f902/Send2Trash-1.8.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/51/a0/ee460cc54e68afcf33190d198299c9579a5eafeadef0016ae8563237ccb6/setuptools-71.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/58/e0ef3b9974a04ce9cde2a7a33881ddcb2d68450803745804545cdd8d258f/setuptools-72.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/64/d4/01c4b37fe224c0d3200a060bfbc1bb912a2a36995178f2dabb19f4a12ff7/shiboken6-6.7.2-cp39-abi3-macosx_11_0_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d5/0f/6c8ddb1a9c3c9e963fb603096bec243c8b510e0c5f9f5d6cd0ecaf6f681e/SimpleITK-2.3.1-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
@@ -375,7 +375,7 @@ environments:
       osx-arm64:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/bzip2-1.0.8-h99b78c6_7.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ca-certificates-2024.7.4-hf0a4a13_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libffi-3.4.2-h3422bc3_5.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libiconv-1.17-h0d3ecfb_2.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libsqlite-3.46.0-hfb93653_0.conda
@@ -398,7 +398,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/46/6a/d5c26c41c49b546860cc1acabdddf48b0b3fb2685f4f5617ac59261b44ae/charset_normalizer-3.3.2-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -423,7 +423,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/7e/a9/2146d5117ad8a81185331e0809a6b48933c10171f5bac253c6df9fce991c/QtPy-2.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/b0/4562db6223154aa4e22f939003cb92514c79f3d4dccca3444253fd17f902/Send2Trash-1.8.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/51/a0/ee460cc54e68afcf33190d198299c9579a5eafeadef0016ae8563237ccb6/setuptools-71.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/58/e0ef3b9974a04ce9cde2a7a33881ddcb2d68450803745804545cdd8d258f/setuptools-72.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/64/d4/01c4b37fe224c0d3200a060bfbc1bb912a2a36995178f2dabb19f4a12ff7/shiboken6-6.7.2-cp39-abi3-macosx_11_0_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d9/66/4679ce174a4d3507b3a60019fef31cf6d06f786048d1b716c409c1546d55/SimpleITK-2.3.1-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
@@ -458,7 +458,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a2/a0/4af29e22cb5942488cf45630cbdd7cefd908768e69bdd90280842e4e8529/charset_normalizer-3.3.2-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/ac/d0bf0d37a9f95f69a5efc5685d9166ee34a664d3cd29a9c139989512fe14/jaraco.functools-4.0.1-py3-none-any.whl
@@ -485,7 +485,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/7e/a9/2146d5117ad8a81185331e0809a6b48933c10171f5bac253c6df9fce991c/QtPy-2.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/9b/335f9764261e915ed497fcdeb11df5dfd6f7bf257d4a6a2a686d80da4d54/requests-2.32.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/40/b0/4562db6223154aa4e22f939003cb92514c79f3d4dccca3444253fd17f902/Send2Trash-1.8.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/51/a0/ee460cc54e68afcf33190d198299c9579a5eafeadef0016ae8563237ccb6/setuptools-71.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/58/e0ef3b9974a04ce9cde2a7a33881ddcb2d68450803745804545cdd8d258f/setuptools-72.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/11/9f/50ed659cbce4664374707bf416e2fac2ff94de3253ab093d5dee7f53e02f/shiboken6-6.7.2-cp39-abi3-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/da/d1/74b4873287626a55ea8f6a89c061f478c70067b487d241e67d17f2b5d98e/SimpleITK-2.3.1-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
@@ -557,7 +557,7 @@ packages:
   name: bioimageit
   version: 0.3.0
   path: .
-  sha256: 0e0ef73bf5b32dc503ac139b09e54acc3dd3ce822040badf0f043f77e10c9b02
+  sha256: 47e01be9601cea66fd605cbfb75b6300adbac47e44b4f2dee306962fe5b7d70f
   requires_dist:
   - omero-py==5.15.0
   - simpleitk>=2.3.1,<2.4
@@ -775,9 +775,9 @@ packages:
   requires_python: '>=3.5'
 - kind: pypi
   name: importlib-metadata
-  version: 8.1.0
-  url: https://files.pythonhosted.org/packages/c7/f3/6bd738acf4e03b2cd8360521cf5edd398866acc1b4bc95fa9fced218e52b/importlib_metadata-8.1.0-py3-none-any.whl
-  sha256: 3cd29f739ed65973840b068e3132135ce954c254d48b5b640484467ef7ab3c8c
+  version: 8.2.0
+  url: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
+  sha256: 11901fa0c2f97919b288679932bb64febaeacf289d18ac84dd68cb2e74213369
   requires_dist:
   - zipp>=0.5
   - typing-extensions>=3.6.4 ; python_version < '3.8'
@@ -926,33 +926,35 @@ packages:
 - kind: conda
   name: libcxx
   version: 18.1.8
-  build: h167917d_0
+  build: h167917d_2
+  build_number: 2
   subdir: osx-arm64
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_0.conda
-  sha256: a598062f2d1522fc3727c16620fbc2bc913c1069342671428a92fcf4eb02ec12
-  md5: c891c2eeabd7d67fbc38e012cc6045d6
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-18.1.8-h167917d_2.conda
+  sha256: 001b211de6264f7160f4e781efbff11cd67a326f67b7d6b07e6278fcb0cc2f50
+  md5: 15656a04159b40ab98e02b46b52b7919
   depends:
   - __osx >=11.0
   license: Apache-2.0 WITH LLVM-exception
   license_family: Apache
   purls: []
-  size: 1219441
-  timestamp: 1720589623297
+  size: 1220245
+  timestamp: 1722378613893
 - kind: conda
   name: libcxx
   version: 18.1.8
-  build: hef8daea_0
+  build: hef8daea_2
+  build_number: 2
   subdir: osx-64
-  url: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_0.conda
-  sha256: d5e7755fe7175e6632179801f2e71c67eec033f1610a48e14510df679c038aa3
-  md5: 4101cde4241c92aeac310d65e6791579
+  url: https://conda.anaconda.org/conda-forge/osx-64/libcxx-18.1.8-hef8daea_2.conda
+  sha256: d63c2c723014fd7c27bfbc69aff3c09975d00755d1821b1d2304303b08b2e560
+  md5: c21d8b63b5cf5d3290d5a7aa2b028bcc
   depends:
   - __osx >=10.13
   license: Apache-2.0 WITH LLVM-exception
   license_family: Apache
   purls: []
-  size: 1396919
-  timestamp: 1720589431855
+  size: 1221021
+  timestamp: 1722378520414
 - kind: conda
   name: libffi
   version: 3.4.2
@@ -2445,9 +2447,9 @@ packages:
   requires_python: '!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7'
 - kind: pypi
   name: setuptools
-  version: 71.1.0
-  url: https://files.pythonhosted.org/packages/51/a0/ee460cc54e68afcf33190d198299c9579a5eafeadef0016ae8563237ccb6/setuptools-71.1.0-py3-none-any.whl
-  sha256: 33874fdc59b3188304b2e7c80d9029097ea31627180896fb549c578ceb8a0855
+  version: 72.1.0
+  url: https://files.pythonhosted.org/packages/e1/58/e0ef3b9974a04ce9cde2a7a33881ddcb2d68450803745804545cdd8d258f/setuptools-72.1.0-py3-none-any.whl
+  sha256: 5a03e1860cf56bb6ef48ce186b0e557fdba433237481a9a625176c2831be15d1
   requires_dist:
   - packaging>=24 ; extra == 'core'
   - ordered-set>=3.1.1 ; extra == 'core'

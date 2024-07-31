@@ -14,48 +14,46 @@
 
 
 import sys
-from PyFlow.App import PyFlow
 from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 import argparse
 import os
 import json
+from importlib import reload
+from functools import partial
+
+def restart(app):
+	PyFlow = reload(sys.modules['biit.App']).PyFlow
+	app.quit()
+	main()
 
 def main():
-    QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
-    
-    app = QApplication(sys.argv)
-    
-    instance = PyFlow.instance(software="standalone")
-    instance.updateCSS()
-    
-    if instance is not None:
-        instance.activateWindow()
-        instance.show()
-        
-        parser = argparse.ArgumentParser(description="PyFlow CLI")
-        parser.add_argument("-f", "--filePath", type=str, default="Untitled.pygraph")
-        parsedArguments, unknown = parser.parse_known_args(sys.argv[1:])
-        filePath = parsedArguments.filePath
-        if not filePath.endswith(".pygraph"):
-            filePath += ".pygraph"
-        if os.path.exists(filePath):
-                with open(filePath, 'r') as f:
-                    data = json.load(f)
-                    instance.loadFromData(data)
-                    instance.currentFileName = filePath
-                    
-        try:
-            sys.exit(app.exec_())
-        except Exception as e:
-            print(e)
+	from biit.App import PyFlow
 
+	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
+	
+	app = QApplication(sys.argv)
+	
+	instance = PyFlow.instance(software="standalone", restart=partial(restart, app))
+	instance.updateCSS()
+	
+	if instance is not None:
+		instance.activateWindow()
+		instance.show()
+		
+		parser = argparse.ArgumentParser(description="PyFlow CLI")
+		parser.add_argument("-f", "--filePath", type=str, default="Untitled.pygraph")
+		parsedArguments, unknown = parser.parse_known_args(sys.argv[1:])
+		filePath = parsedArguments.filePath
+		if not filePath.endswith(".pygraph"):
+			filePath += ".pygraph"
+		if os.path.exists(filePath):
+				with open(filePath, 'r') as f:
+					data = json.load(f)
+					instance.loadFromData(data)
+					instance.currentFileName = filePath
 
-        try:
-            sys.exit(app.exec_())
-        except Exception as e:
-            print(e)
-
+		sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    main()
+	main()

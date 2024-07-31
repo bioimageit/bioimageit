@@ -321,7 +321,7 @@ class RunTool(ShelfTool):
             inmain(lambda: self.displayError(e, tb))
         
         self.executing = False
-
+        self.cancelExecution.clear()
         return
     
     def cancel(self):

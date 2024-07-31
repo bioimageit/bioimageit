@@ -4,7 +4,8 @@ version = "0.3.0"
 description = "A FAIR data management and image analysis framework"
 authors = [{name = "Arthur Masson", email = "arthur.masson@inria.fr"}]
 license = { file = "LICENSE" }
-requires-python = "== 3.10.2"
+# requires-python = ">= 3.10.2, <3.11"
+requires-python = "==3.10.2"
 dependencies = ["omero-py==5.15.0",
                 "simpleitk>=2.3.1, <2.4",
                 "qtpy>=2.4.1,<3",
@@ -13,7 +14,10 @@ dependencies = ["omero-py==5.15.0",
                 "numpy>=2.0.1,<3",
                 "pandas>=2.2.2,<3",
                 "pillow>=10.4.0,<11",
-                "pyside6>=6.7.2,<7", "pyside6-qtads>=4.3.0.2,<5", "munch>=4.0.0,<5", "send2trash>=1.8.3,<2"]
+                "pyside6>=6.7.2,<7", 
+                "pyside6-qtads>=4.3.0.2,<5", 
+                "munch>=4.0.0,<5", 
+                "send2trash>=1.8.3,<2"]
 
 [project.optional-dependencies]
 install = ["pyinstaller"]
@@ -22,8 +26,8 @@ install = ["pyinstaller"]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-exclude = ["micromamba"]
+[tool.setuptools.package-dir]
+biit = "PyFlow"
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -42,6 +46,7 @@ zeroc-ice = "==3.6.5"
 default = { solve-group = "default" }
 install = { features = ["install"], solve-group = "default" }
 
+# CX Freeze (not used yet, using pyinstaller instead)
 [tool.cxfreeze]
 executables = [
     {script = "pyflow.py", base = "gui"}

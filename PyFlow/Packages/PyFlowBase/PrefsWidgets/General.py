@@ -22,7 +22,7 @@ from qtpy.QtWidgets import *
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.UI.Widgets.PreferencesWindow import CategoryWidgetBase
-
+from PyFlow.UpdateManager import UpdateManager
 
 class GeneralPreferences(CategoryWidgetBase):
     """docstring for GeneralPreferences."""
@@ -51,6 +51,28 @@ class GeneralPreferences(CategoryWidgetBase):
 
         self.historyDepth.editingFinished.connect(setHistoryCapacity)
         commonCategory.addWidget("History depth", self.historyDepth)
+        
+        self.autoUpdateCheckbox = QCheckBox()
+        commonCategory.addWidget("Auto update", self.autoUpdateCheckbox)
+
+        self.updateFrequency = QSpinBox()
+        self.updateFrequency.setRange(1, 24 * 3600)
+        self.updateFrequency.setValue(3600 / 2)
+        commonCategory.addWidget("Update frequency", self.updateFrequency)
+
+        self.versionSelector = QComboBox()
+        self.versions = ['0.3.0']
+        for version in self.versions:
+            self.versionSelector.addItem(version)
+        def setVersion():
+            self.versionSelector.currentText()
+        self.versionSelector.editTextChanged.connect(setVersion)
+        commonCategory.addWidget("BioImageIT version", self.versionSelector)
+
+        self.checkVersionsButton = QPushButton('Check available versions')
+        self.checkVersionsButton.clicked.connect(UpdateManager.get().checkVersions)
+        UpdateManager.get().versionsUpdated.connect(self.updateVersionSelector)
+        commonCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
 
         omeroCategory = CollapsibleFormWidget(headName="Omero")
         self.layout.addWidget(omeroCategory)
@@ -76,6 +98,8 @@ class GeneralPreferences(CategoryWidgetBase):
     def initDefaults(self, settings):
         settings.setValue("EditorCmd", "sublime_text.exe @FILE")
         settings.setValue("HistoryDepth", 50)
+        settings.setValue("UpdateFrequency", 3600 / 2)
+        settings.setValue("BioImageITVersion", "0.3.0")
 
         settings.setValue("OmeroHost", "demo.openmicroscopy.org")
         settings.setValue("OmeroPort", 4064)
@@ -86,6 +110,9 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("EditorCmd", self.lePythonEditor.text())
         settings.setValue("ImageViewerCmd", self.leImageViewer.text())
         settings.setValue("HistoryDepth", self.historyDepth.value())
+        settings.setValue("AutoUpdate", self.autoUpdateCheckbox.isChecked())
+        settings.setValue("UpdateFrequency", self.updateFrequency.value())
+        settings.setValue("BioImageITVersion", self.versionSelector.currentText())
 
         settings.setValue("OmeroHost", self.host.text())
         settings.setValue("OmeroPort", self.port.value())
@@ -100,12 +127,21 @@ class GeneralPreferences(CategoryWidgetBase):
         self.username.setText(username)
         self.password.setText(keyring.get_password("bioif-omero", username))
 
+        self.updateVersionSelector()
+        
         try:
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))
-        except:
-            pass
-
-        try:
+            self.autoUpdateCheckbox.setChecked(bool(settings.value("AutoUpdate")))
+            self.updateFrequency.setValue(int(settings.value("UpdateFrequency")))
+            self.versionSelector.setCurrentText(settings.value("BioImageITVersion"))
             self.redirectOutput.setChecked(settings.value("RedirectOutput") == "true")
         except:
             pass
+    
+    def updateVersionSelector(self, versions=None):
+        currentVersion = self.versionSelector.currentText()
+        while self.versionSelector.count() > 0:
+            self.versionSelector.removeItem(0)
+        for version in self.versions:
+            self.versionSelector.addItem(version)
+        self.versionSelector.setCurrentText(currentVersion)
