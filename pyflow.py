@@ -23,48 +23,51 @@ import json
 from importlib import reload
 from functools import partial
 
-mustRestart = False
+# mustRestart = False
 
 def restart(app):
-	PyFlow = reload(sys.modules['biit.App']).PyFlow
-	app.exit(0)
-	del app
-	gc.collect()
-	global mustRestart
-	mustRestart = True
+	# PyFlow = reload(sys.modules['biit.App']).PyFlow
+	# app.exit(0)
+	# global mustRestart
+	# mustRestart = True
 
-def main():
+	QtCore.QCoreApplication.quit()
+	status = QtCore.QProcess.startDetached(sys.executable, sys.argv)
+
+def main(instance=None):
 	from biit.App import PyFlow
 
 	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
 	
 	app = QApplication(sys.argv)
 
-	instance = PyFlow.instance(software="standalone", restart=partial(restart, app))
-	instance.updateCSS()
-	
-	if instance is not None:
-		instance.activateWindow()
-		instance.show()
-		
-		parser = argparse.ArgumentParser(description="PyFlow CLI")
-		parser.add_argument("-f", "--filePath", type=str, default="Untitled.pygraph")
-		parsedArguments, unknown = parser.parse_known_args(sys.argv[1:])
-		filePath = parsedArguments.filePath
-		if not filePath.endswith(".pygraph"):
-			filePath += ".pygraph"
-		if os.path.exists(filePath):
-				with open(filePath, 'r') as f:
-					data = json.load(f)
-					instance.loadFromData(data)
-					instance.currentFileName = filePath
+	instance2 = PyFlow.instance(software="standalone", restart=partial(restart, app))
+	instance = instance2
 
-		app.exec_()
-		global mustRestart
-		if mustRestart:
-			# QApplication.shutdown()
-			mustRestart = False
-			main()
+	instance.updateCSS()
+	instance.activateWindow()
+	instance.show()
+	
+	parser = argparse.ArgumentParser(description="PyFlow CLI")
+	parser.add_argument("-f", "--filePath", type=str, default="Untitled.pygraph")
+	parsedArguments, unknown = parser.parse_known_args(sys.argv[1:])
+	filePath = parsedArguments.filePath
+	if not filePath.endswith(".pygraph"):
+		filePath += ".pygraph"
+	if os.path.exists(filePath):
+			with open(filePath, 'r') as f:
+				data = json.load(f)
+				instance.loadFromData(data)
+				instance.currentFileName = filePath
+
+	app.exec_()
+	# app.shutdown()
+	# del app
+	# gc.collect()
+	# global mustRestart
+	# if mustRestart:
+	# 	mustRestart = False
+	# 	main(instance)
 
 if __name__ == "__main__":
 	main()
