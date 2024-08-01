@@ -63,6 +63,12 @@ class GeneralPreferences(CategoryWidgetBase):
         self.updateFrequency.setValue(3600 / 2)
         versionsCategory.addWidget("Update frequency", self.updateFrequency)
 
+        self.checkVersionsButton = QPushButton('Check available versions')
+        self.checkVersionsButton.clicked.connect(UpdateManager.get().checkVersions)
+        UpdateManager.get().versionInstalled.connect(self.updateVersion)
+        UpdateManager.get().versionsUpdated.connect(self.updateVersionSelector)
+        versionsCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
+
         self.versionSelector = QComboBox()
         self.versions = ['0.3.0']
         for version in self.versions:
@@ -72,11 +78,6 @@ class GeneralPreferences(CategoryWidgetBase):
         self.versionSelector.editTextChanged.connect(setVersion)
         versionsCategory.addWidget("BioImageIT version", self.versionSelector)
 
-        self.checkVersionsButton = QPushButton('Check available versions')
-        self.checkVersionsButton.clicked.connect(UpdateManager.get().checkVersions)
-        UpdateManager.get().versionsUpdated.connect(self.updateVersionSelector)
-        versionsCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
-
         # Error reports
         errorReportsCategory = CollapsibleFormWidget(headName="Error reports")
         self.layout.addWidget(errorReportsCategory)
@@ -85,7 +86,6 @@ class GeneralPreferences(CategoryWidgetBase):
         errorReportsCategory.addWidget("Email address", self.email)
 
         self.mailApiKey = QLineEdit("")
-        self.mailApiKey.setEchoMode(QLineEdit.Password)
         errorReportsCategory.addWidget("Mail API Key", self.mailApiKey)
 
         self.mailApiSecret = QLineEdit("")
@@ -151,7 +151,6 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("OmeroUsername", self.username.text())
         keyring.set_password("bioif-omero", self.username.text(), self.password.text())
 
-
     def onShow(self, settings):
         self.lePythonEditor.setText(settings.value("EditorCmd"))
         self.leImageViewer.setText(settings.value("ImageViewerCmd"))
@@ -163,7 +162,7 @@ class GeneralPreferences(CategoryWidgetBase):
             self.updateVersionSelector()
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))
 
-            self.autoUpdateCheckbox.setChecked(bool(settings.value("AutoUpdate")))
+            self.autoUpdateCheckbox.setChecked(settings.value("AutoUpdate") == "true")
             self.updateFrequency.setValue(int(settings.value("UpdateFrequency")))
             self.versionSelector.setCurrentText(settings.value("BioImageITVersion"))
 
@@ -176,7 +175,12 @@ class GeneralPreferences(CategoryWidgetBase):
         except:
             pass
     
+    def updateVersion(self, version):
+        self.versionSelector.setCurrentText(version)
+
     def updateVersionSelector(self, versions=None):
+        if versions is not None:
+            self.versions = versions
         currentVersion = self.versionSelector.currentText()
         while self.versionSelector.count() > 0:
             self.versionSelector.removeItem(0)

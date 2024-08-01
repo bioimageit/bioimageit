@@ -159,7 +159,6 @@ class PyFlow(QMainWindow):
 		self.preferencesWindow = PreferencesWindow(self)
 		self.preferencesWindow.settingsUpdated.connect(OmeroService().reset)
 		self.preferencesWindow.settingsUpdated.connect(UpdateManager.get().initializeAutoUpdate)
-		UpdateManager.get().versionInstalled.connect(self.warnNewVersion)
 
 		self.setMouseTracking(True)
 
@@ -170,7 +169,7 @@ class PyFlow(QMainWindow):
 		self.currentFileName = None
 
 	def warnNewVersion(self, version:str=None):
-		self.updatingVersion = False
+		self.preferencesWindow.savePreferences()
 		answer = QMessageBox.warning(self, "New BioImageIT version", "A new version of BioImageIT was just installed, please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
 		if answer == QMessageBox.Yes:
 			if self.restartApp is not None:
@@ -833,4 +832,6 @@ class PyFlow(QMainWindow):
 				for categoryName, widgetClass in prefsWidgets.items():
 					PreferencesWindow().addCategory(categoryName, widgetClass())
 				PreferencesWindow().selectByName("General")
+		# The following must be connected after the version selector has been connected in PyFlow/Packages/PyFlowBase/PrefsWidgets/General.py
+		UpdateManager.get().versionInstalled.connect(instance.warnNewVersion)
 		return instance
