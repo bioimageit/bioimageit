@@ -53,8 +53,8 @@ class GeneralPreferences(CategoryWidgetBase):
         commonCategory.addWidget("History depth", self.historyDepth)
         
         # UPDATE
-
         versionsCategory = CollapsibleFormWidget(headName="Version management")
+        self.layout.addWidget(versionsCategory)
         self.autoUpdateCheckbox = QCheckBox()
         versionsCategory.addWidget("Auto update", self.autoUpdateCheckbox)
 
@@ -79,6 +79,7 @@ class GeneralPreferences(CategoryWidgetBase):
 
         # Error reports
         errorReportsCategory = CollapsibleFormWidget(headName="Error reports")
+        self.layout.addWidget(errorReportsCategory)
 
         self.email = QLineEdit("")
         errorReportsCategory.addWidget("Email address", self.email)
@@ -143,6 +144,7 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("Email", self.email.text())
         settings.setValue("MailAPIKey", self.mailApiSecret.text())
         settings.setValue("MailAPISecret", self.mailApiSecret.text())
+        keyring.set_password("bioif-mail-api-secret", self.email.text(), self.mailApiSecret.text())
 
         settings.setValue("OmeroHost", self.host.text())
         settings.setValue("OmeroPort", self.port.value())
@@ -157,18 +159,18 @@ class GeneralPreferences(CategoryWidgetBase):
         self.username.setText(username)
         self.password.setText(keyring.get_password("bioif-omero", username))
 
-        self.updateVersionSelector()
-        
         try:
+            self.updateVersionSelector()
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))
 
             self.autoUpdateCheckbox.setChecked(bool(settings.value("AutoUpdate")))
             self.updateFrequency.setValue(int(settings.value("UpdateFrequency")))
             self.versionSelector.setCurrentText(settings.value("BioImageITVersion"))
 
-            self.email.setText(settings.value("Email"))
+            email = settings.value("Email")
+            self.email.setText(email)
             self.mailApiKey.setText(settings.value("MailAPIKey"))
-            self.mailApiSecret.setText(settings.value("MailAPISecret"))
+            self.mailApiSecret.setText(keyring.get_password("bioif-mail-api-secret", email))
             
             self.redirectOutput.setChecked(settings.value("RedirectOutput") == "true")
         except:
