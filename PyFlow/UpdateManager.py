@@ -37,14 +37,18 @@ class UpdateManager:
 		shutil.copytree(bioimageitName / 'PyFlow', destinationPath)
 		send2trash(bioimageitName)
 		send2trash(bioimageitName.name + '.tar.gz')
-		inmain(lambda: self.versionInstalled.send(version))
+		inmain(lambda: self.sendVersionInstalled(version))
+	
+	def sendVersionInstalled(self, version):
+		self.currentBioImageITVersion = version
+		self.versionInstalled.send(version)
 	
 	def checkVersions(self):
 		print('checkVersions')
 		xmlFeed = urllib.request.urlopen("https://pypi.org/rss/project/bioimageit/releases.xml").read()
 		root = ET.fromstring(xmlFeed)
 		versions = [title.text for title in root.findall('./channel/item/title')]
-		GET_PACKAGES()['PyFlowBase'].PrefsWidgets()['General'].versions = versions
+		# GET_PACKAGES()['PyFlowBase'].PrefsWidgets()['General'].versions = versions
 		self.versionsUpdated.send(versions)
 		return versions
 
