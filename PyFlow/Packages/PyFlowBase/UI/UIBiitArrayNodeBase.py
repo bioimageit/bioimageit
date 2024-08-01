@@ -95,7 +95,7 @@ class ColumnValueWidget(QWidget):
     
     def updateNodeParameters(self, value, type):
         parameter = self.node.parameters[self.name]
-        parameter[type] = int(value) if parameter['dataType'] == 'integer' else value
+        parameter[type] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
         self.node.dataBeenSet(resetParameters=False)
     

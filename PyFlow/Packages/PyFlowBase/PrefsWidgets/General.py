@@ -52,13 +52,16 @@ class GeneralPreferences(CategoryWidgetBase):
         self.historyDepth.editingFinished.connect(setHistoryCapacity)
         commonCategory.addWidget("History depth", self.historyDepth)
         
+        # UPDATE
+
+        versionsCategory = CollapsibleFormWidget(headName="Version management")
         self.autoUpdateCheckbox = QCheckBox()
-        commonCategory.addWidget("Auto update", self.autoUpdateCheckbox)
+        versionsCategory.addWidget("Auto update", self.autoUpdateCheckbox)
 
         self.updateFrequency = QSpinBox()
         self.updateFrequency.setRange(1, 24 * 3600)
         self.updateFrequency.setValue(3600 / 2)
-        commonCategory.addWidget("Update frequency", self.updateFrequency)
+        versionsCategory.addWidget("Update frequency", self.updateFrequency)
 
         self.versionSelector = QComboBox()
         self.versions = ['0.3.0']
@@ -67,12 +70,28 @@ class GeneralPreferences(CategoryWidgetBase):
         def setVersion():
             self.versionSelector.currentText()
         self.versionSelector.editTextChanged.connect(setVersion)
-        commonCategory.addWidget("BioImageIT version", self.versionSelector)
+        versionsCategory.addWidget("BioImageIT version", self.versionSelector)
 
         self.checkVersionsButton = QPushButton('Check available versions')
         self.checkVersionsButton.clicked.connect(UpdateManager.get().checkVersions)
         UpdateManager.get().versionsUpdated.connect(self.updateVersionSelector)
-        commonCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
+        versionsCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
+
+        # Error reports
+        errorReportsCategory = CollapsibleFormWidget(headName="Error reports")
+
+        self.email = QLineEdit("")
+        errorReportsCategory.addWidget("Email address", self.email)
+
+        self.mailApiKey = QLineEdit("")
+        self.mailApiKey.setEchoMode(QLineEdit.Password)
+        errorReportsCategory.addWidget("Mail API Key", self.mailApiKey)
+
+        self.mailApiSecret = QLineEdit("")
+        self.mailApiSecret.setEchoMode(QLineEdit.Password)
+        errorReportsCategory.addWidget("Mail API Secret", self.mailApiSecret)
+
+        # OMERO
 
         omeroCategory = CollapsibleFormWidget(headName="Omero")
         self.layout.addWidget(omeroCategory)
@@ -98,8 +117,14 @@ class GeneralPreferences(CategoryWidgetBase):
     def initDefaults(self, settings):
         settings.setValue("EditorCmd", "sublime_text.exe @FILE")
         settings.setValue("HistoryDepth", 50)
+        
+        settings.setValue("AutoUpdate", False)
         settings.setValue("UpdateFrequency", 3600 / 2)
         settings.setValue("BioImageITVersion", "0.3.0")
+
+        settings.setValue("Email", "")
+        settings.setValue("MailAPIKey", "")
+        settings.setValue("MailAPISecret", "")
 
         settings.setValue("OmeroHost", "demo.openmicroscopy.org")
         settings.setValue("OmeroPort", 4064)
@@ -110,9 +135,14 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("EditorCmd", self.lePythonEditor.text())
         settings.setValue("ImageViewerCmd", self.leImageViewer.text())
         settings.setValue("HistoryDepth", self.historyDepth.value())
+
         settings.setValue("AutoUpdate", self.autoUpdateCheckbox.isChecked())
         settings.setValue("UpdateFrequency", self.updateFrequency.value())
         settings.setValue("BioImageITVersion", self.versionSelector.currentText())
+
+        settings.setValue("Email", self.email.text())
+        settings.setValue("MailAPIKey", self.mailApiSecret.text())
+        settings.setValue("MailAPISecret", self.mailApiSecret.text())
 
         settings.setValue("OmeroHost", self.host.text())
         settings.setValue("OmeroPort", self.port.value())
@@ -131,9 +161,15 @@ class GeneralPreferences(CategoryWidgetBase):
         
         try:
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))
+
             self.autoUpdateCheckbox.setChecked(bool(settings.value("AutoUpdate")))
             self.updateFrequency.setValue(int(settings.value("UpdateFrequency")))
             self.versionSelector.setCurrentText(settings.value("BioImageITVersion"))
+
+            self.email.setText(settings.value("Email"))
+            self.mailApiKey.setText(settings.value("MailAPIKey"))
+            self.mailApiSecret.setText(settings.value("MailAPISecret"))
+            
             self.redirectOutput.setChecked(settings.value("RedirectOutput") == "true")
         except:
             pass

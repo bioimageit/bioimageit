@@ -17,7 +17,7 @@ dependencies = ["omero-py==5.15.0",
                 "pyside6>=6.7.2,<7", 
                 "pyside6-qtads>=4.3.0.2,<5", 
                 "munch>=4.0.0,<5", 
-                "send2trash>=1.8.3,<2"]
+                "send2trash>=1.8.3,<2", "mailjet-rest>=1.3.4,<2"]
 
 [project.optional-dependencies]
 install = ["pyinstaller"]

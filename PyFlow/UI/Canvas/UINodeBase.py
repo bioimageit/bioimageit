@@ -23,6 +23,7 @@ from qtpy.QtSvgWidgets import QGraphicsSvgItem
 
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.Core.Common import *
+from PyFlow.ErrorManager import ErrorManager
 from PyFlow.UI.Canvas.UIPinBase import UIPinBase, getUIPinInstance, PinGroup
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Canvas.UICommon import *
@@ -37,7 +38,6 @@ from PyFlow.UI.Utils.stylesheet import Colors
 from collections import OrderedDict
 
 UI_NODES_FACTORIES = {}
-
 
 class CollapseNodeActionButton(NodeActionButtonBase):
     """docstring for CollapseNodeActionButton."""
@@ -731,6 +731,7 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         # change node ui to invalid
         errorString = args[0]
         error = {"Node": self._rawNode.name, "Error": errorString}
+        ErrorManager.report(f'Error on node: {self._rawNode.name}\n\n{error}')
         if ConfigManager().shouldRedirectOutput():
             errorLink = (
                 """<a href=%s><span style=" text-decoration: underline; color:red;">%s</span></a></p>"""

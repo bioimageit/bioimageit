@@ -14,6 +14,7 @@
 
 from typing import Iterable
 from pathlib import Path
+import logging
 import json, copy
 import re
 import shutil
@@ -31,6 +32,7 @@ from qtpy import QtGui, QtCore
 from qtpy.QtCore import QObject, QThread
 from qtpy.QtWidgets import *
 
+from PyFlow.ErrorManager import ErrorManager
 from PyFlow.UI.Tool.Tool import ShelfTool
 from PyFlow.UI.Widgets import BlueprintCanvas
 from PyFlow.Packages.PyFlowBase.Tools import RESOURCES_DIR
@@ -47,6 +49,8 @@ from PyFlow.invoke_in_main import inmain, inthread
 
 def dedent(message):
     return linesep.join(line.lstrip().replace('[t]', '\t') for line in message.splitlines())
+
+logger = logging.getLogger()
 
 class ProgressDialog(QWidget):
 
@@ -257,13 +261,14 @@ class RunTool(ShelfTool):
         self.log(text)
         message.setDetailedText(f'{traceback}')
         message.exec()
+        ErrorManager.report(text)
 
     def initializeLog(self):
         logTools = [tool for tool in self.pyFlowInstance._tools if isinstance(tool, LoggerTool)]
         self.logTool = logTools[0] if len(logTools)>0 else None
     
     def log(self, message:str):
-        print(message)
+        logger.info(message)
         self.progressDialog.log(message)
         if self.logTool is None: return
         inmain(lambda: self.logTool.logPython(message))
@@ -318,6 +323,7 @@ class RunTool(ShelfTool):
             print(tb)
             traceback.print_tb(e.__traceback__)
             tb += '\n'.join(traceback.format_tb(e.__traceback__))
+            # traceback.format_exc()
             inmain(lambda: self.displayError(e, tb))
         
         self.executing = False

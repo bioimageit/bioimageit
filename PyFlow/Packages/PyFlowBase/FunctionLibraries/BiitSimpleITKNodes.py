@@ -69,7 +69,7 @@ class BinaryThreshold(SimpleITKBase):
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(thresholdedImage, outputPath)
         self.executed = True
-        return 
+        return
     
 class AddScalarToImage(SimpleITKBase):
 

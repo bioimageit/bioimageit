@@ -16,6 +16,7 @@
 """Application class here
 """
 
+import logging
 import os
 import json
 import shutil
@@ -63,7 +64,7 @@ import asyncio
 import PyFlow.UI.resources
 # from PyFlow.Wizards.PackageWizard import PackageWizard
 
-from PyFlow import INITIALIZE
+from PyFlow import INITIALIZE, getRootPath
 from PyFlow.Input import InputAction, InputActionType
 from PyFlow.Input import InputManager
 from PyFlow.ConfigManager import ConfigManager
@@ -73,6 +74,13 @@ import PyFlow.UI.resources
 
 EDITOR_TARGET_FPS = 30
 
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler(getRootPath() / 'bioimageit.log'),
+        logging.StreamHandler()
+    ]
+)
 
 def generateRandomString(numbSymbols=5):
 	result = ""

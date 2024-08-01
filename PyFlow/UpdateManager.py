@@ -74,7 +74,7 @@ class UpdateManager:
 			self.setVersion(currentBioImageITVersion)
 			self.currentBioImageITVersion = currentBioImageITVersion
 			return
-		autoUpdate = bool(ConfigManager().getPrefsValue("PREFS", "General/AutoUpdate"))
+		autoUpdate = ConfigManager().getPrefsValue("PREFS", "General/AutoUpdate") == 'true'
 		if not autoUpdate:
 			return
 		updateFrequency = int(ConfigManager().getPrefsValue("PREFS", "General/UpdateFrequency"))
