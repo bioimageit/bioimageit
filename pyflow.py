@@ -14,28 +14,20 @@
 
 
 import sys
-import gc
 from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 import argparse
 import os
 import json
-from importlib import reload
 from functools import partial
-
-# mustRestart = False
+import PyFlow
+from biit.App import PyFlow
 
 def restart(app):
-	# PyFlow = reload(sys.modules['biit.App']).PyFlow
-	# app.exit(0)
-	# global mustRestart
-	# mustRestart = True
-
 	QtCore.QCoreApplication.quit()
-	status = QtCore.QProcess.startDetached(sys.executable, sys.argv)
+	QtCore.QProcess.startDetached(sys.executable, sys.argv)
 
 def main(instance=None):
-	from biit.App import PyFlow
 
 	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
 	
@@ -61,13 +53,5 @@ def main(instance=None):
 				instance.currentFileName = filePath
 
 	app.exec_()
-	# app.shutdown()
-	# del app
-	# gc.collect()
-	# global mustRestart
-	# if mustRestart:
-	# 	mustRestart = False
-	# 	main(instance)
-
 if __name__ == "__main__":
 	main()

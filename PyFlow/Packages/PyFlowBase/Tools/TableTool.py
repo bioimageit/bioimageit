@@ -26,7 +26,7 @@ from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 from PyFlow.Packages.PyFlowBase.Tools.PandasModel import PandasModel
 from PyFlow.ConfigManager import ConfigManager
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 # from PyFlow.Viewer.NapariManager import NapariManager
 from PyFlow.Viewer import environment, dependencies
 try:
@@ -43,7 +43,7 @@ class TableTool(DockTool):
 	def __init__(self):
 		super(TableTool, self).__init__()
 		self.content = None
-		thumbnailGenerator.finished.connect(self.updateThumbnails)
+		ThumbnailGenerator.get().finished.connect(self.updateThumbnails)
 
 	def onShow(self):
 		super(TableTool, self).onShow()

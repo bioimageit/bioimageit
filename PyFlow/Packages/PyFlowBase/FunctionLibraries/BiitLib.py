@@ -4,7 +4,7 @@ from importlib import import_module
 from PyFlow import getImportPath
 from PyFlow.Core import FunctionLibraryBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode as createToolNode
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import BinaryThreshold, ExtractChannel, AddScalarToImage, SubtractImages, ConnectedComponents, LabelStatistics
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import createFunctionNodes
 
 class BiitLib(FunctionLibraryBase):
     """doc string for BiitLib"""
@@ -27,9 +27,4 @@ def loadTools(toolsPath):
 
 loadTools(toolsPath)
 
-BiitLib.classes['BinaryThreshold'] = BinaryThreshold
-BiitLib.classes['AddScalarToImage'] = AddScalarToImage
-BiitLib.classes['ExtractChannel'] = ExtractChannel
-BiitLib.classes['SubtractImages'] = SubtractImages
-BiitLib.classes['ConnectedComponents'] = ConnectedComponents
-BiitLib.classes['LabelStatistics'] = LabelStatistics
+BiitLib.classes.update(createFunctionNodes())

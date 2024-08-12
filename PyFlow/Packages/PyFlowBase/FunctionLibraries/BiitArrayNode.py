@@ -8,7 +8,7 @@ from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputFolderPath, isIoPath
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 
 from blinker import Signal
 
@@ -232,7 +232,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         data = pandas.DataFrame()
         for input in pathInputs:
             data[self.getColumnName(input)] = [self.parameters[input.name]['value']]
-        thumbnailGenerator.generateThumbnails(self.name, data)
+        ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data
 
     def createDataFrameFromFolder(self, path, initParameters=True):
@@ -248,7 +248,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         if initParameters:
             # Now that we have a pandas frame as input: let's consider the parameters type as columnName and set parameters['columnName']
             self.setParametersFromDataframe(data, True)
-        thumbnailGenerator.generateThumbnails(self.name, data)
+        ThumbnailGenerator.get().generateThumbnails(self.name, data)
         if len(data)>0:
             # self.inArray.dataBeenSet.disconnect(self.dataBeenSet)
             self.inArray.setData(data)
@@ -268,32 +268,20 @@ class BiitArrayNodeBase(BiitNodeBase):
                 if isinstance(outputPath, Path) and outputPath.exists():
                     outputPath.unlink()
 
-def constructor(self, name):
-    super(self.__class__, self).__init__(name)
+    @classmethod
+    def description(cls): 
+        return cls.tool.info.help if hasattr(cls, 'tool') and hasattr(cls.tool, 'info') and hasattr(cls.tool.info, 'help') else ''
 
-def compute(self, *args, **kwargs):
-    return super(self.__class__, self).compute(**kwargs)
-    
-@classmethod
-def description(cls): 
-    return cls.tool.info.help
-
-@classmethod
-def category(cls):
-    return '|'.join(cls.tool.info.categories)
+    @classmethod
+    def category(cls):
+        return '|'.join(cls.tool.info.categories)
 
 def createNode(tool):
     # Hide the version number for now, but it would be nice to add it later when there are multiple versions of the tool
     # toolId = f'{tool.info.id}_v{tool.info.version}'
     # toolId = f'{tool.info.id}_biitarray'
     toolId = f'{tool.info.id}'
-    toolClass = type(toolId, (BiitArrayNodeBase, ), dict( 
-        tool = tool,
-        __init__= constructor, 
-        compute = compute, 
-        description = description,
-        category = category
-    ))
+    toolClass = type(toolId, (BiitArrayNodeBase, ), dict(tool = tool))
     return toolClass
 
 class SimpleITKBase(BiitArrayNodeBase):

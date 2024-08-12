@@ -8,7 +8,7 @@ from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 from PyFlow.Packages.PyFlowBase.Nodes import FLOW_CONTROL_COLOR
 from blinker import Signal
 
@@ -110,8 +110,8 @@ class ListFiles(PandasNodeBase):
             return
         path = Path(data)
         if path.exists():
-            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():sorted(list(path.iterdir()))})
-            thumbnailGenerator.generateThumbnails(self.name, dataFrame)
+            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():sorted(list(p for p in path.iterdir() if p.name != '.DS_Store'))})
+            ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
             self.setOutputAndClean(dataFrame)
             self.dirty = False
 

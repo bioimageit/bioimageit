@@ -10,12 +10,12 @@ class ErrorManager:
 
     @staticmethod
     def getGraph():
-        saveData = GraphManagerSingleton.get().serialize()
+        saveData = GraphManagerSingleton().get().serialize()
         return '\n\nGraph:\n\n' + json.dumps(saveData, indent=4)
     
     @staticmethod
     def getDataFrames():
-        nodes = GraphManagerSingleton.get().getAllNodes()
+        nodes = GraphManagerSingleton().get().getAllNodes()
 
         dataFrames = '\n\nDataFrames:\n\n'
         for node in nodes:
@@ -47,9 +47,12 @@ class ErrorManager:
         emailAddress = ConfigManager().getPrefsValue("PREFS", "General/Email")
         if len(api_key) == 0 or len(api_secret) == 0 or len(emailAddress) == 0: return
         if errorMessage in ErrorManager.reportedErrors: return
-        errorMessage += ErrorManager.getGraph()
-        errorMessage += ErrorManager.getDataFrames()
-        errorMessage += ErrorManager.getLogs()
+        try:
+            errorMessage += ErrorManager.getGraph()
+            errorMessage += ErrorManager.getDataFrames()
+            errorMessage += ErrorManager.getLogs()
+        except:
+            pass
         mailjet = Client(auth=(api_key, api_secret), version='v3.1')
         data = {
         'Messages': [

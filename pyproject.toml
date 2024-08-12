@@ -1,11 +1,11 @@
 [project]
 name = "bioimageit"
-version = "0.3.2"
+version = "0.3.3"
 description = "A FAIR data management and image analysis framework"
 authors = [{name = "Arthur Masson", email = "arthur.masson@inria.fr"}]
 license = { file = "LICENSE" }
 # requires-python = ">= 3.10.2, <3.11"
-requires-python = "==3.10.2"
+requires-python = "==3.10.8"
 dependencies = ["omero-py==5.15.0",
                 "simpleitk>=2.3.1, <2.4",
                 "qtpy>=2.4.1,<3",
@@ -40,6 +40,10 @@ bioimageit = { path = ".", editable = true }
 
 [tool.pixi.dependencies]
 zeroc-ice = "==3.6.5"
+
+[tool.pixi.system-requirements]
+linux="4.15"
+libc = { family="glibc", version="2.17" }
 
 # Environments
 [tool.pixi.environments]

@@ -1,27 +1,64 @@
 from pathlib import Path
+import json
 import pandas
+from munch import DefaultMunch
+import SimpleITK as sitk
 
+from PyFlow import getRootPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.invoke_in_main import inmain
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
 
-from munch import DefaultMunch
 # import re
-import SimpleITK as sitk
 
 class SimpleITKBase(BiitArrayNodeBase):
 
     def __init__(self, name):
         super(SimpleITKBase, self).__init__(name)
 
-    @staticmethod
-    def category():
-        return "SimpleITK"
+    @classmethod
+    def category(cls):
+        return cls.tool.info.categories if 'categories' in cls.tool.info else 'SimpleITK|Custom'
     
     def getParameter(self, name, row):
         return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
     
+    def setOutputColumns(self, tool, data):
+        for output in tool.info.outputs:
+            for index, row in data.iterrows():
+                # Guess output file extension: find the first input image format
+                suffixes = '.tiff'
+                for input in tool.info.inputs:
+                    if input.type == 'path' and 'image' in input.name and self.getParameter(input.name, row) is not None:
+                        suffixes = ''.join(Path(self.getParameter(input.name, row)).suffixes)
+                        break
+                data.at[index, self.getColumnName(output)] = getOutputFolderPath(self.name) / f'{output.name}_{index}{suffixes}'
+
+    def execute(self):
+        data: pandas.DataFrame|None = self.getDataFrame()
+        if data is None:
+            self.executed = True
+            return
+        outputData: pandas.DataFrame = self.outArray.currentData()
+        for index, row in data.iterrows():
+            argValues = []
+            for input in self.tool.info.inputs:
+                parameter = self.getParameter(input.name, row)
+                argValues.append(parameter if input.type != 'path' else sitk.ReadTransform(parameter) if str(parameter).endswith('.tfm') else sitk.ReadImage(parameter))
+            # if 'vector' in inputImage.GetPixelIDTypeAsString():
+            #     inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
+            result = self.__class__.sitkFunction(*argValues)
+            outputPath = Path(outputData.at[index, self.name + '_' + self.tool.info.outputs[0].name])
+            outputPath.parent.mkdir(exist_ok=True, parents=True)
+            if outputPath.suffix == '.tfm':
+                sitk.WriteTransform(result, outputPath)
+            else:
+                sitk.WriteImage(result, outputPath)
+        self.executed = True
+        return
+
 class BinaryThreshold(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'binary_threshold', inputs=[
@@ -51,7 +88,7 @@ class BinaryThreshold(SimpleITKBase):
     #     self.dirty = False
 
     def execute(self):
-        data: pandas.DataFrame = self.getDataFrame()
+        data: pandas.DataFrame|None = self.getDataFrame()
         if data is None:
             self.executed = True 
             return
@@ -120,7 +157,7 @@ class ExtractChannel(SimpleITKBase):
     #     self.dirty = False
 
     def execute(self):
-        data: pandas.DataFrame = self.getDataFrame()
+        data: pandas.DataFrame|None = self.getDataFrame()
         outputData: pandas.DataFrame = self.outArray.currentData()
         for index, row in data.iterrows():
             inputImage = sitk.ReadImage(self.getParameter('image', row))
@@ -286,9 +323,70 @@ class LabelStatistics(SimpleITKBase):
                 records.append(dict(image=imagePath, label=labelPath, connected_component=outputPath, label_index=i, minimum=minimum, maximum=maximum, median=median, mean=mean, numPixels=numPixels, bb=str(bb)))
         outDataFrame = pandas.DataFrame.from_records(records)
         
-        inmain(lambda: thumbnailGenerator.generateThumbnails(self.name, outDataFrame))
+        inmain(lambda: ThumbnailGenerator.get().generateThumbnails(self.name, outDataFrame))
         inmain(lambda: self.setOutputAndClean(outDataFrame))
         
         self.executed = True
         return 
-        
+
+
+def createSimpleITKNode(name, sitkFunction, tool):
+    return type(name, (SimpleITKBase,), dict(sitkFunction=sitkFunction, tool=tool))
+
+# import inspect
+# import re
+
+# members = inspect.getmembers(sitk)
+# sitkFunctions = [m for m in members if len(m) >= 1 and inspect.isfunction(m[1]) ]
+
+# for name, sitkFunction in sitkFunctions:
+#     signature = inspect.signature(sitkFunction)
+#     doc = inspect.getdoc(sitkFunction)
+#     if "'" in doc or '"' in doc:
+#         print(f'Warning: there is a string in the parameters of {name}, ignoring.')
+#         continue
+#     match = re.search(r'\((.*?)\)', doc)
+#     if not match: continue
+#     arguments = match.group(1).split(', ')
+#     arguments = [a.split(' ') for a in arguments]
+#     arguments = [dict() for a in arguments]
+
+#     # inputs = [dict(name=name, description='', type=parameter.) for name, parameter in signature.parameters]
+
+
+#     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: name, inputs=[
+#             dict(name='image1', description='Input image path', type='imagepng'),
+#             dict(name='channel', description='Channel to threshold', default_value=0, type='integer'),
+#             dict(name='lowerThreshold', description='Lower threshold', default_value=0, type='integer'),
+#             dict(name='upperThreshold', description='Upper threshold', default_value=255, type='integer'),
+#             dict(name='insideValue', description='Inside value', default_value=1, type='integer'),
+#             dict(name='outsideValue', description='Outside value', default_value=0, type='integer'),
+#         ], outputs=[
+#             dict(name='thresholded_image', description='Output image path', type='imagepng'),
+#         ])))
+
+classes = {}
+
+classes['BinaryThreshold'] = BinaryThreshold
+classes['AddScalarToImage'] = AddScalarToImage
+classes['ExtractChannel'] = ExtractChannel
+classes['SubtractImages'] = SubtractImages
+classes['ConnectedComponents'] = ConnectedComponents
+classes['LabelStatistics'] = LabelStatistics
+
+def createFunctionNodes():
+
+    with open(getRootPath() / 'Scripts' / 'simpleITK_functions.json', 'r') as f:
+        tools = json.load(f)
+
+    for tool in tools.values():
+        name = tool['name']
+        functionName = tool['function_name']
+        if name in classes: continue
+        tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: name, inputs=tool['inputs'], outputs=tool['outputs'], help=tool['description'], categories='SimpleITK|All')))
+        if hasattr(sitk, functionName):
+            classes[name] = createSimpleITKNode(name, getattr(sitk, functionName), tool)
+        else:
+            print(f'Warning: sitk has no {functionName} function.')
+
+    return classes

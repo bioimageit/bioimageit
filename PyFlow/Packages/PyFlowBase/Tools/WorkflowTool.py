@@ -20,6 +20,7 @@ from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 
 class WorkflowTool(DockTool):
     """docstring for Workflow tool."""
@@ -72,6 +73,8 @@ class WorkflowTool(DockTool):
         self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
         self.setWidget(self.mainWidget)
+
+        self.workflowLoaded.connect(ThumbnailGenerator.get().setWorkflowPathAndLoadImageToThumbnail)
 
     @staticmethod
     def isMovable():

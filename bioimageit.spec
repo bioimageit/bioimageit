@@ -3,10 +3,11 @@
 
 a = Analysis(
     ['pyflow.py'],
-    pathex=[],
+    pathex=['PyFlow'],
     binaries=[],
     datas=[],
-    hiddenimports=['omero_API_ice',
+    hiddenimports=[
+'omero_API_ice',
 'omero_Collections_ice',
 'omero_Constants_ice',
 'omero_FS_ice',

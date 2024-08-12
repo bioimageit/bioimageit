@@ -335,7 +335,7 @@ class RunTool(ShelfTool):
             self.progressDialog.hide()
         else:
             self.cancelExecution.set()
-            if self.currentNode is not None:
+            if self.currentNode is not None and hasattr(self.currentNode, 'exitTool'):
                 self.currentNode.exitTool()
     
     def saveGraph(self):

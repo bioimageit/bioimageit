@@ -27,7 +27,7 @@ class BiitNodeBase(NodeBase):
     def setExecuted(self, executed=True, propagate=True):
         if self.executed == executed: return
         self.executed = executed
-        inmain(lambda: self.executedChanged.send(executed))
+        # inmain(lambda: self.executedChanged.send(executed))
         # Propagate to following nodes is execution was unset?
         if propagate and not executed:
             nextNodes = EvaluationEngine()._impl.getEvaluationOrderIterative(self, forward=True)

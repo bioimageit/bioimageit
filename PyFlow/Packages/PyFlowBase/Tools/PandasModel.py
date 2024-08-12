@@ -5,14 +5,14 @@ from qtpy.QtGui import QPixmap, QIcon
 from qtpy.QtCore import QAbstractTableModel, Qt, QModelIndex, QSize
 from qtpy import QtCore, QtWidgets
 from PyFlow.Core.GraphManager import GraphManagerSingleton
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 
 # class ImageDelegate(QtWidgets.QStyledItemDelegate):
 #     def __init__(self, parent: QtCore.QObject | None = ...) -> None:
 #         super().__init__(parent)
 #     def initStyleOption(self, option, index):
 #         super(ImageDelegate, self).initStyleOption(option, index)
-#         path = thumbnailGenerator.getThumbnailPath(index.data())
+#         path = ThumbnailGenerator.get().getThumbnailPath(index.data())
 #         if path is not None and path.exists() and path.is_file() and path.suffix in ['.png', '.jpg', '.jpeg', '.bmp', '.dib', '.gif', '.tiff', '.tif']:
 #             self.pixmap = QPixmap(path)
 #             if not self.pixmap.isNull():
@@ -91,7 +91,7 @@ class PandasModel(QAbstractTableModel):
         # if role == QtCore.Qt.DisplayRole:
         #     return value
         
-        path = thumbnailGenerator.getThumbnailPath(value)
+        path = ThumbnailGenerator.get().getThumbnailPath(value)
         
         if path is not None and path.exists() and path.is_file() and path.suffix in ['.png', '.jpg', '.jpeg', '.bmp', '.dib', '.gif', '.tiff', '.tif']:
     

@@ -10,7 +10,7 @@ from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import thumbnailGenerator
+from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
 
 class OmeroLib(FunctionLibraryBase):
     """doc string for OmeroLib"""
@@ -97,7 +97,7 @@ class OmeroDownload(OmeroBase):
                 path = getOutputFolderPath(self.name) / image.getName()
                 records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=path))
             dataFrame = pandas.DataFrame.from_records(records)
-            thumbnailGenerator.generateThumbnails(self.name, dataFrame)
+            ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
             self.setOutputAndClean(dataFrame)
             self.dirty = False
             self.outputMessage = None

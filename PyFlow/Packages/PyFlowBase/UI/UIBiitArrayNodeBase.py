@@ -49,9 +49,10 @@ class ColumnValueWidget(QWidget):
         # self.columnNameInput.setWidgetValue(defaultColumnName)
         # self.columnNameInput.blockWidgetSignals(False)
         if isinstance(self.inputWidget, InputWidgetRaw):
-            self.inputWidget.blockWidgetSignals(True)
-            self.inputWidget.setWidgetValue(node.parameters[input.name]['value'])
-            self.inputWidget.blockWidgetSignals(False)
+            if node.parameters[input.name]['value'] is not None:
+                self.inputWidget.blockWidgetSignals(True)
+                self.inputWidget.setWidgetValue(node.parameters[input.name]['value'])
+                self.inputWidget.blockWidgetSignals(False)
         self.columnSelector = None
         index = 0 if type == 'columnName' and isDataframe else 1
         if isDataframe:
@@ -87,9 +88,10 @@ class ColumnValueWidget(QWidget):
         )
         if w:
             w.setToolTip(description)
-            w.blockWidgetSignals(True)
-            w.setWidgetValue(defaultValue)
-            w.blockWidgetSignals(False)
+            if defaultValue is not None and defaultValue != '':
+                w.blockWidgetSignals(True)
+                w.setWidgetValue(defaultValue)
+                w.blockWidgetSignals(False)
             w.setObjectName(name)
         return w
     
