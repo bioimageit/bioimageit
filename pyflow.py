@@ -20,8 +20,7 @@ import argparse
 import os
 import json
 from functools import partial
-import PyFlow
-from biit.App import PyFlow
+from PyFlow.App import PyFlow
 
 def restart(app):
 	QtCore.QCoreApplication.quit()

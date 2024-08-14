@@ -135,7 +135,7 @@ class EnvironmentManager:
 	host = 'localhost'
 	environments: dict[str, Environment] = {}
 	
-	def __init__(self, condaPath:str|Path=__file__) -> None:
+	def __init__(self, condaPath:str|Path=Path('micromamba')) -> None:
 		self.setCondaPath(condaPath)
 	
 	def setCondaPath(self, condaPath:str|Path):
