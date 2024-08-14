@@ -20,7 +20,7 @@ from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 class WorkflowTool(DockTool):
     """docstring for Workflow tool."""

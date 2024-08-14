@@ -10,7 +10,7 @@ from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 class OmeroLib(FunctionLibraryBase):
     """doc string for OmeroLib"""

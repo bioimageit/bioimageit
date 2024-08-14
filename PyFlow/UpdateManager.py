@@ -27,7 +27,7 @@ class UpdateManager:
 	def setVersion(self, version):
 		print('set version', version)
 		# subprocess.run(['pip', 'download', '--no-deps', '--no-binary', ':all:', f'bioimageit=={latest_version}'])
-		process = environmentManager._executeCommands(environmentManager._activateConda() + [f'micromamba run pip download --python-version 3.10.2 --disable-pip-version-check --no-deps --no-binary :all: bioimageit=={version}'])
+		process = environmentManager.executeCommands(environmentManager._activateConda() + [f'micromamba run pip download --python-version 3.10.2 --disable-pip-version-check --no-deps --no-binary :all: bioimageit=={version}'])
 		environmentManager._getOutput(process)
 
 		bioimageitName = Path(f'bioimageit-{version}')

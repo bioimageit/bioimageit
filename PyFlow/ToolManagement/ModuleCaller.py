@@ -71,9 +71,9 @@ def launchListener():
 								module = import_module(message['module'])
 								if not hasattr(module, message['function']):
 									raise Exception(f'Module {message["module"]} has no function {message["function"]}.')
-								getattr(module, message['function'])(*message['args'])
+								result = getattr(module, message['function'])(*message['args'])
 								logger.debug(f'Executed')
-								connection.send(dict(action='execution finished', message='process execution done'))
+								connection.send(dict(action='execution finished', message='process execution done', result=result))
 							if message['action'] == 'exit':
 								logger.debug(f'exit')
 								connection.send(dict(action='exited'))

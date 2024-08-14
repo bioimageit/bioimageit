@@ -8,7 +8,7 @@ from PyFlow import getRootPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.invoke_in_main import inmain
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
 
 # import re

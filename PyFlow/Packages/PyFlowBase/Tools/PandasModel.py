@@ -5,7 +5,7 @@ from qtpy.QtGui import QPixmap, QIcon
 from qtpy.QtCore import QAbstractTableModel, Qt, QModelIndex, QSize
 from qtpy import QtCore, QtWidgets
 from PyFlow.Core.GraphManager import GraphManagerSingleton
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 # class ImageDelegate(QtWidgets.QStyledItemDelegate):
 #     def __init__(self, parent: QtCore.QObject | None = ...) -> None:

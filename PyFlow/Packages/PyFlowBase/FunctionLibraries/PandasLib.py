@@ -8,7 +8,7 @@ from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from PyFlow.Packages.PyFlowBase.Nodes import FLOW_CONTROL_COLOR
 from blinker import Signal
 

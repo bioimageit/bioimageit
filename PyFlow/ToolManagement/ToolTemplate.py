@@ -9,7 +9,7 @@ class Tool():
     # - the python version
     # - the conda packages which will be installed with 'conda install packageName'
     # - the pip packages which will be installed with 'pip install packageName'
-    dependencies = dict(python=3.10, conda=[], pip=[])
+    dependencies = dict(python='==3.10', conda=[], pip=[])
 
     # Describe the tool inputs & outputs with ArgumentParser
     @staticmethod

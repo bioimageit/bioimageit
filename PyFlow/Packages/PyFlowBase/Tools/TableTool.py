@@ -26,7 +26,7 @@ from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 from PyFlow.Packages.PyFlowBase.Tools.PandasModel import PandasModel
 from PyFlow.ConfigManager import ConfigManager
-from PyFlow.Packages.PyFlowBase.Tools.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 # from PyFlow.Viewer.NapariManager import NapariManager
 from PyFlow.Viewer import environment, dependencies
 try:
@@ -110,7 +110,7 @@ class TableTool(DockTool):
 			# # Uset the QT_API so that napari finds the QT version of the conda env
 			# if 'QT_API' in env:
 			#     del env['QT_API']
-			# environmentManager._executeCommands([environmentManager._activateConda(), f'conda activate {imageViewerCmd}', f'napari {path}'], env=env)
+			# environmentManager.executeCommands([environmentManager._activateConda(), f'conda activate {imageViewerCmd}', f'napari {path}'], env=env)
 			
 			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier
 

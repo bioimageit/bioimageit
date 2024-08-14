@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 import pandas
 import numpy as np
-# from PyFlow.invoke_in_main import inmain, inthread
+from PyFlow.invoke_in_main import inmain, inthread
 from blinker import Signal
+# from PyFlow.Packages.PyFlowBase.Tools.generate_thumbnails import generateThumbnails
 # import threading
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 
 from PIL import Image
 import multiprocessing
@@ -16,29 +18,33 @@ class ThumbnailGenerator:
 
 	def __init__(self) -> None:
 		self.imageToThumbnail: dict[str, str] = {}
+		self.environment = environmentManager.launch('ThumbnailGenerator', condaEnvironment=False)
 
-	@staticmethod
-	def thumbnail(inputPath, outputPath, size=(128,128)): 
-		try:
-			# Load just once, then successively scale down
-			im = Image.open(inputPath)
-			if im.mode[0] in ['I', 'F']:
-				data = np.asarray(im)
-				dmax, dmin = data.max(), data.min()
-				data = 255.0 * ( data - dmin ) / (dmax - dmin) if abs(dmax - dmin) > 0 else data
-				im = Image.fromarray(data.astype(np.uint8))
-			im.thumbnail(size)
-			im.save(outputPath)
-			return (inputPath, outputPath)
-		except Exception as e:
-			return e 
+	# @staticmethod
+	# def thumbnail(inputPath, outputPath, size=(128,128)): 
+	# 	try:
+	# 		# Load just once, then successively scale down
+	# 		im = Image.open(inputPath)
+	# 		if im.mode[0] in ['I', 'F']:
+	# 			data = np.asarray(im)
+	# 			dmax, dmin = data.max(), data.min()
+	# 			data = 255.0 * ( data - dmin ) / (dmax - dmin) if abs(dmax - dmin) > 0 else data
+	# 			im = Image.fromarray(data.astype(np.uint8))
+	# 		im.thumbnail(size)
+	# 		im.save(outputPath)
+	# 		return (inputPath, outputPath)
+	# 	except Exception as e:
+	# 		return e 
 
 	def setWorkflowPathAndLoadImageToThumbnail(self, workflowPath):
 		self.workflowPath = workflowPath
 		imageToThumbnailPath = self.getThumbnailsPath() / 'imageToThumbnail.json'
 		if imageToThumbnailPath.exists():
 			with open(imageToThumbnailPath, 'r') as f:
-				self.imageToThumbnail = json.load(f)
+				try:
+					self.imageToThumbnail = json.load(f)
+				except json.JSONDecodeError:
+					self.imageToThumbnail = {}
 		else:
 			self.imageToThumbnail = {}
 		
@@ -60,13 +66,18 @@ class ThumbnailGenerator:
 		return thumbnailsPath / f'{Path(path).stem}_{rowIndex}-{colIndex}.png'
 
 	def _generateThumbnails(self, images):
+		# multiprocessing.set_start_method('spawn')
 		# pool = multiprocessing.Pool(8)
 		# print(f'generate {len(images)} thumbnails')
 		# results = pool.starmap(self.thumbnail, images)
 
-		results = [self.thumbnail(inputPath, outputPath) for inputPath, outputPath in images]
+		# results = [self.thumbnail(inputPath, outputPath) for inputPath, outputPath in images]
+		# # self._finishGenerateThumbnails(results)
+
+		# results = generateThumbnails(images)
 		# inmain(self._finishGenerateThumbnails, results)
-		self._finishGenerateThumbnails(results)
+		results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [images])
+		inmain(self._finishGenerateThumbnails, results)
 		return
 	
 	def _finishGenerateThumbnails(self, results):
@@ -96,8 +107,8 @@ class ThumbnailGenerator:
 			# thread = threading.Thread(target=self._generateThumbnails, args=images)
 			# thread.daemon = True
 			# thread.start()
-			# inthread(self._generateThumbnails, images)
-			self._generateThumbnails(images)
+			inthread(self._generateThumbnails, images)
+			# self._generateThumbnails(images)
 		return 
 
 	@classmethod

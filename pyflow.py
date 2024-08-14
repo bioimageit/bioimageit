@@ -51,7 +51,7 @@ def main(instance=None):
 				data = json.load(f)
 				instance.loadFromData(data)
 				instance.currentFileName = filePath
-
 	app.exec_()
+
 if __name__ == "__main__":
 	main()

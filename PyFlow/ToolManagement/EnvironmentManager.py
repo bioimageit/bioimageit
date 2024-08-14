@@ -8,7 +8,11 @@ from pathlib import Path
 from collections.abc import Callable
 from abc import abstractmethod
 from multiprocessing.connection import Client
-from typing import TypedDict
+import sys
+if sys.version_info < (3, 11):
+    from typing_extensions import TypedDict, Required, NotRequired, Self
+else:
+    from typing import TypedDict, Required, NotRequired, Self
 
 # class Singleton(type):
 # 	_instances = {}
@@ -36,9 +40,9 @@ def attachLogHandler(log:Callable[[str], None], logLevel=logging.INFO) -> None:
 	return
 
 class Dependencies(TypedDict):
-	python: float
-	conda: list[str]
-	pip: list[str]
+	python: str
+	conda: NotRequired[list[str]]
+	pip: NotRequired[list[str]]
 
 class Environment():
 	
@@ -72,7 +76,7 @@ class ClientEnvironment(Environment):
 		while message := self.connection.recv():
 			if message['action'] == 'execution finished':
 				logger.info('execution finished')
-				break
+				return message['result'] if 'result' in message else None
 			elif message['action'] == 'error':
 				raise Exception(message)
 			# if message['action'] == 'print':
@@ -117,9 +121,9 @@ class ProxyEnvironment(Environment):
 	def execute(self, module:str, function: str, args: list):
 		if module not in self.modules:
 			self.modules[module] = import_module(module)
-			if not hasattr(module, function):
-				raise Exception(f'Module {module} has no function {function}.')
-			getattr(module, function)(**args)
+		if not hasattr(self.modules[module], function):
+			raise Exception(f'Module {module} has no function {function}.')
+		return getattr(self.modules[module], function)(*args)
 
 	def _exit(self):
 		return
@@ -157,22 +161,23 @@ class EnvironmentManager:
 			commandsWithChecks += checks
 		return commandsWithChecks
 
-	def _getOutput(self, process):
+	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None):
+		commands = str(commands) if len(commands)>0 and commands is not None else ''
 		outputs = []
 		for line in process.stdout:
 			logger.info(line)
 			if 'CondaSystemExit' in line:
 				process.kill()
-				raise Exception('An error occured during the execution of the commands {commands}.')
+				raise Exception(f'An error occured during the execution of the commands {commands}.')
 			outputs.append(line)
 		process.wait()
 		if process.returncode != 0:
-			raise Exception('An error occured during the execution of the commands {commands}.')
+			raise Exception(f'An error occured during the execution of the commands {commands}.')
 		return (outputs, process.returncode)
 
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
-	def _executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True):
+	def executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True):
 		print('executeCommands', commands, launchedMessage)
 
 		with tempfile.NamedTemporaryFile(suffix='.ps1' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
@@ -191,12 +196,13 @@ class EnvironmentManager:
 		return condaDependency.split('::')[1]
 	
 	def environmentIsRequired(self, dependencies: Dependencies):
-		if len(dependencies['conda'])>0:
-			process = self._executeCommands([self._activateConda(), f'{self.condaBin} list -y'])
+		if 'conda' in dependencies and len(dependencies['conda'])>0:
+			process = self.executeCommands([self._activateConda(), f'{self.condaBin} list -y'])
 			out, _ = self._getOutput(process)
 			installedCondaPackages = out.split('\n')
 			if not all([self._removeChannel(d) in installedCondaPackages for d in dependencies['conda']]):
 				return True
+		if 'pip' not in dependencies: return False
 		dists = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 		return not all([d in dists for d in dependencies['pip']])
 
@@ -207,7 +213,7 @@ class EnvironmentManager:
 		return self.condaPath.resolve(), Path('bin/micromamba' if platform.system() != 'Windows' else 'Library/bin/micromamba.exe')
 
 	def _setupCondaChannels(self):
-		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority strict']
+		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
 		
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
@@ -252,9 +258,13 @@ class EnvironmentManager:
 	
 	def install(self, environment:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		process = self._executeCommands(self._activateConda() + [f'{self.condaBin} install {channel}{environment} -y'])
+		process = self.executeCommands(self._activateConda() + [f'{self.condaBin} install {channel}{environment} -y'])
 		self._getOutput(process)
 
+	def formatDependencies(self, package_manager:str, dependencies: list[str]):
+		dependencies = dependencies[package_manager] if package_manager in dependencies else []
+		return [f'"{d}"' for d in dependencies]
+	
 	def create(self, environment:str, dependencies:Dependencies={}, skipIfDependenciesAreAvailable=False, errorIfExists=False) -> bool:
 		if skipIfDependenciesAreAvailable and not self.environmentIsRequired(dependencies): return False
 		if self._environmentExists(environment):
@@ -262,27 +272,33 @@ class EnvironmentManager:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = f'python={dependencies["python"]}' if 'python' in dependencies and dependencies['python'] not in ['latest', ''] else 'python'
-		condaDependencies = dependencies['conda'] if 'conda' in dependencies else []
-		pipDependencies = dependencies['pip'] if 'pip' in dependencies else []
-		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} {pythonRequirement} {" ".join(condaDependencies)} -y']
-		pipInstallCommands = [f'{self.condaBin} activate {environment}', f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
-		process = self._executeCommands(createEnvCommands + pipInstallCommands)
+		pythonRequirement = dependencies['python'] if 'python' in dependencies and dependencies['python'] else ''
+		condaDependencies = self.formatDependencies('conda', dependencies)
+		pipDependencies = self.formatDependencies('pip', dependencies)
+		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python{pythonRequirement} -y']
+		createEnvCommands += [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
+		createEnvCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
+		createEnvCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
+		process = self.executeCommands(createEnvCommands)
 		self._getOutput(process)
 		return True
 	
 	def _environmentIsLaunched(self, environment:str):
 		return environment in self.environments and self.environments[environment].launched()
 	
-	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None) -> Environment:
+	# Unusued, but could be nice
+	# def executeCommandsInEnvironment(self, environment:str, commands:list[str], environmentVariables:dict[str, str]=None):
+	# 	commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] + commands
+	# 	return self.executeCommands(commands, env=environmentVariables)
+
+	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None, condaEnvironment=True) -> Environment:
 		if self._environmentIsLaunched(environment):
 			return self.environments[environment]
 
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
-		commands = self._activateConda() + [
-					f'{self.condaBin} activate {environment}', 
-					f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
-		process = self._executeCommands(commands, env=environmentVariables)
+		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
+		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
+		process = self.executeCommands(commands, env=environmentVariables)
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish
 		port = -1
