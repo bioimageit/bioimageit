@@ -28,17 +28,6 @@ if not sources.exists():
     z = zipfile.ZipFile(io.BytesIO(r.content))
     z.extractall()
 
-for file in sorted(list(sources.iterdir())):
-    destination = file.parent.parent / file.name
-    if destination.exists():
-        if destination.is_dir():
-            shutil.rmtree(destination)
-        else:
-            destination.unlink()
-    file.rename(destination)
-
-# Keep the empty sources folder since its name tells which version is installed
-
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 # em = import_module('PyFlow.ToolManagement.EnvironmentManager')
 
@@ -49,7 +38,8 @@ with open("pyproject.toml", "rb") as f:
     condaDependencies = [key + value for key, value in projectConfiguration['tool']['pixi']['dependencies'].items()]
 
 environmentManager.create('bioimageit', dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion), False)
-process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate bioimageit', 'python -u pyflow.py'])
+pyflow = sources / 'pyflow.py'
+process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate bioimageit', f'python -u {pyflow}'])
 for line in process.stdout:
     print(line)
 print(process.wait())
