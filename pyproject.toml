@@ -21,8 +21,12 @@ dependencies = ["omero-py==5.15.0",
 
 [project.optional-dependencies]
 install = ["pyinstaller"]
+package = ["requests>=2.32.3, <2.33"]
 cxf = ["cx_Freeze"]
 ipython = ["ipython"]
+
+[tool.pixi.feature.package.dependencies]
+python = "3.12"
 
 [build-system]
 requires = ["setuptools"]
@@ -49,6 +53,7 @@ default = { solve-group = "default" }
 install = { features = ["install"], solve-group = "default" }
 cxf = { features = ["cxf"], solve-group = "default" }
 dev = { features = ["ipython"], solve-group = "default" }
+package = { features = ["install", "package"], no-default-feature = true }
 
 [tool.pixi.feature.cxf.tasks]
 build_cxf = "cxfreeze build"

@@ -162,7 +162,7 @@ class EnvironmentManager:
 		return commandsWithChecks
 
 	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None):
-		commands = str(commands) if len(commands)>0 and commands is not None else ''
+		commands = str(commands) if commands is not None and len(commands)>0 else ''
 		outputs = []
 		for line in process.stdout:
 			logger.info(line)
