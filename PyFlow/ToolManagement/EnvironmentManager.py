@@ -215,7 +215,15 @@ class EnvironmentManager:
 
 	def _setupCondaChannels(self):
 		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
-		
+	
+	def _sheelHook(self):
+		currentPath = Path.cwd().resolve()
+		condaPath, condaBinPath = self._getCondaPaths()
+		if platform.system() == 'Windows':
+			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']
+		else:
+			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
+	
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
 		if (condaPath / condaBinPath).exists(): return []
@@ -237,22 +245,14 @@ class EnvironmentManager:
 			machine = platform.machine()
 			machine = '64' if machine == 'x86_64' else machine
 			commands += [f'cd "{condaPath}"', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
+		commands += self._sheelHook()
 		return commands + self._setupCondaChannels()
 
 	def _activateConda(self):
 		# activatePath = Path(self.condaPath) / 'condabin' / 'conda.bat' if self._isWindows() else Path(self.condaPath) / 'etc' / 'profile.d' / 'conda.sh'
 		# return f'"{activatePath}" ' if self._isWindows() else f'. "{activatePath}"'
-		currentPath = Path.cwd().resolve()
-		condaPath, condaBinPath = self._getCondaPaths()
 		commands = self._installCondaIfNecessary()
-		if platform.system() == 'Windows':
-			commands += [f'Set-Location -Path "{condaPath}"', 
-				f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', 
-				f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression',
-				f'Set-Location -Path "{currentPath}"']
-		else:
-			commands += [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
-		return commands
+		return commands + self._sheelHook()
 
 	def environmentExists(self, environment:str):
 		condaMeta = Path(self.condaPath) / 'envs' / environment / 'conda-meta'
