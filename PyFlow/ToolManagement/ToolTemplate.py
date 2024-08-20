@@ -33,7 +33,7 @@ class Tool():
         return dataFrame
     
     # Process the data
-    def process(self, args):
+    def processData(self, args):
         return
 
 if __name__ == "__main__":

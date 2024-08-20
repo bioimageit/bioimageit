@@ -45,12 +45,14 @@ class ErrorManager:
         api_key = ConfigManager().getPrefsValue("PREFS", "General/MailAPIKey")
         api_secret = ConfigManager().getPrefsValue("PREFS", "General/MailAPISecret")
         emailAddress = ConfigManager().getPrefsValue("PREFS", "General/Email")
+        if api_key is None or api_secret is None or emailAddress is None: return
         if len(api_key) == 0 or len(api_secret) == 0 or len(emailAddress) == 0: return
         if errorMessage in ErrorManager.reportedErrors: return
+        mail = errorMessage
         try:
-            errorMessage += ErrorManager.getGraph()
-            errorMessage += ErrorManager.getDataFrames()
-            errorMessage += ErrorManager.getLogs()
+            mail += ErrorManager.getGraph()
+            mail += ErrorManager.getDataFrames()
+            mail += ErrorManager.getLogs()
         except:
             pass
         mailjet = Client(auth=(api_key, api_secret), version='v3.1')
@@ -68,7 +70,7 @@ class ErrorManager:
                 }
             ],
             "Subject": f"Error report",
-            "TextPart": errorMessage
+            "TextPart": mail
             }
         ]
         }

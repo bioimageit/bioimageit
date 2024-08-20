@@ -58,3 +58,9 @@ It is possible to run and debug the project with Visual Studio Code by selecting
     ]
 }
 ```
+
+## Packaging
+
+The command `pixi run -e package pyinstaller bioimageit.py` packages BioImageIT in the `dist/` repository. 
+It runs "`pyinstaller bioimageit.py`" in the `package` environment defined in `pyproject.toml`.
+This environment only requires `requests` and `pyinstaller` with Python 3.12.

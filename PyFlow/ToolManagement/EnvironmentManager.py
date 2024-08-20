@@ -48,6 +48,7 @@ class Environment():
 	
 	def __init__(self, name) -> None:
 		self.name = name
+		self.process = None
 
 	@abstractmethod
 	def execute(self, module:str, function: str, args: list):
@@ -113,7 +114,7 @@ class ClientEnvironment(Environment):
 	# def __del__(self):
 	# 	self.exit()
 	
-class ProxyEnvironment(Environment):
+class DirectEnvironment(Environment):
 	def __init__(self, name) -> None:
 		super().__init__(name)
 		self.modules = {}
@@ -252,7 +253,7 @@ class EnvironmentManager:
 			commands += [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
 		return commands
 
-	def _environmentExists(self, environment:str):
+	def environmentExists(self, environment:str):
 		condaMeta = Path(self.condaPath) / 'envs' / environment / 'conda-meta'
 		return condaMeta.is_dir() # we could also check for the condaMeta / history file.
 	
@@ -267,7 +268,7 @@ class EnvironmentManager:
 	
 	def create(self, environment:str, dependencies:Dependencies={}, skipIfDependenciesAreAvailable=False, errorIfExists=False) -> bool:
 		if skipIfDependenciesAreAvailable and not self.environmentIsRequired(dependencies): return False
-		if self._environmentExists(environment):
+		if self.environmentExists(environment):
 			if errorIfExists:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
@@ -326,7 +327,7 @@ class EnvironmentManager:
 			# finally:
 			# 	ce.exit()
 		else:
-			return ProxyEnvironment(environment)
+			return DirectEnvironment(environment)
 	
 	def exit(self, environment:Environment|str):
 		environmentName = environment if isinstance(environment, str) else environment.name

@@ -123,10 +123,16 @@ class NodeBoxTreeWidget(QTreeWidget):
                         sepCatNames.pop()
         return False
 
-    def addNodeClass(self, nodeName, nodePath:Path):
+    def addNodeClass(self, workflowPath, nodeName, nodePath:Path):
         from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
         moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
         # moduleImportPath = getImportPath(nodePath)
+        toolsPath = str(Path(workflowPath).resolve() / 'Tools')
+        if toolsPath not in sys.path:
+            sys.path.append(toolsPath)
+        # If you are dynamically importing a module that was created since the interpreter began execution (e.g., created a Python source file),
+        #  you may need to call invalidate_caches() in order for the new module to be noticed by the import system.
+        # invalidate_caches()
         if nodeName in self.nodeClasses:
             self.nodeClasses[nodeName] = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
         else:
@@ -583,7 +589,7 @@ class NodesBox(QFrame):
         print('file changed:', filePath)
         filePath = Path(filePath).resolve()
         if filePath.exists():
-            nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath)
+            nodeClass = self.treeWidget.addNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()
             # for node in graphManager.getAllNodes():
             #     if node.toolName == filePath.stem and node.process:
@@ -659,7 +665,7 @@ class NodesBox(QFrame):
         self.bDragging = False
 
     def addNodeClass(self, toolName, toolPath):
-        nodeClass = self.treeWidget.addNodeClass(toolName, toolPath)
+        nodeClass = self.treeWidget.addNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, toolName, toolPath)
         self.treeWidget.refresh(expand='PyFlowBase|' + nodeClass.category())
     
     def removeNodeClass(self, toolName):
@@ -669,8 +675,9 @@ class NodesBox(QFrame):
         return sorted(list(Path(toolsPath).glob('**/*.py')))
     
     def addTools(self, workflowPath):
-        toolsPath = workflowPath / 'Tools'
-        sys.path.append(str(toolsPath))
+        toolsPath = str(workflowPath / 'Tools')
+        if toolsPath not in sys.path:
+            sys.path.append(toolsPath)
         for toolPath in self.getTools(toolsPath):
             self.addNodeClass(toolPath.stem, toolPath)
         self.watchNodes(toolsPath)
@@ -684,14 +691,12 @@ class NodesBox(QFrame):
             self.systemWatcher.removePath(str(toolPath))
 
     def createTool(self):
-        toolName, ok = QInputDialog.getText(self, 'Tool name dialog', 'Tool name:', QLineEdit.Normal, '')
-        if ok and len(toolName) > 0:
+        rawToolName, ok = QInputDialog.getText(self, 'Tool name dialog', 'Tool name:', QLineEdit.Normal, '')
+        if ok and len(rawToolName) > 0:
             # Todo validate tool name
-            if ' ' in toolName:
-                QMessageBox.error(self, 'Name invalid', f'Error, the tool name contain spaces.')
-                return
+            toolName = rawToolName.replace(' ', '_')
             if toolName in self.treeWidget.nodeClasses.keys():
-                QMessageBox.warning(self, 'Name exists', f'Error, the tool {toolName} already exists. Please choose a unique tool name.')
+                QMessageBox.warning(self, 'Name exists', f'Error, the tool {rawToolName} already exists. Please choose a unique tool name.')
                 return
             graphManager = self.pyFlowInstance.graphManager.get()
             workflowPath = Path(graphManager.workflowPath).resolve()
@@ -701,6 +706,11 @@ class NodesBox(QFrame):
             templatePath = Path('PyFlow/ToolManagement') / 'ToolTemplate.py'
             with open(toolPath, 'w') as destinationFile, open(templatePath, 'r') as exampleFile:
                 destinationFile.write(exampleFile.read())
+
+            if str(customToolsPath) not in self.systemWatcher.directories():
+                self.systemWatcher.addPath(str(customToolsPath.resolve()))
+            if str(toolPath) not in self.systemWatcher.files():
+                self.systemWatcher.addPath(str(toolPath))
 
             self.addNodeClass(toolName, toolPath)
 

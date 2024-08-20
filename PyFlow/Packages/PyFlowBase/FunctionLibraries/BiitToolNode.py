@@ -18,7 +18,7 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 
 
 def get_bundle_path():
-    return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
+	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
 
 # path = Path(__file__).parent.resolve()
 # with open(path.parent.parent / 'biit' / 'config.json' if path.name == 'ToolManagement' else path / 'biit' / 'config.json', 'r') as file:
@@ -217,7 +217,8 @@ class BiitToolNode(BiitArrayNodeBase):
 	
 	def execute(self, req):
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies)
-		inthread(self.logOutput, self.__class__.environment.process)
+		if self.__class__.environment.process is not None:
+			inthread(self.logOutput, self.__class__.environment.process)
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))
 		# QThreadPool.globalInstance().start(self.worker)
 		argsList = self.getArgs()
@@ -226,8 +227,8 @@ class BiitToolNode(BiitArrayNodeBase):
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			args = [item for items in [(f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 			self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
-		self.setExecuted(True)
-		return
+		self.finishExecution(argsList)
+		return True
 
 def constructor(self, name):
 	super(self.__class__, self).__init__(name)

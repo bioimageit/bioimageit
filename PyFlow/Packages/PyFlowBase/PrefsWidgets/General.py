@@ -13,8 +13,10 @@
 ## limitations under the License.
 
 
-import os
+from pathlib import Path
 import keyring
+import requests
+import sys
 
 from qtpy import QtCore
 from qtpy.QtWidgets import *
@@ -22,10 +24,13 @@ from qtpy.QtWidgets import *
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.UI.Widgets.PreferencesWindow import CategoryWidgetBase
-from PyFlow.UpdateManager import UpdateManager
+from PyFlow.invoke_in_main import inmain, inthread
 
 class GeneralPreferences(CategoryWidgetBase):
     """docstring for GeneralPreferences."""
+
+    projectId = 54065 # The BioImageIT Project on Gitlab
+    autoUpdateString = 'latest (auto update)'
 
     def __init__(self, parent=None):
         super(GeneralPreferences, self).__init__(parent)
@@ -33,16 +38,20 @@ class GeneralPreferences(CategoryWidgetBase):
         self.layout.setContentsMargins(1, 1, 1, 1)
         self.layout.setSpacing(2)
 
+        self.progressDialog = None
+
         commonCategory = CollapsibleFormWidget(headName="Common")
         self.layout.addWidget(commonCategory)
 
+        # Code editor
         self.lePythonEditor = QLineEdit("sublime_text.exe @FILE")
-        commonCategory.addWidget("External text editor", self.lePythonEditor)
+        commonCategory.addWidget("External code editor", self.lePythonEditor)
 
+        # Napari
         self.leImageViewer = QLineEdit("")
-        # commonCategory.addWidget("External image viewer", self.leImageViewer)
         commonCategory.addWidget("Napari environment", self.leImageViewer)
 
+        # History
         self.historyDepth = QSpinBox()
         self.historyDepth.setRange(10, 100)
 
@@ -52,31 +61,12 @@ class GeneralPreferences(CategoryWidgetBase):
         self.historyDepth.editingFinished.connect(setHistoryCapacity)
         commonCategory.addWidget("History depth", self.historyDepth)
         
-        # UPDATE
-        versionsCategory = CollapsibleFormWidget(headName="Version management")
-        self.layout.addWidget(versionsCategory)
-        self.autoUpdateCheckbox = QCheckBox()
-        versionsCategory.addWidget("Auto update", self.autoUpdateCheckbox)
-
-        self.updateFrequency = QSpinBox()
-        self.updateFrequency.setRange(1, 24 * 3600)
-        self.updateFrequency.setValue(3600 / 2)
-        versionsCategory.addWidget("Update frequency", self.updateFrequency)
-
-        self.checkVersionsButton = QPushButton('Check available versions')
-        self.checkVersionsButton.clicked.connect(UpdateManager.get().checkVersions)
-        UpdateManager.get().versionInstalled.connect(self.updateVersion)
-        UpdateManager.get().versionsUpdated.connect(self.updateVersionSelector)
-        versionsCategory.addWidget("Check BioImageIT versions", self.checkVersionsButton)
-
+        # Update
         self.versionSelector = QComboBox()
-        self.versions = ['0.3.0']
-        for version in self.versions:
-            self.versionSelector.addItem(version)
-        def setVersion():
-            self.versionSelector.currentText()
-        self.versionSelector.editTextChanged.connect(setVersion)
-        versionsCategory.addWidget("BioImageIT version", self.versionSelector)
+        self.versionSelector.currentTextChanged.connect(self.setVersion)
+        self.updateVersionSelector()
+
+        commonCategory.addWidget("BioImageIT version", self.versionSelector)
 
         # Error reports
         errorReportsCategory = CollapsibleFormWidget(headName="Error reports")
@@ -119,9 +109,7 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("EditorCmd", "sublime_text.exe @FILE")
         settings.setValue("HistoryDepth", 50)
         
-        settings.setValue("AutoUpdate", False)
-        settings.setValue("UpdateFrequency", 3600 / 2)
-        settings.setValue("BioImageITVersion", "0.3.0")
+        settings.setValue("BioImageITVersion", self.autoUpdateString)
 
         settings.setValue("Email", "")
         settings.setValue("MailAPIKey", "")
@@ -137,13 +125,10 @@ class GeneralPreferences(CategoryWidgetBase):
         settings.setValue("ImageViewerCmd", self.leImageViewer.text())
         settings.setValue("HistoryDepth", self.historyDepth.value())
 
-        settings.setValue("AutoUpdate", self.autoUpdateCheckbox.isChecked())
-        settings.setValue("UpdateFrequency", self.updateFrequency.value())
         settings.setValue("BioImageITVersion", self.versionSelector.currentText())
 
         settings.setValue("Email", self.email.text())
-        settings.setValue("MailAPIKey", self.mailApiSecret.text())
-        settings.setValue("MailAPISecret", self.mailApiSecret.text())
+        settings.setValue("MailAPIKey", self.mailApiKey.text())
         keyring.set_password("bioif-mail-api-secret", self.email.text(), self.mailApiSecret.text())
 
         settings.setValue("OmeroHost", self.host.text())
@@ -159,12 +144,9 @@ class GeneralPreferences(CategoryWidgetBase):
         self.password.setText(keyring.get_password("bioif-omero", username))
 
         try:
-            self.updateVersionSelector()
             self.historyDepth.setValue(int(settings.value("HistoryDepth")))
 
-            self.autoUpdateCheckbox.setChecked(settings.value("AutoUpdate") == "true")
-            self.updateFrequency.setValue(int(settings.value("UpdateFrequency")))
-            self.versionSelector.setCurrentText(settings.value("BioImageITVersion"))
+            self.updateVersionSelector(settings.value("BioImageITVersion"))
 
             email = settings.value("Email")
             self.email.setText(email)
@@ -174,16 +156,72 @@ class GeneralPreferences(CategoryWidgetBase):
             self.redirectOutput.setChecked(settings.value("RedirectOutput") == "true")
         except:
             pass
-    
-    def updateVersion(self, version):
-        self.versionSelector.setCurrentText(version)
 
-    def updateVersionSelector(self, versions=None):
-        if versions is not None:
-            self.versions = versions
-        currentVersion = self.versionSelector.currentText()
+    def getVersions(self):
+        return requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/tags').json()
+    
+    def downloadVersion(self, autoUpdate, versionName, parent, selected, latest, newSources):
+        import zipfile, io
+        r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/archive.zip', params={'sha': versionName})
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        z.extractall(parent)
+        if not self.progressDialog.wasCanceled():
+            inmain(self.symlinkVersion, autoUpdate, selected, latest, newSources)
+
+    def showProgressAndDownloadVersion(self, autoUpdate, versionName, parent, selected, latest, newSources):
+        self.progressDialog = QProgressDialog("Downloading...", "Abort", 0, 0, self)
+        self.progressDialog.setValue(0)
+        self.progressDialog.show()
+        inthread(self.downloadVersion, autoUpdate, versionName, parent, selected, latest, newSources)
+    
+    def symlinkVersion(self, autoUpdate, selected, latest, newSources):
+        if not autoUpdate:
+            selected.symlink_to(newSources, True)
+        else:
+            latest.symlink_to(newSources, True)
+        if self.progressDialog is not None:
+            self.progressDialog.hide()
+        answer = QMessageBox.warning(self, "New BioImageIT version", "Please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
+        if answer == QMessageBox.Yes:
+            sys.exit(0)
+    
+    def setVersion(self):
+        versionName = self.versionSelector.currentText()
+        versionTarget = self.versionSelector.currentData()
+        autoUpdate = versionName == self.autoUpdateString
+        if autoUpdate:
+            versionName = self.versionSelector.itemText(1)
+            versionTarget = self.versionSelector.itemData(1)
+        parent = Path('..')
+        latest = parent / 'bioimageit-latest'
+        selected = parent / 'bioimageit-selected-version'
+        if latest.exists():
+            latest.unlink()
+        if selected.exists():
+            selected.unlink()
+        newSources = (parent / f'bioimageit-{versionName}-{versionTarget}').resolve()
+        if not newSources.exists():
+            self.showProgressAndDownloadVersion(autoUpdate, versionName, parent, selected, latest, newSources)
+        else:
+            self.symlinkVersion(autoUpdate, selected, latest, newSources)
+    
+    def setVersionSelector(self, tags, version):
+        self.versionSelector.currentTextChanged.disconnect(self.setVersion)
         while self.versionSelector.count() > 0:
             self.versionSelector.removeItem(0)
-        for version in self.versions:
-            self.versionSelector.addItem(version)
-        self.versionSelector.setCurrentText(currentVersion)
+        self.versionSelector.addItem(self.autoUpdateString)
+        for tag in tags:
+            self.versionSelector.addItem(tag['name'], tag['target'])
+        self.versionSelector.setCurrentText(version if version is not None else self.autoUpdateString)
+        self.versionSelector.currentTextChanged.connect(self.setVersion)
+
+    def getVersionsThenSetVersionSelector(self, version=None):
+        try:
+            tags = self.getVersions()
+            inmain(lambda: self.setVersionSelector(tags, version))
+        except Exception as e:
+            import logging
+            logging.error(f'Impossible to get BioImageIT versions: {e}')
+
+    def updateVersionSelector(self, version=None):
+        inthread(self.getVersionsThenSetVersionSelector, version)

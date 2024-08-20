@@ -31,7 +31,6 @@ from qtpy.QtWidgets import *
 from qtpy.QtWidgets import QMessageBox
 
 from PyFlow import GET_PACKAGES
-from PyFlow.UpdateManager import UpdateManager
 from PyFlow.Core.PathsRegistry import PathsRegistry
 from PyFlow.Core.version import *
 from PyFlow.Core.GraphManager import GraphManagerSingleton
@@ -158,7 +157,6 @@ class PyFlow(QMainWindow):
 
 		self.preferencesWindow = PreferencesWindow(self)
 		self.preferencesWindow.settingsUpdated.connect(OmeroService().reset)
-		self.preferencesWindow.settingsUpdated.connect(UpdateManager.get().initializeAutoUpdate)
 
 		self.setMouseTracking(True)
 
@@ -167,15 +165,6 @@ class PyFlow(QMainWindow):
 		self.tick_timer = QtCore.QTimer()
 		self._currentFileName = ""
 		self.currentFileName = None
-
-	def warnNewVersion(self, version:str=None):
-		self.preferencesWindow.savePreferences()
-		answer = QMessageBox.warning(self, "New BioImageIT version", "A new version of BioImageIT was just installed, please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
-		if answer == QMessageBox.Yes:
-			if self.restartApp is not None:
-				self.restartApp()
-			else:
-				self.close()
 
 	def historyStatePushed(self, state):
 		if state.modifiesData():
@@ -706,7 +695,7 @@ class PyFlow(QMainWindow):
 		QMainWindow.closeEvent(self, event)
 
 	@staticmethod
-	def instance(parent=None, software="", restart=None):
+	def instance(parent=None, software=""):
 		assert (
 			software != ""
 		), "Invalid arguments. Please pass you software name as second argument!"
@@ -715,7 +704,6 @@ class PyFlow(QMainWindow):
 		instance = PyFlow(parent)
 		instance.currentSoftware = software
 		SessionDescriptor().software = instance.currentSoftware
-		instance.restartApp = restart
 
 		if software == "standalone":
 			editableStyleSheet(instance)
@@ -832,6 +820,5 @@ class PyFlow(QMainWindow):
 				for categoryName, widgetClass in prefsWidgets.items():
 					PreferencesWindow().addCategory(categoryName, widgetClass())
 				PreferencesWindow().selectByName("General")
-		# The following must be connected after the version selector has been connected in PyFlow/Packages/PyFlowBase/PrefsWidgets/General.py
-		UpdateManager.get().versionInstalled.connect(instance.warnNewVersion)
+
 		return instance

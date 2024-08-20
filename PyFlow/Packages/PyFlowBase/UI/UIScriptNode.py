@@ -29,7 +29,9 @@ class UIScriptNode(UINodeBase):
     def createScript(self):
         app = self.canvasRef().pyFlowInstance
         graphManager = GraphManagerSingleton().get()
-        scriptPath, _ = QFileDialog.getSaveFileName(app, "Create script", str(Path(graphManager.workflowPath / 'Scripts').resolve()), "All Files(*);;Python Files(*.py)", options = QFileDialog.HideNameFilterDetails)
+        scriptsPath = (Path(graphManager.workflowPath) / 'Scripts' / 'script.py').resolve()
+        scriptPath, _ = QFileDialog.getSaveFileName(app, "Create script", str(scriptsPath), "All Files(*);;Python Files(*.py)", options = QFileDialog.HideNameFilterDetails)
+        scriptPath = Path(scriptPath)
         scriptPath.parent.mkdir(exist_ok=True, parents=True)
         self._rawNode.scriptPath = scriptPath
         examplePath = getRootPath() / 'PyFlow' / 'Scripts' / 'template.py'

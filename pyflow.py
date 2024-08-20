@@ -19,12 +19,7 @@ from qtpy import QtCore
 import argparse
 import os
 import json
-from functools import partial
 from PyFlow.App import PyFlow
-
-def restart(app):
-	QtCore.QCoreApplication.quit()
-	QtCore.QProcess.startDetached(sys.executable, sys.argv)
 
 def main(instance=None):
 
@@ -32,7 +27,7 @@ def main(instance=None):
 	
 	app = QApplication(sys.argv)
 
-	instance2 = PyFlow.instance(software="standalone", restart=partial(restart, app))
+	instance2 = PyFlow.instance(software="standalone")
 	instance = instance2
 
 	instance.updateCSS()

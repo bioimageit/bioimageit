@@ -21,7 +21,7 @@ class Tool:
         inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
         inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image}_segmentation.tif', type=Path)
+        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image}_segmentation.png', type=Path)
         outputs_parser.add_argument('-n', '--npy', help='The output segmentation path.', default='{input_image}_segmentation.npy', type=Path)
         return parser
 
@@ -63,11 +63,8 @@ class Tool:
         if args.out:
             print(f'[[4/4]] Save segmentation {args.out}')
             # save results as tif
-            self.io.save_masks(image, masks, flows, input_image, tif=True)
-            import time
-            time.sleep(1)
-            print('ok')
-            output_mask = input_image.parent / f'{input_image.stem}_cp_masks.tif'
+            self.io.save_masks(image, masks, flows, input_image)
+            output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
             if output_mask.exists():
                 (output_mask).rename(args.out)
                 print(f'Saved out: {args.out}')

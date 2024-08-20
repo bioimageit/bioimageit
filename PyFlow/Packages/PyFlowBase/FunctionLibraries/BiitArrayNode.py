@@ -199,7 +199,6 @@ class BiitArrayNodeBase(BiitNodeBase):
         argsList = self.getArgs()
         argsList = argsList if type(argsList) is list else [argsList]
 
-        outputData: pandas.DataFrame = self.outArray.currentData()
         outputFolder = getOutputFolderPath(self.name)
         outputFolder.mkdir(exist_ok=True, parents=True)
         
@@ -215,6 +214,15 @@ class BiitArrayNodeBase(BiitNodeBase):
             req.runner_service.tear_down(tool, job_id)
         except Exception as err:
             req.notify_error(str(err), job_id)
+        self.finishExecution(argsList)
+        return True
+
+    def finishExecution(self, argsList):
+        outputFolder = getOutputFolderPath(self.name)
+        outputFolder.mkdir(exist_ok=True, parents=True)
+
+        outputData: pandas.DataFrame = self.outArray.currentData()
+        ThumbnailGenerator.get().generateThumbnails(self.name, outputData)
 
         if isinstance(outputData, pandas.DataFrame):
             outputData.to_csv(outputFolder / 'output_data_frame.csv')
@@ -222,8 +230,6 @@ class BiitArrayNodeBase(BiitNodeBase):
             json.dump(argsList, f)
 
         self.setExecuted(True)
-
-        return True
 
     def createDataFrameFromInputs(self):
         tool = self.__class__.tool
