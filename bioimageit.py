@@ -56,10 +56,21 @@ selected = Path(f'bioimageit-selected-version')     # exists if user has selecte
 if not selected.exists():
     sources = downloadLatestVersion(selected, latest)
 
+# Does not work, but path is added when freezing
 if getattr(sys, 'frozen', False):
     sys.path.append(sources.resolve())
 
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
+
+# from importlib import import_module
+# environmentManager = import_module('PyFlow.ToolManagement.EnvironmentManager').environmentManager
+
+# import importlib
+# if spec:=importlib.util.spec_from_file_location('EnvironmentManager', f'{sources.name}/PyFlow/ToolManagement/EnvironmentManager.py'):
+#         dependency = importlib.util.module_from_spec(spec)
+#         sys.modules['EnvironmentManager'] = dependency
+#         spec.loader.exec_module(dependency)
+#         environmentManager = dependency.environmentManager
 
 environment = 'bioimageit'
 

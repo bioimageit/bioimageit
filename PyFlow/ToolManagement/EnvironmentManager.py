@@ -216,7 +216,7 @@ class EnvironmentManager:
 	def _setupCondaChannels(self):
 		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
 	
-	def _sheelHook(self):
+	def _shellHook(self):
 		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
 		if platform.system() == 'Windows':
@@ -245,14 +245,14 @@ class EnvironmentManager:
 			machine = platform.machine()
 			machine = '64' if machine == 'x86_64' else machine
 			commands += [f'cd "{condaPath}"', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
-		commands += self._sheelHook()
+		commands += self._shellHook()
 		return commands + self._setupCondaChannels()
 
 	def _activateConda(self):
 		# activatePath = Path(self.condaPath) / 'condabin' / 'conda.bat' if self._isWindows() else Path(self.condaPath) / 'etc' / 'profile.d' / 'conda.sh'
 		# return f'"{activatePath}" ' if self._isWindows() else f'. "{activatePath}"'
 		commands = self._installCondaIfNecessary()
-		return commands + self._sheelHook()
+		return commands + self._shellHook()
 
 	def environmentExists(self, environment:str):
 		condaMeta = Path(self.condaPath) / 'envs' / environment / 'conda-meta'
