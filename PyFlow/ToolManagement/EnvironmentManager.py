@@ -235,6 +235,7 @@ class EnvironmentManager:
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
+			machine = '64' if machine == 'x86_64' else machine
 			commands += [f'cd "{condaPath}"', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
 		return commands + self._setupCondaChannels()
 
