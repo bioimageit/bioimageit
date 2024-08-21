@@ -4,7 +4,7 @@ import sys
 import re
 from pathlib import Path
 from munch import Munch
-from PyFlow import getRootPath
+from PyFlow import getBundlePath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool
@@ -17,14 +17,12 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 # 	LAUNCHED = 3
 
 
-def get_bundle_path():
-	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
 
 # path = Path(__file__).parent.resolve()
 # with open(path.parent.parent / 'biit' / 'config.json' if path.name == 'ToolManagement' else path / 'biit' / 'config.json', 'r') as file:
 # 	condaPath = Path(json.load(file)['runner']['conda_dir'])
 
-environmentManager.setCondaPath(get_bundle_path() / 'micromamba')
+environmentManager.setCondaPath(getBundlePath() / 'micromamba')
 
 class BiitToolNode(BiitArrayNodeBase):
 

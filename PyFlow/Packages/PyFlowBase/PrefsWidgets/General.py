@@ -17,10 +17,12 @@ from pathlib import Path
 import keyring
 import requests
 import sys
+import json
 
 from qtpy import QtCore
 from qtpy.QtWidgets import *
 
+from PyFlow import getBundlePath
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.UI.Widgets.PreferencesWindow import CategoryWidgetBase
@@ -31,6 +33,7 @@ class GeneralPreferences(CategoryWidgetBase):
 
     projectId = 54065 # The BioImageIT Project on Gitlab
     autoUpdateString = 'latest (auto update)'
+    versionJson = 'version.json'
 
     def __init__(self, parent=None):
         super(GeneralPreferences, self).__init__(parent)
@@ -160,25 +163,23 @@ class GeneralPreferences(CategoryWidgetBase):
     def getVersions(self):
         return requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/tags').json()
     
-    def downloadVersion(self, autoUpdate, versionName, parent, selected, latest, newSources):
+    def downloadVersion(self, autoUpdate, versionName, newSources):
         import zipfile, io
         r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/archive.zip', params={'sha': versionName})
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall(parent)
+        z.extractall(getBundlePath().parent)
         if not self.progressDialog.wasCanceled():
-            inmain(self.symlinkVersion, autoUpdate, selected, latest, newSources)
+            inmain(self.setVersion, autoUpdate, newSources)
 
-    def showProgressAndDownloadVersion(self, autoUpdate, versionName, parent, selected, latest, newSources):
+    def showProgressAndDownloadVersion(self, autoUpdate, versionName, newSources):
         self.progressDialog = QProgressDialog("Downloading...", "Abort", 0, 0, self)
         self.progressDialog.setValue(0)
         self.progressDialog.show()
-        inthread(self.downloadVersion, autoUpdate, versionName, parent, selected, latest, newSources)
+        inthread(self.downloadVersion, autoUpdate, versionName, newSources)
     
-    def symlinkVersion(self, autoUpdate, selected, latest, newSources):
-        if not autoUpdate:
-            selected.symlink_to(newSources, True)
-        else:
-            latest.symlink_to(newSources, True)
+    def setVersion(self, autoUpdate, newSources):
+        with open(getBundlePath().parent / self.versionJson, 'w') as f:
+            json.dump(dict(autoUpdate=autoUpdate, version=newSources.name), f)
         if self.progressDialog is not None:
             self.progressDialog.hide()
         answer = QMessageBox.warning(self, "New BioImageIT version", "Please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
@@ -188,22 +189,17 @@ class GeneralPreferences(CategoryWidgetBase):
     def setVersion(self):
         versionName = self.versionSelector.currentText()
         versionTarget = self.versionSelector.currentData()
-        autoUpdate = versionName == self.autoUpdateString
-        if autoUpdate:
+        root = getBundlePath().parent
+        with open(root / self.versionJson, 'r') as f:
+            versionInfo = json.load(f)
+        if versionInfo['autoUpdate']:
             versionName = self.versionSelector.itemText(1)
             versionTarget = self.versionSelector.itemData(1)
-        parent = Path('..')
-        latest = parent / 'bioimageit-latest'
-        selected = parent / 'bioimageit-selected-version'
-        if latest.exists():
-            latest.unlink()
-        if selected.exists():
-            selected.unlink()
-        newSources = (parent / f'bioimageit-{versionName}-{versionTarget}').resolve()
+        newSources = (root / f'bioimageit-{versionName}-{versionTarget}').resolve()
         if not newSources.exists():
-            self.showProgressAndDownloadVersion(autoUpdate, versionName, parent, selected, latest, newSources)
+            self.showProgressAndDownloadVersion(versionInfo['autoUpdate'], versionName, newSources)
         else:
-            self.symlinkVersion(autoUpdate, selected, latest, newSources)
+            self.symlinkVersion(versionInfo['autoUpdate'], newSources)
     
     def setVersionSelector(self, tags, version):
         self.versionSelector.currentTextChanged.disconnect(self.setVersion)

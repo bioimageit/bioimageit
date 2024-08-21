@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import json
 
 projectId = 54065 # The BioImageIT Project on Gitlab
 
@@ -19,24 +20,14 @@ def downloadSources(versionName):
     z = zipfile.ZipFile(io.BytesIO(r.content))
     z.extractall()
 
-def downloadLatestVersion(selected, latest):
-    try:
-        tag = getLatestVersion()
+def downloadLatestVersion():
+    tag = getLatestVersion()
 
-        sources = Path(f'bioimageit-{tag['name']}-{tag['target']}')
+    sources = Path(f'bioimageit-{tag['name']}-{tag['target']}')
 
-        if not sources.exists():
-            downloadSources(tag['name'])
-            latest.unlink(missing_ok=True)
-            if not selected.exists():
-                latest.symlink_to(sources, True)
-    except Exception as e:
-        print('Could not check the BioImageIT versions:')
-        print(e)
-    if not selected.exists() and not latest.exists():
-        sys.exit('The bioimageit sources could not be downloaded.')
-    
-    return selected if selected.exists() else latest
+    if not sources.exists():
+        downloadSources(tag['name'])
+    return sources
 
 def createEnvironment(sources, environmentManager, environment):
     import tomllib, logging
@@ -49,28 +40,30 @@ def createEnvironment(sources, environmentManager, environment):
     logging.basicConfig(level=logging.INFO)
     environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion), False)
 
-latest = Path(f'bioimageit-latest')                 # exists by default or if user wants to auto update
-selected = Path(f'bioimageit-selected-version')     # exists if user has selected a specific version
+versionPath = Path('version.json')
+if versionPath.exists():
+    with open(versionPath, 'r') as f:
+        versionInfo = json.load(f)
+else:
+    versionInfo = dict(autoUpdate=True, version='unknown')
+
+sources = Path(versionInfo['version'])
 
 # If the selected version does not exist: auto update
-if not selected.exists():
-    sources = downloadLatestVersion(selected, latest)
-
-# Does not work, but path is added when freezing
-if getattr(sys, 'frozen', False):
-    sys.path.append(sources.resolve())
+if versionInfo['autoUpdate']:
+    try:
+        sources = downloadLatestVersion()
+    except Exception as e:
+        print('Could not check the BioImageIT versions:')
+        print(e)
+        if versionInfo['version'] == 'unknown':
+            sys.exit(f'The bioimageit sources could not be downloaded.')
+    
+versionInfo['version'] = sources.name
+with open(versionPath, 'w') as f:
+    json.dump(versionInfo, f)
 
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
-
-# from importlib import import_module
-# environmentManager = import_module('PyFlow.ToolManagement.EnvironmentManager').environmentManager
-
-# import importlib
-# if spec:=importlib.util.spec_from_file_location('EnvironmentManager', f'{sources.name}/PyFlow/ToolManagement/EnvironmentManager.py'):
-#         dependency = importlib.util.module_from_spec(spec)
-#         sys.modules['EnvironmentManager'] = dependency
-#         spec.loader.exec_module(dependency)
-#         environmentManager = dependency.environmentManager
 
 environment = 'bioimageit'
 

@@ -24,6 +24,7 @@ import pkgutil
 import collections.abc
 from copy import copy
 import os
+import sys
 import json
 from pathlib import Path
 
@@ -50,6 +51,9 @@ __HASHABLE_TYPES = []
 
 def getRootPath():
     return Path(__file__).parent.parent
+
+def getBundlePath():
+	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
 
 def getImportPath(toolPath):
     return '.'.join(toolPath.resolve().relative_to(getRootPath()).with_suffix('').parts)
