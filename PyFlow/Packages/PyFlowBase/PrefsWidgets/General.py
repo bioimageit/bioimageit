@@ -169,7 +169,7 @@ class GeneralPreferences(CategoryWidgetBase):
         z = zipfile.ZipFile(io.BytesIO(r.content))
         z.extractall(getBundlePath().parent)
         if not self.progressDialog.wasCanceled():
-            inmain(self.setVersion, autoUpdate, newSources)
+            inmain(self.setVersionJson, autoUpdate, newSources)
 
     def showProgressAndDownloadVersion(self, autoUpdate, versionName, newSources):
         self.progressDialog = QProgressDialog("Downloading...", "Abort", 0, 0, self)
@@ -177,7 +177,7 @@ class GeneralPreferences(CategoryWidgetBase):
         self.progressDialog.show()
         inthread(self.downloadVersion, autoUpdate, versionName, newSources)
     
-    def setVersion(self, autoUpdate, newSources):
+    def setVersionJson(self, autoUpdate, newSources):
         with open(getBundlePath().parent / self.versionJson, 'w') as f:
             json.dump(dict(autoUpdate=autoUpdate, version=newSources.name), f)
         if self.progressDialog is not None:
