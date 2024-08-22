@@ -78,7 +78,7 @@ class TableTool(DockTool):
 			del env['QT_API']
 
 		napariEnvironment = napariEnvironment if len(napariEnvironment)>0 else environment
-		napariManagerPath = getRootPath() / 'Viewer' / 'NapariManager.py'
+		napariManagerPath = getRootPath() / 'PyFlow' / 'Viewer' / 'NapariManager.py'
 		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python -u "{napariManagerPath}"', environmentVariables=env)
 
 	def tryOpenImageOnNapari(self, path, removeExistingImages):
