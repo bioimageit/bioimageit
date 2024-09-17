@@ -164,6 +164,7 @@ class PyFlow(QMainWindow):
 		versionJson = getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
 		with open(versionJson, 'r') as f:
 			versionInfo = json.load(f)
+		environmentManager.setCondaPath(getBundlePath() / 'micromamba' if (getBundlePath() / 'micromamba').exists() else getBundlePath().parent / 'micromamba')
 		environmentManager.setProxies(versionInfo['proxies'])
 
 		self.preferencesWindow = PreferencesWindow(self)
