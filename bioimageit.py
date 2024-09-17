@@ -262,15 +262,17 @@ def main():
         progressBar.step(4)
         updateLabel('Launching BioImageIT...')
 
+        executable = 'python'
         # Hack for OS X to display BioImageIT in the menu instead of python
         if platform.system() == 'Darwin':
             condaPath, _ = environmentManager._getCondaPaths()
             python = condaPath / 'envs/' / environment / 'bin' / 'python'
-            pythonSymlink = sources / 'BioImageIT'
+            executable = 'BioImageIT'
+            pythonSymlink = sources / executable
             if not pythonSymlink.exists():
                 Path(pythonSymlink).symlink_to(python)
 
-        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'./BioImageIT -u pyflow.py'])
+        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'./{executable} -u pyflow.py'])
 
         for line in process.stdout:
             log(line)
