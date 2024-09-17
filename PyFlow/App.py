@@ -160,7 +160,9 @@ class PyFlow(QMainWindow):
 		self._tools = set()
 		self.currentTempDir = ""
 		
-		with open(getBundlePath() / 'version.json', 'r') as f:
+		# The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
+		versionJson = getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
+		with open(versionJson, 'r') as f:
 			versionInfo = json.load(f)
 		environmentManager.setProxies(versionInfo['proxies'])
 
