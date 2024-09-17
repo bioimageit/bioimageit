@@ -17,6 +17,7 @@
 """
 
 import logging
+import logging.handlers
 import os
 import json
 import shutil
@@ -45,6 +46,7 @@ from PyFlow.UI.Tool import GET_TOOLS
 from PyFlow.UI.Utils.stylesheet import editableStyleSheet
 from PyFlow.UI.ContextMenuGenerator import ContextMenuGenerator
 from PyFlow.UI.Widgets.PreferencesWindow import PreferencesWindow
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 
 try:
 	from PyQtAds import QtAds
@@ -63,7 +65,7 @@ import asyncio
 import PyFlow.UI.resources
 # from PyFlow.Wizards.PackageWizard import PackageWizard
 
-from PyFlow import INITIALIZE, getRootPath
+from PyFlow import INITIALIZE, getBundlePath
 from PyFlow.Input import InputAction, InputActionType
 from PyFlow.Input import InputManager
 from PyFlow.ConfigManager import ConfigManager
@@ -76,10 +78,13 @@ EDITOR_TARGET_FPS = 30
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler(getRootPath() / 'bioimageit.log'),
+        logging.handlers.RotatingFileHandler(getBundlePath() / 'bioimageit.log', maxBytes=5000000, backupCount=1),
         logging.StreamHandler()
     ]
 )
+
+logger = logging.getLogger()
+logger.info('Launching BioImageIT...')
 
 def generateRandomString(numbSymbols=5):
 	result = ""
@@ -154,6 +159,10 @@ class PyFlow(QMainWindow):
 		self.setWindowIcon(QtGui.QIcon(":/LogoBpApp.png"))
 		self._tools = set()
 		self.currentTempDir = ""
+		
+		with open(getBundlePath() / 'version.json', 'r') as f:
+			versionInfo = json.load(f)
+		environmentManager.setProxies(versionInfo['proxies'])
 
 		self.preferencesWindow = PreferencesWindow(self)
 		self.preferencesWindow.settingsUpdated.connect(OmeroService().reset)
@@ -200,6 +209,10 @@ class PyFlow(QMainWindow):
 	
 	def populateMenu(self, fileMenu):
 
+		preferencesAction = fileMenu.addAction("Preferences")
+		preferencesAction.setIcon(QtGui.QIcon(":/options_icon.png"))
+		preferencesAction.triggered.connect(self.showPreferencesWindow)
+
 		newFileAction = fileMenu.addAction("New workflow")
 		newFileAction.setIcon(QtGui.QIcon(":/new_file_icon.png"))
 		newFileAction.triggered.connect(self.getWorkflowTool().createWorkflow)
@@ -243,9 +256,6 @@ class PyFlow(QMainWindow):
 		#             )
 
 		# editMenu = self.menuBar.addMenu("Edit")
-		preferencesAction = fileMenu.addAction("Preferences")
-		preferencesAction.setIcon(QtGui.QIcon(":/options_icon.png"))
-		preferencesAction.triggered.connect(self.showPreferencesWindow)
 
 		# pluginsMenu = self.menuBar.addMenu("Plugins")
 		# packagePlugin = pluginsMenu.addAction("Create package...")
@@ -735,7 +745,7 @@ class PyFlow(QMainWindow):
 		state = settings.value("Editor/state")
 		if state is not None:
 			instance.restoreState(state)
-		
+
 		fileMenu = instance.menuBar.addMenu("File")
 		toolsMenu = instance.menuBar.addMenu('Tools')
 
@@ -810,6 +820,7 @@ class PyFlow(QMainWindow):
 			if tool is None or toolName == 'Logger':
 				instance.invokeDockToolByName("PyFlowBase", toolName)
 		
+		
 		instance.populateMenu(fileMenu)
 
 		EditorHistory().saveState("New file")
@@ -821,4 +832,6 @@ class PyFlow(QMainWindow):
 					PreferencesWindow().addCategory(categoryName, widgetClass())
 				PreferencesWindow().selectByName("General")
 
+		# This print tells the launcher bioimageit.py to close the loading window
+		print('Initialization complete')
 		return instance

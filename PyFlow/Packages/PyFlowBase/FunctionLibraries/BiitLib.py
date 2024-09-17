@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from importlib import import_module
 
@@ -13,7 +14,7 @@ class BiitLib(FunctionLibraryBase):
 toolsPath = Path('PyFlow/Tools/')
 
 def getTools(toolsPath):
-    return sorted(list(Path(toolsPath).glob('**/*.py')))
+    return sorted(list(Path(toolsPath).glob('*/*.py')))
 
 def loadTools(toolsPath):
     tools = []

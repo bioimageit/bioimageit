@@ -31,4 +31,4 @@ def execute(self):
         outputPath = Path(outputData.at[index, 'cellpose_out_uint8'])
         outputPath.parent.mkdir(exist_ok=True, parents=True)
         sitk.WriteImage(outputImage, outputPath)
-    self.executed = True
+    self.finishExecution()

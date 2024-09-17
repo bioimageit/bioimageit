@@ -126,7 +126,7 @@ class NodeDefaults(object):
 
     @property
     def PURE_NODE_HEAD_COLOR(self):
-        return QtGui.QColor(255, 255, 255) # Colors.NodeNameRectGreen
+        return Colors.SelectionBlue.darker(60) # QtGui.QColor(255, 255, 255) # Colors.NodeNameRectGreen
 
     @property
     def COMPUTING_NODE_HEAD_COLOR(self):

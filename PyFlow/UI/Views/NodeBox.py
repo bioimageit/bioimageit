@@ -33,7 +33,6 @@ from PyFlow.UI.Canvas.UICommon import *
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.Core.NodeBase import NodeBase
 from PyFlow.ConfigManager import ConfigManager
-from PyFlow import getImportPath
 
 class NodeBoxLineEdit(QLineEdit):
     def __init__(self, parent, events=True):
@@ -126,7 +125,6 @@ class NodeBoxTreeWidget(QTreeWidget):
     def addNodeClass(self, workflowPath, nodeName, nodePath:Path):
         from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
         moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
-        # moduleImportPath = getImportPath(nodePath)
         toolsPath = str(Path(workflowPath).resolve() / 'Tools')
         if toolsPath not in sys.path:
             sys.path.append(toolsPath)
@@ -154,7 +152,7 @@ class NodeBoxTreeWidget(QTreeWidget):
         bCompoundNode=False,
         className=None
     ):
-        nodePath = nodeCategoryPath.split("|")
+        nodePath = nodeCategoryPath.split("|")[1:]
         categoryPath = ""
         # walk from tree top to bottom, creating folders if needed
         # also writing all paths in dict to avoid duplications
@@ -386,7 +384,7 @@ class NodeBoxTreeWidget(QTreeWidget):
                 for categoryItem in self.categoryPaths.values():
                     categoryItem.setExpanded(True)
             else:
-                expandList = expand.split('|')
+                expandList = expand.split('|')[1:]
                 for i in range(1, len(expandList)+1):
                     self.categoryPaths['|'.join(expandList[:i])].setExpanded(True)
             self.sortItems(0, QtCore.Qt.AscendingOrder)
@@ -413,7 +411,7 @@ class NodeBoxTreeWidget(QTreeWidget):
             if not rootItem.bCategory:
                 bPyNode = rootItem.bPyNode
                 bCompoundNode = rootItem.bCompoundNode
-        packageName = rootItem.text(0)
+        packageName = 'PyFlowBase' # rootItem.text(0)
         pressed_text = item_clicked.text(0)
         libName = item_clicked.libName
 

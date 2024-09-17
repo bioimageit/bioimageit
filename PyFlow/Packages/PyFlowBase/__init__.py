@@ -88,14 +88,14 @@ from PyFlow.Packages.PyFlowBase.Tools.TableTool import TableTool
 from PyFlow.Packages.PyFlowBase.Tools.WorkflowTool import WorkflowTool
 from PyFlow.Packages.PyFlowBase.Tools.ExecutionTool import ExecutionTool
 
-from PyFlow.Packages.PyFlowBase.Tools.SearchResultsTool import SearchResultsTool
+# from PyFlow.Packages.PyFlowBase.Tools.SearchResultsTool import SearchResultsTool
 from PyFlow.Packages.PyFlowBase.Tools.AlignLeftTool import AlignLeftTool
 from PyFlow.Packages.PyFlowBase.Tools.AlignRightTool import AlignRightTool
 from PyFlow.Packages.PyFlowBase.Tools.AlignTopTool import AlignTopTool
 from PyFlow.Packages.PyFlowBase.Tools.AlignBottomTool import AlignBottomTool
 from PyFlow.Packages.PyFlowBase.Tools.HistoryTool import HistoryTool
 from PyFlow.Packages.PyFlowBase.Tools.PropertiesTool import PropertiesTool
-from PyFlow.Packages.PyFlowBase.Tools.VariablesTool import VariablesTool
+# from PyFlow.Packages.PyFlowBase.Tools.VariablesTool import VariablesTool
 from PyFlow.Packages.PyFlowBase.Tools.CompileTool import CompileTool
 # from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool, RunAllTool, RunSelectedTool, ExportWorkflowTool
 # from PyFlow.Packages.PyFlowBase.Tools.ClearTool import ClearTool, ClearAllTool, ClearSelectedTool
@@ -226,14 +226,14 @@ _TOOLS[ScreenshotTool.__name__] = ScreenshotTool
 # _TOOLS[AlignBottomTool.__name__] = AlignBottomTool
 
 _TOOLS[PropertiesTool.__name__] = PropertiesTool
-_TOOLS[VariablesTool.__name__] = VariablesTool
+# _TOOLS[VariablesTool.__name__] = VariablesTool
 
 # _TOOLS[PackageBuilder.__name__] = PackageBuilder
 #_TOOLS[TextEditor.__name__] = TextEditor
 
 _TOOLS[LoggerTool.__name__] = LoggerTool
 _TOOLS[HistoryTool.__name__] = HistoryTool
-_TOOLS[SearchResultsTool.__name__] = SearchResultsTool
+# _TOOLS[SearchResultsTool.__name__] = SearchResultsTool
 _TOOLS[NodeBoxTool.__name__] = NodeBoxTool
 _TOOLS[TableTool.__name__] = TableTool
 _TOOLS[WorkflowTool.__name__] = WorkflowTool

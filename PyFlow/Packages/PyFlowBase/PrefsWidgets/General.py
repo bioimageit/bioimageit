@@ -159,27 +159,32 @@ class GeneralPreferences(CategoryWidgetBase):
             self.redirectOutput.setChecked(settings.value("RedirectOutput") == "true")
         except:
             pass
-
-    def getVersions(self):
-        return requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/tags').json()
     
-    def downloadVersion(self, autoUpdate, versionName, newSources):
+    def getInstalledVersion(self):
+        with open(getBundlePath() / self.versionJson, 'r') as f:
+            return json.load(f)
+    
+    def getVersions(self, proxies=None):
+        proxies = self.getInstalledVersion()['proxies'] if proxies is None else proxies
+        return requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/tags', proxies=proxies).json()
+    
+    def downloadVersion(self, autoUpdate, versionName, proxies, newSources):
         import zipfile, io
-        r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/archive.zip', params={'sha': versionName})
+        r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/archive.zip', params={'sha': versionName}, proxies=proxies)
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall(getBundlePath().parent)
+        z.extractall(getBundlePath())
         if not self.progressDialog.wasCanceled():
-            inmain(self.setVersionJson, autoUpdate, newSources)
+            inmain(self.setVersionJson, autoUpdate, proxies, newSources)
 
-    def showProgressAndDownloadVersion(self, autoUpdate, versionName, newSources):
+    def showProgressAndDownloadVersion(self, autoUpdate, versionName, proxies, newSources):
         self.progressDialog = QProgressDialog("Downloading...", "Abort", 0, 0, self)
         self.progressDialog.setValue(0)
         self.progressDialog.show()
-        inthread(self.downloadVersion, autoUpdate, versionName, newSources)
+        inthread(self.downloadVersion, autoUpdate, versionName, proxies, newSources)
     
-    def setVersionJson(self, autoUpdate, newSources):
-        with open(getBundlePath().parent / self.versionJson, 'w') as f:
-            json.dump(dict(autoUpdate=autoUpdate, version=newSources.name), f)
+    def setVersionJson(self, autoUpdate, proxies, newSources):
+        with open(getBundlePath() / self.versionJson, 'w') as f:
+            json.dump(dict(autoUpdate=autoUpdate, version=newSources.name, proxies=proxies), f)
         if self.progressDialog is not None:
             self.progressDialog.hide()
         answer = QMessageBox.warning(self, "New BioImageIT version", "Please restart the application to take changes into account. Would you like to quit BioImageIT?", QMessageBox.Yes | QMessageBox.No)
@@ -189,17 +194,15 @@ class GeneralPreferences(CategoryWidgetBase):
     def setVersion(self):
         versionName = self.versionSelector.currentText()
         versionTarget = self.versionSelector.currentData()
-        root = getBundlePath().parent
-        with open(root / self.versionJson, 'r') as f:
-            versionInfo = json.load(f)
+        versionInfo = self.getInstalledVersion()
         if versionInfo['autoUpdate']:
             versionName = self.versionSelector.itemText(1)
             versionTarget = self.versionSelector.itemData(1)
-        newSources = (root / f'bioimageit-{versionName}-{versionTarget}').resolve()
+        newSources = (getBundlePath() / f'bioimageit-{versionName}-{versionTarget}').resolve()
         if not newSources.exists():
-            self.showProgressAndDownloadVersion(versionInfo['autoUpdate'], versionName, newSources)
+            self.showProgressAndDownloadVersion(versionInfo['autoUpdate'], versionName, versionInfo['proxies'], newSources)
         else:
-            self.symlinkVersion(versionInfo['autoUpdate'], newSources)
+            self.setVersionJson(versionInfo['autoUpdate'], versionInfo['proxies'], newSources)
     
     def setVersionSelector(self, tags, version):
         self.versionSelector.currentTextChanged.disconnect(self.setVersion)

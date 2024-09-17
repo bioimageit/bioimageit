@@ -187,7 +187,7 @@ class NodePainter(object):
         if node.drawlabel:
             lr = QtCore.QRectF(r)
             lr.setHeight(node.labelHeight + NodeDefaults().CONTENT_MARGINS / 2 - 2)
-            headColor = node.headColor
+            headColor = node.getHeaderColor()
             if node.isTemp:
                 headColor = headColor.lighter(50)
                 headColor.setAlpha(50)
@@ -195,11 +195,12 @@ class NodePainter(object):
                 b = QtGui.QLinearGradient(0, 0, lr.width(), 0)
                 # b.setColorAt(0, headColor.lighter(60))
                 # b.setColorAt(0.5, headColor)
+                b.setColorAt(0, headColor)
+                b.setColorAt(1, headColor)
                 # b.setColorAt(0, headColor.darker(60))
                 # b.setColorAt(1, headColor.darker(60))
-                b.setColorAt(0, Colors.SelectionBlue.darker(60))
-                # b.setColorAt(0.5, Colors.Green)
-                b.setColorAt(1, Colors.SelectionBlue.darker(60))
+                # b.setColorAt(0, Colors.SelectionBlue.darker(60))
+                # b.setColorAt(1, Colors.SelectionBlue.darker(60))
                 path = QtGui.QPainterPath()
                 path.setFillRule(QtCore.Qt.WindingFill)
                 path.addRoundedRect(lr, node.roundness, node.roundness)

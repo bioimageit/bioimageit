@@ -1,4 +1,5 @@
 import sys
+import platform
 from pathlib import Path
 import json
 import tkinter as tk
@@ -33,6 +34,9 @@ logText.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 logScroll = tk.Scrollbar(window, command=logText.yview)
 logScroll.pack(side=tk.RIGHT, fill=tk.Y)
 logText.config(yscrollcommand=logScroll.set)
+
+def getBundlePath():
+	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 def log(message):
     logText.insert(tk.END, message)
@@ -88,7 +92,7 @@ def downloadSources(sources:Path, versionName):
     updateLabel("Extracting files...")
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
-        z.extractall()
+        z.extractall(getBundlePath())
 
     window.update_idletasks()
     
@@ -136,7 +140,6 @@ def getProxySettingsFromGUI():
     window.wait_window(dialog.top)
 
 def getProxySettingsFromConda():
-    import platform
 
     condaConfigurations = ["/etc/conda/.condarc",
                         "/etc/conda/condarc",
@@ -258,15 +261,28 @@ def main():
 
         progressBar.step(4)
         updateLabel('Launching BioImageIT...')
-        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'python -u pyflow.py'])
-        # window.destroy()
+
+        # Hack for OS X to display BioImageIT in the menu instead of python
+        if platform.system() == 'Darwin':
+            condaPath, _ = environmentManager._getCondaPaths()
+            python = condaPath / 'envs/' / environment / 'bin' / 'python'
+            pythonSymlink = sources / 'BioImageIT'
+            if not pythonSymlink.exists():
+                Path(pythonSymlink).symlink_to(python)
+
+        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'./BioImageIT -u pyflow.py'])
+
         for line in process.stdout:
             log(line)
+            if line.strip() == 'Initialization complete':
+                window.destroy()
+
         print(process.wait())
     
 
 # Start the task in a separate thread to keep the GUI responsive
-threading.Thread(target=main, daemon=True).start()
-
+thread = threading.Thread(target=main, daemon=True)
+thread.start()
+print('Main loop')
 # Start the Tkinter event loop
 window.mainloop()

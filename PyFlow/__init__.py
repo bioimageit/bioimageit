@@ -53,7 +53,7 @@ def getRootPath():
     return Path(__file__).parent.parent
 
 def getBundlePath():
-	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else getRootPath()
+	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else getRootPath()
 
 def getImportPath(toolPath):
     return '.'.join(toolPath.resolve().relative_to(getRootPath()).with_suffix('').parts)

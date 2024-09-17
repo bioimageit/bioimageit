@@ -34,5 +34,8 @@ class BiitNodeBase(NodeBase):
             for node in [node for node in nextNodes if node != self]:
                 node.setExecuted(False, propagate=False)
 
+    def execute(self, *args, **kwargs):
+        self.setExecuted()
+
     def clear(self):
         self.setExecuted(False)

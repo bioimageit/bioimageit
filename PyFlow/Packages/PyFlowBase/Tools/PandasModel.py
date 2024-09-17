@@ -104,10 +104,16 @@ class PandasModel(QAbstractTableModel):
                 return pixmap.size()
             
             if role == Qt.DisplayRole:
-                return ''
+                return str(value.name)
             
             if role == Qt.UserRole:
-                return path
+                return Path(value).resolve()
+            
+            if role == Qt.ToolTipRole:
+                return str(value)
+            
+            # if role == Qt.TextAlignmentRole:
+            #     return Qt.AlignBottom
 
         elif role == Qt.DisplayRole:
             if ( isinstance(value, Path) or isinstance(value, str) ) and Path(self.graphManager.workflowPath) in Path(value).parents:

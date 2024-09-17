@@ -74,6 +74,11 @@ class ListFiles(PandasNodeBase):
         self.pathPin = self.createInputPin("Folder path", "StringPin", defaultValue=Path.home())
         self.pathPin.setInputWidgetVariant("FolderPathWidget")
         self.pathPin.dataBeenSet.connect(self.pathBeenSet)
+        
+        self.filterPin = self.createInputPin("Filter", "StringPin", '*')
+        self.filterPin.pinHidden = True
+        self.filterPin.dataBeenSet.connect(self.columnBeenSet)
+
         self.columnNamePin = self.createInputPin("Column name", "StringPin", "path")
         self.columnNamePin.pinHidden = True
         self.columnNamePin.dataBeenSet.connect(self.columnBeenSet)
@@ -110,7 +115,14 @@ class ListFiles(PandasNodeBase):
             return
         path = Path(data)
         if path.exists():
-            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():sorted(list(p for p in path.iterdir() if p.name != '.DS_Store'))})
+            filter = self.filterPin.currentData()
+            try:
+                files = sorted(list(path.glob(filter))) if len(filter)>0 else sorted(list(path.iterdir()))
+            except ValueError as e:
+                print(e)
+                files = sorted(list(path.iterdir()))
+            files = [f for f in files if f.name != '.DS_Store']
+            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():files})
             ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
             self.setOutputAndClean(dataFrame)
             self.dirty = False
@@ -217,6 +229,7 @@ class ColumnRegex(PandasNodeInOut):
 
     def compute(self, *args, **kwargs):
         if not self.dirty: return
+        if self.getPinData(self.inArray) is None: return
         df: pandas.DataFrame = self.getPinData(self.inArray).copy()
         regex = self.regex.currentData()
         columnName = self.columnName.currentData()

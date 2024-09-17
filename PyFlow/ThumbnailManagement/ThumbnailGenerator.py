@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import queue
 import pandas
 import numpy as np
 from PyFlow.invoke_in_main import inmain, inthread
@@ -8,6 +9,7 @@ from blinker import Signal
 # import threading
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 
+
 from PIL import Image
 import multiprocessing
 
@@ -15,11 +17,21 @@ class ThumbnailGenerator:
 	
 	instance = None
 	finished = Signal(object)
+	queue = queue.Queue()
 
 	def __init__(self) -> None:
 		self.imageToThumbnail: dict[str, str] = {}
 		self.environment = environmentManager.launch('ThumbnailGenerator', condaEnvironment=False)
+		if self.environment.process is not None:
+			inthread(self.logOutput, self.environment.process)
+		inthread(self._generateThumbnailsThread)
 
+	@classmethod
+	def logOutput(cls, process):
+		for line in process.stdout:
+			print(line)
+		return
+	
 	# @staticmethod
 	# def thumbnail(inputPath, outputPath, size=(128,128)): 
 	# 	try:
@@ -65,6 +77,13 @@ class ThumbnailGenerator:
 		thumbnailsPath = self.getNodeThumbnailsPath(nodeName) if thumbnailsPath is None else thumbnailsPath
 		return thumbnailsPath / f'{Path(path).stem}_{rowIndex}-{colIndex}.png'
 
+	def _generateThumbnailsThread(self):
+		while True:
+			images = self.queue.get()
+			results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [images])
+			inmain(self._finishGenerateThumbnails, results)
+			self.queue.task_done()
+
 	def _generateThumbnails(self, images):
 		# multiprocessing.set_start_method('spawn')
 		# pool = multiprocessing.Pool(8)
@@ -107,7 +126,10 @@ class ThumbnailGenerator:
 			# thread = threading.Thread(target=self._generateThumbnails, args=images)
 			# thread.daemon = True
 			# thread.start()
-			inthread(self._generateThumbnails, images)
+			
+			# inthread(self._generateThumbnails, images)
+			self.queue.put(images)
+
 			# self._generateThumbnails(images)
 		return 
 

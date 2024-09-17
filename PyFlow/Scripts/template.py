@@ -15,4 +15,4 @@ def execute(self):
     data = self.inArray.getData()
     print('Execute:')
     print(data)
-    self.executed = True
+    self.finishExecution()

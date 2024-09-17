@@ -284,6 +284,13 @@ class LoggerTool(DockTool):
 
     def onShow(self):
         super(LoggerTool, self).onShow()
+        self.clearView()
+        logger = logging.getLogger()
+        for handler in logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                with open(handler.baseFilename, 'r') as f:
+                    logs = f.read()
+                    self.logPython(logs.split('Launching BioImageIT...')[-1])
 
     def closeEvent(self, event):
         self.hide()

@@ -84,14 +84,14 @@ def launchListener():
 							logger.error(e.args)
 							logger.error(traceback.format_exc())
 							# '\n'.join(traceback.format_tb(e.__traceback__))
-							connection.send(dict(action='error', exception=e, traceback=traceback.format_exc()))
+							connection.send(dict(action='error', exception=str(e), traceback=traceback.format_exc()))
 				except Exception as e:
 					logger.error('Caught exception while waiting for message:')
 					logger.error(e)
 					logger.error(e.args)
 					logger.error(traceback.format_exc())
 					logger.error(message)
-					connection.send(dict(action='error', exception=e))
+					connection.send(dict(action='error', exception=str(e)))
 
 if __name__ == '__main__':
 	launchListener()

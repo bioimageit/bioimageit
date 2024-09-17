@@ -93,7 +93,7 @@ class ClientEnvironment(Environment):
 		# 	self.nTries += 1
 	
 	def launched(self):
-		return self.connection is not None and self.connection.writable and self.connection.readable and not self.connection.closed
+		return self.process.poll() is None and self.connection is not None and self.connection.writable and self.connection.readable and not self.connection.closed
 	
 	def _exit(self):
 		if self.connection is not None:
@@ -176,6 +176,18 @@ class EnvironmentManager:
 			raise Exception(f'An error occured during the execution of the commands {commands}.')
 		return (outputs, process.returncode)
 
+	def setProxies(self, proxies):
+		condaPath, _ = self._getCondaPaths()
+		condaConfigPath = condaPath / '.mambarc'
+		condaConfig = dict()
+		import yaml
+		if condaConfigPath.exists():
+			with open(condaConfigPath, 'r') as f:
+				condaConfig = yaml.safe_load(f)
+		condaConfig['proxy_servers'] = proxies
+		with open(condaConfigPath, 'w') as f:
+			yaml.safe_dump(condaConfig, f)
+		
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
 	def executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True):
@@ -194,13 +206,12 @@ class EnvironmentManager:
 			return subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', bufsize=1)
 
 	def _removeChannel(self, condaDependency):
-		return condaDependency.split('::')[1]
+		return condaDependency.split('::')[1] if '::' in condaDependency else condaDependency
 	
 	def environmentIsRequired(self, dependencies: Dependencies):
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
-			process = self.executeCommands([self._activateConda(), f'{self.condaBin} list -y'])
-			out, _ = self._getOutput(process)
-			installedCondaPackages = out.split('\n')
+			process = self.executeCommands(self._activateConda() + [f'{self.condaBin} list -y'])
+			installedCondaPackages, _ = self._getOutput(process)
 			if not all([self._removeChannel(d) in installedCondaPackages for d in dependencies['conda']]):
 				return True
 		if 'pip' not in dependencies: return False
@@ -277,7 +288,7 @@ class EnvironmentManager:
 		pythonRequirement = dependencies['python'] if 'python' in dependencies and dependencies['python'] else ''
 		condaDependencies = self.formatDependencies('conda', dependencies)
 		pipDependencies = self.formatDependencies('pip', dependencies)
-		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python{pythonRequirement} -y']
+		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
 		createEnvCommands += [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
 		createEnvCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		createEnvCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
@@ -300,18 +311,20 @@ class EnvironmentManager:
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
-		process = self.executeCommands(commands, env=environmentVariables)
+		debug = False # customCommand is not None and 'NapariManager' in customCommand
+		port = -1 if not debug else 56966 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
+		process = self.executeCommands(commands, env=environmentVariables) if not debug else None
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish
-		port = -1
-		for line in process.stdout:
-			logger.info(line)
-			if line.strip().startswith('Listening port '):
-				port = int(line.strip().replace('Listening port ', ''))
-				break
-		# If process is finished: check if error
-		if process.poll() is not None:
-			raise Exception(f'Process exited with return code {process.returncode}.')
+		if not debug:
+			for line in process.stdout:
+				logger.info(line)
+				if line.strip().startswith('Listening port '):
+					port = int(line.strip().replace('Listening port ', ''))
+					break
+			# If process is finished: check if error
+			if process.poll() is not None:
+				raise Exception(f'Process exited with return code {process.returncode}.')
 		ce = ClientEnvironment(environment, port, process)
 		self.environments[environment] = ce
 		ce.initialize()

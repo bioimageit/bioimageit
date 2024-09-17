@@ -26,7 +26,7 @@ def main(instance=None):
 	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
 	
 	app = QApplication(sys.argv)
-
+	
 	instance2 = PyFlow.instance(software="standalone")
 	instance = instance2
 

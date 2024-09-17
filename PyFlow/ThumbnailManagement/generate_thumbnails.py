@@ -1,9 +1,19 @@
 import numpy as np
 from PIL import Image
 import multiprocessing
+import logging
 
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler('thumbnails.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__file__)
 
 def thumbnail(inputPath, outputPath, size=(128,128)): 
 	try:
@@ -18,10 +28,10 @@ def thumbnail(inputPath, outputPath, size=(128,128)):
 		im.save(outputPath)
 		return (inputPath, outputPath)
 	except Exception as e:
-		return e 
+		return None
 
 def generateThumbnails(images):
 	pool = multiprocessing.Pool(8)
-	print(f'generate {len(images)} thumbnails')
+	logger.info(f'generate {len(images)} thumbnails')
 	results = pool.starmap(thumbnail, images)
-	return results
+	return [r for r in results if r is not None]

@@ -22,9 +22,6 @@ class SimpleITKBase(BiitArrayNodeBase):
     def category(cls):
         return cls.tool.info.categories if 'categories' in cls.tool.info else 'SimpleITK|Custom'
     
-    def getParameter(self, name, row):
-        return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
-    
     def setOutputColumns(self, tool, data):
         for output in tool.info.outputs:
             for index, row in data.iterrows():
@@ -39,7 +36,7 @@ class SimpleITKBase(BiitArrayNodeBase):
     def execute(self):
         data: pandas.DataFrame|None = self.getDataFrame()
         if data is None:
-            self.executed = True
+            self.finishExecution()
             return
         outputData: pandas.DataFrame = self.outArray.currentData()
         for index, row in data.iterrows():
@@ -56,7 +53,7 @@ class SimpleITKBase(BiitArrayNodeBase):
                 sitk.WriteTransform(result, outputPath)
             else:
                 sitk.WriteImage(result, outputPath)
-        self.executed = True
+        self.finishExecution()
         return
 
 class BinaryThreshold(SimpleITKBase):
@@ -90,7 +87,7 @@ class BinaryThreshold(SimpleITKBase):
     def execute(self):
         data: pandas.DataFrame|None = self.getDataFrame()
         if data is None:
-            self.executed = True 
+            self.finishExecution()
             return
         outputData: pandas.DataFrame = self.outArray.currentData()
         for index, row in data.iterrows():
@@ -105,7 +102,7 @@ class BinaryThreshold(SimpleITKBase):
             outputPath = Path(outputData.at[index, self.name + '_thresholded_image'])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(thresholdedImage, outputPath)
-        self.executed = True
+        self.finishExecution()
         return
     
 class AddScalarToImage(SimpleITKBase):
@@ -129,7 +126,7 @@ class AddScalarToImage(SimpleITKBase):
     #         outputPath = Path(outputData.at[index, self.name + '_out'])
     #         outputPath.parent.mkdir(exist_ok=True, parents=True)
     #         sitk.WriteImage(resultImage, outputPath)
-    #     self.executed = True
+    #     self.finishExecution()
     #     return
     
 class ExtractChannel(SimpleITKBase):
@@ -167,7 +164,7 @@ class ExtractChannel(SimpleITKBase):
             outputPath = Path(outputData.at[index, self.name + '_out'])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(inputImage, outputPath)
-        self.executed = True
+        self.finishExecution()
         return
     
 class SubtractImages(SimpleITKBase):
@@ -204,7 +201,7 @@ class SubtractImages(SimpleITKBase):
             outputPath = Path(outputData.at[index, self.name + '_out'])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(sitk.Cast(resultImage, sitk.sitkUInt8), outputPath)
-        self.executed = True
+        self.finishExecution()
         return
     
 class ConnectedComponents(SimpleITKBase):
@@ -248,7 +245,7 @@ class ConnectedComponents(SimpleITKBase):
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             labeledImageRGB = sitk.LabelToRGB(labeledImage)
             sitk.WriteImage(labeledImageRGB, outputPath)
-        self.executed = True
+        self.finishExecution()
         return 
         
 class LabelStatistics(SimpleITKBase):
@@ -326,7 +323,7 @@ class LabelStatistics(SimpleITKBase):
         inmain(lambda: ThumbnailGenerator.get().generateThumbnails(self.name, outDataFrame))
         inmain(lambda: self.setOutputAndClean(outDataFrame))
         
-        self.executed = True
+        self.finishExecution()
         return 
 
 

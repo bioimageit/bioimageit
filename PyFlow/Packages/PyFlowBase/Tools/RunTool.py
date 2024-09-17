@@ -142,6 +142,7 @@ class RunTool(ShelfTool):
 
     req = None
     cancelExecution = threading.Event()
+    progressDialog = None
 
     def __init__(self, initialize=True):
         super(RunTool, self).__init__()
@@ -154,7 +155,7 @@ class RunTool(ShelfTool):
         self.executing = False
         self.logTool = None
         self.currentNode = None
-        self.progressDialog = ProgressDialog(self)
+        self.__class__.progressDialog = ProgressDialog(self)
         BiitNodeBase.log.connect(self.log)
 
     @staticmethod
@@ -255,12 +256,14 @@ class RunTool(ShelfTool):
     def displayError(self, exception, traceback):
         message = QMessageBox(self.pyFlowInstance)
         message.setWindowTitle('Error during execution')
-        text = f'{exception}'
+        exceptionString = str(exception)
+        exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
+        text = f'An error occured during the execution of the process: {exceptionString}'
         message.setText(text)
-        self.log('Error during execution:')
-        self.log(text)
-        message.setDetailedText(f'{traceback}')
+        message.setDetailedText(f'{exception.__class__}\n\n{traceback}')
         message.exec()
+        text += f'(Class: {exception.__class__})'
+        self.log(text)
         ErrorManager.report(text)
 
     def initializeLog(self):
@@ -320,6 +323,7 @@ class RunTool(ShelfTool):
             print(e.args[0]['exception'] if isinstance(e, Iterable) and len(e.args)>0 and 'exception' in e.args[0] else e)
             tb = e.args[0]['traceback'] if isinstance(e, Iterable) and len(e.args)>0 and 'traceback' in e.args[0] else ''
             tb += '\n\n\n'
+            print(e)
             print(tb)
             traceback.print_tb(e.__traceback__)
             tb += '\n'.join(traceback.format_tb(e.__traceback__))

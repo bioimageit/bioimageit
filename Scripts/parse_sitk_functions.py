@@ -6,6 +6,7 @@ d = pq(filename='SimpleITK_reference.html')
 
 add = False
 function_elements = []
+
 # Select all h2 between <h2 class='groupheader'>Function Documentation</h2> and <h2 class='groupheader'>Typedef Documentation</h2>
 # They are the functions
 for element in d('h2'):

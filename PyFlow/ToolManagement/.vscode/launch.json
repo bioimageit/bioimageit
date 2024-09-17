@@ -5,13 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "ModuleCaller",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/ModuleCaller.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/../../",
-            "args": "--listener_port 49152"
+            "args": ""
         }
     ]
 }

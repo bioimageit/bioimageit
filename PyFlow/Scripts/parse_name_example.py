@@ -16,4 +16,4 @@ def compute(self):
 # The execute function will be called when the user clicks the execute button (from the tool bar)
 # Use it to process the data files in the data frame
 def execute(self):
-    self.executed = True
+    self.finishExecution()

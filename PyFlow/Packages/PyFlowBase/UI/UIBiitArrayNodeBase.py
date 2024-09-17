@@ -19,6 +19,7 @@ from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget, InputWidgetRaw
+from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getPinTypeFromIoType, filePathTypes
 
 class ColumnValueWidget(QWidget):
@@ -74,8 +75,12 @@ class ColumnValueWidget(QWidget):
             w = QComboBox()
             for name in selectInfo.names:
                 w.addItem(name)
-            w.setCurrentIndex(selectInfo.values.index(defaultValue) if defaultValue in selectInfo.values else 0)
-            w.activated.connect(lambda index: self.updateNodeParameters(selectInfo.values[index], 'value'))
+            # for BiitToolNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
+            # But values has a special meaning in dict, so it is a function instead of a list.
+            # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
+            selectInfoValues = selectInfo.values if isinstance(selectInfo.values, list) else selectInfo['values']
+            w.setCurrentIndex(selectInfoValues.index(defaultValue) if defaultValue in selectInfoValues else 0)
+            w.activated.connect(lambda index: self.updateNodeParameters(selectInfoValues[index], 'value'))
             w.setToolTip(description)
             w.setObjectName(name)
             return w
@@ -184,3 +189,32 @@ class UIBiitArrayNodeBase(UINodeBase):
         for input in tool.info.inputs:
             iw = ColumnValueWidget(input, self._rawNode, inputsCategory)
             inputsCategory.addWidget(input.name, iw, group=inGroup)
+
+    def updateOutput(self, output, value):
+        output.default_value = value
+        data: pandas.DataFrame = self._rawNode.outArray.currentData()
+        self._rawNode.setOutputColumns(self._rawNode.__class__.tool, data)
+        self._rawNode.setOutputAndClean(data)
+        self.parametersChanged(data)
+        # data[self.getColumnName(output)] = data[self.getColumnName(output)].apply(lambda v: value)
+
+    def createOutputCollapsibleFormWidget(self, propertiesWidget):
+        outputsCategory = CollapsibleFormWidget(headName="Outputs")
+        
+        tool = self._rawNode.__class__.tool
+        
+        for output in tool.info.outputs:
+
+            w = createInputWidget('StringPin', lambda value: self.updateOutput(output, value), defaultValue=output.default_value)
+            if w:
+                if hasattr(output, 'help'):
+                    w.setToolTip(output.help)
+                w.blockWidgetSignals(True)
+                w.setWidgetValue(output.default_value)
+                w.blockWidgetSignals(False)
+                w.setObjectName(output.name)
+                
+                outputsCategory.addWidget(output.name, w)
+
+        if outputsCategory.Layout.count() > 0:
+            propertiesWidget.addWidget(outputsCategory)

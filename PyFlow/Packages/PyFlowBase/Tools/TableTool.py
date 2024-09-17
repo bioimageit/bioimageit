@@ -16,12 +16,14 @@ from pathlib import Path
 import subprocess
 import pandas
 import os
+import threading
 from multiprocessing.connection import Client
 
 from qtpy import QtCore, QtGui
-from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QApplication
 
 from PyFlow import getRootPath
+# from PyFlow.invoke_in_main import inthread
 from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 from PyFlow.Packages.PyFlowBase.Tools.PandasModel import PandasModel
@@ -113,8 +115,21 @@ class TableTool(DockTool):
 			# environmentManager.executeCommands([environmentManager._activateConda(), f'conda activate {imageViewerCmd}', f'napari {path}'], env=env)
 			
 			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier
+			
+			progress = QProgressDialog(labelText='Openning image...', cancelButtonText='Cancel', minimum=0, maximum=0, parent=self.pyFlowInstance)
+			progress.setWindowModality(QtCore.Qt.WindowModal)
+			progress.setWindowTitle('Openning Napari')
+			# progress.setGeometry(QApplication.instance().activeWindow().geometry())
+			progress.show()
 
+			# thread = inthread(self.openImageOnNapari, path, removeExistingImages)
+			# thread.join()
+			# thread = threading.Thread(target=lambda: self.openImageOnNapari(path, removeExistingImages), daemon=True)
+			# thread.start()
+			# thread.join()
 			self.openImageOnNapari(path, removeExistingImages)
+
+			progress.close()
 
 		elif len(imageViewer)>0:
 			if isinstance(path, Path):

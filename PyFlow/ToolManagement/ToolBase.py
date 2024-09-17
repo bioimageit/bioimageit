@@ -12,7 +12,7 @@ def initialize(moduleImportPath: str, args: list[str]):
     parser = tool.getArgumentParser()
     parser.exit_on_error = False
     args = parser.parse_args(args)
-    if toolIsNone:
+    if toolIsNone and hasattr(tool, 'initialize') and callable(tool.initialize):
         tool.initialize(args)
     return tool, args
 

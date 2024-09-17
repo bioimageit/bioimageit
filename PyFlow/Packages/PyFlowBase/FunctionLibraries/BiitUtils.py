@@ -13,8 +13,8 @@ ioTypeToPinType = dict(
 def getPinTypeFromIoType(ioType):
     return ioTypeToPinType[ioType] if ioType in ioTypeToPinType else 'StringPin'
 
-def isIoPath(io):
-    return io.type not in ioTypeToPinType.keys()
+def isIoPath(inputType):
+    return inputType not in ioTypeToPinType.keys()
 
 filePathTypes = ['imagetiff', 'path']
 

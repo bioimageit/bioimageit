@@ -16,8 +16,6 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 # 	LAUNCHING = 2
 # 	LAUNCHED = 3
 
-
-
 # path = Path(__file__).parent.resolve()
 # with open(path.parent.parent / 'biit' / 'config.json' if path.name == 'ToolManagement' else path / 'biit' / 'config.json', 'r') as file:
 # 	condaPath = Path(json.load(file)['runner']['conda_dir'])
@@ -83,7 +81,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		# toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
 		for input in self.getToolIOs('inputs'):
 			select_info = dict(names=input.choices, values=input.choices)
-			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=False, value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info)))
+			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=False, value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=input.dest in self.Tool.autoInputs)))
 		for output in self.getToolIOs('outputs'):
 			select_info = dict(names=output.choices, values=output.choices)
 			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info)))
@@ -173,30 +171,39 @@ class BiitToolNode(BiitArrayNodeBase):
 		if cls.environment is not None:
 			return environmentManager.exit(cls.environment)
 
-	def getParameterValueString(self, name, row):
-		parameterDict = self.parameters[name]
-		if parameterDict['type'] == 'value':
-			return str(parameterDict['value'])
-		else:
-			value = row[parameterDict['columnName']]
-			return value.stem if isinstance(value, Path) else value
+	def getStem(self, filename):
+		return filename[:filename.index('.')] if '.' in filename else filename
 	
+	def getSuffixes(self, filename):
+		return filename[filename.index('.'):] if '.' in filename else ''
+
 	def replaceInputArgs(self, outputValue, inputGetter):
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', str(outputValue)):
-			outputValue = str(outputValue).replace(f'{{{name}}}', str(inputGetter(name)))
+			outputValue = str(outputValue).replace(f'{{{name}}}', inputGetter(name))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', str(outputValue)):
+			outputValue = str(outputValue).replace(f'{{{name}.stem}}', self.getStem(inputGetter(name)))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).ext\}', str(outputValue)):
+			outputValue = str(outputValue).replace(f'{{{name}.ext}}', Path(inputGetter(name)).suffix)
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).exts\}', str(outputValue)):
+			outputValue = str(outputValue).replace(f'{{{name}.exts}}', ''.join(Path(inputGetter(name)).suffixes))
 		return outputValue
+
+	def getParameterValueName(self, name, row):
+		parameterValue = self.getParameter(name, row)
+		return parameterValue.name if isinstance(parameterValue, Path) else str(parameterValue)
 
 	def setOutputColumns(self, tool, data):
 		graphManager = GraphManagerSingleton().get()
 		for output in tool.info.outputs:
 			if output.type != 'path': continue
-			ods = output.default_value.split('.')
-			stem = ods[0]
-			suffixes = '.'.join(ods[1:])
+			# ods = output.default_value.split('.')
+			# stem = ods[0]
+			# suffixes = '.'.join(ods[1:])
 			# data[self.getColumnName(output)] = [Path(graphManager.workflowPath).resolve() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
 			for index, row in data.iterrows():
-				finalStem = self.replaceInputArgs(stem, lambda name: self.getParameterValueString(name, row))
-				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}_{index}.{suffixes}'
+				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
+				finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
+				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}_{index}{finalSuffix}'
 
 	def compute(self):
 		data = super().compute()

@@ -956,6 +956,10 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
             if label:
                 self.update()
 
+    def getHeaderColor(self):
+        # return self.headColor
+        return QtGui.QColor(200, 240, 190, 255) if hasattr(self._rawNode, 'executed') and self._rawNode.executed else Colors.SelectionBlue.darker(60)
+
     def updateNodeHeaderColor(self):
         if self.computing:
             self.headColor = NodeDefaults().COMPUTING_NODE_HEAD_COLOR
@@ -1434,6 +1438,9 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
             if layout is not None:
                 self.noPadding(playout=layout)
 
+    def createOutputCollapsibleFormWidget(self, propertiesWidget):
+        pass
+
     def createPropertiesWidget(self, propertiesWidget):
         self.createBaseWidgets(propertiesWidget)
 
@@ -1441,6 +1448,8 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         self.createInputWidgets(inputsCategory)
         if inputsCategory.Layout.count() > 0:
             propertiesWidget.addWidget(inputsCategory)
+
+        self.createOutputCollapsibleFormWidget(propertiesWidget)
 
         # self.noPadding(inputsCategory)
 

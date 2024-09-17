@@ -9,6 +9,7 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.0.10', 'pandas==2.2.2'])
     environment = 'cellpose'
+    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -21,8 +22,8 @@ class Tool:
         inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
         inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image}_segmentation.png', type=Path)
-        outputs_parser.add_argument('-n', '--npy', help='The output segmentation path.', default='{input_image}_segmentation.npy', type=Path)
+        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.png', type=Path)
+        outputs_parser.add_argument('-n', '--npy', help='The output segmentation path.', default='{input_image.stem}_segmentation.npy', type=Path)
         return parser
 
     def initialize(self, args):

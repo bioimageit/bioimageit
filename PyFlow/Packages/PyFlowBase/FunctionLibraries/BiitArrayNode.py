@@ -43,8 +43,12 @@ class BiitArrayNodeBase(BiitNodeBase):
         self.parameters = {} if tool is None else { input.name: self.initializeInput(input) for input in tool.info.inputs }
     
     def initializeInput(self, input):
-        defaultValue = input.select_info.values[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
-        return dict(type='value', columnName='', value=defaultValue, dataType=input.type)
+        # for BiitToolNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
+        # But values has a special meaning in dict, so it is a function instead of a list.
+        # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
+        selectInfoValues = (input.select_info.values if isinstance(input.select_info.values, list) else input.select_info['values'])  if input.type == 'select' else None
+        defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
+        return dict(type='value', columnName='', value=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else isIoPath(input.type))
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
@@ -65,7 +69,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         n = len(data.columns)-1
         tool = self.__class__.tool
         for input in tool.info.inputs:
-            if isIoPath(input) and (overwriteExistingColumns or self.parameters[input.name]['type'] == 'value'):
+            if hasattr(input, 'auto') and input.auto and (overwriteExistingColumns or self.parameters[input.name]['type'] == 'value'):
                 self.parameters[input.name]['type'] = 'columnName'
                 self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
                 n -= 1
@@ -91,6 +95,8 @@ class BiitArrayNodeBase(BiitNodeBase):
     # The input pin was unplugged: reset dataFrame
     def dataBeenUnset(self, pin=None):
         self.inArray.setData(None)
+        if self.dataFramePath is not None:
+            self.createDataFrameFromFolder(self.dataFramePath)
 
     def getDataFrame(self):
         data = self.inArray.currentData()
@@ -153,12 +159,17 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def setOutputArgsFromDataFrame(self, toolInfo, args, outputData, index):
         for output in toolInfo.outputs:
+            if self.getColumnName(output) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
             outputPath = outputData.at[index, self.getColumnName(output)]
             if isinstance(outputPath, Path):
                 outputPath.parent.mkdir(exist_ok=True, parents=True)    
             args[output.name] = str(outputPath)
     
+    def getParameter(self, name, row):
+        return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
+    
     def setArg(self, args, parameterName, parameterValue):
+        if parameterValue is None: return
         if type(parameterValue) is bool and parameterValue:         # if parameter is a boolean: only set arg if true
             args[parameterName] = ''
         elif type(parameterValue) is not bool:                          # otherwise, set arg to parameter value
@@ -197,7 +208,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         tool = req.get_tool(f'{toolInfo.id}_v{toolInfo.version}')
 
         argsList = self.getArgs()
-        argsList = argsList if type(argsList) is list else [argsList]
+        # argsList = argsList if type(argsList) is list else [argsList]
 
         outputFolder = getOutputFolderPath(self.name)
         outputFolder.mkdir(exist_ok=True, parents=True)
@@ -217,7 +228,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         self.finishExecution(argsList)
         return True
 
-    def finishExecution(self, argsList):
+    def finishExecution(self, argsList=None):
+        argsList = self.getArgs() if argsList is None else argsList
         outputFolder = getOutputFolderPath(self.name)
         outputFolder.mkdir(exist_ok=True, parents=True)
 
@@ -233,10 +245,10 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def createDataFrameFromInputs(self):
         tool = self.__class__.tool
-        pathInputs = [i for i in tool.info.inputs if isIoPath(i)]
-        if len(pathInputs) == 0: return None
+        autoInputs = [i for i in tool.info.inputs if hasattr(i, 'auto') and i.auto]
+        if len(autoInputs) == 0: return None
         data = pandas.DataFrame()
-        for input in pathInputs:
+        for input in autoInputs:
             data[self.getColumnName(input)] = [self.parameters[input.name]['value']]
         ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data
