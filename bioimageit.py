@@ -267,12 +267,12 @@ def main():
         if platform.system() == 'Darwin':
             condaPath, _ = environmentManager._getCondaPaths()
             python = condaPath / 'envs/' / environment / 'bin' / 'python'
-            executable = 'BioImageIT'
-            pythonSymlink = sources / executable
+            pythonSymlink = sources / 'BioImageIT'
             if not pythonSymlink.exists():
                 Path(pythonSymlink).symlink_to(python)
+            executable = './BioImageIT'
 
-        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'./{executable} -u pyflow.py'])
+        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py'])
 
         for line in process.stdout:
             log(line)
