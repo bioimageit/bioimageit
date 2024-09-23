@@ -33,7 +33,6 @@ class GeneralPreferences(CategoryWidgetBase):
 
     projectId = 54065 # The BioImageIT Project on Gitlab
     autoUpdateString = 'latest (auto update)'
-    versionJson = 'version.json'
 
     def __init__(self, parent=None):
         super(GeneralPreferences, self).__init__(parent)
@@ -160,8 +159,12 @@ class GeneralPreferences(CategoryWidgetBase):
         except:
             pass
     
+    def getVersionPath(self):
+        # The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
+        return getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
+
     def getInstalledVersion(self):
-        with open(getBundlePath() / self.versionJson, 'r') as f:
+        with open(self.getVersionPath(), 'r') as f:
             return json.load(f)
     
     def getVersions(self, proxies=None):
@@ -183,7 +186,7 @@ class GeneralPreferences(CategoryWidgetBase):
         inthread(self.downloadVersion, autoUpdate, versionName, proxies, newSources)
     
     def setVersionJson(self, autoUpdate, proxies, newSources):
-        with open(getBundlePath() / self.versionJson, 'w') as f:
+        with open(self.getVersionPath(), 'w') as f:
             json.dump(dict(autoUpdate=autoUpdate, version=newSources.name, proxies=proxies), f)
         if self.progressDialog is not None:
             self.progressDialog.hide()

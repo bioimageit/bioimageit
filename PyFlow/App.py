@@ -156,7 +156,7 @@ class PyFlow(QMainWindow):
 		# self.toolBar.setObjectName("toolBar")
 		# self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
 
-		self.setWindowIcon(QtGui.QIcon(":/LogoBpApp.png"))
+		self.setWindowIcon(QtGui.QIcon(":/Logo.png"))
 		self._tools = set()
 		self.currentTempDir = ""
 		
