@@ -32,7 +32,7 @@ class Tool:
             sys.exit('Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Run Spitfire on image {args.input_image}')
-        command = ['simgspitfiredenoise3d', '-i', args.input_image, '-o', args.output_image, '-regularization', args.regularization, '-weighting', args.weighting, '-method', args.method, '-padding', args.padding, '-niter', 200]
+        command = ['simgspitfiredenoise3d', '-i', args.input_image, '-o', args.output_image, '-regularization', args.regularization, '-weighting', args.weighting, '-method', 'SV' if args.method == 'Sparse variation' else 'HV', '-padding', 'True' if args.padding else 'False', '-niter', 200]
         subprocess.call([str(c) for c in command])
 
 if __name__ == '__main__':
