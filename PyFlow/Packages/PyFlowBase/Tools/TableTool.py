@@ -23,7 +23,7 @@ from qtpy import QtCore, QtGui
 from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QApplication
 
 from PyFlow import getRootPath
-# from PyFlow.invoke_in_main import inthread
+from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 from PyFlow.Packages.PyFlowBase.Tools.PandasModel import PandasModel
@@ -98,6 +98,10 @@ class TableTool(DockTool):
 		self.nTries = 0
 		self.tryOpenImageOnNapari(path, removeExistingImages)
 	
+	def openImageAndClose(self, path, removeExistingImages, progress):
+		self.openImageOnNapari(path, removeExistingImages)
+		inmain(lambda: progress.close())
+	
 	def onTableClicked(self, item):
 		imageViewerOpened = ImageViewerTool is not None and any([isinstance(toolInstance, ImageViewerTool) for toolInstance in self.pyFlowInstance._tools])
 		imageViewer = self.pyFlowInstance.getRegisteredTools(classNameFilters=["ImageViewerTool"])
@@ -111,11 +115,9 @@ class TableTool(DockTool):
 			progress.setWindowModality(QtCore.Qt.WindowModal)
 			progress.setWindowTitle('Openning Napari')
 
-			progress.show()
-
-			self.openImageOnNapari(path, removeExistingImages)
-
-			progress.close()
+			progress.setMinimumDuration(500)
+			progress.setValue(0)
+			inthread(self.openImageAndClose, path, removeExistingImages, progress)
 
 		elif len(imageViewer)>0:
 			if isinstance(path, Path):
