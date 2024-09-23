@@ -104,10 +104,6 @@ def getOrCreateMenu(menuBar, title):
 	return menu
 
 
-def winTitle():
-	return "BioImageIT v{0}".format(currentVersion().__str__())
-
-
 # App itself
 class PyFlow(QMainWindow):
 
@@ -123,7 +119,8 @@ class PyFlow(QMainWindow):
 		self.currentSoftware = ""
 		self.edHistory = EditorHistory(self)
 		self.edHistory.statePushed.connect(self.historyStatePushed)
-		self.setWindowTitle(winTitle())
+		versionInfo = self.getVersionInfo()
+		self.setWindowTitle(self.winTitle(versionInfo))
 		self.undoStack = QtGui.QUndoStack(self)
 		self.setContentsMargins(1, 1, 1, 1)
 		self.graphManager = GraphManagerSingleton()
@@ -159,11 +156,6 @@ class PyFlow(QMainWindow):
 		self.setWindowIcon(QtGui.QIcon(":/Logo.png"))
 		self._tools = set()
 		self.currentTempDir = ""
-		
-		# The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
-		versionJson = getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
-		with open(versionJson, 'r') as f:
-			versionInfo = json.load(f)
 		environmentManager.setCondaPath(getBundlePath() / 'micromamba' if (getBundlePath() / 'micromamba').exists() else getBundlePath().parent / 'micromamba')
 		environmentManager.setProxies(versionInfo['proxies'])
 
@@ -178,6 +170,17 @@ class PyFlow(QMainWindow):
 		self._currentFileName = ""
 		self.currentFileName = None
 
+	def winTitle(self, versionInfo=None):
+		versionInfo = self.getVersionInfo() if versionInfo is None else versionInfo
+		version = versionInfo['version'].split('-')[1] if 'version' in versionInfo and len(versionInfo['version'].split('-')) == 3 else None
+		return "BioImageIT {0}".format(version) if version is not None else "BioImageIT"
+
+	def getVersionInfo(self):
+		# The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
+		versionJson = getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
+		with open(versionJson, 'r') as f:
+			return json.load(f)
+		
 	def historyStatePushed(self, state):
 		if state.modifiesData():
 			self.modified = True
@@ -195,12 +198,14 @@ class PyFlow(QMainWindow):
 
 	def updateLabel(self):
 		label = "Untitled"
-		if self.currentFileName is not None:
-			if os.path.isfile(self.currentFileName):
-				label = os.path.basename(self.currentFileName)
+		# if self.currentFileName is not None:
+		# 	if os.path.isfile(self.currentFileName):
+		# 		label = os.path.basename(self.currentFileName)
+		if self.graphManager.get().workflowPath is not None:
+			label = Path(self.graphManager.get().workflowPath).name
 		if self.modified:
 			label += "*"
-		self.setWindowTitle("{0} - {1}".format(winTitle(), label))
+		self.setWindowTitle("{0} - {1}".format(self.winTitle(), label))
 
 	def getMenuBar(self):
 		return self.menuBar

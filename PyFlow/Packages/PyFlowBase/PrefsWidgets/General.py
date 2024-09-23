@@ -139,6 +139,13 @@ class GeneralPreferences(CategoryWidgetBase):
         keyring.set_password("bioif-omero", self.username.text(), self.password.text())
 
     def onShow(self, settings):
+        
+        # settings BioImageITVersion might be out of date: update it onShow (we can't do that in __init__ we have no settings)
+        if settings.value("BioImageITVersion") != self.autoUpdateString:
+            versionInfo = self.getInstalledVersion()
+            version = versionInfo['version'].split('-')[1]
+            settings.setValue("BioImageITVersion", version)
+
         self.lePythonEditor.setText(settings.value("EditorCmd"))
         self.leImageViewer.setText(settings.value("ImageViewerCmd"))
         username = settings.value("OmeroUsername")
