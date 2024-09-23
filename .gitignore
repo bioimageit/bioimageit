@@ -6,8 +6,10 @@
 .vscode/
 __pycache__/
 micromamba/
+bioimageit-v*/
 PyFlow/Configs/
 *.ini
 *.log
 build/
 dist/
+version.json

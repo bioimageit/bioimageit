@@ -100,7 +100,7 @@ def downloadSources(sources:Path, versionName):
 def downloadLatestVersion():
     tag = getLatestVersion()
 
-    sources = Path(f'bioimageit-{tag['name']}-{tag['target']}')
+    sources = Path(f"bioimageit-{tag['name']}-{tag['target']}")
 
     if not sources.exists():
         downloadSources(sources, tag['name'])

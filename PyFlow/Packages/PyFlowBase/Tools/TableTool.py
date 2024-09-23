@@ -73,13 +73,13 @@ class TableTool(DockTool):
 
 
 	def launchNapari(self):
-		napariEnvironment = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerCmd")
 		env = os.environ.copy()
 		# Uset the QT_API so that napari finds the QT version of the conda env
 		if 'QT_API' in env:
 			del env['QT_API']
 
-		napariEnvironment = napariEnvironment if len(napariEnvironment)>0 else environment
+		napariEnvironment = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerCmd")
+		napariEnvironment = napariEnvironment if isinstance(napariEnvironment, str) and len(napariEnvironment) > 0 else environment
 		napariManagerPath = getRootPath() / 'PyFlow' / 'Viewer' / 'NapariManager.py'
 		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python -u "{napariManagerPath}"', environmentVariables=env)
 
@@ -102,31 +102,17 @@ class TableTool(DockTool):
 		imageViewerOpened = ImageViewerTool is not None and any([isinstance(toolInstance, ImageViewerTool) for toolInstance in self.pyFlowInstance._tools])
 		imageViewer = self.pyFlowInstance.getRegisteredTools(classNameFilters=["ImageViewerTool"])
 		
-		imageViewerCmd = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerCmd")
 		path = item.data(QtCore.Qt.UserRole)
-		if not imageViewerOpened and len(imageViewerCmd)>0:
-			# imageViewerCmd = imageViewerCmd.replace("@FILE", str(path))
-			# subprocess.Popen([imageViewerCmd, str(path)])
-
-			# env = os.environ.copy()
-			# # Uset the QT_API so that napari finds the QT version of the conda env
-			# if 'QT_API' in env:
-			#     del env['QT_API']
-			# environmentManager.executeCommands([environmentManager._activateConda(), f'conda activate {imageViewerCmd}', f'napari {path}'], env=env)
+		if not imageViewerOpened:
 			
 			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier
 			
 			progress = QProgressDialog(labelText='Openning image...', cancelButtonText='Cancel', minimum=0, maximum=0, parent=self.pyFlowInstance)
 			progress.setWindowModality(QtCore.Qt.WindowModal)
 			progress.setWindowTitle('Openning Napari')
-			# progress.setGeometry(QApplication.instance().activeWindow().geometry())
+
 			progress.show()
 
-			# thread = inthread(self.openImageOnNapari, path, removeExistingImages)
-			# thread.join()
-			# thread = threading.Thread(target=lambda: self.openImageOnNapari(path, removeExistingImages), daemon=True)
-			# thread.start()
-			# thread.join()
 			self.openImageOnNapari(path, removeExistingImages)
 
 			progress.close()
