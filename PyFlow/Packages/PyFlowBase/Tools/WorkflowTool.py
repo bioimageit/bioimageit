@@ -20,8 +20,9 @@ from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
+from PyFlow.Packages.PyFlowBase.UI.UIWelcomeDialog import WelcomeDialog
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
-
+    
 class WorkflowTool(DockTool):
     """docstring for Workflow tool."""
 
@@ -91,7 +92,10 @@ class WorkflowTool(DockTool):
 
         workflows = self.getWorkflows()
         if len(workflows) == 0:
-            workflows = [self.createWorkflow()]
+            welcomeDialog = WelcomeDialog(self, self)
+            welcomeDialog.show()
+            welcomeDialog.centerWindow()
+            workflows = []
         for workflow in workflows:
             self.addWorkflowToList(workflow, setCurrentItem=False)
         
@@ -106,9 +110,11 @@ class WorkflowTool(DockTool):
             self.addWorkflow(workflow, setCurrentItem=True)
         else:
             self.listWidget.setCurrentRow(workflowIndex)
-        if workflow is None:
+        if workflow is None and self.listWidget.count()>0:
             workflow = self.listWidget.currentItem().text()
-        self.loadWorkflow(workflow, True)
+        
+        if workflow is not None:
+            self.loadWorkflow(workflow, True)
 
     def getWorkflowIndex(self, workflowPath):
         workflowPath = str(workflowPath)
@@ -186,24 +192,29 @@ class WorkflowTool(DockTool):
         self.pyFlowInstance.currentFileName = str(path / WorkflowTool.graphFileName)
         self.pyFlowInstance.save(save_as=False)
 
-    def createWorkflow(self, path=None):
+    def createWorkflowDialog(self):
+        fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))
+        if fileName is None or len(fileName) == 0: return None
+        path = Path(fileName)
+        if path.exists():
+            send2trash(path)
+        return path
+
+    def createWorkflow(self, path=None, loadWorkflow=False):
         if path is None:
             shouldSave = self.saveGraphIfShouldSave()
             if shouldSave == QtWidgets.QMessageBox.Cancel:
                 return
-            # dialog = FileDialog('directory')
-            # dialog.setWindowTitle('Create workflow directory')
-            fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))
-            if fileName is None or len(fileName) == 0: return None
-            path = Path(fileName)
-            if path.exists():
-                send2trash(path)
+            path = self.createWorkflowDialog()
+            if path is None:
+                return
         path.mkdir(exist_ok=True, parents=True)
 
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
         self.addWorkflow(path)
 
-        # self.loadWorkflowNoDialog(path)
+        if loadWorkflow:
+            self.loadWorkflowNoDialog(path)
         # self.saveGraph(path)
 
         return path
@@ -212,13 +223,13 @@ class WorkflowTool(DockTool):
         path = self.getCurrentWorkflow()
         shouldSave = self.saveGraphIfShouldSave()
         if shouldSave == QtWidgets.QMessageBox.Cancel:
-            return
+            return path
         workflowDirectory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Workflow', str(path), QtWidgets.QFileDialog.ShowDirsOnly)
         if workflowDirectory is None or not Path(workflowDirectory).is_dir(): return
         self.loadWorkflowNoDialog(workflowDirectory)
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
-        self.addWorkflow(path, setCurrentItem=True)
-        return
+        self.addWorkflow(workflowDirectory, setCurrentItem=True)
+        return workflowDirectory
     
     def renameWorkflow(self):
         path = self.getCurrentWorkflow()

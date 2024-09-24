@@ -35,7 +35,7 @@ class GraphManager(object):
         super(GraphManager, self).__init__()
         self.terminationRequested = False  #: used by cli only
         self.graphChanged = Signal(object)
-        self.workflowPath = str(Path.home() / 'BioImageIT')
+        self.workflowPath = None
         self._graphs = {}
         self._activeGraph = None
         self._activeGraph = GraphBase(ROOT_GRAPH_NAME, self)

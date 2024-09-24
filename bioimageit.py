@@ -1,10 +1,16 @@
 import sys
+import os
 import platform
 from pathlib import Path
 import json
 import tkinter as tk
 from tkinter import ttk
 import threading
+
+def getBundlePath():
+	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
+
+os.chdir(getBundlePath())
 
 projectId = 54065 # The BioImageIT Project on Gitlab
 proxies = None
@@ -34,9 +40,6 @@ logText.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 logScroll = tk.Scrollbar(window, command=logText.yview)
 logScroll.pack(side=tk.RIGHT, fill=tk.Y)
 logText.config(yscrollcommand=logScroll.set)
-
-def getBundlePath():
-	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 def log(message):
     logText.insert(tk.END, message)
