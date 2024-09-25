@@ -19,7 +19,6 @@ class WelcomeDialog(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget=None, workflowTool=None) -> None:
         super().__init__(parent)
         self.workflowTool = workflowTool
-        self.workflowPath = None
         self.setModal(True)
         self.setWindowTitle("Welcome to BioImageIT")
 
@@ -39,7 +38,7 @@ class WelcomeDialog(QtWidgets.QDialog):
         buttonLayout.addWidget(self.openButton)
 
         self.workflowNameEdit = QtWidgets.QLineEdit()
-        self.workflowNameEdit.setPlaceholderText("Workflow directory will appear here")
+        self.workflowNameEdit.setPlaceholderText("/path/to/workflow/")
         self.workflowNameEdit.setReadOnly(True)  # Make it read-only, the user can only fill it via the dialog
 
         preferenceMessage = QtWidgets.QLabel(
@@ -85,7 +84,6 @@ class WelcomeDialog(QtWidgets.QDialog):
     def validatePath(self, path):
         if path:
             self.workflowNameEdit.setText(str(path))
-            self.workflowPath = path
             # self.closeButton.setEnabled(True)
             self.prefsButton.setEnabled(True)
     

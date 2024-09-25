@@ -185,8 +185,8 @@ class UIBiitArrayNodeBase(UINodeBase):
         # super(UIBiitArrayNodeBase, self).createInputWidgets(inputsCategory, inGroup, False)
         tool = self._rawNode.__class__.tool
         
-
         for input in tool.info.inputs:
+            if input.is_advanced: continue
             iw = ColumnValueWidget(input, self._rawNode, inputsCategory)
             inputsCategory.addWidget(input.name, iw, group=inGroup)
 
@@ -197,6 +197,18 @@ class UIBiitArrayNodeBase(UINodeBase):
         self._rawNode.setOutputAndClean(data)
         self.parametersChanged(data)
         # data[self.getColumnName(output)] = data[self.getColumnName(output)].apply(lambda v: value)
+
+    def createAdvancedCollapsibleFormWidget(self, propertiesWidget):
+        advancedInputsCategory = CollapsibleFormWidget(headName="Advanced inputs")
+
+        tool = self._rawNode.__class__.tool
+        for input in tool.info.inputs:
+            if not input.is_advanced: continue
+            iw = ColumnValueWidget(input, self._rawNode, advancedInputsCategory)
+            advancedInputsCategory.addWidget(input.name, iw)
+        if advancedInputsCategory.Layout.count() > 0:
+            propertiesWidget.addWidget(advancedInputsCategory)
+            advancedInputsCategory.setCollapsed(True)
 
     def createOutputCollapsibleFormWidget(self, propertiesWidget):
         outputsCategory = CollapsibleFormWidget(headName="Outputs")

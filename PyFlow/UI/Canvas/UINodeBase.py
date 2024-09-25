@@ -1438,6 +1438,9 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
             if layout is not None:
                 self.noPadding(playout=layout)
 
+    def createAdvancedCollapsibleFormWidget(self, propertiesWidget):
+        pass
+
     def createOutputCollapsibleFormWidget(self, propertiesWidget):
         pass
 
@@ -1449,6 +1452,7 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         if inputsCategory.Layout.count() > 0:
             propertiesWidget.addWidget(inputsCategory)
 
+        self.createAdvancedCollapsibleFormWidget(propertiesWidget)
         self.createOutputCollapsibleFormWidget(propertiesWidget)
 
         # self.noPadding(inputsCategory)

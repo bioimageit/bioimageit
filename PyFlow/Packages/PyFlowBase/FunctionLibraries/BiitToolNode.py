@@ -79,10 +79,10 @@ class BiitToolNode(BiitArrayNodeBase):
 		#      tests: [[]]
 		#    xml_file_url
 		# toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
-		for input in self.getToolIOs('inputs'):
+		for input in self.getInputArgs():
 			select_info = dict(names=input.choices, values=input.choices)
-			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=False, value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=input.dest in self.Tool.autoInputs)))
-		for output in self.getToolIOs('outputs'):
+			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=input.dest in self.Tool.autoInputs)))
+		for output in self.getOutputArgs():
 			select_info = dict(names=output.choices, values=output.choices)
 			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info)))
 		return
@@ -90,9 +90,15 @@ class BiitToolNode(BiitArrayNodeBase):
 	def getName(self):
 		return self.name.replace('_', ' ').title()
 
-	def getToolIOs(self, name):
-		inputs_group = next( ac for ac in self.__class__.parser._action_groups if ac.title == name )
-		return inputs_group._group_actions
+	def getArgGroup(self, name):
+		return next( ag for ag in self.__class__.parser._action_groups if ag.title == name )
+
+	def getInputArgs(self):
+		inputs = self.getArgGroup('inputs')
+		return inputs._group_actions + [ac for ag in inputs._action_groups for ac in ag._group_actions]
+
+	def getOutputArgs(self):
+		return self.getArgGroup('outputs')._group_actions
 
 	def postCreate(self, jsonTemplate=None):
 		super().postCreate(jsonTemplate)

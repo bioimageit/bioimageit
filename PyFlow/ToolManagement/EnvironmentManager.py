@@ -20,7 +20,9 @@ else:
 # 		if cls not in cls._instances:
 # 			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
 # 		return cls._instances[cls]
-
+if len(logging.root.handlers)==0: 
+	logging.basicConfig()
+	
 logger = logging.getLogger(__name__)
 
 class CustomHandler(logging.Handler):
@@ -30,7 +32,8 @@ class CustomHandler(logging.Handler):
 		self.log = log
 
 	def emit(self, record: logging.LogRecord) -> None:
-		self.log(record)
+		formatter = self.formatter if self.formatter is not None else logger.handlers[0].formatter if len(logger.handlers)>0 and logger.handlers[0].formatter is not None else logging.root.handlers[0].formatter
+		self.log(formatter.format(record))
 
 def attachLogHandler(log:Callable[[str], None], logLevel=logging.INFO) -> None:
 	logger.setLevel(logLevel)
