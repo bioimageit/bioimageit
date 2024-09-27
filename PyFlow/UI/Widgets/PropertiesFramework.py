@@ -12,13 +12,12 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-
-from PyFlow.UI.Canvas.UICommon import clearLayout
-from PyFlow.UI.Widgets.EditPropertiesWidget import EditPropertiesTreeWidget
-from PyFlow.Packages.PyFlowBase.Tools import RESOURCES_DIR
 from qtpy import QtWidgets
 from qtpy import QtCore, QtGui
 
+from PyFlow import getBundlePath
+from PyFlow.UI.Canvas.UICommon import clearLayout
+from PyFlow.UI.Widgets.EditPropertiesWidget import EditPropertiesTreeWidget
 
 # Framework
 class HeadButton(QtWidgets.QPushButton):
@@ -92,8 +91,9 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.setWindowTitle(self.objectName())
         # self.pbHead.setStyleSheet(self.pbHead.styleSheet() + "\nText-align:left;")
         self.pbHead.setStyleSheet("Text-align:left;")
-        self.contentHiddenIcon = QtGui.QIcon(RESOURCES_DIR + "ArrowRight.png") # QtGui.QIcon(":/Plus.png")
-        self.contentVisibleIcon = QtGui.QIcon(RESOURCES_DIR + "ArrowDown.png") # QtGui.QIcon(":/Minus.png")
+        resourcesPath = getBundlePath() / 'PyFlow' / 'UI' / 'resources'
+        self.contentHiddenIcon = QtGui.QIcon(str(resourcesPath / "ArrowRight.png")) # QtGui.QIcon(":/Plus.png")
+        self.contentVisibleIcon = QtGui.QIcon(str(resourcesPath / "ArrowDown.png")) # QtGui.QIcon(":/Minus.png")
         # self.contentHiddenIcon = self.pbHead.style().standardIcon(
         #     QtWidgets.QStyle.SP_ToolBarHorizontalExtensionButton
         # )

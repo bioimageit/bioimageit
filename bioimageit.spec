@@ -26,12 +26,13 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['PyFlow/UI/resources/Logo.ico','PyFlow/UI/resources/Logo.icns', 'PyFlow/UI/resources/Logo.png'],
 )
 coll = COLLECT(
     exe,
@@ -41,4 +42,10 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='bioimageit',
+)
+app = BUNDLE(
+    coll,
+    name='BioImageIT.app',
+    icon=['PyFlow/UI/resources/Logo.icns'],
+    bundle_identifier=None,
 )

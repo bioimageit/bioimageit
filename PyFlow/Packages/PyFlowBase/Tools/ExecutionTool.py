@@ -13,17 +13,12 @@
 ## limitations under the License.
 
 from pathlib import Path
-import shutil
 
 from qtpy import QtCore, QtWidgets
-from PyFlow.Packages.PyFlowBase.Factories.PinInputWidgetFactory import PathInputWidget
-from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
-from PyFlow.UI.Widgets.FileDialog import FileDialog
 
-from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool, RunAllTool, RunSelectedTool, ExportWorkflowTool
-from PyFlow.Packages.PyFlowBase.Tools.ClearTool import ClearTool, ClearAllTool, ClearSelectedTool
-from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleWidget
+from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool, RunSelectedTool
+from PyFlow.Packages.PyFlowBase.Tools.ClearTool import ClearSelectedTool
 
 class ExecutionTool(DockTool):
     """docstring for Execution tool."""

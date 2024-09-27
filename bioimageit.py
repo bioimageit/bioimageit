@@ -6,11 +6,23 @@ import json
 import tkinter as tk
 from tkinter import ttk
 import threading
+import logging
 
 def getBundlePath():
 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 os.chdir(getBundlePath())
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.handlers.FileHandler(getBundlePath() / 'initialize.log', mode='w'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger()
+logger.info('Initializing BioImageIT...')
 
 projectId = 54065 # The BioImageIT Project on Gitlab
 proxies = None
@@ -47,7 +59,7 @@ def log(message):
     window.update_idletasks()
     
 def updateLabel(message):
-    print(message)
+    logging.info(message)
     labelText.set(message)
     log(message + '\n')
 
@@ -85,7 +97,7 @@ def downloadSources(sources:Path, versionName):
         downloadedData.write(data)
         downloadedSize = downloadedData.tell()
         progressBar.step(downloadedSize)
-        print(f"Downloaded {downloadedSize} of {totalSize} bytes")
+        logging.info(f"Downloaded {downloadedSize} of {totalSize} bytes")
         window.update_idletasks()
 
     progressBar.configure(maximum=nSteps)
@@ -203,7 +215,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
     try:
         return downloadLatestVersion()
     except requests.exceptions.ProxyError as e:
-        print(e)
+        logging.warning(e)
         getProxySettingsFromGUI()
         return downloadLatestVersion()
 
@@ -212,8 +224,8 @@ def tryDownloadLatestVersionOrGetProxySettingsFromConda():
     try:
         return downloadLatestVersion()
     except requests.exceptions.ProxyError as e:
-        print(e)
-        print('Searching for proxy settings in conda, mamba or micromamba configuration files...')
+        logging.warning(e)
+        logging.warning('Searching for proxy settings in conda, mamba or micromamba configuration files...')
         getProxySettingsFromConda()
         return tryDownloadLatestVersionOrGetProxySettingsFromGUI()
 
@@ -244,8 +256,8 @@ def main():
         try:
             sources = tryDownloadLatestVersionOrGetProxySettingsFromConda()
         except Exception as e:
-            print('Could not check the BioImageIT versions:')
-            print(e)
+            logging.warning('Could not check the BioImageIT versions:')
+            logging.warning(e)
             if versionInfo['version'] == 'unknown':
                 sys.exit(f'The bioimageit sources could not be downloaded.')
         
@@ -282,12 +294,12 @@ def main():
             if line.strip() == 'Initialization complete':
                 window.destroy()
 
-        print(process.wait())
+        process.wait()
     
 
 # Start the task in a separate thread to keep the GUI responsive
 thread = threading.Thread(target=main, daemon=True)
 thread.start()
-print('Main loop')
+
 # Start the Tkinter event loop
 window.mainloop()

@@ -13,7 +13,7 @@ class Tool:
 
     @staticmethod
     def getArgumentParser():
-        parser = argparse.ArgumentParser("Convert images", description="Convert image file formats.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser("Convert images", description='Convert image file formats. The extension of the output file specifies the file format to use for the conversion. For example, to convert the input image to png and keep the input name, use "{input_image.stem}.png"', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path, metavar='input_image')
         advanced_parser = inputs_parser.add_argument_group('advanced')
