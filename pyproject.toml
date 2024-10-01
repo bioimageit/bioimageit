@@ -1,6 +1,6 @@
 [project]
 name = "bioimageit"
-version = "0.3.3"
+version = "0.3.9"
 description = "A FAIR data management and image analysis framework"
 authors = [{name = "Arthur Masson", email = "arthur.masson@inria.fr"}]
 license = { file = "LICENSE" }
@@ -58,7 +58,7 @@ dev = { features = ["ipython"], solve-group = "default" }
 package = { features = ["install", "package"], no-default-feature = true }
 
 [tool.pixi.feature.package.tasks]
-build_pyi = "pyinstaller bioimageit.py"
+build_pyi = "pyinstaller bioimageit.spec"
 
 [tool.pixi.feature.cxf.tasks]
 build_cxf = "cxfreeze build"

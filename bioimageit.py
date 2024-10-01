@@ -1,11 +1,11 @@
 import sys
 import os
 import platform
-from pathlib import Path
 import json
 import tkinter as tk
 from tkinter import ttk
 import threading
+from pathlib import Path
 import logging
 
 def getBundlePath():
@@ -16,7 +16,7 @@ os.chdir(getBundlePath())
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.handlers.FileHandler(getBundlePath() / 'initialize.log', mode='w'),
+        logging.FileHandler(getBundlePath() / 'initialize.log', mode='w'),
         logging.StreamHandler()
     ]
 )

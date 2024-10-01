@@ -1110,7 +1110,7 @@ packages:
   name: bioimageit
   version: 0.3.3
   path: .
-  sha256: beb9b20b851271f66c7aef787cdfd5a07463b60e564079aeca2466187b5cfec9
+  sha256: e0e5acd8125acf3742a38541a9375d5bace49e22e38945018fac6682d122e134
   requires_dist:
   - omero-py==5.15.0
   - simpleitk>=2.3.1,<2.4
