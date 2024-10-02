@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['PyFlow/UI/resources/GcoPS.icns' if platform.system() == 'Darwin' else 'PyFlow/UI/resources/GcoPS.ico'],
+    icon=['PyFlow/UI/resources/Logo.icns' if platform.system() == 'Darwin' else 'PyFlow/UI/resources/Logo.ico'],
 )
 coll = COLLECT(
     exe,
