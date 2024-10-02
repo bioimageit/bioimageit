@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+import platform
 
 a = Analysis(
     ['bioimageit.py'],
@@ -32,6 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['PyFlow/UI/resources/GcoPS.icns' if platform.system() == 'Darwin' else 'PyFlow/UI/resources/GcoPS.ico'],
 )
 coll = COLLECT(
     exe,

@@ -1108,9 +1108,9 @@ packages:
   requires_python: '>=3.8'
 - kind: pypi
   name: bioimageit
-  version: 0.3.3
+  version: 0.3.9
   path: .
-  sha256: e0e5acd8125acf3742a38541a9375d5bace49e22e38945018fac6682d122e134
+  sha256: 2cdf632ec9b7740a12177df3ccbee2458446176f330118b25853f80c7abcd574
   requires_dist:
   - omero-py==5.15.0
   - simpleitk>=2.3.1,<2.4
