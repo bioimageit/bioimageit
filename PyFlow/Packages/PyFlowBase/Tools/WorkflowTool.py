@@ -245,7 +245,8 @@ class WorkflowTool(DockTool):
         path.rename(newPath)
         
         # Update listWidget: remove old path & add new path
-        self.listWidget.takeItem(str(path))
+        for item in self.listWidget.findItems(str(path), QtCore.Qt.MatchExactly):
+            self.listWidget.takeItem(self.listWidget.row(item))
         self.addWorkflowToList(newPath, setCurrentItem=True)
 
         # Update settings: update workflows and current workflow

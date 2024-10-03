@@ -288,7 +288,7 @@ class EnvironmentManager:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = dependencies['python'] if 'python' in dependencies and dependencies['python'] else ''
+		pythonRequirement = dependencies['python'].replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
 		condaDependencies = self.formatDependencies('conda', dependencies)
 		pipDependencies = self.formatDependencies('pip', dependencies)
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
