@@ -80,7 +80,7 @@ class Tool:
             command += ['-range', rangeIndices[0], rangeIndices[1]]
         
         command += [args.input_image, args.output_image]
-        subprocess.call([str(c) for c in command])
+        subprocess.run([str(c) for c in command])
 
 if __name__ == '__main__':
     tool = Tool()

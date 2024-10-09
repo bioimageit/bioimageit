@@ -67,15 +67,15 @@ def launchListener():
 							if message['action']  == 'execute':
 								# Redirect all outputs to connection.send
 								# with redirect_stdout(WriteProcessor(connection)):
-								logger.debug(f'Execute {message["module"]}.{message["function"]}({message["args"]})')
+								logger.info(f'Execute {message["module"]}.{message["function"]}({message["args"]})')
 								module = import_module(message['module'])
 								if not hasattr(module, message['function']):
 									raise Exception(f'Module {message["module"]} has no function {message["function"]}.')
 								result = getattr(module, message['function'])(*message['args'])
-								logger.debug(f'Executed')
+								logger.info(f'Executed')
 								connection.send(dict(action='execution finished', message='process execution done', result=result))
 							if message['action'] == 'exit':
-								logger.debug(f'exit')
+								logger.info(f'exit')
 								connection.send(dict(action='exited'))
 								return
 						except Exception as e:

@@ -254,6 +254,7 @@ class WorkflowTool(DockTool):
         workflows.append(str(newPath))
         self.setWorkflows(workflows)
         self.setCurrentWorkflow(newPath)
+        self.saveGraph(newPath)
         return
     
     def duplicateWorkflow(self):

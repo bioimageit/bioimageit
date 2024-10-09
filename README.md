@@ -64,3 +64,12 @@ It is possible to run and debug the project with Visual Studio Code by selecting
 The command `pixi run -e package pyinstaller bioimageit.py` packages BioImageIT in the `dist/` repository. 
 It runs "`pyinstaller bioimageit.py`" in the `package` environment defined in `pyproject.toml`.
 This environment only requires `requests` and `pyinstaller` with Python 3.12.
+
+## Debug Modules
+
+- Open ToolManagement/ in a new VSCode window: `code PyFlow/ToolManagement`
+- Choose the proper python environment to debug (open a python file, then choose the env at the bottom right of the screen)
+- Run Debug
+- Copy the port number printed in the output: "Listening port 62996"
+- Back in bioimageit: EnvironmentManager.launch, set Debug to True when the environment is the one to debug (for example), and past the port number
+- Debug BioImageIT

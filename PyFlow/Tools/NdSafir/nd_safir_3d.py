@@ -34,7 +34,7 @@ class Tool:
 
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         command = ['ndsafir', '-i', args.input_image, '-o', args.output_image, '-noise', args.noise, '-iter', args.n_iterations, '-nf', args.noise_factor, '-2dt', 1 if args.time_series else 0, '-patch', args.patch]
-        subprocess.call([str(c) for c in command])
+        subprocess.run([str(c) for c in command])
 
 if __name__ == '__main__':
     tool = Tool()

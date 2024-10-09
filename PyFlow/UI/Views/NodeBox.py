@@ -714,5 +714,5 @@ class NodesBox(QFrame):
 
             # Open script file in code editor
             editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")
-            editCmd = editCmd.replace("@FILE", str(toolPath.resolve()))
+            editCmd = editCmd.replace("@FILE", f'"{toolPath.resolve()}"')
             subprocess.Popen(editCmd, shell=True)

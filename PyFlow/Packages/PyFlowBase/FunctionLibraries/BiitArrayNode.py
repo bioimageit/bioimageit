@@ -53,7 +53,11 @@ class BiitArrayNodeBase(BiitNodeBase):
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
         if 'parameters' in jsonTemplate:
-            self.parameters = jsonTemplate['parameters']
+            # Instead of oerwriting parameters by doing self.parameters = jsonTemplate['parameters']
+            # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
+            for parameterName, parameter in jsonTemplate['parameters'].items():
+                for key, value in parameter.items():
+                    self.parameters[parameterName][key] = value
         self.setExecuted(False)
         
         if 'dataFramePath' in jsonTemplate and jsonTemplate['dataFramePath'] is not None:
@@ -168,10 +172,13 @@ class BiitArrayNodeBase(BiitNodeBase):
     def getParameter(self, name, row):
         return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
     
+    def setBoolArg(self, args, name):
+        args[name] = ''
+    
     def setArg(self, args, parameterName, parameterValue):
         if parameterValue is None: return
         if type(parameterValue) is bool and parameterValue:         # if parameter is a boolean: only set arg if true
-            args[parameterName] = ''
+            self.setBoolArg(args, parameterName)
         elif type(parameterValue) is not bool:                          # otherwise, set arg to parameter value
             args[parameterName] = str( parameterValue )
         return
@@ -238,8 +245,10 @@ class BiitArrayNodeBase(BiitNodeBase):
 
         if isinstance(outputData, pandas.DataFrame):
             outputData.to_csv(outputFolder / 'output_data_frame.csv')
-        with open(outputFolder / 'parameters.json', 'w') as f:
-            json.dump(argsList, f)
+        
+        if argsList is not None:
+            with open(outputFolder / 'parameters.json', 'w') as f:
+                json.dump(argsList, f)
 
         self.setExecuted(True)
 
@@ -282,7 +291,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         data = self.getDataFrame()
         for output in tool.info.outputs:
             for index, row in data.iterrows():
-                outputPath = row[output.name]
+                outputPath = row[self.getColumnName(output)]
                 if isinstance(outputPath, Path) and outputPath.exists():
                     outputPath.unlink()
 

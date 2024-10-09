@@ -266,6 +266,8 @@ def main():
         with open(versionPath, 'w') as f:
             json.dump(versionInfo, f)
 
+        sys.path.append(str(sources.resolve()))
+        
         from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
 
         environment = 'bioimageit'

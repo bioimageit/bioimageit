@@ -42,6 +42,7 @@ from PyFlow.Packages.PyFlowBase.Nodes.imageDisplay import imageDisplay
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroBase, OmeroDownload, OmeroUpload
 from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
+# from PyFlow.Packages.PyFlowBase.Nodes.dialog import DialogNode
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import ListFiles
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import ConcatDataFrames
 from PyFlow.Packages.PyFlowBase.UI.UIImageDisplayNode import UIImageDisplayNode
@@ -71,6 +72,7 @@ from PyFlow.Packages.PyFlowBase.UI.UIWhileLoopBeginNode import UIWhileLoopBeginN
 from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
 from PyFlow.Packages.PyFlowBase.UI.UIOmeroNode import UIOmeroNode, UIOmeroDownload, UIOmeroUpload
 from PyFlow.Packages.PyFlowBase.UI.UIScriptNode import UIScriptNode
+# from PyFlow.Packages.PyFlowBase.UI.UIDialogNode import UIDialogNode
 
 from PyFlow.Packages.PyFlowBase.UI.UIBiitListFilesNode import UIBiitListFilesNode
 from PyFlow.Packages.PyFlowBase.UI.UIBiitConcatDataFramesNode import UIBiitConcatDataFramesNode
@@ -127,6 +129,8 @@ def createUINode(raw_instance):
         return UIWhileLoopBeginNode(raw_instance)
     if isinstance(raw_instance, ScriptNode):
         return UIScriptNode(raw_instance)
+    # if isinstance(raw_instance, DialogNode):
+    #     return UIDialogNode(raw_instance)
     if isinstance(raw_instance, OmeroDownload):
         return UIOmeroDownload(raw_instance)
     if isinstance(raw_instance, OmeroUpload):

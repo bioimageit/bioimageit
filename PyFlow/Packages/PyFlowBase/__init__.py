@@ -81,6 +81,7 @@ from PyFlow.Packages.PyFlowBase.Nodes.commentNode import commentNode
 from PyFlow.Packages.PyFlowBase.Nodes.stickyNote import stickyNote
 
 from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
+# from PyFlow.Packages.PyFlowBase.Nodes.dialog import DialogNode
 
 from PyFlow.Packages.PyFlowBase.Tools.ScreenshotTool import ScreenshotTool
 from PyFlow.Packages.PyFlowBase.Tools.NodeBoxTool import NodeBoxTool
@@ -188,6 +189,7 @@ _NODES = {
     # cliexit.__name__: cliexit,
     # singletonThreadSampleNode.__name__: singletonThreadSampleNode,
     ScriptNode.__name__: ScriptNode,
+    # DialogNode.__name__: DialogNode,
 }
 
 for biitClass in BiitLib.classes.values():

@@ -1,7 +1,10 @@
-import numpy as np
-from PIL import Image
 import multiprocessing
 import logging
+from pathlib import Path
+import numpy as np
+from PIL import Image
+import h5py
+
 
 if __name__ == '__main__':
 	multiprocessing.set_start_method('spawn')
@@ -15,15 +18,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__file__)
 
+def openH5array(filename, datasetName='dataset'):
+	with h5py.File(filename, 'r') as h5file:
+		return h5file[datasetName][:]
+
+def normalizeAndConvert(data):
+	dmax, dmin = data.max(), data.min()
+	data = 255.0 * ( data - dmin ) / (dmax - dmin) if abs(dmax - dmin) > 0 else data
+	return Image.fromarray(data.astype(np.uint8))
+
 def thumbnail(inputPath, outputPath, size=(128,128)): 
 	try:
-		# Load just once, then successively scale down
-		im = Image.open(inputPath)
-		if im.mode[0] in ['I', 'F']:
-			data = np.asarray(im)
-			dmax, dmin = data.max(), data.min()
-			data = 255.0 * ( data - dmin ) / (dmax - dmin) if abs(dmax - dmin) > 0 else data
-			im = Image.fromarray(data.astype(np.uint8))
+		if Path(inputPath).suffix == '.h5':
+			data = openH5array(inputPath)
+			im = normalizeAndConvert(data[data.shape[0]//2,:,:])
+		else:
+			im = Image.open(inputPath)
+			if im.mode[0] in ['I', 'F']:
+				im = normalizeAndConvert(np.asarray(im))
 		im.thumbnail(size)
 		im.save(outputPath)
 		return (inputPath, outputPath)

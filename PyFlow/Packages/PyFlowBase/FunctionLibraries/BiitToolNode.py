@@ -185,18 +185,37 @@ class BiitToolNode(BiitArrayNodeBase):
 
 	def replaceInputArgs(self, outputValue, inputGetter):
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', str(outputValue)):
-			outputValue = str(outputValue).replace(f'{{{name}}}', inputGetter(name))
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}}}', input)
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', str(outputValue)):
-			outputValue = str(outputValue).replace(f'{{{name}.stem}}', self.getStem(inputGetter(name)))
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}.stem}}', self.getStem(str(input)))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', str(outputValue)):
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}.name}}', str(Path(input).name))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).parent.name\}', str(outputValue)):
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}.parent.name}}', str(Path(input).parent.name))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).ext\}', str(outputValue)):
-			outputValue = str(outputValue).replace(f'{{{name}.ext}}', Path(inputGetter(name)).suffix)
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}.ext}}', Path(input).suffix)
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).exts\}', str(outputValue)):
-			outputValue = str(outputValue).replace(f'{{{name}.exts}}', ''.join(Path(inputGetter(name)).suffixes))
+			input = inputGetter(name)
+			if input is not None:
+				outputValue = str(outputValue).replace(f'{{{name}.exts}}', ''.join(Path(input).suffixes))
 		return outputValue
 
 	def getParameterValueName(self, name, row):
 		parameterValue = self.getParameter(name, row)
 		return parameterValue.name if isinstance(parameterValue, Path) else str(parameterValue)
+
+	def setBoolArg(self, args, name):
+		args[name] = True
 
 	def setOutputColumns(self, tool, data):
 		graphManager = GraphManagerSingleton().get()
@@ -207,7 +226,8 @@ class BiitToolNode(BiitArrayNodeBase):
 			# suffixes = '.'.join(ods[1:])
 			# data[self.getColumnName(output)] = [Path(graphManager.workflowPath).resolve() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
 			for index, row in data.iterrows():
-				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
+				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
+				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
 				finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
 				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}_{index}{finalSuffix}'
 
@@ -236,7 +256,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
-			args = [item for items in [(f'--{key}', f'{value}') for key, value in args.items()] for item in items]
+			args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 			self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
 		self.finishExecution(argsList)
 		return True

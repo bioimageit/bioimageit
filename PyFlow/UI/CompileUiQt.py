@@ -38,7 +38,7 @@ def ui_to_py(ui_file):
     bakFileName = py_file_name.replace(".py", "_backup.py")
 
     # convert to cross compatible code
-    subprocess.call([INTERPRETER_PATH, "-m", "Qt", "--convert", py_file_name])
+    subprocess.run([INTERPRETER_PATH, "-m", "Qt", "--convert", py_file_name])
 
     if os.path.isfile(bakFileName):
         os.remove(bakFileName)
