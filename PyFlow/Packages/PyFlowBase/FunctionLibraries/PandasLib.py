@@ -205,6 +205,7 @@ class ConcatDataFrames(PandasNodeInOut):
         return helper
 
     def compute(self, *args, **kwargs):
+        if not self.dirty: return
         ySortedPins = sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
         data = [self.getPinData(p) for p in ySortedPins]
         if len(data)==0: return
@@ -213,6 +214,8 @@ class ConcatDataFrames(PandasNodeInOut):
         # Remove duplicated columns
         result = result.loc[:,~result.columns.duplicated()].copy()
         self.outArray.setData(result)
+        self.setOutputAndClean(result)
+        self.dirty = False
 
 class ColumnRegex(PandasNodeInOut):
 
