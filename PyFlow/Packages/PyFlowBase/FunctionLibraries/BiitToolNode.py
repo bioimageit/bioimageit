@@ -1,7 +1,6 @@
 import logging
-import json
-import sys
 import re
+import pandas
 from pathlib import Path
 from munch import Munch
 from PyFlow import getBundlePath
@@ -91,14 +90,17 @@ class BiitToolNode(BiitArrayNodeBase):
 		return self.name.replace('_', ' ').title()
 
 	def getArgGroup(self, name):
-		return next( ag for ag in self.__class__.parser._action_groups if ag.title == name )
+		argGroup = [ag for ag in self.__class__.parser._action_groups if ag.title == name]
+		return argGroup[0] if len(argGroup) > 0 else None
 
 	def getInputArgs(self):
 		inputs = self.getArgGroup('inputs')
+		if inputs is None: return []
 		return inputs._group_actions + [ac for ag in inputs._action_groups for ac in ag._group_actions]
 
 	def getOutputArgs(self):
-		return self.getArgGroup('outputs')._group_actions
+		outputs = self.getArgGroup('outputs')
+		return outputs._group_actions if outputs is not None else []
 
 	def postCreate(self, jsonTemplate=None):
 		super().postCreate(jsonTemplate)
@@ -178,6 +180,7 @@ class BiitToolNode(BiitArrayNodeBase):
 			return environmentManager.exit(cls.environment)
 
 	def getStem(self, filename):
+		filename = filename[:-1] if filename.endswith('/') else filename
 		return filename[:filename.index('.')] if '.' in filename else filename
 	
 	def getSuffixes(self, filename):
@@ -229,12 +232,23 @@ class BiitToolNode(BiitArrayNodeBase):
 				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
 				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
 				finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
-				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}_{index}{finalSuffix}'
+				indexString = f'_{index}' if len(data)>1 else ''
+				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
+		print('biit tool node: compute')
 		data = super().compute()
+		print(data)
 		if data is None: return
-		return self.tool.processDataFrame(data)
+		print('biit tool node: process data frame')
+		argsList = [ Munch.fromDict(args) for args in self.getArgs()]
+		data = self.tool.processDataFrame(data, argsList)
+		print(data)
+		self.setOutputAndClean(data if isinstance(data, pandas.DataFrame) else data['dataFrame'])
+		if (not isinstance(data, pandas.DataFrame)) and 'outputMessage' in data:
+			self.outputMessage = data['outputMessage']
+			return data['dataFrame']
+		return data
 	
 	@classmethod
 	def logLine(cls, line):
@@ -253,6 +267,10 @@ class BiitToolNode(BiitArrayNodeBase):
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))
 		# QThreadPool.globalInstance().start(self.worker)
 		argsList = self.getArgs()
+		# for i, args in enumerate(argsList):
+		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
+		
+		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList])
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')

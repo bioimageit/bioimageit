@@ -29,7 +29,7 @@ class Tool():
         # self.models = import_module('cellpose.models')
     
     # Process the data frame
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
     
     # Process the data

@@ -1,11 +1,11 @@
 import subprocess
 import argparse
+import pandas
 from pathlib import Path
-
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
     autoInputs = ['movie_folder']
 
@@ -23,13 +23,14 @@ class Tool:
         outputs_parser.add_argument('-ma', '--merged_annotation', help='Output merged annotation (in .xml format).', default='{movie_folder.name}/merged_annotation.xml', type=Path)
         return parser
 
-    def processDataFrame(self, dataFrame):
-        return dataFrame
+    def processDataFrame(self, dataFrame, argsList):
+        return dict(outputMessage='Output table will be computed on execution.', dataFrame=dataFrame)
 
     def processData(self, args):
         print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmnetation} and {args.expert_annotation}')
         args = ['edf_merge_detector_expert', '-ds', args.movie_folder / args.detector_segmentation, '-es', args.movie_folder / args.expert_segmentation, '-ea', args.movie_folder /args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
         subprocess.run([str(arg) for arg in args])
+
 
 if __name__ == '__main__':
     tool = Tool()

@@ -23,7 +23,7 @@ class Tool:
         outputs_parser.add_argument('-o', '--output_image', help='The output image.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
         return parser
     
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):

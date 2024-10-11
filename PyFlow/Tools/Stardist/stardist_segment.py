@@ -29,7 +29,7 @@ class Tool:
         self.normalize = normalize
         self.model = StarDist2D.from_pretrained(args.model_name)
     
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):

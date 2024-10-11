@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
     autoInputs = ['dataset']
 
@@ -21,17 +21,28 @@ class Tool:
         inputs_parser.add_argument('-ns', '--n_steps', help='Number of steps per epochs. Can be an integer or a list of the form [nStepsModel1, nStepsModel2, ...].', default='100', type=str)
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='model/', type=Path)
+        outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='model', type=Path)
         return parser
 
-    def processDataFrame(self, dataFrame):
+
+    def processDataFrame(self, dataFrame, argsList):
+        if len(argsList)==0: return dataFrame
+        # return pandas.DataFrame.from_records([dict(input=Path(argsList[0].movie_folder).parent, output=Path(argsList[0].output))])
+        output = Path(argsList[0].output).name
+        dataFrame[dataFrame.columns[-1]] = output[:-2] if output.endswith('_0') else output
+        # dataFrame.attrs = dict(groups=dict(output=[1] * len(dataFrame)))
         return dataFrame
 
-    def processData(self, args):
-        print(f'Train ExoDeepFinder from dataset {args.dataset}')
-        args = ['edf_train', '-d', args.dataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', args.output]
+    def processAllData(self, argsList):
+        outputDataset = argsList[0].dataset
+        output = argsList[0].output
+        print(f'Train ExoDeepFinder from dataset {outputDataset}')
+        args = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
         subprocess.run([str(arg) for arg in args])
 
+    def processData(self, args):
+        return
+    
 if __name__ == '__main__':
     tool = Tool()
     parser = tool.getArgumentParser()

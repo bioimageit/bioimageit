@@ -56,6 +56,9 @@ class BiitArrayNodeBase(BiitNodeBase):
             # Instead of oerwriting parameters by doing self.parameters = jsonTemplate['parameters']
             # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
             for parameterName, parameter in jsonTemplate['parameters'].items():
+                if parameterName not in self.parameters:
+                    print(f'Warning: parameter {parameterName} does not exist in node {self.name}. This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
+                    continue
                 for key, value in parameter.items():
                     self.parameters[parameterName][key] = value
         self.setExecuted(False)

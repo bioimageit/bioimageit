@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0'], pip_no_deps=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0'], pip_no_deps=['exodeepfinder'])
     environment = 'exodeepfinder-atlas'
     autoInputs = ['movie']
 
@@ -21,7 +21,7 @@ class Tool:
         outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='{movie_folder.name}/detector_segmentation.h5', type=Path)
         return parser
 
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):

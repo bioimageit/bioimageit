@@ -336,12 +336,12 @@ class WorkflowTool(DockTool):
             self.saveGraph(path)
         
         # self.workflowPathWidget.setWidgetValue(path)
+        
+        self.loadCustomTools(path)
 
         self.pyFlowInstance.loadFromFile(str(path / WorkflowTool.graphFileName))
         self.pyFlowInstance.modified = False
         self.pyFlowInstance.updateLabel()
-
-        self.loadCustomTools(path)
         return
 
     def loadCustomTools(self, path=None):

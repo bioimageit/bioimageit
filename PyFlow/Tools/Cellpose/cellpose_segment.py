@@ -36,7 +36,7 @@ class Tool:
         self.io = cellpose.io
         self.model = self.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=args.model_name)
     
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):

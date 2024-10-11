@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
     autoInputs = ['tiff']
 
@@ -20,7 +20,7 @@ class Tool:
         outputs_parser.add_argument('-o', '--output', help='Output path to the h5 file.', default='{tiff.name}/movie.h5', type=Path)
         return parser
 
-    def processDataFrame(self, dataFrame):
+    def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):

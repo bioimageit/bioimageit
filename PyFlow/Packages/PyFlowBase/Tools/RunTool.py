@@ -77,7 +77,7 @@ class ProgressDialog(QWidget):
         self.layout.addWidget(self.cancelButton)
         self.setLayout(self.layout)
         self.setGeometry(300, 300, 550, 100)
-        self.setWindowTitle('Progress Bar')
+        self.setWindowTitle('Execution progression')
         self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         self.nodeName = None
