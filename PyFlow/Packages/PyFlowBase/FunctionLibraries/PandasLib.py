@@ -21,23 +21,12 @@ class PandasNodeBase(BiitNodeBase):
     def __init__(self, name):
         super(PandasNodeBase, self).__init__(name)
         self.executed = None
-        self.executedChanged = Signal(bool)
         self.dataFrameChanged = Signal(str)
 
         self.outArray = self.createOutputPin("Data frame", "AnyPin")
         self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
         # self.headerColor = FLOW_CONTROL_COLOR
         self.lib = 'BiitLib'
-
-    def setExecuted(self, executed, propagate=True):
-        if self.executed == executed: return
-        self.executed = executed
-        self.executedChanged.send(executed)
-        # Propagate to following nodes is execution was unset?
-        if propagate and not executed:
-            nextNodes = EvaluationEngine()._impl.getEvaluationOrderIterative(self, forward=True)
-            for node in [node for node in nextNodes if node != self]:
-                node.setExecuted(False, propagate=False)
 
     @staticmethod
     def category():
@@ -123,9 +112,12 @@ class ListFiles(PandasNodeBase):
                 files = sorted(list(path.iterdir()))
             files = [f for f in files if f.name != '.DS_Store']
             dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():files})
-            ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
-            self.setOutputAndClean(dataFrame)
-            self.dirty = False
+        else:
+            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():[]})
+        ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
+        self.setOutputAndClean(dataFrame)
+        self.dirty = False
+
 
 class MergeDataFrames(PandasNodeInOut):
 

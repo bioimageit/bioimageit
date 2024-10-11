@@ -23,5 +23,6 @@ class UIBiitListFilesNode(UINodeBase):
         self._rawNode.processNode(True)
         # self.canvasRef().pyFlowInstance.onRequestFillProperties(self.createPropertiesWidget)
         # self.canvasRef().pyFlowInstance.onRequestFillTable(self)
-        self.canvasRef().tryFillPropertiesView(self)
-        self.canvasRef().tryFillTableView(self)
+
+        # self.canvasRef().tryFillPropertiesView(self)      # This calls 
+        self.canvasRef().tryFillTableView(self)             # This calls TableTool.updateTable(self._rawNode)

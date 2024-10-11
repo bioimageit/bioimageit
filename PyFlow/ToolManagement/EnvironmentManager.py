@@ -10,9 +10,9 @@ from abc import abstractmethod
 from multiprocessing.connection import Client
 import sys
 if sys.version_info < (3, 11):
-    from typing_extensions import TypedDict, Required, NotRequired, Self
+	from typing_extensions import TypedDict, Required, NotRequired, Self
 else:
-    from typing import TypedDict, Required, NotRequired, Self
+	from typing import TypedDict, Required, NotRequired, Self
 
 # class Singleton(type):
 # 	_instances = {}
@@ -24,6 +24,18 @@ if len(logging.root.handlers)==0:
 	logging.basicConfig()
 	
 logger = logging.getLogger(__name__)
+
+class ExecutionException(Exception):
+	"""Exception raised when the environment raises an error when executing the requested function.
+
+	Attributes:
+		message -- explanation of the error
+	"""
+
+	def __init__(self, message):
+		super().__init__(message)
+		self.exception = message['exception'] if 'exception' in message else None
+		self.traceback = message['traceback'] if 'traceback' in message else None
 
 class CustomHandler(logging.Handler):
 
@@ -83,7 +95,7 @@ class ClientEnvironment(Environment):
 				logger.info('execution finished')
 				return message['result'] if 'result' in message else None
 			elif message['action'] == 'error':
-				raise Exception(message)
+				raise ExecutionException(message)
 			# if message['action'] == 'print':
 			# 	print(message['content'])
 			else:

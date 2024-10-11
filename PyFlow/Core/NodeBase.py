@@ -425,7 +425,8 @@ class NodeBase(INode):
                     self.checkForErrors()
                     self.afterCompute()
                 except Exception as e:
-                    self.setError(traceback.format_exc())
+                    # self.setError(traceback.format_exc())
+                    self.setError(e)
         else:
             try:
                 self.compute()
@@ -434,7 +435,8 @@ class NodeBase(INode):
                 if force:
                     self.afterCompute()
             except Exception as e:
-                self.setError(traceback.format_exc())
+                # self.setError(traceback.format_exc())
+                self.setError(e)
         delta = datetime.now() - start
         self._computingTime = delta
         self.computed.send()

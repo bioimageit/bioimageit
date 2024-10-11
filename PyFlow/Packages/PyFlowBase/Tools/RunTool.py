@@ -32,6 +32,7 @@ from qtpy import QtGui, QtCore
 from qtpy.QtCore import QObject, QThread
 from qtpy.QtWidgets import *
 
+from PyFlow.ToolManagement.EnvironmentManager import ExecutionException
 from PyFlow.ErrorManager import ErrorManager
 from PyFlow.UI.Tool.Tool import ShelfTool
 from PyFlow.UI.Widgets import BlueprintCanvas
@@ -319,16 +320,17 @@ class RunTool(ShelfTool):
             self.log(self.progressDialog.allNodesProcessedMessage)
             inmain(self.saveGraph)
             inmain(lambda: self.progressDialog.hide())
+        except ExecutionException as e:
+            print(e.exception)
+            for line in e.traceback:
+                print(line)
+            inmain(lambda: self.displayError(e.exception, e.traceback))
+
         except Exception as e:
-            print(e.args[0]['exception'] if isinstance(e, Iterable) and len(e.args)>0 and 'exception' in e.args[0] else e)
-            tb = e.args[0]['traceback'] if isinstance(e, Iterable) and len(e.args)>0 and 'traceback' in e.args[0] else ''
-            tb += '\n\n\n'
-            print(e)
-            print(tb)
-            traceback.print_tb(e.__traceback__)
-            tb += '\n'.join(traceback.format_tb(e.__traceback__))
-            # traceback.format_exc()
-            inmain(lambda: self.displayError(e, tb))
+            for line in traceback.format_tb(e.__traceback__):
+                logger.error(line)
+            
+            inmain(lambda: self.displayError(e, e.__traceback__))
         
         self.executing = False
         self.cancelExecution.clear()
