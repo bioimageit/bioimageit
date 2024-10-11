@@ -18,6 +18,7 @@ from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QFrame, QLabel
 from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
+from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget, InputWidgetRaw
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getPinTypeFromIoType, filePathTypes
@@ -105,6 +106,7 @@ class ColumnValueWidget(QWidget):
         parameter[type] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
         self.node.dataBeenSet(resetParameters=False)
+        EditorHistory().saveState("Update parameter", modify=True)
     
     def changeTypeValue(self, index, sendChanged=True):
         type = None
@@ -127,12 +129,14 @@ class ColumnValueWidget(QWidget):
         self.node.parameters[self.name]['type'] = type
         if sendChanged:
             self.node.dataBeenSet(resetParameters=False)
+            EditorHistory().saveState("Update parameter type", modify=True)
         #     self.node.inArray.setData(None)
 
     def changeColumnValue(self, index):
         data = self.node.inArray.currentData()
         self.node.parameters[self.name]['columnName'] = data.columns[index]
         self.node.dataBeenSet(resetParameters=False)
+        EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
 
 class UIBiitArrayNodeBase(UINodeBase):
