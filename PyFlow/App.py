@@ -75,13 +75,6 @@ import PyFlow.UI.resources
 
 EDITOR_TARGET_FPS = 30
 
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[
-        logging.handlers.RotatingFileHandler(getBundlePath() / 'bioimageit.log', maxBytes=5000000, backupCount=1),
-        logging.StreamHandler()
-    ]
-)
 
 logger = logging.getLogger()
 logger.info('Launching BioImageIT...')

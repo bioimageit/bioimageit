@@ -18,8 +18,8 @@ def initialize(newModuleImportPath: str, args: list[str]):
     return tool, args
 
 def processData(moduleImportPath: str, args: list[str]):
+    tool, args = initialize(moduleImportPath, args)
     if hasattr(tool, 'processData') and callable(tool.processData):
-        tool, args = initialize(moduleImportPath, args)
         tool.processData(args)
 
 # def processAllData(moduleImportPath: str, argsList: list[list[str]]):
@@ -27,8 +27,8 @@ def processData(moduleImportPath: str, args: list[str]):
 #     tool.processAllData(args)
 
 def processAllData(moduleImportPath: str, argsList: list[dict]):
+    # Initialize with the args of the first row, convert them to a list of string before use
+    args0 = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argsList[0].items()] for item in items]
+    tool, _ = initialize(moduleImportPath, args0)
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
-        # Initialize with the args of the first row, convert them to a list of string before use
-        args0 = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argsList[0].items()] for item in items]
-        tool, _ = initialize(moduleImportPath, args0)
         tool.processAllData(argsList)

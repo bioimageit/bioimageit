@@ -19,6 +19,19 @@ from qtpy import QtCore
 import argparse
 import os
 import json
+import logging
+from pathlib import Path
+
+bundlePath = Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent.parent
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.handlers.RotatingFileHandler(bundlePath / 'bioimageit.log', maxBytes=5000000, backupCount=1),
+        logging.StreamHandler()
+    ]
+)
+
 from PyFlow.App import PyFlow
 
 def main(instance=None):
@@ -27,8 +40,7 @@ def main(instance=None):
 	
 	app = QApplication(sys.argv)
 	
-	instance2 = PyFlow.instance(software="standalone")
-	instance = instance2
+	instance = PyFlow.instance(software="standalone")
 
 	instance.updateCSS()
 	instance.activateWindow()

@@ -25,7 +25,7 @@ class Tool:
         return dataFrame
 
     def processData(self, args):
-        print(f'Detect spots in {args.movie}')
+        print(f'Detect spots in {args.movie_folder / args.tiff}')
         args = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.segmentation] + args.atlas_args.split(' ')
         subprocess.run([str(arg) for arg in args])
 
