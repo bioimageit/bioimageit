@@ -100,12 +100,12 @@ class ListFiles(PandasNodeBase):
         path = self.pathPin.currentData()
         if self.columnNamePin.currentData() == 'path':
             self.columnNamePin.setData(Path(path).name)
-        self.dirty = True
+        self.setExecuted(False)
         self.dataFrameChanged.send(path)
 
     def columnBeenSet(self, pin=None):
         path = self.pathPin.currentData()
-        self.dirty = True
+        self.setExecuted(False)
         self.dataFrameChanged.send(path)
 
     def compute(self, *args, **kwargs):

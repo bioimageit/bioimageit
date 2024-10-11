@@ -76,7 +76,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         n = len(data.columns)-1
         tool = self.__class__.tool
         for input in tool.info.inputs:
-            if hasattr(input, 'auto') and input.auto and (overwriteExistingColumns or self.parameters[input.name]['type'] == 'value'):
+            # Overwrite parameter if overwriteExistingColumns or the column does not exist in the new dataframe
+            if hasattr(input, 'auto') and input.auto and overwriteExistingColumns or self.parameters[input.name]['type'] == 'columnName' and not self.parameters[input.name]['columnName'] in data.columns:
                 self.parameters[input.name]['type'] = 'columnName'
                 self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
                 n -= 1
@@ -94,8 +95,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         data = self.getDataFrame()
         if data is None and resetParameters: self.initializeParameters()
         # Set parameters from new input dataFrame
-        # if data is not None and resetParameters: self.setParametersFromDataframe(data, False)
-        if data is not None and resetParameters: self.setParametersFromDataframe(data, True)
+        if data is not None and resetParameters: self.setParametersFromDataframe(data, False)
         #  Once parameters are set, send change
         self.parametersChanged.send(data)
     

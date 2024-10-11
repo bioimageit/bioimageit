@@ -236,14 +236,10 @@ class BiitToolNode(BiitArrayNodeBase):
 				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
-		print('biit tool node: compute')
 		data = super().compute()
-		print(data)
 		if data is None: return
-		print('biit tool node: process data frame')
 		argsList = [ Munch.fromDict(args) for args in self.getArgs()]
 		data = self.tool.processDataFrame(data, argsList)
-		print(data)
 		self.setOutputAndClean(data if isinstance(data, pandas.DataFrame) else data['dataFrame'])
 		if (not isinstance(data, pandas.DataFrame)) and 'outputMessage' in data:
 			self.outputMessage = data['outputMessage']

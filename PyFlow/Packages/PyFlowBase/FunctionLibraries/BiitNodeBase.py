@@ -24,7 +24,9 @@ class BiitNodeBase(NodeBase):
         self.outArray.setData(data)
         self.outArray.setClean()
 
-    def setExecuted(self, executed=True, propagate=True):
+    def setExecuted(self, executed=True, propagate=True, setDirty=True):
+        if not executed and setDirty:
+            self.dirty = True
         if self.executed == executed: return
         self.executed = executed
         # inmain(lambda: self.executedChanged.send(executed))
@@ -38,4 +40,4 @@ class BiitNodeBase(NodeBase):
         self.setExecuted()
 
     def clear(self):
-        self.setExecuted(False)
+        self.setExecuted(False, setDirty=False)

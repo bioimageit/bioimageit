@@ -152,7 +152,11 @@ class NodeBase(INode):
         self.errorCleared.send()
 
     def setError(self, err):
-        self._lastError = str(err)
+        error = str(err)
+        error += str(err.args)
+        # error += traceback.format_exc()
+        error += '\n'.join(traceback.format_tb(err.__traceback__))
+        self._lastError = error                     # str(err)
         self.errorOccurred.send(self._lastError)
 
     def checkForErrors(self):
