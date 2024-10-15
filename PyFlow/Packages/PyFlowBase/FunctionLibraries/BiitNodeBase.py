@@ -24,6 +24,17 @@ class BiitNodeBase(NodeBase):
         self.outArray.setData(data)
         self.outArray.setClean()
 
+    def postCreate(self, jsonTemplate=None):
+        super().postCreate(jsonTemplate)
+        if 'executed' in jsonTemplate:
+            self.executed = True
+            self.dirty = False
+
+    def serialize(self):
+        template = super().serialize()
+        template['executed'] = self.executed
+        return template
+    
     def setExecuted(self, executed=True, propagate=True, setDirty=True):
         if not executed and setDirty:
             self.dirty = True
