@@ -1,5 +1,6 @@
 # pixi environments
 .pixi
+.atlas
 *.egg-info
 *.pyc
 **/.DS_Store

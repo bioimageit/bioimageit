@@ -7,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['dataset']
 
     @staticmethod
     def getArgumentParser():
@@ -22,7 +21,7 @@ class Tool:
 
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='model', type=Path)
-        return parser
+        return parser, dict( dataset = dict(autoColumn=True) )
 
 
     def processDataFrame(self, dataFrame, argsList):
@@ -34,18 +33,19 @@ class Tool:
         return dataFrame
 
     def processAllData(self, argsList):
-        outputDataset = argsList[0].dataset
-        output = argsList[0].output
+        args = argsList[0]
+        outputDataset = args.dataset
+        output = args.output
         print(f'Train ExoDeepFinder from dataset {outputDataset}')
         args = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
     def processData(self, args):
         return
     
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

@@ -301,13 +301,12 @@ class WorkflowTool(DockTool):
         return
     
     def currentItemChanged(self, current, previous):
+
         # path = current.data(QtCore.Qt.UserRole)
         path = Path(current.text())
         # Ask to save current workflow: load if user saves or discard, return to previous item if user cancels
         if not self.loadWorkflow(path):
-            self.listWidget.currentItemChanged.disconnect(self.currentItemChanged)
-            self.listWidget.setCurrentItem(previous)
-            self.listWidget.currentItemChanged.connect(self.currentItemChanged)
+            QtCore.QTimer.singleShot(0, lambda: self.listWidget.setCurrentItem(previous))
         return
 
     # Reselect the first item if the selection is empty

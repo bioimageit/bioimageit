@@ -9,7 +9,6 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(python='3.8', conda=['nvidia::cudatoolkit=11.0.*', 'nvidia::cudnn=8.0.*'], pip=['tensorflow==2.4.*', 'csbdeep==0.8.0', 'stardist==0.9.1'])
     environment = 'stardist'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -19,7 +18,7 @@ class Tool:
         inputs_parser.add_argument('-m', '--model_name', help='The model to use.', required=True, choices=['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo'], type=str)
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.{input_image.exts}', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -51,7 +50,7 @@ class Tool:
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

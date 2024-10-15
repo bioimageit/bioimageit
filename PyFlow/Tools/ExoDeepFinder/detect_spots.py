@@ -5,9 +5,8 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(python='3.10.14', conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0'], pip_no_deps=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0', 'h5py==3.11.0', 'mrcfile==1.4.3', 'matplotlib==3.8.1', 'pillow==10.3.0'], pip_no_deps=['exodeepfinder'])
     environment = 'exodeepfinder-atlas'
-    autoInputs = ['movie']
 
     @staticmethod
     def getArgumentParser():
@@ -19,19 +18,19 @@ class Tool:
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='{movie_folder.name}/detector_segmentation.h5', type=Path)
-        return parser
+        return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processData(self, args):
         print(f'Detect spots in {args.movie_folder / args.tiff}')
-        args = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.segmentation] + args.atlas_args.split(' ')
-        subprocess.run([str(arg) for arg in args])
+        args = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
+        return subprocess.run([str(arg) for arg in args])
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

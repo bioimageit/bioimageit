@@ -1,4 +1,5 @@
 import logging
+import subprocess
 import re
 import pandas
 from pathlib import Path
@@ -80,10 +81,12 @@ class BiitToolNode(BiitArrayNodeBase):
 		# toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
 		for input in self.getInputArgs():
 			select_info = dict(names=input.choices, values=input.choices)
-			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=input.dest in self.Tool.autoInputs)))
+			auto = self.__class__.argsOptions[input.dest]['autoColumn'] if input.dest in self.__class__.argsOptions and 'autoColumn' in self.__class__.argsOptions[input.dest] else False
+			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=auto)))
 		for output in self.getOutputArgs():
 			select_info = dict(names=output.choices, values=output.choices)
-			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info)))
+			auto_increment = self.__class__.argsOptions[output.dest]['autoIncrement'] if output.dest in self.__class__.argsOptions and 'autoIncrement' in self.__class__.argsOptions[output.dest] else True
+			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info, auto_increment=auto_increment)))
 		return
 
 	def getName(self):
@@ -232,14 +235,13 @@ class BiitToolNode(BiitArrayNodeBase):
 				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
 				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
 				finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
-				indexString = f'_{index}' if len(data)>1 else ''
+				indexString = f'_{index}' if len(data)>1 and output.auto_increment else ''
 				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
 		data = super().compute()
 		if data is None: return
-		argsList = [ Munch.fromDict(args) for args in self.getArgs()]
-		data = self.tool.processDataFrame(data, argsList)
+		data = self.tool.processDataFrame(data, [Munch.fromDict(args) for args in self.getArgs()])
 		self.setOutputAndClean(data if isinstance(data, pandas.DataFrame) else data['dataFrame'])
 		if (not isinstance(data, pandas.DataFrame)) and 'outputMessage' in data:
 			self.outputMessage = data['outputMessage']
@@ -271,7 +273,9 @@ class BiitToolNode(BiitArrayNodeBase):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
+			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
+			if completedProcess.returncode != 0:
+				raise Exception(completedProcess)
 		self.finishExecution(argsList)
 		return True
 
@@ -294,11 +298,12 @@ def createNode(modulePath, moduleImportPath, module):
 	# toolId = f'{tool.info.id}_v{tool.info.version}'
 	# toolId = f'{tool.info.id}_biitarray'
 
-	parser = module.Tool.getArgumentParser()
+	parser, argsOptions = module.Tool.getArgumentParser()
 
 	# Creates a new class type named {modulePath.stem} which inherits BiitToolNode and have the attributes of the given dict
 	toolClass = type(modulePath.stem, (BiitToolNode, ), dict( 
 		parser = parser,
+		argsOptions = argsOptions,
 		toolName = modulePath.stem,
 		toolPath = modulePath,
 		toolImportPath = moduleImportPath,

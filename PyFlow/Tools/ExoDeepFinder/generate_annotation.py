@@ -7,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['segmentation']
 
     @staticmethod
     def getArgumentParser():
@@ -19,7 +18,7 @@ class Tool:
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-a', '--annotation', help='Output annotation file (in .xml format).', default='annotation.xml', type=Path)
-        return parser
+        return parser, dict( segmentation = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -28,11 +27,11 @@ class Tool:
         print(f'Annotate {args.segmentation}')
         klu = ['-klu'] if args.keep_labels_unchanged else []
         args = ['edf_generate_annotation', '-s', args.segmentation, '-cr', args.cluster_radius, '-a', args.annotation] + klu
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

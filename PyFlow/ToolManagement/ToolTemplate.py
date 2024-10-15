@@ -1,4 +1,4 @@
-from importlib import import_module
+from pathlib import Path
 import argparse
 
 class Tool():
@@ -16,10 +16,10 @@ class Tool():
     def getArgumentParser():
         parser = argparse.ArgumentParser("Tool name", description="Tool description", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
-        # inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
+        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
         outputs_parser = parser.add_argument_group('outputs')
         # outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image}_segmentation.png', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
 
     # Initialize your tool
     def initialize(self, args):
@@ -39,7 +39,7 @@ class Tool():
 if __name__ == "__main__":
     # When this script is called directly: instanciate the tool, parse the arguments and launch the processing
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

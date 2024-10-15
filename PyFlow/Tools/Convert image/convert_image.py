@@ -9,7 +9,6 @@ class Tool:
     dependencies = dict(conda=['bioconda::bftools'], pip=[])
     # additional_install_commands = dict(all=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'bftools'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -49,7 +48,7 @@ class Tool:
         advanced_parser.add_argument('--pyramid-resolutions', help='Generates a pyramid image with the given number of resolution levels.', type=int)
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output_image', help='The output image.', default='{input_image.stem}.ome.tiff', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -80,10 +79,10 @@ class Tool:
             command += ['-range', rangeIndices[0], rangeIndices[1]]
         
         command += [args.input_image, args.output_image]
-        subprocess.run([str(c) for c in command])
+        return subprocess.run([str(c) for c in command])
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.processData(args)

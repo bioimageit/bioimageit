@@ -8,7 +8,6 @@ class Tool:
     categories = ['Denoising']
     dependencies = dict(python='3.9', conda=['sylvainprigent::simglib=0.1.2'], pip=[])
     environment = 'simglib'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -21,7 +20,7 @@ class Tool:
         inputs_parser.add_argument('-p', '--padding', help='Add a padding to process pixels in borders.', action='store_true')
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output_image', help='The output image.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -36,6 +35,6 @@ class Tool:
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.processData(args)

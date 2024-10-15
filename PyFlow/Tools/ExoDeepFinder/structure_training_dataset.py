@@ -1,6 +1,5 @@
 import subprocess
 import argparse
-import pandas
 from pathlib import Path
 
 class Tool:
@@ -8,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['movie_folder']
 
     @staticmethod
     def getArgumentParser():
@@ -22,7 +20,7 @@ class Tool:
 
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output folder', type=Path, default='dataset')
-        return parser
+        return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         if len(argsList)==0: return dataFrame
@@ -33,18 +31,19 @@ class Tool:
         return dataFrame
     
     def processAllData(self, argsList):
-        inputDatasetPath = Path(argsList[0].movie_folder).parent
-        output = argsList[0].output
+        args = argsList[0]
+        inputDatasetPath = Path(args.movie_folder).parent
+        output = args.output
         print(f'Structure training dataset from {inputDatasetPath} to {output}')
         args = ['edf_structure_training_dataset', '-i', inputDatasetPath, '-s', args.split, '-m', args.movie, '-ms', args.merged_segmentation, '-ma', args.merged_annotation, '-o', output]
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
     def processData(self, args):
         return
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

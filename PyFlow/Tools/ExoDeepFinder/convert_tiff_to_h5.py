@@ -7,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['tiff']
 
     @staticmethod
     def getArgumentParser():
@@ -18,7 +17,10 @@ class Tool:
 
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output path to the h5 file.', default='{tiff.name}/movie.h5', type=Path)
-        return parser
+
+        options = dict( tiff = dict(autoColumn=True), output = dict(autoIncrement=False) )
+        
+        return parser, options
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -26,16 +28,18 @@ class Tool:
     def processData(self, args):
         print(f'Convert {args.tiff} to {args.output}')
         # Never use --make_subfolder in edf_convert_tiff_to_h5 since we do not want to modify the input folder
-        subprocess.run(['edf_convert_tiff_to_h5', '-t', args.tiff, '-o', args.output])
+        completedProcess = subprocess.run(['edf_convert_tiff_to_h5', '-t', args.tiff, '-o', args.output])
+        if completedProcess.returncode != 0: return completedProcess
         # Symlink the tiff folder
         tiffLink = (args.output.parent.resolve() / 'tiff')
         if tiffLink.exists():
             tiffLink.unlink()
         tiffLink.symlink_to(args.tiff, True)
+        return completedProcess
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

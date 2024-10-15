@@ -7,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['movie_folder']
 
     @staticmethod
     def getArgumentParser():
@@ -19,7 +18,7 @@ class Tool:
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='{movie_folder.name}/expert_segmentation.h5', type=Path)
-        return parser
+        return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -27,11 +26,11 @@ class Tool:
     def processData(self, args):
         print(f'Generate segmentation for {args.movie} with {args.annotation}')
         args = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.segmentation]
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

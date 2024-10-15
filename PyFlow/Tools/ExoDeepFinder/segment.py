@@ -7,7 +7,6 @@ class Tool:
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['movie']
 
     @staticmethod
     def getArgumentParser():
@@ -20,7 +19,7 @@ class Tool:
 
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='segmentation.h5', type=Path)
-        return parser
+        return parser, dict( movie = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -29,11 +28,11 @@ class Tool:
         print(f'Segment {args.movie}')
         vizualisation = ['-v'] if args.visualization else []
         args = ['edf_segment', '-m', args.movie, '-mw', args.model_weights, '-ps', args.patch_size, '-s', args.segmentation] + vizualisation
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

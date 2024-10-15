@@ -8,7 +8,6 @@ class Tool:
     categories = ['Detection']
     dependencies = dict(conda=['bioimageit::atlas'], pip=[])
     environment = 'atlas'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -19,7 +18,7 @@ class Tool:
         inputs_parser.add_argument('-pval', '--p_value', help='P-value to account for the probability of false detection.', default=0.001, type=float)
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output_image', help='The output image.', default='{input_image.stem}_detections{input_image.exts}', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -34,6 +33,6 @@ class Tool:
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.processData(args)

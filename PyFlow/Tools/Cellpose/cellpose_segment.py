@@ -9,7 +9,6 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.0.10', 'pandas==2.2.2'])
     environment = 'cellpose'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -24,7 +23,7 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.png', type=Path)
         outputs_parser.add_argument('-n', '--npy', help='The output segmentation path.', default='{input_image.stem}_segmentation.npy', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -74,7 +73,7 @@ class Tool:
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

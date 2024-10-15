@@ -229,8 +229,9 @@ class LoggerTool(DockTool):
                         if os.path.exists(file):
                             file = file.replace("\\", "//")
                             errorLink = (
-                                """<a href=%s><span style=" text-decoration: underline; color:red;">%s</span></a></p>"""
-                                % (file + "::%s" % line, l)
+                                # """<a href=%s><span style=" text-decoration: underline; color:red;">%s</span></a></p>"""
+                                # % (file + "::%s" % line, l)
+                                """<span style=" text-decoration: underline; color:red;">%s</span>""" % l
                             )
                             self.logView.append(errorLink)
                     else:

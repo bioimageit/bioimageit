@@ -8,7 +8,6 @@ class Tool:
     categories = ['Denoising']
     dependencies = dict(python='3.9', conda=['bioimageit::ndsafir'], pip=[])
     environment = 'ndsafir'
-    autoInputs = ['input_image']
 
     @staticmethod
     def getArgumentParser():
@@ -22,7 +21,7 @@ class Tool:
         inputs_parser.add_argument('-nfr', '--n_frames', help='Number of frames to process in a batch. Use 0 to process everything at once.', default=0)
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output_image', help='The output image.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
-        return parser
+        return parser, dict( input_image = dict(autoColumn=True) )
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -37,5 +36,5 @@ class Tool:
 if __name__ == '__main__':
     tool = Tool()
     parser = tool.getArgumentParser()
-    args = parser.parse_args()
+    args, _ = parser.parse_args()
     tool.processData(args)

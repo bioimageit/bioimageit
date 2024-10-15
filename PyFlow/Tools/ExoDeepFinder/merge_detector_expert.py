@@ -1,13 +1,11 @@
 import subprocess
 import argparse
-import pandas
 from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
     dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder'])
     environment = 'exodeepfinder'
-    autoInputs = ['movie_folder']
 
     @staticmethod
     def getArgumentParser():
@@ -21,20 +19,20 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-ms', '--merged_segmentation', help='Output merged segmentation (in .h5 format).', default='{movie_folder.name}/merged_segmentation.h5', type=Path)
         outputs_parser.add_argument('-ma', '--merged_annotation', help='Output merged annotation (in .xml format).', default='{movie_folder.name}/merged_annotation.xml', type=Path)
-        return parser
+        return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dict(outputMessage='Output table will be computed on execution.', dataFrame=dataFrame)
 
     def processData(self, args):
-        print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmnetation} and {args.expert_annotation}')
+        print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmentation} and {args.expert_annotation}')
         args = ['edf_merge_detector_expert', '-ds', args.movie_folder / args.detector_segmentation, '-es', args.movie_folder / args.expert_segmentation, '-ea', args.movie_folder /args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
-        subprocess.run([str(arg) for arg in args])
+        return subprocess.run([str(arg) for arg in args])
 
 
 if __name__ == '__main__':
     tool = Tool()
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

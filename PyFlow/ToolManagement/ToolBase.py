@@ -3,6 +3,30 @@ from importlib import import_module
 tool = None
 moduleImportPath = None
 
+def dict2obj(d):
+     
+    # checking whether object d is a
+    # instance of class list
+    if isinstance(d, list):
+           d = [dict2obj(x) for x in d] 
+ 
+    # if d is not a instance of dict then
+    # directly object is returned
+    if not isinstance(d, dict):
+           return d
+  
+    # declaring a class
+    class C:
+        pass
+  
+    # constructor of the class passed to obj
+    obj = C()
+  
+    for k in d:
+        obj.__dict__[k] = dict2obj(d[k])
+  
+    return obj
+
 def initialize(newModuleImportPath: str, args: list[str]):
     global tool, moduleImportPath
     toolMustBeImported = moduleImportPath != newModuleImportPath
@@ -10,7 +34,7 @@ def initialize(newModuleImportPath: str, args: list[str]):
         module = import_module(newModuleImportPath)
         tool = module.Tool()
         moduleImportPath = newModuleImportPath
-    parser = tool.getArgumentParser()
+    parser, _ = tool.getArgumentParser()
     parser.exit_on_error = False
     args = parser.parse_args(args)
     if toolMustBeImported and hasattr(tool, 'initialize') and callable(tool.initialize):
@@ -20,7 +44,7 @@ def initialize(newModuleImportPath: str, args: list[str]):
 def processData(moduleImportPath: str, args: list[str]):
     tool, args = initialize(moduleImportPath, args)
     if hasattr(tool, 'processData') and callable(tool.processData):
-        tool.processData(args)
+        return tool.processData(args)
 
 # def processAllData(moduleImportPath: str, argsList: list[list[str]]):
 #     tool, args = initialize(moduleImportPath, argsList[0])
@@ -31,4 +55,4 @@ def processAllData(moduleImportPath: str, argsList: list[dict]):
     args0 = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argsList[0].items()] for item in items]
     tool, _ = initialize(moduleImportPath, args0)
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
-        tool.processAllData(argsList)
+        return tool.processAllData(dict2obj(argsList))
