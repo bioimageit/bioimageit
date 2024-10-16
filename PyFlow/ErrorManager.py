@@ -19,8 +19,8 @@ class ErrorManager:
 
         dataFrames = '\n\nDataFrames:\n\n'
         for node in nodes:
-            if hasattr(node, 'getDataFrame'):
-                df = node.getDataFrame()
+            if hasattr(node, 'inArray'):
+                df = node.inArray.currentData()
                 dataFrames += f'\n\n{node.name} DataFrame:\n\n' + df[:100].to_csv()
 
         return dataFrames

@@ -17,18 +17,19 @@ class BiitNodeBase(NodeBase):
         pin.setData(data)
         pin.setClean()
 
-    def setOutputAndClean(self, data):
+    def setOutputAndClean(self, data, affectOthers=True):
         if not hasattr(self, 'outArray'): return
         # Set dirty to False before calling outArray.setData(data) since this can recompute
         self.dirty = False
-        self.outArray.setData(data)
+        self.outArray.setData(data, affectOthers)
         self.outArray.setClean()
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
         if 'executed' in jsonTemplate:
             self.executed = True
-            self.dirty = False
+            # self.dirty = False # only set dirty for BiitArrayNode
+            # compute output and set without affecting others
 
     def serialize(self):
         template = super().serialize()

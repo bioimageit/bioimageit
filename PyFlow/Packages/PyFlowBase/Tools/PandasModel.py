@@ -104,7 +104,7 @@ class PandasModel(QAbstractTableModel):
                 return pixmap.size()
             
             if role == Qt.DisplayRole:
-                return str(value.name)
+                return Path(value).name
             
             if role == Qt.UserRole:
                 return Path(value).resolve()

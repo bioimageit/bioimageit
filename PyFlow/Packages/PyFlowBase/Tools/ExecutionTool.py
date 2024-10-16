@@ -19,6 +19,7 @@ from PyFlow.UI.Tool.Tool import DockTool
 
 from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool, RunSelectedTool
 from PyFlow.Packages.PyFlowBase.Tools.ClearTool import ClearSelectedTool
+from PyFlow.Packages.PyFlowBase.Tools.SetExecutedTool import SetSelectedExecutedTool
 
 class ExecutionTool(DockTool):
     """docstring for Execution tool."""
@@ -37,6 +38,7 @@ class ExecutionTool(DockTool):
         self.runTool = RunTool()
         self.runSelectedTool = RunSelectedTool()
         self.clearSelectedTool = ClearSelectedTool()
+        self.setSelectedExecutedTool = SetSelectedExecutedTool()
 
         # iconSize = QtCore.QSize(self._iconSize, self._iconSize)
         self.executeLayout = QtWidgets.QVBoxLayout()
@@ -55,6 +57,11 @@ class ExecutionTool(DockTool):
         # self.clearSelectedButton.setIconSize(iconSize)
         self.clearSelectedButton.clicked.connect(self.clearSelectedTool.do)
         self.executeLayout.addWidget(self.clearSelectedButton)
+
+        self.setSelectedExecutedButton = QtWidgets.QPushButton("Set selected nodes executed")
+        self.setSelectedExecutedButton.setIcon(SetSelectedExecutedTool.getIcon())
+        self.setSelectedExecutedButton.clicked.connect(self.setSelectedExecutedTool.do)
+        self.executeLayout.addWidget(self.setSelectedExecutedButton)
 
         self.mainLayout.addLayout(self.executeLayout)
         self.mainLayout.addStretch()
@@ -86,6 +93,7 @@ class ExecutionTool(DockTool):
         self.runTool.pyFlowInstance = pyFlowInstance
         self.runSelectedTool.pyFlowInstance = pyFlowInstance
         self.clearSelectedTool.pyFlowInstance = pyFlowInstance
+        self.setSelectedExecutedTool.pyFlowInstance = pyFlowInstance
     
     def onShow(self):
         super().onShow()

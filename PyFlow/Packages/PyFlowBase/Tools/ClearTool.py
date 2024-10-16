@@ -99,3 +99,4 @@ class ClearSelectedTool(ClearTool):
         canvas: BlueprintCanvas = self.pyFlowInstance.getCanvas()
         selectedNodeNames = [node.name for node in canvas.selectedNodes()]
         return [ node for node in nodes if RunTool.isBiitLib(node) and node.name in selectedNodeNames]
+

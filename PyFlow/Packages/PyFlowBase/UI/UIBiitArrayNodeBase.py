@@ -39,7 +39,7 @@ class ColumnValueWidget(QWidget):
         self.layout.addWidget(self.typeSelector)
         self.layout.addWidget(self.inputWidget)
         type = node.parameters[input.name]['type']
-        data = node.inArray.currentData()
+        data = node.getDataFrame()
         isDataframe = isinstance(data, pandas.DataFrame)
         node.inArray.setClean()
         defaultColumnName = node.parameters[input.name]['columnName'] if not isDataframe or node.parameters[input.name]['columnName'] in data.columns else data.columns[-1]

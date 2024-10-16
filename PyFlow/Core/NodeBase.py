@@ -147,6 +147,9 @@ class NodeBase(INode):
     def getLastErrorMessage(self):
         return self._lastError
 
+    def setupConnections(self):
+        return
+    
     def clearError(self):
         self._lastError = None
         self.errorCleared.send()

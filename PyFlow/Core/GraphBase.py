@@ -193,6 +193,8 @@ class GraphBase(ISerializable):
         :type jsonData: dict
         """
         self.clear()
+        # Populating indicates the nodes that they should not try to compute the graph since it is being populated
+        self.populating = True
         self.name = self.graphManager.getUniqGraphName(jsonData["name"])
         self.category = jsonData["category"]
         self.setIsRoot(jsonData["isRoot"])
@@ -248,6 +250,20 @@ class GraphBase(ISerializable):
                         if not connected:
                             print("Failed to restore connection", lhsPin, rhsPin)
                             connectPins(lhsPin, rhsPin)
+        
+        # Now that the graph is built, the nodes can be computed and reset to executed
+        nodes = list(self._nodes.values())
+        executedNodes = [n for n in nodes if n.executed]
+        for node in nodes:
+            node.processNode()
+        for node in executedNodes:
+            node.executed = True
+
+        # Now that the graph is built, the nodes can listen to dataBeenSet
+        # This could be moved to UIBiitArrayNodeBase? (since the UI is built after the graph)
+        self.populating = False
+        for node in nodes:
+            node.setupConnections()
 
     def remove(self):
         """Removes this graph as well as child graphs. Deepest graphs will be removed first

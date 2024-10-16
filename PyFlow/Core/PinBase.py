@@ -525,7 +525,7 @@ class PinBase(IPin):
             func(array)
         return valid
 
-    def setData(self, data):
+    def setData(self, data, affectOthers=True):
         """Sets value to pin
 
         :param data: Data to be set
@@ -562,18 +562,19 @@ class PinBase(IPin):
                     self._data.clear()
                     self._data[data[0]] = self.super.processData(data[1])
 
-            if self.direction == PinDirection.Output:
-                for i in self.affects:
-                    i.setData(self.currentData())
+            if affectOthers:
+                if self.direction == PinDirection.Output:
+                    for i in self.affects:
+                        i.setData(self.currentData())
 
-            elif self.direction == PinDirection.Input and self.owningNode().__class__.__name__ == "compound":
-                for i in self.affects:
-                    i.setData(self.currentData())
+                elif self.direction == PinDirection.Input and self.owningNode().__class__.__name__ == "compound":
+                    for i in self.affects:
+                        i.setData(self.currentData())
 
-            if self.direction == PinDirection.Input or self.optionEnabled(PinOptions.AlwaysPushDirty):
-                push(self)
-            self.clearError()
-            self.dataBeenSet.send(self)
+                if self.direction == PinDirection.Input or self.optionEnabled(PinOptions.AlwaysPushDirty):
+                    push(self)
+                self.clearError()
+                self.dataBeenSet.send(self)
         except Exception as exc:
             self.setError(exc)
             self.setDirty()

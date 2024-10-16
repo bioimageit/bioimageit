@@ -204,8 +204,8 @@ class RunTool(ShelfTool):
         return len(node.inputs) == 0 or all([not RunTool.isBiitLib(n) or RunTool.wasExecuted(n) for n in RunTool.getInputNodes(node)])
     
     @staticmethod
-    def inputsArePlanned(node):
-        return len(node.inputs) == 0 or all([not RunTool.isBiitLib(n) or RunTool.isPlanned(n) for n in RunTool.getInputNodes(node)])
+    def inputsArePlannedOrExecuted(node):
+        return len(node.inputs) == 0 or all([not RunTool.isBiitLib(n) or (RunTool.isPlanned(n) or RunTool.wasExecuted(n)) for n in RunTool.getInputNodes(node)])
     
     @staticmethod
     def getItem(list, value, key='name', cond=None, default=None):
@@ -245,7 +245,7 @@ class RunTool(ShelfTool):
         self.run()
     
     def planExecution(self, node):
-        if not RunTool.inputsArePlanned(node): return False
+        if not RunTool.inputsArePlannedOrExecuted(node): return False
         node.planned = True
         return True
     

@@ -17,7 +17,8 @@ class Tool:
         inputs_parser.add_argument('-a', '--annotation', help='Corresponding annotation (.xml generated with napari-exodeepfinder or equivalent, can also be a .csv file).', default='expert_annotation.xml', type=Path)
         
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='{movie_folder.name}/expert_segmentation.h5', type=Path)
+        outputs_parser.add_argument('-oa', '--output_annotation', help='Output annotation (a symlink to the annotation input).', default='{movie_folder.name}/expert_annotation.xml', type=Path)
+        outputs_parser.add_argument('-os', '--output_segmentation', help='Output segmentation (in .h5 format).', default='{movie_folder.name}/expert_segmentation.h5', type=Path)
         return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
@@ -25,8 +26,12 @@ class Tool:
 
     def processData(self, args):
         print(f'Generate segmentation for {args.movie} with {args.annotation}')
-        args = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.segmentation]
-        return subprocess.run([str(arg) for arg in args])
+        args = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]
+        completedProcess = subprocess.run([str(arg) for arg in args])
+        if completedProcess.returncode != 0: return completedProcess
+        if not args.output_annotation.exists():
+            args.output_annotation.symlink_to(args.movie_folder / args.annotation)
+        return completedProcess
 
 if __name__ == '__main__':
     tool = Tool()

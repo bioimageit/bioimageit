@@ -10,23 +10,29 @@ from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBa
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
+import send2trash
 from blinker import Signal
 
 class BiitArrayNodeBase(BiitNodeBase):
+    
+    OUTPUT_DATAFRAME = 'output_data_frame.csv'
 
     def __init__(self, name):
         super(BiitArrayNodeBase, self).__init__(name)
         self.parametersChanged = Signal(bool)
         self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Single, constraint="1")
         self.inArray.enableOptions(PinOptions.AllowAny)
-        self.inArray.dataBeenSet.connect(self.dataBeenSet)
+        self.inArray.onPinConnected.connect(self.onInputConnected) # Different from dataBeenSet since dataBeenSet is also called when createDataFrameFromFolder() (shortcut to create a dataFrame from the files in a folder) 
         self.inArray.onPinDisconnected.connect(self.dataBeenUnset)
         self.outArray = self.createOutputPin("out", "AnyPin", structure=StructureType.Single, constraint="1")
         self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
-        self.dataFramePath = None
+        self.folderDataFramePath = None
         self.initializeTool()
         self.initializeParameters()
         self.lib = 'BiitLib'
+    
+    def setupConnections(self):
+        self.inArray.dataBeenSet.connect(self.dataBeenSet)
     
     def initializeTool(self):
         # self.tool = self.__class__.tool if hasattr(self.__class__, 'tool') else None
@@ -52,6 +58,9 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
+        if 'executed' in jsonTemplate:
+            self.dirty = False
+
         if 'parameters' in jsonTemplate:
             # Instead of oerwriting parameters by doing self.parameters = jsonTemplate['parameters']
             # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
@@ -61,13 +70,22 @@ class BiitArrayNodeBase(BiitNodeBase):
                     continue
                 for key, value in parameter.items():
                     self.parameters[parameterName][key] = value
-        self.setExecuted(False)
         
-        if 'dataFramePath' in jsonTemplate and jsonTemplate['dataFramePath'] is not None:
-            self.dataFramePath = jsonTemplate['dataFramePath']
-            self.createDataFrameFromFolder(self.dataFramePath, False)
-        # else:
+        if 'folderDataFramePath' in jsonTemplate and jsonTemplate['folderDataFramePath'] is not None:
+            self.folderDataFramePath = jsonTemplate['folderDataFramePath']
+            self.createDataFrameFromFolder(self.folderDataFramePath, False)
+        
+        if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
+            if Path(jsonTemplate['outputDataFramePath']).exists():
+                self.setOutputAndClean(pandas.read_csv(jsonTemplate['outputDataFramePath'], index_col=0), False)
+            else:
+                self.executed = False
+                self.dirty = True
+
         #     self.createDataFrameFromInputs()
+        # Connect inArray.dataBeenSet only if the graph is already built, otherwise it will be connected once the graph is built in Graph.populateFromJson()
+        if not self.graph().populating:
+            self.inArray.dataBeenSet.connect(self.dataBeenSet)
 
     # update the parameters from data (but do not overwrite parameters which are already column names):
     # for all inputs which are path, set the corresponding parameter to the column name
@@ -81,6 +99,11 @@ class BiitArrayNodeBase(BiitNodeBase):
                 self.parameters[input.name]['type'] = 'columnName'
                 self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
                 n -= 1
+    
+    def onInputConnected(self):
+        # Reset folderDataFramePath since it should be None when the input pin has a dataFrame, 
+        # otherwise folderDataFramePath and the input dataFrame are in conlict when loading the graph file (the dataFrame is given from the input, then it is overriden with folderDataFramePath)
+        self.folderDataFramePath = None
         
     # The input pin was plugged (resetParameters=True) or parameters were changed in the properties GUI (resetParameters=False): 
     #    - set the node dirty, 
@@ -102,8 +125,8 @@ class BiitArrayNodeBase(BiitNodeBase):
     # The input pin was unplugged: reset dataFrame
     def dataBeenUnset(self, pin=None):
         self.inArray.setData(None)
-        if self.dataFramePath is not None:
-            self.createDataFrameFromFolder(self.dataFramePath)
+        if self.folderDataFramePath is not None:
+            self.createDataFrameFromFolder(self.folderDataFramePath)
 
     def getDataFrame(self):
         data = self.inArray.currentData()
@@ -121,7 +144,10 @@ class BiitArrayNodeBase(BiitNodeBase):
     def serialize(self):
         template = super(BiitArrayNodeBase, self).serialize()
         template['parameters'] = self.parameters.copy()
-        template['dataFramePath'] = self.dataFramePath
+        template['folderDataFramePath'] = self.folderDataFramePath
+        outputFolder = getOutputFolderPath(self.name)
+        if Path(outputFolder / self.OUTPUT_DATAFRAME).exists():
+            template['outputDataFramePath'] = str(outputFolder / self.OUTPUT_DATAFRAME)
         return template
     
     @staticmethod
@@ -247,7 +273,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         ThumbnailGenerator.get().generateThumbnails(self.name, outputData)
 
         if isinstance(outputData, pandas.DataFrame):
-            outputData.to_csv(outputFolder / 'output_data_frame.csv')
+            outputData.to_csv(outputFolder / self.OUTPUT_DATAFRAME)
         
         if argsList is not None:
             with open(outputFolder / 'parameters.json', 'w') as f:
@@ -266,7 +292,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         return data
 
     def createDataFrameFromFolder(self, path, initParameters=True):
-        self.dataFramePath = path
+        self.folderDataFramePath = path
         data = pandas.DataFrame()
         columnName = f'{self.name}_path'
         if isinstance(path, str) and len(path)==0 or not Path(path).exists():
@@ -283,6 +309,9 @@ class BiitArrayNodeBase(BiitNodeBase):
             # self.inArray.dataBeenSet.disconnect(self.dataBeenSet)
             self.inArray.setData(data)
             # self.inArray.dataBeenSet.connect(self.dataBeenSet)
+            
+            # Useful if self.inArray.dataBeenSet is not connected to self.dataBeenSet yet:
+            self.setParametersFromDataframe(data, False)
 
     def clear(self):
         self.deleteFiles()
@@ -291,12 +320,15 @@ class BiitArrayNodeBase(BiitNodeBase):
     def deleteFiles(self):
         self.processNode(True)
         tool = self.__class__.tool
-        data = self.getDataFrame()
-        for output in tool.info.outputs:
-            for index, row in data.iterrows():
-                outputPath = row[self.getColumnName(output)]
-                if isinstance(outputPath, Path) and outputPath.exists():
-                    outputPath.unlink()
+        # data = self.outArray.getData()
+        # for output in tool.info.outputs:
+        #     for index, row in data.iterrows():
+        #         outputPath = row[self.getColumnName(output)]
+        #         if isinstance(outputPath, Path) and outputPath.exists():
+        #             outputPath.unlink()
+        outputFolder = getOutputFolderPath(self.name)
+        if outputFolder.exists():
+            send2trash(outputFolder)
 
     @classmethod
     def description(cls): 
