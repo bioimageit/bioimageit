@@ -190,30 +190,30 @@ class BiitToolNode(BiitArrayNodeBase):
 		return filename[filename.index('.'):] if '.' in filename else ''
 
 	def replaceInputArgs(self, outputValue, inputGetter):
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', str(outputValue)):
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}}}', input)
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', str(outputValue)):
+				outputValue = outputValue.replace(f'{{{name}}}', input)
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}.stem}}', self.getStem(str(input)))
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', str(outputValue)):
+				outputValue = outputValue.replace(f'{{{name}.stem}}', self.getStem(str(input)))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}.name}}', str(Path(input).name))
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+).parent.name\}', str(outputValue)):
+				outputValue = outputValue.replace(f'{{{name}.name}}', str(Path(input).name))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).parent.name\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}.parent.name}}', str(Path(input).parent.name))
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+).ext\}', str(outputValue)):
+				outputValue = outputValue.replace(f'{{{name}.parent.name}}', str(Path(input).parent.name))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).ext\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}.ext}}', Path(input).suffix)
-		for name in re.findall(r'\{([a-zA-Z0-9_-]+).exts\}', str(outputValue)):
+				outputValue = outputValue.replace(f'{{{name}.ext}}', Path(input).suffix)
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).exts\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = str(outputValue).replace(f'{{{name}.exts}}', ''.join(Path(input).suffixes))
+				outputValue = outputValue.replace(f'{{{name}.exts}}', ''.join(Path(input).suffixes))
 		return outputValue
 
 	def getParameterValueName(self, name, row):
@@ -224,6 +224,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		args[name] = True
 
 	def setOutputColumns(self, tool, data):
+		# super().setOutputColumns(tool, data)
 		graphManager = GraphManagerSingleton().get()
 		for output in tool.info.outputs:
 			if output.type != 'path': continue
@@ -232,11 +233,20 @@ class BiitToolNode(BiitArrayNodeBase):
 			# suffixes = '.'.join(ods[1:])
 			# data[self.getColumnName(output)] = [Path(graphManager.workflowPath).resolve() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
 			for index, row in data.iterrows():
-				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameterValueName(name, row))
-				finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
-				finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
-				indexString = f'_{index}' if len(data)>1 and output.auto_increment else ''
-				data.at[index, self.getColumnName(output)] = Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
+				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
+
+				if output.value is None:
+					extension = output.extension if hasattr(output, 'extension') else ''
+					finalValue = Path(graphManager.workflowPath).resolve() / self.name / f'{output.name}_{index}{extension}'
+				else:
+					finalValue = self.replaceInputArgs(str(output.value), lambda name: self.getParameter(name, row)) 
+					# finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
+					
+					finalValue = finalValue.replace('[workflow_folder]', Path(graphManager.workflowPath).resolve())
+					finalValue = finalValue.replace('[node_folder]', Path(graphManager.workflowPath).resolve() / self.name)
+					finalValue = finalValue.replace('[index]', index)
+
+				data.at[index, self.getColumnName(output)] = finalValue # Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
 		data = super().compute()
