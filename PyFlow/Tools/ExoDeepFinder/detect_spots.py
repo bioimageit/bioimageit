@@ -18,7 +18,7 @@ class Tool:
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='{movie_folder.name}/detector_segmentation.h5', type=Path)
-        return parser, dict( movie_folder = dict(autoColumn=True) )
+        return parser, dict( movie_folder = dict(autoColumn=True), output=dict(autoIncrement=False) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -26,7 +26,12 @@ class Tool:
     def processData(self, args):
         print(f'Detect spots in {args.movie_folder / args.tiff}')
         args = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
-        return subprocess.run([str(arg) for arg in args])
+        completedProcess = subprocess.run([str(arg) for arg in args])
+        if completedProcess.returncode != 0: return completedProcess
+        for file in sorted(list(args.movie_folder.iterdir())):
+            if not (args.output.parent / file.name).exists():
+                (args.output.parent / file.name).symlink_to(file)
+        return completedProcess
 
 if __name__ == '__main__':
     tool = Tool()

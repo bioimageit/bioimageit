@@ -164,7 +164,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         return ""
     
     def getColumnName(self, output):
-        return self.name + '_' + output.name
+        return self.name + ': ' + output.name
     
     def setOutputColumns(self, tool, data):
         for output in tool.info.outputs:

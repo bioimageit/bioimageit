@@ -19,17 +19,23 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-ms', '--merged_segmentation', help='Output merged segmentation (in .h5 format).', default='{detector_segmentation.parent.name}/merged_segmentation.h5', type=Path)
         outputs_parser.add_argument('-ma', '--merged_annotation', help='Output merged annotation (in .xml format).', default='{detector_segmentation.parent.name}/merged_annotation.xml', type=Path)
-        return parser, dict( detector_segmentation = dict(autoColumn=True), expert_segmentation = dict(autoColumn=True), expert_annotation = dict(autoColumn=True) )
+        outputs_parser.add_argument('-mf', '--movie_folder', help='Output movie folder.', default='{detector_segmentation.parent.name}', type=Path)
+        return parser, dict( detector_segmentation = dict(autoColumn=True), expert_segmentation = dict(autoColumn=True), expert_annotation = dict(autoColumn=True), merged_segmentation=dict(autoIncrement=False), merged_annotation=dict(autoIncrement=False), movie_folder=dict(autoIncrement=False) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dict(outputMessage='Output table will be computed on execution.', dataFrame=dataFrame)
 
     def processData(self, args):
         print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmentation} and {args.expert_annotation}')
-        expert_annotation = Path(args.expert_segmentation).parent / args.expert_annotation if not Path(args.expert_annotation).is_absolute() else args.expert_annotation
-        args = ['edf_merge_detector_expert', '-ds', args.detector_segmentation, '-es', args.expert_segmentation, '-ea', expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
-        return subprocess.run([str(arg) for arg in args])
-
+        # expert_annotation = Path(args.expert_segmentation).parent / args.expert_annotation if not Path(args.expert_annotation).is_absolute() else args.expert_annotation
+        args = ['edf_merge_detector_expert', '-ds', args.detector_segmentation, '-es', args.expert_segmentation, '-ea', args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
+        completedProcess =  subprocess.run([str(arg) for arg in args])
+        if completedProcess.returncode != 0: return completedProcess
+        input_movie_folder = args.detector_segmentation.parent
+        for file in sorted(list(input_movie_folder.iterdir())):
+            if not (args.movie_folder / file.name).exists():
+                (args.movie_folder / file.name).symlink_to(file)
+        return completedProcess
 
 if __name__ == '__main__':
     tool = Tool()

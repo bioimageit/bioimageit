@@ -149,7 +149,7 @@ class UIBiitArrayNodeBase(UINodeBase):
         # print('parametersChanged')
         # self.canvasRef().pyFlowInstance.onRequestFillTable(self)
         if self.isSelected():
-            self.canvasRef().tryFillTableView(self)
+            self.canvasRef().tryFillTableView(self)         # Calls TableTool.updateTable()
         
     def executedChanged(self, executed:bool):
         if executed:

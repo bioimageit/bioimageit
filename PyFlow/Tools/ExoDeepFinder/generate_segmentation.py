@@ -19,7 +19,7 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-oa', '--output_annotation', help='Output annotation (a symlink to the annotation input).', default='{movie_folder.name}/expert_annotation.xml', type=Path)
         outputs_parser.add_argument('-os', '--output_segmentation', help='Output segmentation (in .h5 format).', default='{movie_folder.name}/expert_segmentation.h5', type=Path)
-        return parser, dict( movie_folder = dict(autoColumn=True) )
+        return parser, dict( movie_folder = dict(autoColumn=True), output_annotation=dict(autoIncrement=False) , output_segmentation=dict(autoIncrement=False) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
@@ -29,8 +29,11 @@ class Tool:
         args = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]
         completedProcess = subprocess.run([str(arg) for arg in args])
         if completedProcess.returncode != 0: return completedProcess
-        if not args.output_annotation.exists():
-            args.output_annotation.symlink_to(args.movie_folder / args.annotation)
+        # if not args.output_annotation.exists():
+        #     args.output_annotation.symlink_to(args.movie_folder / args.annotation)
+        for file in sorted(list(args.movie_folder.iterdir())):
+            if not (args.output_segmentation.parent / file.name).exists():
+                (args.output_segmentation.parent / file.name).symlink_to(file)
         return completedProcess
 
 if __name__ == '__main__':
