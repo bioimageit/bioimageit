@@ -149,7 +149,7 @@ class UIBiitArrayNodeBase(UINodeBase):
         # print('parametersChanged')
         # self.canvasRef().pyFlowInstance.onRequestFillTable(self)
         if self.isSelected():
-            self.canvasRef().tryFillTableView(self)
+            self.canvasRef().tryFillTableView(self)         # Calls TableTool.updateTable()
         
     def executedChanged(self, executed:bool):
         if executed:
@@ -162,7 +162,7 @@ class UIBiitArrayNodeBase(UINodeBase):
     def createBaseWidgets(self, propertiesWidget):
 
         if not self._rawNode.inArray.hasConnections():
-            defaultValue = self._rawNode.dataFramePath if self._rawNode.dataFramePath is not None else ''
+            defaultValue = self._rawNode.folderDataFramePath if self._rawNode.folderDataFramePath is not None else ''
             inputFilesLayout = QHBoxLayout()
             inputFilesLabel = QLabel('Input files:')
             inputFilesLayout.addWidget(inputFilesLabel)

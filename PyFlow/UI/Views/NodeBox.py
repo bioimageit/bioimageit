@@ -25,6 +25,7 @@ from qtpy import QtCore, QtWidgets
 from qtpy import QtGui
 from qtpy.QtWidgets import *
 
+from PyFlow import getRootPath
 from PyFlow import GET_PACKAGES
 from PyFlow import GET_PACKAGE_PATH
 
@@ -122,12 +123,15 @@ class NodeBoxTreeWidget(QTreeWidget):
                         sepCatNames.pop()
         return False
 
-    def addNodeClass(self, workflowPath, nodeName, nodePath:Path):
-        from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
-        moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
+    def addCustomNodeClass(self, workflowPath, nodeName, nodePath:Path):
         toolsPath = str(Path(workflowPath).resolve() / 'Tools')
         if toolsPath not in sys.path:
             sys.path.append(toolsPath)
+        moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
+        self.addNodeClass(nodeName, nodePath, moduleImportPath)
+
+    def addNodeClass(self, nodeName, nodePath:Path, moduleImportPath:str):
+        from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
         # If you are dynamically importing a module that was created since the interpreter began execution (e.g., created a Python source file),
         #  you may need to call invalidate_caches() in order for the new module to be noticed by the import system.
         # invalidate_caches()
@@ -587,7 +591,10 @@ class NodesBox(QFrame):
         print('file changed:', filePath)
         filePath = Path(filePath).resolve()
         if filePath.exists():
-            nodeClass = self.treeWidget.addNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
+            if filePath.resolve().is_relative_to(getRootPath()):
+                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getRootPath())).replace('.py', '').replace('/', '.'))
+            else:
+                nodeClass = self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()
             # for node in graphManager.getAllNodes():
             #     if node.toolName == filePath.stem and node.process:
@@ -662,8 +669,8 @@ class NodesBox(QFrame):
         super(NodesBox, self).mouseReleaseEvent(event)
         self.bDragging = False
 
-    def addNodeClass(self, toolName, toolPath):
-        nodeClass = self.treeWidget.addNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, toolName, toolPath)
+    def addCustomNodeClass(self, toolName, toolPath):
+        nodeClass = self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, toolName, toolPath)
         self.treeWidget.refresh(expand='PyFlowBase|' + nodeClass.category())
     
     def removeNodeClass(self, toolName):
@@ -677,7 +684,7 @@ class NodesBox(QFrame):
         if toolsPath not in sys.path:
             sys.path.append(toolsPath)
         for toolPath in self.getTools(toolsPath):
-            self.addNodeClass(toolPath.stem, toolPath)
+            self.addCustomNodeClass(toolPath.stem, toolPath)
         self.watchNodes(toolsPath)
     
     def removeTools(self, workflowPath):
@@ -710,7 +717,7 @@ class NodesBox(QFrame):
             if str(toolPath) not in self.systemWatcher.files():
                 self.systemWatcher.addPath(str(toolPath))
 
-            self.addNodeClass(toolName, toolPath)
+            self.addCustomNodeClass(toolName, toolPath)
 
             # Open script file in code editor
             editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")

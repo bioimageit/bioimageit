@@ -19,6 +19,7 @@ from PyFlow.UI.Tool.Tool import ShelfTool
 from PyFlow.UI.Widgets import BlueprintCanvas
 from PyFlow.Packages.PyFlowBase.Tools import RESOURCES_DIR
 from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool
+from PyFlow.UI.EditorHistory import EditorHistory
 
 class SetSelectedExecutedTool(ShelfTool):
     """docstring for SetSelectedExecutedTool."""
@@ -50,3 +51,5 @@ class SetSelectedExecutedTool(ShelfTool):
         nodesToSet = self.getNodesToSet(nodes)
         for node in nodesToSet:
             node.setExecuted(True)
+            
+        self.pyFlowInstance.getCanvas().resetScale()

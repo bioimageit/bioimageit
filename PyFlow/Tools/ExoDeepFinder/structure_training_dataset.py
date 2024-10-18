@@ -35,8 +35,8 @@ class Tool:
         inputDatasetPath = Path(args.movie_folder).parent
         output = args.output
         print(f'Structure training dataset from {inputDatasetPath} to {output}')
-        args = ['edf_structure_training_dataset', '-i', inputDatasetPath, '-s', args.split, '-m', args.movie, '-ms', args.merged_segmentation, '-ma', args.merged_annotation, '-o', output]
-        return subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_structure_training_dataset', '-i', inputDatasetPath, '-s', args.split, '-m', args.movie, '-ms', args.merged_segmentation, '-ma', args.merged_annotation, '-o', output]
+        return subprocess.run([str(arg) for arg in commandArgs])
 
     def processData(self, args):
         return

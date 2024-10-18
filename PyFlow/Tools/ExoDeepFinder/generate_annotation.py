@@ -26,8 +26,8 @@ class Tool:
     def processData(self, args):
         print(f'Annotate {args.segmentation}')
         klu = ['-klu'] if args.keep_labels_unchanged else []
-        args = ['edf_generate_annotation', '-s', args.segmentation, '-cr', args.cluster_radius, '-a', args.annotation] + klu
-        return subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_generate_annotation', '-s', args.segmentation, '-cr', args.cluster_radius, '-a', args.annotation] + klu
+        return subprocess.run([str(arg) for arg in commandArgs])
 
 if __name__ == '__main__':
     tool = Tool()

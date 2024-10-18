@@ -179,7 +179,7 @@ class NodeName(QGraphicsWidget):
             parent,
             self,
             singleLine=True,
-            validator=NodeNameValidator(),
+            validator=None, # NodeNameValidator(),
         )
         self.labelItem.setDefaultTextColor(self.parentItem()._labelTextColor)
         self.labelItem.setAcceptHoverEvents(True)

@@ -47,7 +47,7 @@ class SimpleITKBase(BiitArrayNodeBase):
             # if 'vector' in inputImage.GetPixelIDTypeAsString():
             #     inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
             result = self.__class__.sitkFunction(*argValues)
-            outputPath = Path(outputData.at[index, self.name + '_' + self.tool.info.outputs[0].name])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             if outputPath.suffix == '.tfm':
                 sitk.WriteTransform(result, outputPath)
@@ -99,7 +99,7 @@ class BinaryThreshold(SimpleITKBase):
             if 'vector' in inputImage.GetPixelIDTypeAsString():
                 inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
             thresholdedImage = sitk.BinaryThreshold(inputImage, argValues['lowerThreshold'], argValues['upperThreshold'], int(argValues['insideValue']), int(argValues['outsideValue']))
-            outputPath = Path(outputData.at[index, self.name + '_thresholded_image'])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(thresholdedImage, outputPath)
         self.finishExecution()
@@ -161,7 +161,7 @@ class ExtractChannel(SimpleITKBase):
             if 'vector' in inputImage.GetPixelIDTypeAsString():
                 nChannels = inputImage.ToScalarImage().GetSize()[0]-1
                 inputImage = inputImage[min(int(self.getParameter('channel', row)), nChannels), :, :]
-            outputPath = Path(outputData.at[index, self.name + '_out'])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(inputImage, outputPath)
         self.finishExecution()
@@ -198,7 +198,7 @@ class SubtractImages(SimpleITKBase):
             inputImage1 = sitk.ReadImage(self.getParameter('image1', row), sitk.sitkInt32)
             inputImage2 = sitk.ReadImage(self.getParameter('image2', row), sitk.sitkInt32)
             resultImage = sitk.Subtract(inputImage1, inputImage2)
-            outputPath = Path(outputData.at[index, self.name + '_out'])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(sitk.Cast(resultImage, sitk.sitkUInt8), outputPath)
         self.finishExecution()
@@ -237,11 +237,11 @@ class ConnectedComponents(SimpleITKBase):
         for index, row in data.iterrows():
             inputImage = sitk.ReadImage(self.getParameter('image', row))
             labeledImage = sitk.ConnectedComponent(inputImage)
-            outputPath = Path(outputData.at[index, self.name + '_labeled_image'])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(sitk.Cast(labeledImage, sitk.sitkUInt16), outputPath)
             # sitk.WriteImage(labeledImage, outputPath)
-            outputPath = Path(outputData.at[index, self.name + '_labeled_image_rgb'])
+            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[1])])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             labeledImageRGB = sitk.LabelToRGB(labeledImage)
             sitk.WriteImage(labeledImageRGB, outputPath)
