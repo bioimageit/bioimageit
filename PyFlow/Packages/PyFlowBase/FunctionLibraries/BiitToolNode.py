@@ -7,7 +7,7 @@ from munch import Munch
 from PyFlow import getBundlePath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Core.GraphManager import GraphManagerSingleton
-from PyFlow.Packages.PyFlowBase.Tools.RunTool import RunTool
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
 
@@ -239,12 +239,23 @@ class BiitToolNode(BiitArrayNodeBase):
 					extension = output.extension if hasattr(output, 'extension') else ''
 					finalValue = Path(graphManager.workflowPath).resolve() / self.name / f'{output.name}_{index}{extension}'
 				else:
-					finalValue = self.replaceInputArgs(str(output.value), lambda name: self.getParameter(name, row)) 
+					outputValue = str(output.value)
+					
+					# Check that [workflow_folder] and [node_folder] are used at the beginning of the outputValue (if used at all)
+					for name in ['[workflow_folder]', '[node_folder]']:
+						if name in outputValue and not outputValue.startswith(name):
+							raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {output.name}.')
+					
+					# If outputValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
+					if ('[workflow_folder]' not in outputValue) and ('[node_folder]' not in outputValue) and (not Path(outputValue).is_absolute()):
+						outputValue = '[node_folder]/' + outputValue
+					
+					finalValue = self.replaceInputArgs(outputValue, lambda name: self.getParameter(name, row)) 
 					# finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
 					
-					finalValue = finalValue.replace('[workflow_folder]', Path(graphManager.workflowPath).resolve())
-					finalValue = finalValue.replace('[node_folder]', Path(graphManager.workflowPath).resolve() / self.name)
-					finalValue = finalValue.replace('[index]', index)
+					finalValue = finalValue.replace('[workflow_folder]', str(Path(graphManager.workflowPath).resolve()))
+					finalValue = finalValue.replace('[node_folder]', str(Path(graphManager.workflowPath).resolve() / self.name))
+					finalValue = finalValue.replace('[index]', str(index))
 
 				data.at[index, self.getColumnName(output)] = finalValue # Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
@@ -277,13 +288,13 @@ class BiitToolNode(BiitArrayNodeBase):
 		argsList = self.getArgs()
 		# for i, args in enumerate(argsList):
 		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-		
-		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList])
+		outputFolderPath = getOutputFolderPath(self.name)
+		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath])
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args])
+			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath])
 			if completedProcess is not None and completedProcess.returncode != 0:
 				raise Exception(completedProcess)
 		self.finishExecution(argsList)

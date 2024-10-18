@@ -17,7 +17,8 @@ class Tool:
         inputs_parser.add_argument('-aa', '--atlas_args', help='Additional atlas arguments.', default='-rad 21 -pval 0.001 -arealim 3', type=str)
         
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='{movie_folder.name}/detector_segmentation.h5', type=Path)
+        outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='[workflow_folder]/dataset/{movie_folder.name}/detector_segmentation.h5', type=Path)
+        outputs_parser.add_argument('-omf', '--output_movie_folder', help='Output movie folder.', default='[workflow_folder]/dataset/{movie_folder.name}', type=Path)
         return parser, dict( movie_folder = dict(autoColumn=True), output=dict(autoIncrement=False) )
 
     def processDataFrame(self, dataFrame, argsList):
@@ -27,10 +28,6 @@ class Tool:
         print(f'Detect spots in {args.movie_folder / args.tiff}')
         commandArgs = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
         completedProcess = subprocess.run([str(arg) for arg in commandArgs])
-        if completedProcess.returncode != 0: return completedProcess
-        for file in sorted(list(args.movie_folder.iterdir())):
-            if not (args.output.parent / file.name).exists():
-                (args.output.parent / file.name).symlink_to(file)
         return completedProcess
 
 if __name__ == '__main__':

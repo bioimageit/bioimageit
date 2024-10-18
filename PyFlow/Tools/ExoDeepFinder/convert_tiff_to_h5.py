@@ -16,7 +16,7 @@ class Tool:
         # inputs_parser.add_argument('-ms', '--make_subfolder', help='Put all tiffs in a tiff/ subfolder in the --tiff input folder, and saves the output h5 file beside.', action='store_true')
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='Output path to the h5 file.', default='{tiff.name}/movie.h5', type=Path)
+        outputs_parser.add_argument('-o', '--output', help='Output path to the h5 file.', default='[workflow_folder]/dataset/{tiff.name}/movie.h5', type=Path)
 
         options = dict( tiff = dict(autoColumn=True), output = dict(autoIncrement=False) )
         

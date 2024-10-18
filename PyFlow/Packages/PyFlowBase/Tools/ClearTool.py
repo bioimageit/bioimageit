@@ -74,7 +74,7 @@ class ClearAllTool(ClearTool):
         graphManager = self.pyFlowInstance.graphManager.get()
         for node in graphManager.getAllNodes():
             if ClearTool.isBiitLib(node):
-                node.setExecuted(False)
+                node.clear()
         super(ClearAllTool, self).do()
 
 class ClearSelectedTool(ClearTool):

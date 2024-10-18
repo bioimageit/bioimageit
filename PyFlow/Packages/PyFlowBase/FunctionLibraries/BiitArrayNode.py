@@ -5,12 +5,13 @@ from qtpy.QtCore import Signal
 
 from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
+from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
-import send2trash
+from send2trash import send2trash
 from blinker import Signal
 
 class BiitArrayNodeBase(BiitNodeBase):
@@ -207,12 +208,18 @@ class BiitArrayNodeBase(BiitNodeBase):
     def setBoolArg(self, args, name):
         args[name] = ''
     
-    def setArg(self, args, parameterName, parameterValue):
+    def setArg(self, args, parameterName, parameter, parameterValue, index):
         if parameterValue is None: return
+        graphManager = GraphManagerSingleton().get()
         if type(parameterValue) is bool and parameterValue:         # if parameter is a boolean: only set arg if true
             self.setBoolArg(args, parameterName)
         elif type(parameterValue) is not bool:                          # otherwise, set arg to parameter value
-            args[parameterName] = str( parameterValue )
+            arg = str( parameterValue )
+            if parameter['dataType'] == 'path':
+                arg = arg.replace('[index]', str(index)) if index is not None else arg
+                arg = arg.replace('[node_folder]', str(Path(graphManager.workflowPath).resolve() / self.name))
+                arg = arg.replace('[workflow_folder]', str(Path(graphManager.workflowPath).resolve()))
+            args[parameterName] = arg
         return
     
     def getArgs(self):
@@ -223,7 +230,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         if inputData is None:
             args = {}
             for parameterName, parameter in self.parameters.items():
-                self.setArg(args, parameterName, parameter['value'])
+                self.setArg(args, parameterName, parameter, parameter['value'], None)
             # self.setOutputArgs(toolInfo, args)
             self.setOutputArgsFromDataFrame(toolInfo, args, outputData, 0)
             argsList.append(args)
@@ -232,9 +239,9 @@ class BiitArrayNodeBase(BiitNodeBase):
             args = {}
             for parameterName, parameter in self.parameters.items():
                 if parameter['type'] == 'value':
-                    self.setArg(args, parameterName, parameter['value'])
+                    self.setArg(args, parameterName, parameter, parameter['value'], index)
                 else:
-                    self.setArg(args, parameterName, row[parameter['columnName']])
+                    self.setArg(args, parameterName, parameter, row[parameter['columnName']], index)
             self.setOutputArgsFromDataFrame(toolInfo, args, outputData, index)
             argsList.append(args)
         # else:
@@ -250,6 +257,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         # argsList = argsList if type(argsList) is list else [argsList]
 
         outputFolder = getOutputFolderPath(self.name)
+        if outputFolder.exists():
+            send2trash(outputFolder)
         outputFolder.mkdir(exist_ok=True, parents=True)
         
         job_id = req.new_job()

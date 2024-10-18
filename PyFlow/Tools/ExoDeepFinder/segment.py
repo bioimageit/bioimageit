@@ -18,7 +18,7 @@ class Tool:
         inputs_parser.add_argument('-v', '--visualization', help='Generate visualization images.', action='store_true')
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='segmentation.h5', type=Path)
+        outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='[workflow_folder]/dataset/{movie.parent.name}/segmentation.h5', type=Path)
         return parser, dict( movie = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
