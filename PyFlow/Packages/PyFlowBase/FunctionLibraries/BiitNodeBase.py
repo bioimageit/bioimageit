@@ -39,6 +39,8 @@ class BiitNodeBase(NodeBase):
     def setExecuted(self, executed=True, propagate=True, setDirty=True):
         if not executed and setDirty:
             self.dirty = True
+            if hasattr(self, 'outArray'):
+                self.outArray.setDirty()
         if self.executed == executed: return
         self.executed = executed
         # inmain(lambda: self.executedChanged.send(executed))

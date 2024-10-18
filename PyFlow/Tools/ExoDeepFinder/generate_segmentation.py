@@ -26,8 +26,8 @@ class Tool:
 
     def processData(self, args):
         print(f'Generate segmentation for {args.movie} with {args.annotation}')
-        args = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]
-        completedProcess = subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]
+        completedProcess = subprocess.run([str(arg) for arg in commandArgs])
         if completedProcess.returncode != 0: return completedProcess
         # if not args.output_annotation.exists():
         #     args.output_annotation.symlink_to(args.movie_folder / args.annotation)

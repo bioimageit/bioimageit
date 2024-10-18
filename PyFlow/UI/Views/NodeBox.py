@@ -592,7 +592,7 @@ class NodesBox(QFrame):
         filePath = Path(filePath).resolve()
         if filePath.exists():
             if filePath.resolve().is_relative_to(getRootPath()):
-                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, filePath.replace('.py', '').replace('/', '.'))
+                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getRootPath())).replace('.py', '').replace('/', '.'))
             else:
                 nodeClass = self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()

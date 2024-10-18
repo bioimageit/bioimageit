@@ -37,8 +37,8 @@ class Tool:
         outputDataset = args.dataset
         output = args.output
         print(f'Train ExoDeepFinder from dataset {outputDataset}')
-        args = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
-        return subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
+        return subprocess.run([str(arg) for arg in commandArgs])
 
     def processData(self, args):
         return

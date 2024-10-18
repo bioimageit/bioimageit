@@ -27,8 +27,8 @@ class Tool:
     def processData(self, args):
         print(f'Segment {args.movie}')
         vizualisation = ['-v'] if args.visualization else []
-        args = ['edf_segment', '-m', args.movie, '-mw', args.model_weights, '-ps', args.patch_size, '-s', args.segmentation] + vizualisation
-        return subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_segment', '-m', args.movie, '-mw', args.model_weights, '-ps', args.patch_size, '-s', args.segmentation] + vizualisation
+        return subprocess.run([str(arg) for arg in commandArgs])
 
 if __name__ == '__main__':
     tool = Tool()

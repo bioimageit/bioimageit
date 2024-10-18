@@ -28,8 +28,8 @@ class Tool:
     def processData(self, args):
         print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmentation} and {args.expert_annotation}')
         # expert_annotation = Path(args.expert_segmentation).parent / args.expert_annotation if not Path(args.expert_annotation).is_absolute() else args.expert_annotation
-        args = ['edf_merge_detector_expert', '-ds', args.detector_segmentation, '-es', args.expert_segmentation, '-ea', args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
-        completedProcess =  subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_merge_detector_expert', '-ds', args.detector_segmentation, '-es', args.expert_segmentation, '-ea', args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
+        completedProcess =  subprocess.run([str(arg) for arg in commandArgs])
         if completedProcess.returncode != 0: return completedProcess
         input_movie_folder = args.detector_segmentation.parent
         for file in sorted(list(input_movie_folder.iterdir())):

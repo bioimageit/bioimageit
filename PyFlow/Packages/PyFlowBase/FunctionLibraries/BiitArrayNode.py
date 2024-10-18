@@ -115,7 +115,8 @@ class BiitArrayNodeBase(BiitNodeBase):
     def dataBeenSet(self, pin=None, resetParameters=True):
         self.dirty = True
         self.setExecuted(False)
-        data = self.getDataFrame()
+        data = self.inArray.currentData()
+        data = data if isinstance(data, pandas.DataFrame) else None
         if data is None and resetParameters: self.initializeParameters()
         # Set parameters from new input dataFrame
         if data is not None and resetParameters: self.setParametersFromDataframe(data, False)
@@ -129,8 +130,10 @@ class BiitArrayNodeBase(BiitNodeBase):
             self.createDataFrameFromFolder(self.folderDataFramePath)
 
     def getDataFrame(self):
-        data = self.inArray.currentData()
-        data = data if isinstance(data, pandas.DataFrame) else self.inArray.getData()
+        # data = self.inArray.currentData()
+        # data = data if isinstance(data, pandas.DataFrame) else self.inArray.getData()
+        # return data if isinstance(data, pandas.DataFrame) else None
+        data = self.inArray.getData()
         return data if isinstance(data, pandas.DataFrame) else None
     
     def getPreviousNodes(self):

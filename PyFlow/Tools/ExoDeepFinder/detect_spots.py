@@ -25,8 +25,8 @@ class Tool:
 
     def processData(self, args):
         print(f'Detect spots in {args.movie_folder / args.tiff}')
-        args = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
-        completedProcess = subprocess.run([str(arg) for arg in args])
+        commandArgs = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
+        completedProcess = subprocess.run([str(arg) for arg in commandArgs])
         if completedProcess.returncode != 0: return completedProcess
         for file in sorted(list(args.movie_folder.iterdir())):
             if not (args.output.parent / file.name).exists():

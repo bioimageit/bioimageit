@@ -205,7 +205,6 @@ class ConcatDataFrames(PandasNodeInOut):
         result = pandas.concat(data, axis=1)
         # Remove duplicated columns
         result = result.loc[:,~result.columns.duplicated()].copy()
-        self.outArray.setData(result)
         self.setOutputAndClean(result)
         self.dirty = False
 
