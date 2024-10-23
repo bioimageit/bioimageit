@@ -65,6 +65,7 @@ class Environment():
 	def __init__(self, name) -> None:
 		self.name = name
 		self.process = None
+		self.installedDependencies = {}
 
 	@abstractmethod
 	def execute(self, module:str, function: str, args: list):
@@ -228,18 +229,21 @@ class EnvironmentManager:
 		withoutChannel = condaDependency.split('::')[1] if '::' in condaDependency else condaDependency
 		return withoutChannel.split('|')[0] if '|' in withoutChannel else withoutChannel
 	
-	def environmentIsRequired(self, dependencies: Dependencies):
+	def dependenciesAreInstalled(self, environment:str, dependencies: Dependencies):
+		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
-			process = self.executeCommands(self._activateConda() + [f'{self.condaBin} list -y'])
-			installedCondaPackages, _ = self._getOutput(process)
-			if not all([self._removeChannel(d) in installedCondaPackages for d in dependencies['conda']]):
-				return True
-		if ('pip' not in dependencies) or ('pip_no_deps' not in dependencies): return False
-		dists = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
+			if 'conda' not in installedDependencies:
+				process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'])
+				installedDependencies['conda'], _ = self._getOutput(process)
+			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
+				return False
+		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
+		dists = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()] if 'pip' not in installedDependencies else installedDependencies['pip']
+		installedDependencies['pip'] = dists
 		allPipDepsAreSatisfied = True
 		if 'pip' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in dists for d in dependencies['pip']])
 		if 'pip_no_deps' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in dists for d in dependencies['pip_no_deps']])
-		return not allPipDepsAreSatisfied
+		return allPipDepsAreSatisfied
 
 	def _isWindows(self):
 		return platform.system() == 'Windows'
@@ -292,9 +296,10 @@ class EnvironmentManager:
 		condaMeta = Path(self.condaPath) / 'envs' / environment / 'conda-meta'
 		return condaMeta.is_dir() # we could also check for the condaMeta / history file.
 	
-	def install(self, environment:str, channel=None):
+	def install(self, environment:str, package:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		process = self.executeCommands(self._activateConda() + [f'{self.condaBin} install {channel}{environment} -y'])
+		process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y'])
+		self.environments[environment].installedDependencies = {}
 		self._getOutput(process)
 
 	def formatDependencies(self, package_manager:str, dependencies: list[str]):
@@ -311,22 +316,27 @@ class EnvironmentManager:
 				finalDependencies.append(dependency)
 		return [f'"{d}"' for d in finalDependencies]
 	
-	def create(self, environment:str, dependencies:Dependencies={}, skipIfDependenciesAreAvailable=False, errorIfExists=False) -> bool:
-		if skipIfDependenciesAreAvailable and not self.environmentIsRequired(dependencies): return False
+	def installDependencies(self, environment:str, dependencies: Dependencies={}):
+		condaDependencies = self.formatDependencies('conda', dependencies)
+		pipDependencies = self.formatDependencies('pip', dependencies)
+		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies)
+		installDepsCommands = [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
+		installDepsCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
+		installDepsCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
+		installDepsCommands += [f'pip install --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
+		self.environments[environment].installedDependencies = {}
+		return installDepsCommands
+	
+	def create(self, environment:str, dependencies:Dependencies={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
+		if mainEnvironment is not None and self.dependenciesAreInstalled(mainEnvironment, dependencies): return False
 		if self.environmentExists(environment):
 			if errorIfExists:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
 		pythonRequirement = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
-		condaDependencies = self.formatDependencies('conda', dependencies)
-		pipDependencies = self.formatDependencies('pip', dependencies)
-		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies)
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
-		createEnvCommands += [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
-		createEnvCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
-		createEnvCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
-		createEnvCommands += [f'pip install --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
+		createEnvCommands += self.installDependencies(environment, dependencies)
 		process = self.executeCommands(createEnvCommands)
 		self._getOutput(process)
 		return True
@@ -346,8 +356,8 @@ class EnvironmentManager:
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
-		debug = False # environment == 'exodeepfinder' # customCommand is not None and 'NapariManager' in customCommand
-		port = -1 if not debug else 60824 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
+		debug = environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
+		port = -1 if not debug else 60873 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
 		process = self.executeCommands(commands, env=environmentVariables) if not debug else None
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish
@@ -366,8 +376,8 @@ class EnvironmentManager:
 		return ce
 	
 	# @contextmanager
-	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None) -> Environment:
-		environmentIsRequired = self.create(environment, dependencies, True)
+	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, mainEnvironment:str=None) -> Environment:
+		environmentIsRequired = self.create(environment, dependencies, mainEnvironment)
 		if environmentIsRequired:
 			return self.launch(environment, customCommand, environmentVariables)
 			# ce = self.launch(environment)

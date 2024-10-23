@@ -6,7 +6,6 @@ from pathlib import Path
 from munch import Munch
 from PyFlow import getBundlePath
 from PyFlow.invoke_in_main import inthread, inmain
-from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
@@ -225,19 +224,18 @@ class BiitToolNode(BiitArrayNodeBase):
 
 	def setOutputColumns(self, tool, data):
 		# super().setOutputColumns(tool, data)
-		graphManager = GraphManagerSingleton().get()
 		for output in tool.info.outputs:
 			if output.type != 'path': continue
 			# ods = output.default_value.split('.')
 			# stem = ods[0]
 			# suffixes = '.'.join(ods[1:])
-			# data[self.getColumnName(output)] = [Path(graphManager.workflowPath).resolve() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
+			# data[self.getColumnName(output)] = [self.getWorkflowDataPath() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
 			for index, row in data.iterrows():
 				# finalValue = self.replaceInputArgs(output.default_value, lambda name, row=row: self.getParameter(name, row))
 
 				if output.value is None:
 					extension = output.extension if hasattr(output, 'extension') else ''
-					finalValue = Path(graphManager.workflowPath).resolve() / self.name / f'{output.name}_{index}{extension}'
+					finalValue = self.getWorkflowDataPath() / self.name / f'{output.name}_{index}{extension}'
 				else:
 					outputValue = str(output.value)
 					
@@ -253,11 +251,11 @@ class BiitToolNode(BiitArrayNodeBase):
 					finalValue = self.replaceInputArgs(outputValue, (lambda name, row=row: self.getParameter(name, row)) )
 					# finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
 					
-					finalValue = finalValue.replace('[workflow_folder]', str(Path(graphManager.workflowPath).resolve()))
-					finalValue = finalValue.replace('[node_folder]', str(Path(graphManager.workflowPath).resolve() / self.name))
+					finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
+					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
 					finalValue = finalValue.replace('[index]', str(index))
 
-				data.at[index, self.getColumnName(output)] = finalValue # Path(graphManager.workflowPath).resolve() / self.name / f'{finalStem}{indexString}{finalSuffix}'
+				data.at[index, self.getColumnName(output)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
 		data = super().compute()
@@ -280,7 +278,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		return
 	
 	def execute(self, req):
-		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies)
+		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
 			inthread(self.logOutput, self.__class__.environment.process)
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))

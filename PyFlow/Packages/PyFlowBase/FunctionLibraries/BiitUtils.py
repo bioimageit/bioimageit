@@ -22,7 +22,7 @@ fileTypeToExtensions = dict(imagetiff='tif', trackmatemodel='xml', imagepng='png
 
 def getOutputFolderPath(nodeName):
     graphManager = GraphManagerSingleton().get()
-    return Path(graphManager.workflowPath).resolve() / nodeName
+    return Path(graphManager.workflowPath).resolve() / 'Data' / nodeName
 
 def getOutputFilePath(info, nodeName, index=None):
     indexPrefix = f'_{index}' if index is not None else ''

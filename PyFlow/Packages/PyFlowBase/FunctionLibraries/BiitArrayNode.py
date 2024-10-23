@@ -209,17 +209,20 @@ class BiitArrayNodeBase(BiitNodeBase):
     def setBoolArg(self, args, name):
         args[name] = ''
     
+    def getWorkflowDataPath(self):
+        graphManager = GraphManagerSingleton().get()
+        return Path(graphManager.workflowPath).resolve() / 'Data'
+    
     def setArg(self, args, parameterName, parameter, parameterValue, index):
         if parameterValue is None: return
-        graphManager = GraphManagerSingleton().get()
         if type(parameterValue) is bool and parameterValue:         # if parameter is a boolean: only set arg if true
             self.setBoolArg(args, parameterName)
         elif type(parameterValue) is not bool:                          # otherwise, set arg to parameter value
             arg = str( parameterValue )
             if parameter['dataType'] == 'path':
                 arg = arg.replace('[index]', str(index)) if index is not None else arg
-                arg = arg.replace('[node_folder]', str(Path(graphManager.workflowPath).resolve() / self.name))
-                arg = arg.replace('[workflow_folder]', str(Path(graphManager.workflowPath).resolve()))
+                arg = arg.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
+                arg = arg.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
             args[parameterName] = arg
         return
     

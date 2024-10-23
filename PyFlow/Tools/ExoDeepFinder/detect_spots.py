@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(python='3.10.14', conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0', 'h5py==3.11.0', 'mrcfile==1.4.3', 'matplotlib==3.8.1', 'pillow==10.3.0'], pip_no_deps=['exodeepfinder'])
+    dependencies = dict(python='3.10.14', conda=['bioimageit::atlas'], pip=['scikit-learn==1.3.2', 'scikit-image==0.22.0', 'h5py==3.11.0', 'mrcfile==1.4.3', 'matplotlib==3.8.1', 'pillow==10.3.0'], pip_no_deps=['exodeepfinder==0.3.11'])
     environment = 'exodeepfinder-atlas'
 
     @staticmethod

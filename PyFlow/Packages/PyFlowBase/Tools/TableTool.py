@@ -104,8 +104,33 @@ class TableTool(DockTool):
 		self.tryOpenImageOnNapari(path, removeExistingImages)
 	
 	def openImageAndClose(self, path, removeExistingImages, progress):
+		self.checkIfNodesMustInstallViewerDependencies()
 		self.openImageOnNapari(path, removeExistingImages)
 		inmain(lambda: progress.close())
+	
+	def installViewerDependencies(self, dependencies):
+		self.launchNapari()
+		if not environmentManager.dependenciesAreInstalled(self.napariEnvironment.name, dependencies):
+			hasPipDependencies = 'pip' in dependencies and len(dependencies['pip']) > 0
+			hasCondaDependencies = 'conda' in dependencies and len(dependencies['conda']) > 0
+			dependenciesString = f"pip ({dependencies['pip'].join(', ')})" if hasPipDependencies else ''
+			dependenciesString += ' and ' if hasPipDependencies and hasCondaDependencies else ''
+			dependenciesString += f"conda ({dependencies['conda'].join(', ')})" if hasCondaDependencies else ''
+			if self.openImageProgressDialog is not None:
+				inmain(lambda: self.openImageProgressDialog.setLabelText(f'Installing {dependenciesString} dependencies in Napari...\nThis could take a few minutes.'))
+			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies)
+			process = environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands)
+			environmentManager._getOutput(process)
+			if self.openImageProgressDialog is not None:
+				inmain(lambda: self.openImageProgressDialog.setLabelText('Opening image...'))
+	
+	def checkIfNodesMustInstallViewerDependencies(self):
+		graphManager = self.pyFlowInstance.graphManager.get()
+		nodes = graphManager.getAllNodes()
+		for node in nodes:
+			if hasattr(node, 'Tool') and hasattr(node.Tool, 'viewerDependencies'):
+				self.installViewerDependencies(node.Tool.viewerDependencies)
+		return
 	
 	def onTableClicked(self, item):
 		imageViewerOpened = ImageViewerTool is not None and any([isinstance(toolInstance, ImageViewerTool) for toolInstance in self.pyFlowInstance._tools])

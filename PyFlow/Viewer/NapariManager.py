@@ -11,9 +11,8 @@ def add_image(image_path, remove_others=False):
 	print('add image', image_path, remove_others)
 	if remove_others:
 		viewer.layers.clear()
-	# viewer.window.qt_viewer._qt_open([image_path], )
-	viewer.open([image_path], plugin=None)
-
+	# viewer.open([image_path], plugin=None)
+	viewer.window.qt_viewer._qt_open([image_path], stack=False)
 
 @thread_worker
 def launch_listener():
