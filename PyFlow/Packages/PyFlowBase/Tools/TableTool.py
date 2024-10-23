@@ -50,6 +50,7 @@ class TableTool(DockTool):
 	def onShow(self):
 		super(TableTool, self).onShow()
 		self.setMinimumSize(QtCore.QSize(200, 50))
+		self.openImageProgressDialog = None
 		self.container = QWidget()
 		self.layout:QVBoxLayout = QVBoxLayout()
 		self.label = QLabel()
@@ -81,7 +82,11 @@ class TableTool(DockTool):
 		napariEnvironment = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerCmd")
 		napariEnvironment = napariEnvironment if isinstance(napariEnvironment, str) and len(napariEnvironment) > 0 else environment
 		napariManagerPath = getRootPath() / 'PyFlow' / 'Viewer' / 'NapariManager.py'
+		if self.openImageProgressDialog is not None and not environmentManager.environmentIsLaunched(napariEnvironment):
+			inmain(lambda: self.openImageProgressDialog.setLabelText('Installing and launching napari...\nThis could take a few minutes.'))
 		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python -u "{napariManagerPath}"', environmentVariables=env)
+		if self.openImageProgressDialog is not None:
+			inmain(lambda: self.openImageProgressDialog.setLabelText('Opening image...'))
 
 	def tryOpenImageOnNapari(self, path, removeExistingImages):
 		self.launchNapari()
@@ -111,13 +116,13 @@ class TableTool(DockTool):
 			
 			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier
 			
-			progress = QProgressDialog(labelText='Openning image...', cancelButtonText='Cancel', minimum=0, maximum=0, parent=self.pyFlowInstance)
-			progress.setWindowModality(QtCore.Qt.WindowModal)
-			progress.setWindowTitle('Openning Napari')
+			self.openImageProgressDialog = QProgressDialog(labelText='Opening image...', cancelButtonText='Cancel', minimum=0, maximum=0, parent=self.pyFlowInstance)
+			self.openImageProgressDialog.setWindowModality(QtCore.Qt.WindowModal)
+			self.openImageProgressDialog.setWindowTitle('Opening Napari')
 
-			progress.setMinimumDuration(500)
-			progress.setValue(0)
-			inthread(self.openImageAndClose, path, removeExistingImages, progress)
+			self.openImageProgressDialog.setMinimumDuration(500)
+			self.openImageProgressDialog.setValue(0)
+			inthread(self.openImageAndClose, path, removeExistingImages, self.openImageProgressDialog)
 
 		elif len(imageViewer)>0:
 			if isinstance(path, Path):

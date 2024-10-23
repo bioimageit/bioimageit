@@ -18,8 +18,8 @@ class Tool:
         inputs_parser.add_argument('-ea', '--expert_annotation', help='Expert annotation (in .xml format).', default='expert_annotation.xml', type=Path)
         
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-ms', '--merged_segmentation', help='Output merged segmentation (in .h5 format).', default='[workflow_folder]/dataset/{detector_segmentation.parent.name}/merged_segmentation.h5', type=Path)
-        outputs_parser.add_argument('-ma', '--merged_annotation', help='Output merged annotation (in .xml format).', default='[workflow_folder]/dataset/{detector_segmentation.parent.name}/merged_annotation.xml', type=Path)
+        outputs_parser.add_argument('-ms', '--merged_segmentation', help='Output merged segmentation (in .h5 format).', default='[workflow_folder]/dataset/{movie_folder.name}/merged_segmentation.h5', type=Path)
+        outputs_parser.add_argument('-ma', '--merged_annotation', help='Output merged annotation (in .xml format).', default='[workflow_folder]/dataset/{movie_folder.name}/merged_annotation.xml', type=Path)
         
         return parser, dict( merged_segmentation=dict(autoIncrement=False), merged_annotation=dict(autoIncrement=False), movie_folder=dict(autoColumn=True, autoIncrement=False) )
 

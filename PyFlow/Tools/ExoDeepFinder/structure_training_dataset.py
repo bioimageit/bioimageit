@@ -19,15 +19,10 @@ class Tool:
         inputs_parser.add_argument('-ma', '--merged_annotation', help='Path to the merged annotation (relative to the movie folder).', default='merged_annotation.xml', type=Path)
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='Output folder', type=Path, default='[workflow_folder]/final_dataset')
+        outputs_parser.add_argument('-o', '--output', help='Output folder', type=Path, default='[workflow_folder]/train_valid')
         return parser, dict( movies_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
-        if len(argsList)==0: return dataFrame
-        # return pandas.DataFrame.from_records([dict(input=Path(argsList[0].movie_folder).parent, output=Path(argsList[0].output))])
-        output = Path(argsList[0].output).name
-        dataFrame[dataFrame.columns[-1]] = output[:-2] if output.endswith('_0') else output
-        # dataFrame.attrs = dict(groups=dict(output=[1] * len(dataFrame)))
         return dataFrame
     
     def processAllData(self, argsList):

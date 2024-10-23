@@ -180,11 +180,12 @@ class EnvironmentManager:
 			commandsWithChecks += checks
 		return commandsWithChecks
 
-	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None):
+	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None, log=True):
 		commands = str(commands) if commands is not None and len(commands)>0 else ''
 		outputs = []
 		for line in process.stdout:
-			logger.info(line)
+			if log:
+				logger.info(line)
 			if 'CondaSystemExit' in line:
 				process.kill()
 				raise Exception(f'An error occured during the execution of the commands {commands}.')
@@ -317,7 +318,7 @@ class EnvironmentManager:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = dependencies['python'].replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
+		pythonRequirement = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
 		condaDependencies = self.formatDependencies('conda', dependencies)
 		pipDependencies = self.formatDependencies('pip', dependencies)
 		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies)
@@ -330,7 +331,7 @@ class EnvironmentManager:
 		self._getOutput(process)
 		return True
 	
-	def _environmentIsLaunched(self, environment:str):
+	def environmentIsLaunched(self, environment:str):
 		return environment in self.environments and self.environments[environment].launched()
 	
 	# Unusued, but could be nice
@@ -339,7 +340,7 @@ class EnvironmentManager:
 	# 	return self.executeCommands(commands, env=environmentVariables)
 
 	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None, condaEnvironment=True) -> Environment:
-		if self._environmentIsLaunched(environment):
+		if self.environmentIsLaunched(environment):
 			return self.environments[environment]
 
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'

@@ -67,7 +67,7 @@ class BiitArrayNodeBase(BiitNodeBase):
             # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
             for parameterName, parameter in jsonTemplate['parameters'].items():
                 if parameterName not in self.parameters:
-                    print(f'Warning: parameter {parameterName} does not exist in node {self.name}. This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
+                    print(f'Warning: parameter "{parameterName}" does not exist in node "{self.name}". This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
                     continue
                 for key, value in parameter.items():
                     self.parameters[parameterName][key] = value
@@ -203,6 +203,7 @@ class BiitArrayNodeBase(BiitNodeBase):
             args[output.name] = str(outputPath)
     
     def getParameter(self, name, row):
+        if name not in self.parameters: return None
         return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
     
     def setBoolArg(self, args, name):

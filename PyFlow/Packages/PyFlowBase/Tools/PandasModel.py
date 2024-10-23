@@ -109,15 +109,15 @@ class PandasModel(QAbstractTableModel):
             if role == Qt.UserRole:
                 return Path(value).resolve()
             
-            if role == Qt.ToolTipRole:
-                return str(value)
-            
             # if role == Qt.TextAlignmentRole:
             #     return Qt.AlignBottom
 
         elif role == Qt.DisplayRole:
             if ( isinstance(value, Path) or isinstance(value, str) ) and Path(self.graphManager.workflowPath) in Path(value).parents:
                 return Path(value).name
+            return str(value)
+        
+        if role == Qt.ToolTipRole:
             return str(value)
 
         if role == Qt.TextAlignmentRole:

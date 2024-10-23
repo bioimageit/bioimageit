@@ -7,6 +7,7 @@ from tkinter import ttk
 import threading
 from pathlib import Path
 import logging
+from importlib import import_module
 
 def getBundlePath():
 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
@@ -268,12 +269,16 @@ def main():
 
         sys.path.append(str(sources.resolve()))
         
-        from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
+        # Do not import with 
+        # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
+        # since PyInstaller would freeze the EnvironmentManager and we could not benefit from its updates
+        EnvironmentManager = import_module('PyFlow.ToolManagement.EnvironmentManager')
+        environmentManager = EnvironmentManager.environmentManager
 
         environment = 'bioimageit'
 
         if not environmentManager.environmentExists(environment):
-            attachLogHandler(log)
+            EnvironmentManager.attachLogHandler(log)
             createEnvironment(sources, environmentManager, environment)
 
         progressBar.step(4)

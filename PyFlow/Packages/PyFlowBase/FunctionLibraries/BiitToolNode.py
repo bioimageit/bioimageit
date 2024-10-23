@@ -233,7 +233,7 @@ class BiitToolNode(BiitArrayNodeBase):
 			# suffixes = '.'.join(ods[1:])
 			# data[self.getColumnName(output)] = [Path(graphManager.workflowPath).resolve() / self.name / f'{stem}_{i}.{suffixes}' for i in range(len(data))]
 			for index, row in data.iterrows():
-				# finalValue = self.replaceInputArgs(output.default_value, lambda name: self.getParameter(name, row))
+				# finalValue = self.replaceInputArgs(output.default_value, lambda name, row=row: self.getParameter(name, row))
 
 				if output.value is None:
 					extension = output.extension if hasattr(output, 'extension') else ''
@@ -250,7 +250,7 @@ class BiitToolNode(BiitArrayNodeBase):
 					if ('[workflow_folder]' not in outputValue) and ('[node_folder]' not in outputValue) and (not Path(outputValue).is_absolute()):
 						outputValue = '[node_folder]/' + outputValue
 					
-					finalValue = self.replaceInputArgs(outputValue, lambda name: self.getParameter(name, row)) 
+					finalValue = self.replaceInputArgs(outputValue, (lambda name, row=row: self.getParameter(name, row)) )
 					# finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
 					
 					finalValue = finalValue.replace('[workflow_folder]', str(Path(graphManager.workflowPath).resolve()))

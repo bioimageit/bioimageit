@@ -163,8 +163,9 @@ class MergeDataFrames(PandasNodeInOut):
         # data = self.inArray.currentData()
         ySortedPins = sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
         data = [self.getPinData(p) for p in ySortedPins]
-        assert(all([isinstance(d, pandas.DataFrame) for d in data]))
+        data = [d for d in data if d is not None]
         if len(data)==0: return
+        assert(all([isinstance(d, pandas.DataFrame) for d in data]))
         df = data[0]
         mergeArgs = { arg: getattr(self, f'merge{arg}Pin').currentData() for arg, typeDefault in self.__class__.mergeArgumentToType.items() if getattr(self, f'merge{arg}Pin').currentData() != '' }
         mergeArgs['suffixes'] = (mergeArgs['left_suffix'], mergeArgs['right_suffix'])
@@ -200,6 +201,7 @@ class ConcatDataFrames(PandasNodeInOut):
         if not self.dirty: return
         ySortedPins = sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
         data = [self.getPinData(p) for p in ySortedPins]
+        data = [d for d in data if d is not None]
         if len(data)==0: return
         assert(all([isinstance(d, pandas.DataFrame) for d in data]))
         result = pandas.concat(data, axis=1)

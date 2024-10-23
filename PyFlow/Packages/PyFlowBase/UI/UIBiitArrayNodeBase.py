@@ -195,7 +195,7 @@ class UIBiitArrayNodeBase(UINodeBase):
             inputsCategory.addWidget(input.name, iw, group=inGroup)
 
     def updateOutput(self, output, value):
-        output.default_value = value
+        output.value = value
         data: pandas.DataFrame = self._rawNode.outArray.currentData()
         self._rawNode.setOutputColumns(self._rawNode.__class__.tool, data)
         self._rawNode.setOutputAndClean(data)
@@ -221,12 +221,12 @@ class UIBiitArrayNodeBase(UINodeBase):
         
         for output in tool.info.outputs:
 
-            w = createInputWidget('StringPin', lambda value: self.updateOutput(output, value), defaultValue=output.default_value)
+            w = createInputWidget('StringPin', (lambda value, output=output: self.updateOutput(output, value)), defaultValue=output.default_value)
             if w:
                 if hasattr(output, 'help'):
                     w.setToolTip(output.help)
                 w.blockWidgetSignals(True)
-                w.setWidgetValue(output.default_value)
+                w.setWidgetValue(output.value)
                 w.blockWidgetSignals(False)
                 w.setObjectName(output.name)
                 

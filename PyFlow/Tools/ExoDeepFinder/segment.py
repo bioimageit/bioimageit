@@ -12,14 +12,15 @@ class Tool:
     def getArgumentParser():
         parser = argparse.ArgumentParser("Segment", description="Segment exocytosis events.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-m', '--movie', help='Exocytosis movie (in .h5 format).', required=True, type=Path)
+        inputs_parser.add_argument('-mf', '--movie_folder', help='Input folder containing the movie files (a least a tiff folder containing the movie frames).', required=True, type=Path)
+        inputs_parser.add_argument('-m', '--movie', help='Exocytosis movie (in .h5 format).', default='movie.h5', type=Path)
         inputs_parser.add_argument('-mw', '--model_weights', help='Model weigths (in .h5 format).', default=None, type=Path)
         inputs_parser.add_argument('-ps', '--patch_size', help='Patch size (the movie is split in cubes of --patch_size before being processed). Must be a multiple of 4.', default=160, type=int)
         inputs_parser.add_argument('-v', '--visualization', help='Generate visualization images.', action='store_true')
 
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-s', '--segmentation', help='Output segmentation (in .h5 format).', default='[workflow_folder]/dataset/{movie.parent.name}/segmentation.h5', type=Path)
-        return parser, dict( movie = dict(autoColumn=True) )
+        return parser, dict( movie_folder = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame

@@ -137,6 +137,12 @@ class ProgressDialog(QWidget):
                 self.currentStep, self.nSteps = self.parseInts(progressPrints[0])
             self.logProgress()
         inmain(lambda: self.logView.append(message))
+    
+    def setCancelButtonToOk(self):
+        self.cancelButton.setText('Close')
+
+    def setCancelButtonToCancel(self):
+        self.cancelButton.setText('Cancel execution')
 
 class RunTool(ShelfTool):
     """docstring for RunTool."""
@@ -272,7 +278,7 @@ class RunTool(ShelfTool):
         self.logTool = logTools[0] if len(logTools)>0 else None
     
     def log(self, message:str):
-        logger.info(message)
+        # logger.info(message)
         self.progressDialog.log(message)
         if self.logTool is None: return
         inmain(lambda: self.logTool.logPython(message))
@@ -309,6 +315,7 @@ class RunTool(ShelfTool):
         # self.executeNodes(plannedNodes, logTool, progress)
 
     def executeNodes(self, plannedNodes):
+        inmain(lambda: self.progressDialog.setCancelButtonToCancel())
 
         self.executing = True
         try:
@@ -319,7 +326,8 @@ class RunTool(ShelfTool):
                 if self.cancelExecution.is_set(): break
             self.log(self.progressDialog.allNodesProcessedMessage)
             inmain(self.saveGraph)
-            inmain(lambda: self.progressDialog.hide())
+            # inmain(lambda: self.progressDialog.hide())
+            inmain(lambda: self.progressDialog.setCancelButtonToOk())
         except ExecutionException as e:
             print(e.exception)
             for line in e.traceback:

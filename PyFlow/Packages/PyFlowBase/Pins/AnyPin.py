@@ -140,7 +140,7 @@ class AnyPin(PinBase):
                     if self.optionEnabled(PinOptions.ChangeTypeOnConnection):
                         traverseConstrainedPins(
                             self,
-                            lambda x: self.updateOnConnectionCallback(
+                            lambda x, pin=pin: self.updateOnConnectionCallback(
                                 x, pin.__name__, True, None
                             ),
                         )

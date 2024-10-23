@@ -380,7 +380,7 @@ def createFunctionNodes():
         name = tool['name']
         functionName = tool['function_name']
         if name in classes: continue
-        tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: name, inputs=tool['inputs'], outputs=tool['outputs'], help=tool['description'], categories='SimpleITK|All')))
+        tool = DefaultMunch.fromDict(dict(info=dict(fullname=(lambda name=name: name), inputs=tool['inputs'], outputs=tool['outputs'], help=tool['description'], categories='SimpleITK|All')))
         if hasattr(sitk, functionName):
             classes[name] = createSimpleITKNode(name, getattr(sitk, functionName), tool)
         else:
