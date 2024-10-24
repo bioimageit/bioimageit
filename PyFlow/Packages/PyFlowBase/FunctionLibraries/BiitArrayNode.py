@@ -59,8 +59,6 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
-        if 'executed' in jsonTemplate:
-            self.dirty = False
 
         if 'parameters' in jsonTemplate:
             # Instead of oerwriting parameters by doing self.parameters = jsonTemplate['parameters']
@@ -74,11 +72,17 @@ class BiitArrayNodeBase(BiitNodeBase):
         
         if 'folderDataFramePath' in jsonTemplate and jsonTemplate['folderDataFramePath'] is not None:
             self.folderDataFramePath = jsonTemplate['folderDataFramePath']
+            # if not Path(self.folderDataFramePath).exists():
+            #     raise Exception(f'Warning: the node {self.name} should create its dataFrame from the folder {self.folderDataFramePath}, but it does not exist.')
             self.createDataFrameFromFolder(self.folderDataFramePath, False)
         
         if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
-            if Path(jsonTemplate['outputDataFramePath']).exists():
-                self.setOutputAndClean(pandas.read_csv(jsonTemplate['outputDataFramePath'], index_col=0), False)
+            outputFolder = getOutputFolderPath(self.name)
+            if Path(outputFolder / jsonTemplate['outputDataFramePath']).exists():
+                self.setOutputAndClean(pandas.read_csv(outputFolder / jsonTemplate['outputDataFramePath'], index_col=0), False)
+                if 'executed' in jsonTemplate:
+                    self.executed = True
+                    self.dirty = False
             else:
                 self.executed = False
                 self.dirty = True
@@ -151,7 +155,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         template['folderDataFramePath'] = self.folderDataFramePath
         outputFolder = getOutputFolderPath(self.name)
         if Path(outputFolder / self.OUTPUT_DATAFRAME).exists():
-            template['outputDataFramePath'] = str(outputFolder / self.OUTPUT_DATAFRAME)
+            template['outputDataFramePath'] = self.OUTPUT_DATAFRAME
         return template
     
     @staticmethod

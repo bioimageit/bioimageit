@@ -278,7 +278,7 @@ class RunTool(ShelfTool):
         self.logTool = logTools[0] if len(logTools)>0 else None
     
     def log(self, message:str):
-        # logger.info(message)
+        logger.info(message)
         self.progressDialog.log(message)
         if self.logTool is None: return
         inmain(lambda: self.logTool.logPython(message))

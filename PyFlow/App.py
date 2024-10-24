@@ -370,7 +370,7 @@ class PyFlow(QMainWindow):
 		self.modified = False
 		self.updateLabel()
 
-	def loadFromData(self, data, clearHistory=False):
+	def loadFromData(self, data, clearHistory=False, workflowPath=None):
 
 		# check first if all packages we are trying to load are legal
 		missedPackages = set()  # TODO: nothing fills this, can never report missing package
@@ -392,6 +392,8 @@ class PyFlow(QMainWindow):
 		self.newFile(keepRoot=False)
 		# load raw data
 		self.graphManager.get().deserialize(data)
+		if workflowPath is not None:
+			self.graphManager.get().workflowPath = workflowPath
 		self.fileBeenLoaded.emit()
 		self.graphManager.get().selectGraphByName(data["activeGraph"])
 		self.updateLabel()
@@ -409,7 +411,7 @@ class PyFlow(QMainWindow):
 	def loadFromFile(self, filePath):
 		with open(filePath, "r") as f:
 			data = json.load(f)
-			self.loadFromData(data, clearHistory=True)
+			self.loadFromData(data, clearHistory=True, workflowPath=Path(filePath).parent)
 			self.currentFileName = filePath
 			EditorHistory().saveState(
 				"Open {}".format(os.path.basename(self.currentFileName))
@@ -464,6 +466,7 @@ class PyFlow(QMainWindow):
 		if not self.currentFileName == "":
 			with open(self.currentFileName, "w") as f:
 				saveData = self.graphManager.get().serialize()
+				del saveData['workflowPath']
 				json.dump(saveData, f, indent=4)
 			print(str("// saved: '{0}'".format(self.currentFileName)))
 			self.modified = False
