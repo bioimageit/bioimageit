@@ -181,10 +181,12 @@ class EnvironmentManager:
 			commandsWithChecks += checks
 		return commandsWithChecks
 
-	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None, log=True):
+	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None, log=True, strip=True):
 		commands = str(commands) if commands is not None and len(commands)>0 else ''
 		outputs = []
 		for line in process.stdout:
+			if strip: 
+				line = line.strip()
 			if log:
 				logger.info(line)
 			if 'CondaSystemExit' in line:
@@ -238,11 +240,17 @@ class EnvironmentManager:
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
-		dists = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()] if 'pip' not in installedDependencies else installedDependencies['pip']
-		installedDependencies['pip'] = dists
+		
+		if 'pip' not in installedDependencies:
+			if environment is not None:
+				process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'])
+				installedDependencies['pip'], _ = self._getOutput(process)
+			else:
+				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
+
 		allPipDepsAreSatisfied = True
-		if 'pip' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in dists for d in dependencies['pip']])
-		if 'pip_no_deps' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in dists for d in dependencies['pip_no_deps']])
+		if 'pip' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in installedDependencies['pip'] for d in dependencies['pip']])
+		if 'pip_no_deps' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in installedDependencies['pip'] for d in dependencies['pip_no_deps']])
 		return allPipDepsAreSatisfied
 
 	def _isWindows(self):
@@ -356,7 +364,7 @@ class EnvironmentManager:
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
-		debug = environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
+		debug = False # environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
 		port = -1 if not debug else 60873 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
 		process = self.executeCommands(commands, env=environmentVariables) if not debug else None
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself

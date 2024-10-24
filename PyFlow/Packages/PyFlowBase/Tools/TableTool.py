@@ -20,7 +20,7 @@ import threading
 from multiprocessing.connection import Client
 
 from qtpy import QtCore, QtGui
-from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QApplication
+from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QMessageBox
 
 from PyFlow import getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
@@ -108,14 +108,24 @@ class TableTool(DockTool):
 		self.openImageOnNapari(path, removeExistingImages)
 		inmain(lambda: progress.close())
 	
-	def installViewerDependencies(self, dependencies):
+	def askConfirmInstallViewerDependencies(self, node, dependenciesString):
+		alwaysInstallDependencies = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerAlwaysInstallDependencies")
+		if alwaysInstallDependencies != None and alwaysInstallDependencies != 'None' and str(alwaysInstallDependencies).lower() != 'unknown':
+			return alwaysInstallDependencies == 'Yes'
+		btn = QMessageBox.warning(self, "Install Napari dependencies?", f'The node "{node.name}" requires {dependenciesString} dependencies. Would you like to always install dependencies in the environment "{self.napariEnvironment.name}" when necessary? You can change this choice later in the Preferences panel > General > Always Install Napari Dependencies.', QMessageBox.Yes | QMessageBox.No)
+		ConfigManager().setPrefsValue("PREFS", "General/ImageViewerAlwaysInstallDependencies", 'Yes' if btn == QMessageBox.Yes else 'No')
+		return btn == QMessageBox.Yes
+	
+	def installViewerDependencies(self, node, dependencies):
 		self.launchNapari()
 		if not environmentManager.dependenciesAreInstalled(self.napariEnvironment.name, dependencies):
 			hasPipDependencies = 'pip' in dependencies and len(dependencies['pip']) > 0
 			hasCondaDependencies = 'conda' in dependencies and len(dependencies['conda']) > 0
-			dependenciesString = f"pip ({dependencies['pip'].join(', ')})" if hasPipDependencies else ''
+			dependenciesString = f"pip ({', '.join(dependencies['pip'])})" if hasPipDependencies else ''
 			dependenciesString += ' and ' if hasPipDependencies and hasCondaDependencies else ''
-			dependenciesString += f"conda ({dependencies['conda'].join(', ')})" if hasCondaDependencies else ''
+			dependenciesString += f"conda ({', '.join(dependencies['conda'])})" if hasCondaDependencies else ''
+			if not inmain(lambda: self.askConfirmInstallViewerDependencies(node, dependenciesString)):
+				return
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText(f'Installing {dependenciesString} dependencies in Napari...\nThis could take a few minutes.'))
 			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies)
@@ -129,7 +139,7 @@ class TableTool(DockTool):
 		nodes = graphManager.getAllNodes()
 		for node in nodes:
 			if hasattr(node, 'Tool') and hasattr(node.Tool, 'viewerDependencies'):
-				self.installViewerDependencies(node.Tool.viewerDependencies)
+				self.installViewerDependencies(node, node.Tool.viewerDependencies)
 		return
 	
 	def onTableClicked(self, item):

@@ -53,6 +53,12 @@ class GeneralPreferences(CategoryWidgetBase):
         self.leImageViewer = QLineEdit("")
         commonCategory.addWidget("Napari environment", self.leImageViewer)
 
+        self.alwaysInstallNapariDependencies = QCheckBox()
+        self.alwaysInstallNapariDependencies.setTristate(True)
+        self.alwaysInstallNapariDependencies.setCheckState(QtCore.Qt.PartiallyChecked)
+        # self.alwaysInstallNapariDependencies.stateChanged.connect()
+        commonCategory.addWidget("Always install Napari dependencies", self.alwaysInstallNapariDependencies)
+
         # History
         self.historyDepth = QSpinBox()
         self.historyDepth.setRange(10, 100)
@@ -125,6 +131,7 @@ class GeneralPreferences(CategoryWidgetBase):
     def serialize(self, settings):
         settings.setValue("EditorCmd", self.lePythonEditor.text())
         settings.setValue("ImageViewerCmd", self.leImageViewer.text())
+        settings.setValue("ImageViewerAlwaysInstallDependencies", 'Yes' if self.alwaysInstallNapariDependencies.checkState() == QtCore.Qt.CheckState.Checked else 'No' if self.alwaysInstallNapariDependencies.checkState() == QtCore.Qt.CheckState.Unchecked else 'Unknown')
         settings.setValue("HistoryDepth", self.historyDepth.value())
 
         settings.setValue("BioImageITVersion", self.versionSelector.currentText())
@@ -148,6 +155,7 @@ class GeneralPreferences(CategoryWidgetBase):
 
         self.lePythonEditor.setText(settings.value("EditorCmd"))
         self.leImageViewer.setText(settings.value("ImageViewerCmd"))
+        self.alwaysInstallNapariDependencies.setCheckState(QtCore.Qt.CheckState.Checked if settings.value("ImageViewerAlwaysInstallDependencies") == 'Yes' else QtCore.Qt.CheckState.Unchecked if settings.value("ImageViewerAlwaysInstallDependencies") == 'No' else QtCore.Qt.CheckState.PartiallyChecked)
         username = settings.value("OmeroUsername")
         self.username.setText(username)
         self.password.setText(keyring.get_password("bioif-omero", username))

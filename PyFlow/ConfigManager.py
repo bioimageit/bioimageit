@@ -76,6 +76,11 @@ class ConfigManager(object):
             if settings.contains(valueKey):
                 return settings.value(valueKey)
 
+    def setPrefsValue(self, configAlias, valueKey, value):
+        settings = self.getSettings(configAlias)
+        if settings:
+            settings.setValue(valueKey, value)
+
     def createDefaultInput(self):
         InputManager().registerAction(
             InputAction(
