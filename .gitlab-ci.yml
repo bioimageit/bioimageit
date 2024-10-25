@@ -18,7 +18,7 @@ variables:
   # fetch the app to sign
   - curl -s $UNSIGNED_TARFILE_URL --output $UNSIGNED_TARFILE
   - mkdir artifacts
-  - python3 sign_and_notarize.py --soft-name BioImageIT --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts
+  - python3 sign_and_notarize.py --soft-name BioImage-IT --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts
  
 stages:
 - sign
