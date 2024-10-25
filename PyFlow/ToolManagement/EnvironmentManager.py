@@ -332,7 +332,8 @@ class EnvironmentManager:
 		installDepsCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		installDepsCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
 		installDepsCommands += [f'pip install --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
-		self.environments[environment].installedDependencies = {}
+		if environment in self.environments:
+			self.environments[environment].installedDependencies = {}
 		return installDepsCommands
 	
 	def create(self, environment:str, dependencies:Dependencies={}, mainEnvironment:str=None, errorIfExists=False) -> bool:

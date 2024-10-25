@@ -8,6 +8,7 @@ import threading
 from pathlib import Path
 import logging
 from importlib import import_module
+import shutil
 
 def getBundlePath():
 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
@@ -239,7 +240,7 @@ def createEnvironment(sources, environmentManager, environment):
         pythonVersion = projectConfiguration['project']['requires-python']
         pipDependencies = projectConfiguration['project']['dependencies']
         condaDependencies = [key + value for key, value in projectConfiguration['tool']['pixi']['dependencies'].items()]
-    environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion), False)
+    environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion), None, False)
 
 def main():
 
@@ -267,12 +268,22 @@ def main():
         with open(versionPath, 'w') as f:
             json.dump(versionInfo, f)
 
-        sys.path.append(str(sources.resolve()))
         
         # Do not import with 
         # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
         # since PyInstaller would freeze the EnvironmentManager and we could not benefit from its updates
-        EnvironmentManager = import_module('PyFlow.ToolManagement.EnvironmentManager')
+        # Copy EnvironmentManager to avoid importing all PyFlow dependencies
+        shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'EnvironmentManager.py')
+        sys.path.append(str(sources.resolve()))
+        # Imports from the Environment manager must be available now
+        from multiprocessing.connection import Client
+        if sys.version_info < (3, 11):
+            from typing_extensions import TypedDict, Required, NotRequired, Self
+        else:
+            from typing import TypedDict, Required, NotRequired, Self
+        print(Client, TypedDict, Required, NotRequired, Self)
+
+        EnvironmentManager = import_module('EnvironmentManager')
         environmentManager = EnvironmentManager.environmentManager
 
         environment = 'bioimageit'
