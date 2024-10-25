@@ -16,7 +16,7 @@ variables:
   - apt -y install --no-install-recommends curl ca-certificates xz-utils python3 python3-pip
   - python3 -m pip install --user --extra-index-url https://si-repository.inria.fr/ci sign_server
   # fetch the app to sign
-  - curl --fail-with-body --output $UNSIGNED_TARFILE --header "JOB-TOKEN: ${CI_JOB_TOKEN}" "$UNSIGNED_TARFILE_URL"
+  - curl --fail-with-body --output $UNSIGNED_TARFILE --header "JOB-TOKEN: ${CI_JOB_TOKEN}" $UNSIGNED_TARFILE_URL
   - mkdir artifacts
   - python3 sign_and_notarize.py --soft-name BioImage-IT --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts
  
