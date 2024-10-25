@@ -1,0 +1,37 @@
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
+image: ubuntu:22.04
+ 
+# Developers are expected to push an update to this file
+# for example by updating the version to release
+# to trigger signature
+variables:
+  RELEASED_VERSION: "0.3.9"
+  UNSIGNED_TARFILE: BioImageIT_v0.3.9.app.tar.gz
+  UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/amasson/bioimageit/-/package_files/80/download"
+ 
+.reference_script: &reference_script
+  - export DEBIAN_FRONTEND="noninteractive"
+  - apt update
+  - apt -y install --no-install-recommends curl ca-certificates xz-utils python3 python3-pip
+  - python3 -m pip install --user --extra-index-url https://si-repository.inria.fr/ci sign_server
+  # fetch the app to sign
+  - curl -s $UNSIGNED_TARFILE_URL --output $UNSIGNED_TARFILE
+  - mkdir artifacts
+  - python3 sign_and_notarize.py --soft-name BioImageIT --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts
+ 
+stages:
+- sign
+ 
+sign:
+  stage: sign
+  tags:
+    - codesign.inria.fr
+  script:
+    - *reference_script
+  artifacts:
+    paths:
+      - artifacts/*.tgz
+  when: manual
+  except:
+    - dev
