@@ -29,12 +29,12 @@ client=SignServerClient(
  
 if not args.skip_upload:
   # upload files to the server
-  for file_to_upload in ['BioImageIT.entitlements', os.environ['UNSIGNED_TARFILE']]:
+  for file_to_upload in ['entitlements.plist', os.environ['UNSIGNED_TARFILE']]:
     result=client.upload(file_to_upload)
  
 # client.sign(['BioImageIT_v0.3.9.app/Contents/MacOS/Plugins/*'], '--deep --force --verbose 2')
  
-client.sign(['BioImageIT_v0.3.9.app'], f'--options=runtime --entitlements BioImageIT.entitlements --verbose 2')
+client.sign(['BioImageIT_v0.3.9.app'], f'--options=runtime --entitlements entitlements.plist --verbose 2')
  
 submission_id = client.notarize('BioImageIT_v0.3.9.app', '')
  
