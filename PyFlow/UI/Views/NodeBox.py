@@ -128,7 +128,7 @@ class NodeBoxTreeWidget(QTreeWidget):
         if toolsPath not in sys.path:
             sys.path.append(toolsPath)
         moduleImportPath = f'{nodePath.parent.name}.{nodePath.stem}'
-        self.addNodeClass(nodeName, nodePath, moduleImportPath)
+        return self.addNodeClass(nodeName, nodePath, moduleImportPath)
 
     def addNodeClass(self, nodeName, nodePath:Path, moduleImportPath:str):
         from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode

@@ -278,7 +278,8 @@ class BiitToolNode(BiitArrayNodeBase):
 		return
 	
 	def execute(self, req):
-		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, mainEnvironment='bioimageit')
+		additionalInstallCommands = self.Tool.additionalInstallCommands if hasattr(self.Tool, 'additionalInstallCommands') else None
+		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
 			inthread(self.logOutput, self.__class__.environment.process)
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))

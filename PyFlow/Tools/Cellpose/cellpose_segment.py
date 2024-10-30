@@ -7,7 +7,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(conda=[], pip=['cellpose==3.0.10', 'pandas==2.2.2'])
+    dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
 
     @staticmethod
@@ -15,7 +15,7 @@ class Tool:
         parser = argparse.ArgumentParser("Cellpose", description="Segment cells with cellpose.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-m', '--model_name', help='The model to use.', default='cyto', type=str)
+        inputs_parser.add_argument('-m', '--model_type', help='Model type. “cyto”=cytoplasm model; “nuclei”=nucleus model; “cyto2”=cytoplasm model with additional user images; “cyto3”=super-generalist model.', default='cyto', choices=['cyto', 'nuclei', 'cyto2', 'cyto3'], type=str)
         inputs_parser.add_argument('-g', '--use_gpu', help='Use GPU (default is CPU).', action='store_true')
         inputs_parser.add_argument('-a', '--auto_diameter', help='Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.', action='store_true')
         inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
@@ -33,7 +33,7 @@ class Tool:
         import cellpose.io
         self.models = cellpose.models
         self.io = cellpose.io
-        self.model = self.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=args.model_name)
+        self.model = self.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=args.model_type)
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame

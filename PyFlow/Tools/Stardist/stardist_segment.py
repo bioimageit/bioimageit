@@ -15,18 +15,22 @@ class Tool:
         parser = argparse.ArgumentParser("Stardist", description="Segment cells with stardist.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-m', '--model_name', help='The model to use.', required=True, choices=['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo'], type=str)
+        inputs_parser.add_argument('-m', '--model_name', help='The model to use.', required=True, choices=['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo', '3D_demo'], type=str)
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):
         print('Loading libraries...')
-        from stardist.models import StarDist2D
         from csbdeep.utils import normalize
         from skimage import io
         self.normalize = normalize
-        self.model = StarDist2D.from_pretrained(args.model_name)
+        if args.model_name.startswith('2D'):
+            from stardist.models import StarDist2D
+            self.model = StarDist2D.from_pretrained(args.model_name)
+        else:
+            from stardist.models import StarDist3D
+            self.model = StarDist3D.from_pretrained(args.model_name)
     
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame

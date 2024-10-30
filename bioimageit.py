@@ -240,7 +240,7 @@ def createEnvironment(sources, environmentManager, environment):
         pythonVersion = projectConfiguration['project']['requires-python']
         pipDependencies = projectConfiguration['project']['dependencies']
         condaDependencies = [key + value for key, value in projectConfiguration['tool']['pixi']['dependencies'].items()]
-    environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion), None, False)
+    environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion))
 
 def main():
 

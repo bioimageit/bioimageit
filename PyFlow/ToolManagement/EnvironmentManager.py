@@ -253,6 +253,9 @@ class EnvironmentManager:
 		if 'pip_no_deps' in dependencies: allPipDepsAreSatisfied = allPipDepsAreSatisfied and all([d in installedDependencies['pip'] for d in dependencies['pip_no_deps']])
 		return allPipDepsAreSatisfied
 
+	def _getPlatformCommonName(self):
+		return 'mac' if platform.system() == 'Darwin' else platform.system().lower()
+	
 	def _isWindows(self):
 		return platform.system() == 'Windows'
 	
@@ -336,7 +339,7 @@ class EnvironmentManager:
 			self.environments[environment].installedDependencies = {}
 		return installDepsCommands
 	
-	def create(self, environment:str, dependencies:Dependencies={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
+	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
 		if mainEnvironment is not None and self.dependenciesAreInstalled(mainEnvironment, dependencies): return False
 		if self.environmentExists(environment):
 			if errorIfExists:
@@ -346,6 +349,10 @@ class EnvironmentManager:
 		pythonRequirement = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies)
+		if additionalInstallCommands is not None and 'all' in additionalInstallCommands:
+			createEnvCommands += additionalInstallCommands['all']
+		if additionalInstallCommands is not None and self._getPlatformCommonName() in additionalInstallCommands:
+			createEnvCommands += additionalInstallCommands[self._getPlatformCommonName()]
 		process = self.executeCommands(createEnvCommands)
 		self._getOutput(process)
 		return True
@@ -385,8 +392,8 @@ class EnvironmentManager:
 		return ce
 	
 	# @contextmanager
-	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, mainEnvironment:str=None) -> Environment:
-		environmentIsRequired = self.create(environment, dependencies, mainEnvironment)
+	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, mainEnvironment:str=None) -> Environment:
+		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, mainEnvironment=mainEnvironment)
 		if environmentIsRequired:
 			return self.launch(environment, customCommand, environmentVariables)
 			# ce = self.launch(environment)

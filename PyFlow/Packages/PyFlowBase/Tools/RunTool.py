@@ -264,7 +264,7 @@ class RunTool(ShelfTool):
         message = QMessageBox(self.pyFlowInstance)
         message.setWindowTitle('Error during execution')
         exceptionString = str(exception)
-        exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
+        # exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
         text = f'An error occured during the execution of the process: {exceptionString}'
         message.setText(text)
         message.setDetailedText(f'{exception.__class__}\n\n{traceback}')
