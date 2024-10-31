@@ -7,7 +7,6 @@ class Tool:
 
     categories = ['Format conversion']
     dependencies = dict(conda=['bioconda::bftools'], pip=[])
-    # additional_install_commands = dict(all=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'bftools'
 
     @staticmethod

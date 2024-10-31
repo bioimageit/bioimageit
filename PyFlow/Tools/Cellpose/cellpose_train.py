@@ -28,7 +28,7 @@ class Tool:
         inputs_parser.add_argument('-sdg', '--SDG', help='Whether to use SGD as optimization instead of RAdam.', action='store_true')
         inputs_parser.add_argument('-lr', '--learning_rate', help='Learning rate for the training.', default=0.005, type=float)
         inputs_parser.add_argument('-ne', '--n_epochs', help='Number of times to go through the whole training set during training.', default=2000, type=int)
-        inputs_parser.add_argument('-m', '--model_name', help='Name of the new network.', default=None, type=str)
+        inputs_parser.add_argument('-mn', '--model_name', help='Name of the new network.', default=None, type=str)
 
         inputs_parser.add_argument('-e', '--evaluate', help='Whether to evaluate the model after training.', action='store_true')
 
