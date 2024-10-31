@@ -3,8 +3,8 @@ from pathlib import Path
 
 class Tool:
 
-    categories = ['Serpico', 'Deconvolution']
-    dependencies = dict(python='3.9', conda=['bioimageit::matirf'], pip=[])
+    categories = ['Deconvolution']
+    dependencies = dict(python='3.9', conda=['bioimageit::matirf|osx-64,win-64,linux-64'], pip=[])
     environment = 'matirf'
 
     @staticmethod

@@ -4,6 +4,7 @@
 *.egg-info
 *.pyc
 **/.DS_Store
+**/test-data/
 __pycache__/
 micromamba/
 bioimageit-v*/

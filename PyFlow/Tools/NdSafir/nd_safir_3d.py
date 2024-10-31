@@ -7,7 +7,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Denoising']
-    dependencies = dict(python='3.9', conda=['bioimageit::ndsafir'], pip=[])
+    dependencies = dict(python='3.9', conda=['bioimageit::ndsafir|osx-64,win-64,linux-64'], pip=[])
     environment = 'ndsafir'
 
     @staticmethod

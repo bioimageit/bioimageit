@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Tracking', 'Stracking']
-    dependencies = dict(python='3.9', conda=[], pip=['bioimageit::stracking==0.1.4'])
+    dependencies = dict(python='3.9', conda=[], pip=['bioimageit::stracking==0.1.4|osx-64,win-64,linux-64'])
     environment = 'stracking'
 
     @staticmethod

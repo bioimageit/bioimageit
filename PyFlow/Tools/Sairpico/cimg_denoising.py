@@ -7,7 +7,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Denoising']
-    dependencies = dict(conda=['bioimageit::cimgdenoising==1.0.0'], pip=[])
+    dependencies = dict(conda=['bioimageit::cimgdenoising==1.0.0|osx-64,win-64'], pip=[])
     environment = 'cimgdenoising'
 
     @staticmethod

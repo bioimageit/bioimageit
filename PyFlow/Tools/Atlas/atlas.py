@@ -8,6 +8,7 @@ class Tool:
     categories = ['Detection']
     dependencies = dict(conda=['bioimageit::atlas'], pip=[])
     environment = 'atlas'
+    test = ['--input_image', 'test-data/M10.tif']
 
     @staticmethod
     def getArgumentParser():

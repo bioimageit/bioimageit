@@ -312,6 +312,11 @@ class EnvironmentManager:
 		process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y'])
 		self.environments[environment].installedDependencies = {}
 		self._getOutput(process)
+	
+	def platformCondaFormat(self):
+		machine = platform.machine()
+		machine = '64' if machine == 'x86_64' else machine
+		return dict(Darwin='osx', Windows='win', Linux='linux')[platform.system()] + '-' + machine
 
 	def formatDependencies(self, package_manager:str, dependencies: list[str]):
 		dependencies = dependencies[package_manager] if package_manager in dependencies else []
@@ -320,8 +325,9 @@ class EnvironmentManager:
 		for dependency in dependencies:
 			if '|' in dependency:
 				dependencyParts = dependency.split('|')
-				platforms = [p.lower() for p in dependencyParts[-1].split(',')]
-				if platform.system().lower() in platforms:
+				platforms = [p for p in dependencyParts[-1].split(',')]  # will be a list like ['win-64', 'osx-arm64', 'linux-arm64']
+				currentPlatform = self.platformCondaFormat()
+				if currentPlatform in platforms:
 					finalDependencies.append(dependencyParts[0])
 			else:
 				finalDependencies.append(dependency)

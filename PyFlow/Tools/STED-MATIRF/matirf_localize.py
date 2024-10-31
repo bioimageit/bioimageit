@@ -5,8 +5,8 @@ import subprocess
 
 class Tool:
 
-    categories = ['Serpico', 'Localization']
-    dependencies = dict(python='3.9', conda=['bioimageit::matirf'], pip=[])
+    categories = ['Localization']
+    dependencies = dict(python='3.9', conda=['bioimageit::matirf|osx-64,win-64,linux-64'], pip=[])
     environment = 'docker'
 
     @staticmethod

@@ -7,7 +7,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(python='3.8', conda=['nvidia::cudatoolkit=11.0.*', 'nvidia::cudnn=8.0.*'], pip=['tensorflow==2.4.*', 'csbdeep==0.8.0', 'stardist==0.9.1'])
+    dependencies = dict(python='3.8', conda=['nvidia::cudatoolkit=11.0.*|win-64,linux-64', 'nvidia::cudnn=8.0.*|win-64,linux-64'], pip=['tensorflow==2.4.*', 'csbdeep==0.8.0', 'stardist==0.9.1'])
     environment = 'stardist'
 
     @staticmethod

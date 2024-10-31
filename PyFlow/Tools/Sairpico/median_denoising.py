@@ -3,8 +3,8 @@ from pathlib import Path
 
 class Tool:
 
-    categories = ['Sairpico', 'Denoising']
-    dependencies = dict(python='3.9', conda=['sylvainprigent::simglib=0.1.3'], pip=[])
+    categories = ['Denoising']
+    dependencies = dict(python='3.9', conda=['sylvainprigent::simglib=0.1.2|osx-64,win-64,linux-64'], pip=[])
     environment = 'simglib'
 
     @staticmethod

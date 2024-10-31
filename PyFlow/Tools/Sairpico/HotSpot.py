@@ -3,8 +3,8 @@ from pathlib import Path
 import subprocess
 
 class Tool:
-    categories = ['Sairpico', 'Detection']
-    dependencies = dict(python='3.9', conda=['bioimageit::hotspot==1.0.0'], pip=[])
+    categories = ['Detection']
+    dependencies = dict(python='3.9', conda=['bioimageit::hotspot==1.0.0|osx-64,win-64,linux-64'], pip=[])
     environment = 'hotspot'
 
     @staticmethod

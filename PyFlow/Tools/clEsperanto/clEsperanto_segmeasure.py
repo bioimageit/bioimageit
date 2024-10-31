@@ -4,7 +4,7 @@ from pathlib import Path
 
 class Tool:
 
-    categories = ['Segmentation']
+    categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
 

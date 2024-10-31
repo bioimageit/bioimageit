@@ -5,14 +5,14 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|windows,linux', 'conda-forge::cudnn|windows,linux'], pip=['exodeepfinder==0.3.13'])
+    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|win-64,linux-64', 'conda-forge::cudnn|win-64,linux-64'], pip=['exodeepfinder==0.3.13'])
     environment = 'exodeepfinder'
 
     @staticmethod
     def getArgumentParser():
         parser = argparse.ArgumentParser("Structure training dataset", description="Convert the default dataset structure to the training file structure.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-mf', '--movies_folder', help='Input movie folder', type=Path, default='[workflow_folder]/dataset')
+        inputs_parser.add_argument('-mf', '--movies_folder', help='Input movies folder', type=Path, default='[workflow_folder]/dataset')
         inputs_parser.add_argument('-s', '--split', help='Splits the dataset in two random sets for training and validation, with --split %% of the movies in the training set, and the rest in the validation set (creates train/ and valid/ folders). Does not split if 0.', default=70, type=float)
         inputs_parser.add_argument('-m', '--movie', help='Path to the movie (relative to the movie folder).', default='movie.h5', type=Path)
         inputs_parser.add_argument('-ms', '--merged_segmentation', help='Path to the merged segmentation (relative to the movie folder).', default='merged_segmentation.h5', type=Path)
