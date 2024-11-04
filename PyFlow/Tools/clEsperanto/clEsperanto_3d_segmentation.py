@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'IXMtest_A02_s9.tif', '--out', 'IXMtest_A02_s9_segmented.tif']
 
     @staticmethod
     def getArgumentParser():
@@ -43,7 +44,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/4]] Load image {input_image}')
                 

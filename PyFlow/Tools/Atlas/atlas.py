@@ -8,7 +8,7 @@ class Tool:
     categories = ['Detection']
     dependencies = dict(conda=['bioimageit::atlas'], pip=[])
     environment = 'atlas'
-    test = ['--input_image', 'test-data/M10.tif']
+    test = ['--input_image', 'M10.tif', '--output_image', 'M10_detections.tif']
 
     @staticmethod
     def getArgumentParser():
@@ -26,11 +26,18 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
-        print(f'[[1/1]] Run Atlas on image {args.input_image}')
+        blobsFileExists = Path('blobs.txt').exists()
+        nSteps = 1 if blobsFileExists else 2
+        if not blobsFileExists:
+            print(f'[[1/{nSteps}]] Run Blobsref if necessary')
+            completedProcess = subprocess.run(['blobsref'])
+            if completedProcess.returncode != 0: return completedProcess
+
+        print(f'[[{nSteps}/{nSteps}]] Run Atlas')
         command = ['atlas', '-i', args.input_image, '-o', args.output_image, '-rad', args.gaussian_std, '-pval', args.p_value]
-        subprocess.run([str(c) for c in command])
+        return subprocess.run([str(c) for c in command])
 
 if __name__ == '__main__':
     tool = Tool()

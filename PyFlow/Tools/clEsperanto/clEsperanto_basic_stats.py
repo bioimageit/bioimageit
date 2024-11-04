@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'IXMtest_A02_s9.tif', '--out', 'IXMtest_A02_s9_info.csv']
 
     @staticmethod
     def getArgumentParser():
@@ -14,7 +15,7 @@ class Tool:
         inputs_parser = parser.add_argument_group('inputs')
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--spot_sigma', type = float, help = 'spot_sigma')
+        inputs_parser.add_argument('--spot_sigma', type = float, help = 'spot_sigma', default=3.5)
         
         outputs_parser = parser.add_argument_group('outputs')
 
@@ -36,7 +37,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         
         import csv
         from itertools import zip_longest

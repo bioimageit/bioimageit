@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'AICS_12_134_C=0.tif', '--out', 'beads_info.csv']
 
     @staticmethod
     def getArgumentParser():
@@ -14,9 +15,9 @@ class Tool:
         inputs_parser = parser.add_argument_group('inputs')
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--corrected_binary', type = str, help = 'if non corrected is not good')
-        inputs_parser.add_argument('--radius_x', type = float, help = 'radius_x')
-        inputs_parser.add_argument('--radius_y', type = float, help = 'radius_y')
+        inputs_parser.add_argument('--corrected_binary', action='store_true', help = 'if non corrected is not good')
+        inputs_parser.add_argument('--radius_x', type = float, help = 'radius_x', default=10)
+        inputs_parser.add_argument('--radius_y', type = float, help = 'radius_y', default=10)
         
         outputs_parser = parser.add_argument_group('outputs')
 
@@ -38,7 +39,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/3]] Load image {input_image}')
 
@@ -58,9 +59,9 @@ class Tool:
         binary = self.cle.binary_not(self.cle.threshold_otsu(input_to_GPU))
         labels = self.cle.voronoi_labeling(binary)
 
-        if args.corrected_binary == "True" :
+        if args.corrected_binary:
             corrected_binary = self.cle.maximum_box(self.cle.minimum_box(binary, radius_x=radius_x, radius_y=radius_y), radius_x=radius_x, radius_y=radius_y)
-            labels = self.cle.voronoi_labeling(corrected_binary)
+            labels = self.cle.voronoi_labeling('True')
 
         print(f'[[3/3]] Save output file {output}')
 

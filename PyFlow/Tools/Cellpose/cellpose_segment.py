@@ -9,6 +9,7 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
+    test = ['--input_image', 'img02.png', '--output_image', 'img02_segmentation.png']
 
     @staticmethod
     def getArgumentParser():
@@ -40,7 +41,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/4]] Load image {input_image}')

@@ -31,7 +31,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
         try:
             background = int(args.background) if args.background != 'auto' else args.background

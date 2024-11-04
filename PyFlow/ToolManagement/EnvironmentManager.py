@@ -359,8 +359,11 @@ class EnvironmentManager:
 			createEnvCommands += additionalInstallCommands['all']
 		if additionalInstallCommands is not None and self._getPlatformCommonName() in additionalInstallCommands:
 			createEnvCommands += additionalInstallCommands[self._getPlatformCommonName()]
+		print('execute commands')
 		process = self.executeCommands(createEnvCommands)
+		print('quit execute commands, getting output')
 		self._getOutput(process)
+		print('finished')
 		return True
 	
 	def environmentIsLaunched(self, environment:str):

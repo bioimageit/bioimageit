@@ -29,7 +29,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         command = ['ndsafir', '-i', args.input_image, '-o', args.output_image, '-noise', args.noise, '-iter', args.n_iterations, '-nf', args.noise_factor, '-2dt', 1 if args.time_series else 0, '-patch', args.patch]

@@ -28,7 +28,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit('Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Run Spitfire on image {args.input_image}')
         command = ['simgspitfiredenoise4d', '-i', args.input_image, '-o', args.output_image, '-regularization', args.regularization, '-weighting', args.weighting, '-method', 'SV' if args.method == 'Sparse variation' else 'HV', '-padding', 'True' if args.padding else 'False', '-niter', 200]
