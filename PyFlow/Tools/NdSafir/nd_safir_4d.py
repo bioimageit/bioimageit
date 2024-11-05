@@ -8,13 +8,16 @@ class Tool:
     categories = ['Denoising']
     dependencies = dict(python='3.9', conda=['bioimageit::ndsafir|osx-64,win-64,linux-64'], pip=[])
     environment = 'ndsafir'
+    test = ['--input_image', '03_rab_bruite.tif', '-n', 'Adaptative-Gauss', '-nf', '2', '--output_image', 'DN.tif']
+
+    noiseChoices = ['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss']
 
     @staticmethod
     def getArgumentParser():
         parser = argparse.ArgumentParser("ND-Safir 3D", description="Denoising method dedicated to microscopy image and sequence analysis.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-n', '--noise', help='Model used to evaluate the noise variance.', default='Gauss', choices=['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss'], type=str)
+        inputs_parser.add_argument('-n', '--noise', help='Model used to evaluate the noise variance.', default='Gauss', choices=Tool.noiseChoices, type=str)
         inputs_parser.add_argument('-p', '--patch', help='Patch radius. Must be of the form AxBxC where A, B and C are the patch radius in each dimension.', default='7x7x1', type=str)
         inputs_parser.add_argument('-nf', '--noise_factor', help='Noise factor.', default=1, type=float)
         inputs_parser.add_argument('-nit', '--n_iterations', help='Number of iterations.', default=5, type=int)
@@ -29,9 +32,9 @@ class Tool:
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
-
+        noise = Tool.noiseChoices.index(args.noise)
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
-        ndsafir_series.ndsafir_series(args.input_image, args.output_image, args.noise, args.n_iterations, args.noise_factor, args.patch, args.n_frames)
+        ndsafir_series.ndsafir_series(args.input_image, args.output_image, noise, args.n_iterations, args.noise_factor, args.patch, args.n_frames)
 
 if __name__ == '__main__':
     tool = Tool()

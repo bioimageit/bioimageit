@@ -2,16 +2,12 @@ import json
 from pathlib import Path
 import queue
 import pandas
-import numpy as np
 from PyFlow.invoke_in_main import inmain, inthread
 from blinker import Signal
 # from PyFlow.Packages.PyFlowBase.Tools.generate_thumbnails import generateThumbnails
 # import threading
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 
-
-from PIL import Image
-import multiprocessing
 
 class ThumbnailGenerator:
 	
@@ -28,8 +24,9 @@ class ThumbnailGenerator:
 
 	@classmethod
 	def logOutput(cls, process):
-		for line in process.stdout:
-			print(line)
+		with process.stdout:
+			for line in process.stdout:
+				print(line)
 		return
 	
 	# @staticmethod

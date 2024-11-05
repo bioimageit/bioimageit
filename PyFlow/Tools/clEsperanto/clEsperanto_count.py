@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'segmentation.tif', '--sigma_x', '1', '--sigma_y', '1', '--out', 'segmentation_count.csv']
 
     @staticmethod
     def getArgumentParser():
@@ -15,8 +16,8 @@ class Tool:
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
 
-        inputs_parser.add_argument('--sigma_x', type = float, help = 'sigma_x')
-        inputs_parser.add_argument('--sigma_y', type = float, help = 'sigma_y')
+        inputs_parser.add_argument('--sigma_x', type = float, help = 'sigma_x', default=0)
+        inputs_parser.add_argument('--sigma_y', type = float, help = 'sigma_y', default=0)
         
         outputs_parser = parser.add_argument_group('outputs')
 

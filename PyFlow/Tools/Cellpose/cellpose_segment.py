@@ -9,7 +9,7 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
-    test = ['--input_image', 'img02.png', '--output_image', 'img02_segmentation.png']
+    test = ['--input_image', 'img02.png', '--out', 'img02_segmentation.png', '--npy', 'img02_segmentation.npy']
 
     @staticmethod
     def getArgumentParser():

@@ -7,6 +7,7 @@ class Tool:
     categories = ['Deconvolution']
     dependencies = dict(conda=['conda-forge::pycudadecon'], pip=[])
     environment = 'condadecon'
+    test = ['--input_image', 'otf.tif', '--output_image', 'otf_decon.tif']
     
     @staticmethod
     def getArgumentParser():

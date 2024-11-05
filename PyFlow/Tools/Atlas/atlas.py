@@ -31,7 +31,7 @@ class Tool:
         blobsFileExists = Path('blobs.txt').exists()
         nSteps = 1 if blobsFileExists else 2
         if not blobsFileExists:
-            print(f'[[1/{nSteps}]] Run Blobsref if necessary')
+            print(f'[[1/{nSteps}]] Run Blobsref')
             completedProcess = subprocess.run(['blobsref'])
             if completedProcess.returncode != 0: return completedProcess
 

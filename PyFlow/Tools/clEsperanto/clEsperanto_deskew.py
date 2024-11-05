@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'deskew.tif', '--voxel_size_x', 0.1449922, '--voxel_size_y', 0.1449922, '--voxel_size_z', 0.3, '--out', 'deskewed.tif']
 
     @staticmethod
     def getArgumentParser():
@@ -14,11 +15,10 @@ class Tool:
         inputs_parser = parser.add_argument_group('inputs')
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--angle', type = float, help = 'Deskewing angle in degrees')
-        inputs_parser.add_argument('--sigma_outline', type = float, help = 'sigma_outline')
-        inputs_parser.add_argument('--voxel_size_x', type = float, help = 'voxel_size_x_in_microns')
-        inputs_parser.add_argument('--voxel_size_y', type = float, help = 'voxel_size_y_in_microns')
-        inputs_parser.add_argument('--voxel_size_z', type = float, help = 'voxel_size_z_in_microns')
+        inputs_parser.add_argument('--angle', type = float, help = 'Deskewing angle in degrees', default=30)
+        inputs_parser.add_argument('--voxel_size_x', type = float, help = 'voxel_size_x_in_microns', default=0.202)
+        inputs_parser.add_argument('--voxel_size_y', type = float, help = 'voxel_size_y_in_microns', default=0.202)
+        inputs_parser.add_argument('--voxel_size_z', type = float, help = 'voxel_size_z_in_microns', default=1)
         
         outputs_parser = parser.add_argument_group('outputs')
 

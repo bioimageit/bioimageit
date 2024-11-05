@@ -13,11 +13,8 @@
 ## limitations under the License.
 
 from pathlib import Path
-import subprocess
 import pandas
 import os
-import threading
-from multiprocessing.connection import Client
 
 from qtpy import QtCore, QtGui
 from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QMessageBox
@@ -129,8 +126,8 @@ class TableTool(DockTool):
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText(f'Installing {dependenciesString} dependencies in Napari...\nThis could take a few minutes.'))
 			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies)
-			process = environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands)
-			environmentManager._getOutput(process)
+			with environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands) as process:
+				environmentManager._getOutput(process)
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText('Opening image...'))
 	

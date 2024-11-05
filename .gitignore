@@ -14,3 +14,4 @@ PyFlow/Configs/
 build/
 dist/
 version.json
+PyFlow/Tests/validated_tools.json

@@ -7,6 +7,7 @@ class Tool:
     categories = ['Tracking', 'Stracking']
     dependencies = dict(python='3.9', conda=[], pip=['bioimageit::stracking==0.1.4|osx-64,win-64,linux-64'])
     environment = 'stracking'
+    test = ['--input_image', 'stracking.txt', '--min_sigma', '3', '--max_sigma', '4', '--n_sigmas', '2', '--output', 'stracking_results.csv']
 
     @staticmethod
     def getArgumentParser():

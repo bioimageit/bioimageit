@@ -235,16 +235,16 @@ class EnvironmentManager:
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
-				process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'])
-				installedDependencies['conda'], _ = self._getOutput(process)
+				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y']) as process:
+					installedDependencies['conda'], _ = self._getOutput(process)
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
 		
 		if 'pip' not in installedDependencies:
 			if environment is not None:
-				process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'])
-				installedDependencies['pip'], _ = self._getOutput(process)
+				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze']) as process:
+					installedDependencies['pip'], _ = self._getOutput(process)
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 
@@ -309,9 +309,9 @@ class EnvironmentManager:
 	
 	def install(self, environment:str, package:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		process = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y'])
-		self.environments[environment].installedDependencies = {}
-		self._getOutput(process)
+		with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y']) as process:
+			self.environments[environment].installedDependencies = {}
+			self._getOutput(process)
 	
 	def platformCondaFormat(self):
 		machine = platform.machine()
@@ -345,7 +345,15 @@ class EnvironmentManager:
 			self.environments[environment].installedDependencies = {}
 		return installDepsCommands
 	
-	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
+	def _getCommandsForCurrentPlatfrom(self, additionalCommands:dict[str, list[str]]={}):
+		commands = []
+		if additionalCommands is not None and 'all' in additionalCommands:
+			commands += additionalCommands['all']
+		if additionalCommands is not None and self._getPlatformCommonName() in additionalCommands:
+			commands += additionalCommands[self._getPlatformCommonName()]
+		return commands
+	
+	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
 		if mainEnvironment is not None and self.dependenciesAreInstalled(mainEnvironment, dependencies): return False
 		if self.environmentExists(environment):
 			if errorIfExists:
@@ -355,15 +363,10 @@ class EnvironmentManager:
 		pythonRequirement = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies)
-		if additionalInstallCommands is not None and 'all' in additionalInstallCommands:
-			createEnvCommands += additionalInstallCommands['all']
-		if additionalInstallCommands is not None and self._getPlatformCommonName() in additionalInstallCommands:
-			createEnvCommands += additionalInstallCommands[self._getPlatformCommonName()]
-		print('execute commands')
-		process = self.executeCommands(createEnvCommands)
-		print('quit execute commands, getting output')
-		self._getOutput(process)
-		print('finished')
+		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
+		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
+		with self.executeCommands(createEnvCommands) as process:
+			self._getOutput(process)
 		return True
 	
 	def environmentIsLaunched(self, environment:str):
@@ -374,12 +377,13 @@ class EnvironmentManager:
 	# 	commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] + commands
 	# 	return self.executeCommands(commands, env=environmentVariables)
 
-	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None, condaEnvironment=True) -> Environment:
+	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None, condaEnvironment=True, additionalActivateCommands:dict[str, list[str]]={}) -> Environment:
 		if self.environmentIsLaunched(environment):
 			return self.environments[environment]
 
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
+		commands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
 		debug = False # environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
 		port = -1 if not debug else 60873 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
@@ -387,13 +391,18 @@ class EnvironmentManager:
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish
 		if not debug:
-			for line in process.stdout:
-				logger.info(line)
-				if line.strip().startswith('Listening port '):
-					port = int(line.strip().replace('Listening port ', ''))
-					break
+			try:
+				for line in process.stdout:
+					logger.info(line)
+					if line.strip().startswith('Listening port '):
+						port = int(line.strip().replace('Listening port ', ''))
+						break
+			except Exception as e:
+				process.stdout.close()
+				raise e
 			# If process is finished: check if error
 			if process.poll() is not None:
+				process.stdout.close()
 				raise Exception(f'Process exited with return code {process.returncode}.')
 		ce = ClientEnvironment(environment, port, process)
 		self.environments[environment] = ce
@@ -401,10 +410,10 @@ class EnvironmentManager:
 		return ce
 	
 	# @contextmanager
-	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, mainEnvironment:str=None) -> Environment:
-		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, mainEnvironment=mainEnvironment)
+	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None) -> Environment:
+		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment=mainEnvironment)
 		if environmentIsRequired:
-			return self.launch(environment, customCommand, environmentVariables)
+			return self.launch(environment, customCommand, environmentVariables=environmentVariables, additionalActivateCommands=additionalActivateCommands)
 			# ce = self.launch(environment)
 			# try:
 			# 	yield ce

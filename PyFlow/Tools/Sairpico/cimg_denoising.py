@@ -9,6 +9,7 @@ class Tool:
     categories = ['Denoising']
     dependencies = dict(conda=['bioimageit::cimgdenoising==1.0.0|osx-64,win-64'], pip=[])
     environment = 'cimgdenoising'
+    test = ['--input_image', 'Montage.tif', '--algo', 'PEWA', '--patch', '3', '--neigh', '7', '--output_image', 'pewa_result.tif']
 
     @staticmethod
     def getArgumentParser():

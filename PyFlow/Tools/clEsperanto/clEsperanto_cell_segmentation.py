@@ -7,7 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
-    test = ['--input_image', 'AICS_12_134_C=0.tif', '--out', 'beads_info.csv']
+    test = ['--input_image', 'AICS_12_134_C=0.tif', '--corrected_binary', '--out', 'AICS_12_134_C=0_mask.tif']
 
     @staticmethod
     def getArgumentParser():

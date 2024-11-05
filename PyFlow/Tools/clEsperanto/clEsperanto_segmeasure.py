@@ -7,6 +7,7 @@ class Tool:
     categories = ['clEsperanto']
     dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
     environment = 'clEsperanto'
+    test = ['--input_image', 'test.png', '--out', 'test_segmeasure.csv']
 
     @staticmethod
     def getArgumentParser():
@@ -14,7 +15,7 @@ class Tool:
         inputs_parser = parser.add_argument_group('inputs')
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--scalar', type = float, help = 'scalar for threshold')
+        inputs_parser.add_argument('--scalar', type = float, help = 'scalar for threshold', default=1)
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('--out', type=Path, help = 'output csv file path')

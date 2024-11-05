@@ -9,7 +9,7 @@ variables:
   RELEASED_VERSION: "0.3.9"
   UNSIGNED_TARFILE: BioImageIT_v0.3.9.app.tar.gz
   UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/BioImageIT_v0.3.9.app.tar.gz"
- 
+
 .reference_script: &reference_script
   - export DEBIAN_FRONTEND="noninteractive"
   - apt update

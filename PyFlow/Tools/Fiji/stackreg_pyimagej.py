@@ -6,16 +6,17 @@ class Tool:
 
     # Taken from https://py.imagej.net/en/latest/Puncta-Segmentation.html
     categories = ['Fiji', 'Registration']
-    dependencies = dict(conda=['conda-forge::pyimagej==1.5.0', 'conda-forge::openjdk=11'], pip=[])
-    additionalInstallCommands = dict(all=[], linux=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
+    dependencies = dict(python='3.10', conda=['conda-forge::pyimagej==1.5.0', 'conda-forge::openjdk=11'], pip=['numy==1.26.4'])
+    additionalActivateCommands = dict(all=[], linux=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'pyimagej'
+    test = ['--input_image', 'celegans_stack.tif', '--output_image', 'stackreg.tif']
     
     @staticmethod
     def getArgumentParser():
         parser = argparse.ArgumentParser("StackReg", description="Stack registration with the StackReg Fiji plugin.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-t', '--transformation', help='The transformation applied on each slice.', choices=['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'], type=str)
+        inputs_parser.add_argument('-t', '--transformation', help='The transformation applied on each slice.', choices=['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'], type=str, default='Rigid Body')
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg.{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )

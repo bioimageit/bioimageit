@@ -305,14 +305,14 @@ def main():
                 Path(pythonSymlink).symlink_to(python)
             executable = './BioImageIT'
 
-        process = environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py'])
+        with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
 
-        for line in process.stdout:
-            log(line)
-            if line.strip() == 'Initialization complete':
-                window.destroy()
+            for line in process.stdout:
+                log(line)
+                if line.strip() == 'Initialization complete':
+                    window.destroy()
 
-        process.wait()
+            # process.wait() # useless with the context manager
     
 
 # Start the task in a separate thread to keep the GUI responsive

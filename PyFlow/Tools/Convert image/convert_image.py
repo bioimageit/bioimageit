@@ -8,6 +8,7 @@ class Tool:
     categories = ['Format conversion']
     dependencies = dict(conda=['bioconda::bftools'], pip=[])
     environment = 'bftools'
+    test = ['--input_image', 'img02.png', '--overwrite', '--output_image', 'img02.tif']
 
     @staticmethod
     def getArgumentParser():
