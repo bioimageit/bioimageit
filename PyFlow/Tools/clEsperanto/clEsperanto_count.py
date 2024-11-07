@@ -1,12 +1,10 @@
 import sys
 import argparse
 from pathlib import Path
+from .clEsperanto_tool import ClEsperantoTool
 
-class Tool:
+class Tool(ClEsperantoTool):
 
-    categories = ['clEsperanto']
-    dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
-    environment = 'clEsperanto'
     test = ['--input_image', 'segmentation.tif', '--sigma_x', '1', '--sigma_y', '1', '--out', 'segmentation_count.csv']
 
     @staticmethod

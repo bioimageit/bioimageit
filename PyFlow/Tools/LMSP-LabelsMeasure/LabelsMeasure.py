@@ -9,6 +9,7 @@ class Tool:
     categories = ['Measurements']
     dependencies = dict(conda=[], pip=['pandas==2.2.2', 'scikit-image==0.24.0', 'scipy==1.14.1'])
     environment = 'scikit-image_scipy'
+    # test = ['--input_image', 'img02.png', '--label', 'img02_segmentation.png', '--pixel', '4', '--out', 'measurements.csv']
 
     @staticmethod
     def getArgumentParser():

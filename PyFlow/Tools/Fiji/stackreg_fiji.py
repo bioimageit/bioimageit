@@ -47,10 +47,13 @@ class Tool:
         print(f'[[1/1]] Run Fiji macro')
         import subprocess
         import platform
-        fijiPath = str(Path(__file__).parent.resolve() / 'Fiji.app') if platform.system() == 'Darwin' else 'fiji' if platform.system() == 'Linux' else 'Fiji.exe'
+        fijiPath = str(Path(__file__).parent.resolve() / 'Fiji.app/Contents/MacOS/ImageJ-macosx') if platform.system() == 'Darwin' else 'fiji' if platform.system() == 'Linux' else 'Fiji.exe'
         macroPath = str(Path(__file__).parent.resolve() / 'StackReg' / 'stackreg.ijm')
         transformation = args.transformation.replace(' ', '_')
-        return subprocess.run([fijiPath, '--headless', '--console', '-macro', macroPath, f'[{args.input},{transformation},{args.output}]'])
+        pluginsArgs = ['--plugins', str(Path(__file__).parent.resolve() / 'Fiji.app/plugins/')] if platform.system() == 'Darwin' else []
+        command = [fijiPath, '--headless', '--console'] + pluginsArgs + ['-macro', macroPath, f'[{args.input_image},{transformation},{args.output_image}]']
+        print('Execute:', command)
+        return subprocess.run(command)
         
 
 if __name__ == '__main__':

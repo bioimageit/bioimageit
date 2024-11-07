@@ -5,7 +5,7 @@ import logging
 from importlib import import_module
 from pathlib import Path
 from PyFlow import getImportPath, getBundlePath
-from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException
 
 environmentManager.setCondaPath(getBundlePath() / 'micromamba')
 
@@ -59,13 +59,16 @@ class TestGeneral(unittest.TestCase):
             moduleImportPath = getImportPath(toolPath)
             if moduleImportPath in validated_tools: continue
             module = import_module(moduleImportPath)
-
+            if not hasattr(module, 'Tool'): continue
             if hasattr(module.Tool, 'test'):
                 
                 additionalInstallCommands = module.Tool.additionalInstallCommands if hasattr(module.Tool, 'additionalInstallCommands') else None
                 additionalActivateCommands = module.Tool.additionalActivateCommands if hasattr(module.Tool, 'additionalActivateCommands') else None
-                environment: Environment = environmentManager.createAndLaunch(module.Tool.environment, module.Tool.dependencies, 
+                try:
+                    environment: Environment = environmentManager.createAndLaunch(module.Tool.environment, module.Tool.dependencies, 
                 additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
+                except IncompatibilityException:
+                    continue
 
                 if environment.process is not None:
                     thread = threading.Thread(target=logOutput, args=[environment.process])
@@ -76,7 +79,9 @@ class TestGeneral(unittest.TestCase):
 
                 outputFolderPath = (toolPath.parent / 'test-data').resolve()
 
-                environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, module.Tool.test, outputFolderPath])
+                args = module.Tool.test
+                args = [arg if arg.startswith('--') else str((outputFolderPath / arg).resolve()) if (outputFolderPath / arg).exists() else arg for arg in args]
+                environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, args, outputFolderPath])
 
                 validated_tools.append(moduleImportPath)
                 

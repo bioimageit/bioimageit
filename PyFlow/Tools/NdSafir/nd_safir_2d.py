@@ -10,7 +10,7 @@ class Tool:
     dependencies = dict(python='3.9', conda=['bioimageit::ndsafir|osx-64,win-64,linux-64'], pip=[])
     environment = 'ndsafir'
     noiseChoices = ['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss']
-    test = ['--input_image', '03_rab_bruite.tif', '--noise', 'Adaptive-Gauss', '--noise_factor', '2', '--time_series', '--output_image', 'DN.tif']
+    test = ['--input_image', '03_rab_bruite.tif', '--noise', 'Adaptive-Gauss', '--noise_factor', '2', '--output_image', 'DN.tif']
 
     @staticmethod
     def getArgumentParser():

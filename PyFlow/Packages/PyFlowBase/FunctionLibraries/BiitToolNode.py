@@ -319,7 +319,7 @@ def createNode(modulePath, moduleImportPath, module):
 	# Hide the version number for now, but it would be nice to add it later when there are multiple versions of the tool
 	# toolId = f'{tool.info.id}_v{tool.info.version}'
 	# toolId = f'{tool.info.id}_biitarray'
-
+	if not hasattr(module, 'Tool'): return None
 	parser, argsOptions = module.Tool.getArgumentParser()
 
 	# Creates a new class type named {modulePath.stem} which inherits BiitToolNode and have the attributes of the given dict

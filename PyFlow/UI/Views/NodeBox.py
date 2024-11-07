@@ -136,10 +136,12 @@ class NodeBoxTreeWidget(QTreeWidget):
         #  you may need to call invalidate_caches() in order for the new module to be noticed by the import system.
         # invalidate_caches()
         if nodeName in self.nodeClasses:
-            self.nodeClasses[nodeName] = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
+            node = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
         else:
-            self.nodeClasses[nodeName] = createNode(nodePath, moduleImportPath, import_module(moduleImportPath))
-        return self.nodeClasses[nodeName]
+            node = createNode(nodePath, moduleImportPath, import_module(moduleImportPath))
+        if node is not None:
+            self.nodeClasses[nodeName] = node
+        return node
     
     def removeNodeClass(self, nodeName):
         if nodeName in self.nodeClasses:

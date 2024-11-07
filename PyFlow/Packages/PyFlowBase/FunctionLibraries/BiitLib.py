@@ -22,8 +22,9 @@ def loadTools(toolsPath):
         moduleImportPath = getImportPath(toolPath)
         module = import_module(moduleImportPath)
         tool = createToolNode(toolPath, moduleImportPath, module)
-        BiitLib.classes[toolPath.name] = tool
-        tools.append(tool)
+        if tool is not None:
+            BiitLib.classes[toolPath.name] = tool
+            tools.append(tool)
     return tools
 
 loadTools(toolsPath)

@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Deconvolution']
-    dependencies = dict(conda=['conda-forge::pycudadecon'], pip=[])
+    dependencies = dict(conda=['conda-forge::pycudadecon|linux-64,win-64'], pip=[])
     environment = 'condadecon'
     test = ['--input_image', 'deskew.tif', '--output_image', 'deskewed.tif']
     

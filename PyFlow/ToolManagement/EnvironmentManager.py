@@ -37,6 +37,9 @@ class ExecutionException(Exception):
 		self.exception = message['exception'] if 'exception' in message else None
 		self.traceback = message['traceback'] if 'traceback' in message else None
 
+class IncompatibilityException(Exception):
+    pass
+
 class CustomHandler(logging.Handler):
 
 	def __init__(self, log)-> None:
@@ -54,11 +57,17 @@ def attachLogHandler(log:Callable[[str], None], logLevel=logging.INFO) -> None:
 	logger.addHandler(ch)
 	return
 
+class OptionalDependencies(TypedDict):
+	conda: NotRequired[list[str]]
+	pip: NotRequired[list[str]]
+	pip_no_deps: NotRequired[list[str]]
+
 class Dependencies(TypedDict):
 	python: str
 	conda: NotRequired[list[str]]
 	pip: NotRequired[list[str]]
 	pip_no_deps: NotRequired[list[str]]
+	optional: OptionalDependencies
 
 class Environment():
 	
@@ -318,7 +327,7 @@ class EnvironmentManager:
 		machine = '64' if machine == 'x86_64' else machine
 		return dict(Darwin='osx', Windows='win', Linux='linux')[platform.system()] + '-' + machine
 
-	def formatDependencies(self, package_manager:str, dependencies: list[str]):
+	def formatDependencies(self, package_manager:str, dependencies: list[str], raiseIncompatibilityException=False):
 		dependencies = dependencies[package_manager] if package_manager in dependencies else []
 		# If there is a "|" in the dependency: check that this platform support this dependency, otherwise ignore it
 		finalDependencies = []
@@ -329,14 +338,21 @@ class EnvironmentManager:
 				currentPlatform = self.platformCondaFormat()
 				if currentPlatform in platforms:
 					finalDependencies.append(dependencyParts[0])
+				elif raiseIncompatibilityException:
+					platformsString = ', '.join(platforms)
+					raise IncompatibilityException(f'Error: the library {dependencyParts[0]} is not available on this platform ({currentPlatform}). It is only available on the following platforms: {platformsString}.')
 			else:
 				finalDependencies.append(dependency)
 		return [f'"{d}"' for d in finalDependencies]
 	
-	def installDependencies(self, environment:str, dependencies: Dependencies={}):
-		condaDependencies = self.formatDependencies('conda', dependencies)
-		pipDependencies = self.formatDependencies('pip', dependencies)
-		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies)
+	def installDependencies(self, environment:str, dependencies: Dependencies={}, raiseIncompatibilityException=True):
+		condaDependencies = self.formatDependencies('conda', dependencies, raiseIncompatibilityException)
+		pipDependencies = self.formatDependencies('pip', dependencies, raiseIncompatibilityException)
+		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies, raiseIncompatibilityException)
+		if 'optional' in dependencies:
+			condaDependencies += self.formatDependencies('conda', dependencies['optional'])
+			pipDependencies += self.formatDependencies('pip', dependencies['optional'])
+			pipNoDepsDependencies += self.formatDependencies('pip_no_deps', dependencies['optional'])
 		installDepsCommands = [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
 		installDepsCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		installDepsCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
@@ -353,16 +369,16 @@ class EnvironmentManager:
 			commands += additionalCommands[self._getPlatformCommonName()]
 		return commands
 	
-	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False) -> bool:
+	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False, raiseIncompatibilityException=True) -> bool:
 		if mainEnvironment is not None and self.dependenciesAreInstalled(mainEnvironment, dependencies): return False
 		if self.environmentExists(environment):
 			if errorIfExists:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
-		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment} python={pythonRequirement} -y']
-		createEnvCommands += self.installDependencies(environment, dependencies)
+		pythonRequirement = ' python=' + str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
+		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment}{pythonRequirement} -y']
+		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
 		with self.executeCommands(createEnvCommands) as process:
@@ -410,8 +426,8 @@ class EnvironmentManager:
 		return ce
 	
 	# @contextmanager
-	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None) -> Environment:
-		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment=mainEnvironment)
+	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, raiseIncompatibilityException=True) -> Environment:
+		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment=mainEnvironment, raiseIncompatibilityException=raiseIncompatibilityException)
 		if environmentIsRequired:
 			return self.launch(environment, customCommand, environmentVariables=environmentVariables, additionalActivateCommands=additionalActivateCommands)
 			# ce = self.launch(environment)

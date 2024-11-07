@@ -1,12 +1,10 @@
 import sys
 import argparse
 from pathlib import Path
+from .clEsperanto_tool import ClEsperantoTool
 
-class Tool:
+class Tool(ClEsperantoTool):
 
-    categories = ['clEsperanto']
-    dependencies = dict(conda=['conda-forge::pyopencl', 'conda-forge::pyclesperanto-prototype'], pip=[])
-    environment = 'clEsperanto'
     test = ['--input_image', 'deskew.tif', '--voxel_size_x', 0.1449922, '--voxel_size_y', 0.1449922, '--voxel_size_z', 0.3, '--out', 'deskewed.tif']
 
     @staticmethod

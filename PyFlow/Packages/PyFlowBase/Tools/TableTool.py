@@ -125,7 +125,7 @@ class TableTool(DockTool):
 				return
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText(f'Installing {dependenciesString} dependencies in Napari...\nThis could take a few minutes.'))
-			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies)
+			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies, True)
 			with environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands) as process:
 				environmentManager._getOutput(process)
 			if self.openImageProgressDialog is not None:
@@ -135,8 +135,8 @@ class TableTool(DockTool):
 		graphManager = self.pyFlowInstance.graphManager.get()
 		nodes = graphManager.getAllNodes()
 		for node in nodes:
-			if hasattr(node, 'Tool') and hasattr(node.Tool, 'viewerDependencies'):
-				self.installViewerDependencies(node, node.Tool.viewerDependencies)
+			if hasattr(node, 'Tool') and 'viewer' in node.Tool.dependencies:
+				self.installViewerDependencies(node, node.Tool.dependencies['viewer'])
 		return
 	
 	def onTableClicked(self, item):

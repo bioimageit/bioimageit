@@ -5,6 +5,7 @@
 *.pyc
 **/.DS_Store
 **/test-data/
+**/Fiji.app/
 __pycache__/
 micromamba/
 bioimageit-v*/

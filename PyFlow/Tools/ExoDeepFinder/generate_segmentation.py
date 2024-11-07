@@ -1,12 +1,9 @@
 import subprocess
 import argparse
 from pathlib import Path
+from .exodeepfinder_tool import ExoDeepFinderTool
 
-class Tool:
-
-    categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict(python='3.10.14', conda=['nvidia/label/cuda-12.3.0::cuda-toolkit|win-64,linux-64', 'conda-forge::cudnn|win-64,linux-64'], pip=['exodeepfinder==0.3.13'])
-    environment = 'exodeepfinder'
+class Tool(ExoDeepFinderTool):
 
     @staticmethod
     def getArgumentParser():

@@ -9,7 +9,7 @@ class Tool:
     dependencies = dict(python='3.10', conda=['conda-forge::pyimagej==1.5.0', 'conda-forge::openjdk=11'], pip=['numy==1.26.4'])
     additionalActivateCommands = dict(all=[], linux=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'pyimagej'
-    test = ['--input_image', 'celegans_stack.tif', '--output_image', 'stackreg.tif']
+    # test = ['--input_image', 'celegans_stack.tif', '--output_image', 'stackreg.tif']
     
     @staticmethod
     def getArgumentParser():

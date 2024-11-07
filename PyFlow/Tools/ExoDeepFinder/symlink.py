@@ -1,11 +1,9 @@
 import argparse
 from pathlib import Path
+from .exodeepfinder_tool import ExoDeepFinderTool
 
-class Tool:
+class Tool(ExoDeepFinderTool):
 
-    categories = ['Detection', 'ExoDeepFinder']
-    dependencies = dict()
-    environment = 'bioimageit'
 
     @staticmethod
     def getArgumentParser():
