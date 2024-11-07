@@ -1,15 +1,13 @@
 import sys
-from importlib import import_module
 import argparse
-import json
 from pathlib import Path
 
 class Tool:
 
     categories = ['Measurements']
-    dependencies = dict(conda=[], pip=['pandas==2.2.2', 'scikit-image==0.24.0', 'scipy==1.14.1'])
+    dependencies = dict(python='3.12', conda=[], pip=['pandas==2.2.2', 'scikit-image==0.24.0', 'scipy==1.14.1'])
     environment = 'scikit-image_scipy'
-    # test = ['--input_image', 'img02.png', '--label', 'img02_segmentation.png', '--pixel', '4', '--out', 'measurements.csv']
+    test = ['--input_image', 'img02.png', '--label', 'img02_segmentation.png', '--pixel', '4', '--out', 'measurements.csv']
 
     @staticmethod
     def getArgumentParser():
@@ -56,7 +54,7 @@ class Tool:
         print("Pixel erosion = {}".format(args.pixel))
         label_img = erosion(label_img, disk(args.pixel))
 
-        print('[[2/3]] Process regions', image.shape)
+        print('[[2/3]] Process regions', label_img.shape)
 
         regions = regionprops(label_img)
         print("Regions created")
@@ -79,7 +77,7 @@ class Tool:
         ###################### save csv ###########################
         ###########################################################
 
-        print('[[3/3]] Save output table', image.shape)
+        print('[[3/3]] Save output table')
 
         props = regionprops_table(label_img, original_img, properties = ('area', 'intensity_mean', 'intensity_min', 'intensity_max', 'perimeter', 'centroid', 'bbox', 'feret_diameter_max', 'slice'), 
             extra_properties=(stdDev, skewness, kurt, center_mass))

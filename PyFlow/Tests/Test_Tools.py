@@ -4,10 +4,12 @@ import unittest
 import logging
 from importlib import import_module
 from pathlib import Path
+from munch import Munch
 from PyFlow import getImportPath, getBundlePath
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException
 
 environmentManager.setCondaPath(getBundlePath() / 'micromamba')
+environmentManager.environments['bioimageit'] = Munch.fromDict(dict(installedDependencies={})) # Initialize default installed dependencies for the bioimageit env
 
 toolsPath = Path('PyFlow/Tools/')
 
@@ -68,6 +70,8 @@ class TestGeneral(unittest.TestCase):
                     environment: Environment = environmentManager.createAndLaunch(module.Tool.environment, module.Tool.dependencies, 
                 additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
                 except IncompatibilityException:
+                    import platform
+                    print(f'Tool {toolPath} not tested since it is not available on this platform ({platform.system()} {platform.machine()})')
                     continue
 
                 if environment.process is not None:

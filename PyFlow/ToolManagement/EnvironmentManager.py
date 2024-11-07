@@ -245,7 +245,7 @@ class EnvironmentManager:
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
 				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y']) as process:
-					installedDependencies['conda'], _ = self._getOutput(process)
+					installedDependencies['conda'], _ = self._getOutput(process, log=False)
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
@@ -253,7 +253,7 @@ class EnvironmentManager:
 		if 'pip' not in installedDependencies:
 			if environment is not None:
 				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze']) as process:
-					installedDependencies['pip'], _ = self._getOutput(process)
+					installedDependencies['pip'], _ = self._getOutput(process, log=False)
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 

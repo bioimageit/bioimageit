@@ -265,8 +265,20 @@ class WorkflowTool(DockTool):
         shutil.copytree(path, newPath)
         return
 
+    def overWriteExternalPaths(self):
+        import json
+        with open(self.pyFlowInstance.currentFileName, 'r') as f:
+            graph = json.load(f)
+            for node in graph['nodes']:
+                node['folderDataFramePath'] = None
+        with open(self.pyFlowInstance.currentFileName, 'w') as f:
+            json.dump(graph, f)
+        return
+    
     def exportWorkflow(self):
         path = self.getCurrentWorkflow()
+        self.saveGraph(path)
+        self.overWriteExternalPaths()
         zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', dir= str(path.parent / f'{path.name}.zip'), filter='Zip files (*.zip)')
         if zipFilePath is None or len(zipFilePath) == 0: return
         zipFilePath = Path(zipFilePath)

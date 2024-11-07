@@ -23,6 +23,7 @@ import shutil
 from string import ascii_letters
 import random
 from pathlib import Path
+from munch import Munch
 
 from qtpy import QtGui
 from qtpy import QtCore
@@ -149,6 +150,7 @@ class PyFlow(QMainWindow):
 		self._tools = set()
 		self.currentTempDir = ""
 		environmentManager.setCondaPath(getBundlePath() / 'micromamba' if (getBundlePath() / 'micromamba').exists() else getBundlePath().parent / 'micromamba')
+		environmentManager.environments['bioimageit'] = Munch.fromDict(dict(installedDependencies={})) # Initialize default installed dependencies for the bioimageit env
 		environmentManager.setProxies(versionInfo['proxies'])
 
 		self.preferencesWindow = PreferencesWindow(self)
