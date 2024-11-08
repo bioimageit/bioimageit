@@ -25,7 +25,7 @@ dependencies = ["omero-py==5.15.0",
 install = ["pyinstaller"]
 package = ["requests>=2.32.3, <2.33"]
 cxf = ["cx_Freeze"]
-ipython = ["ipython"]
+ipython = ["ipython", "ipdb"]
 
 [tool.pixi.feature.package.dependencies]
 python = "3.12"

@@ -4,9 +4,10 @@ import queue
 import pandas
 from PyFlow.invoke_in_main import inmain, inthread
 from blinker import Signal
-# from PyFlow.Packages.PyFlowBase.Tools.generate_thumbnails import generateThumbnails
 # import threading
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
+# Warning: we cannot import generate_thumbnails.generateThumbnails directly here, otherwise the multiprocessing will initialize the entire BioImageIT app for each parallel process!
+# from PyFlow.ThumbnailManagement.generate_thumbnails import generateThumbnails
 
 
 class ThumbnailGenerator:

@@ -18,6 +18,7 @@ import tempfile
 from blinker import Signal
 from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
+from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.Packages.PyFlowBase.UI.UIWelcomeDialog import WelcomeDialog
@@ -265,7 +266,7 @@ class WorkflowTool(DockTool):
         shutil.copytree(path, newPath)
         return
 
-    def overWriteExternalPaths(self):
+    def removeExternalPaths(self):
         import json
         with open(self.pyFlowInstance.currentFileName, 'r') as f:
             graph = json.load(f)
@@ -278,7 +279,7 @@ class WorkflowTool(DockTool):
     def exportWorkflow(self):
         path = self.getCurrentWorkflow()
         self.saveGraph(path)
-        self.overWriteExternalPaths()
+        self.removeExternalPaths()
         zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', dir= str(path.parent / f'{path.name}.zip'), filter='Zip files (*.zip)')
         if zipFilePath is None or len(zipFilePath) == 0: return
         zipFilePath = Path(zipFilePath)
@@ -288,9 +289,17 @@ class WorkflowTool(DockTool):
         with tempfile.TemporaryDirectory() as tmp:
             workflowFolder = Path(tmp) / zipFilePath.stem
             workflowFolder.mkdir(parents=True, exist_ok=True)
+            # Copy the Tools and Scripts folder
             for name in ['Tools', 'Scripts']:
                 if (path / name).exists():
                     shutil.copytree(path / name, workflowFolder / name)
+            # Copy parameters.json and output_data_frame.csv files (PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH) in the "Data / nodeName" folders, but not the other data files
+            dataFolder = workflowFolder / 'Data'
+            dataFolder.mkdir()
+            for folder in sorted(list((path / 'Data').iterdir())):
+                (dataFolder / folder.name).mkdir()
+                for fileName in [PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH]:
+                    shutil.copyfile(folder / fileName, dataFolder / folder.name / fileName)
             shutil.copyfile(path / WorkflowTool.graphFileName, workflowFolder / WorkflowTool.graphFileName)
             shutil.make_archive(zipFilePath.with_suffix(''), 'zip', tmp)
         return

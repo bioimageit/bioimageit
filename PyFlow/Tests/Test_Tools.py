@@ -6,10 +6,11 @@ from importlib import import_module
 from pathlib import Path
 from munch import Munch
 from PyFlow import getImportPath, getBundlePath
-from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException, DirectEnvironment
 
 environmentManager.setCondaPath(getBundlePath() / 'micromamba')
-environmentManager.environments['bioimageit'] = Munch.fromDict(dict(installedDependencies={})) # Initialize default installed dependencies for the bioimageit env
+# environmentManager.environments['bioimageit'] = DirectEnvironment('bioimageit')  # Initialize default installed dependencies for the bioimageit env
+environment = environmentManager.launch('bioimageit')
 
 toolsPath = Path('PyFlow/Tools/')
 

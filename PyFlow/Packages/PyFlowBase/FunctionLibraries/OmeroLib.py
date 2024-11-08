@@ -3,13 +3,14 @@ import pandas
 from munch import DefaultMunch
 # from skimage.io import imsave
 
+from PyFlow import PARAMETERS_PATH
 from PyFlow.Core import FunctionLibraryBase
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 class OmeroLib(FunctionLibraryBase):
@@ -94,7 +95,7 @@ class OmeroDownload(OmeroBase):
             records = []
             for image in dataset.listChildren():
                 image = self.omero.getImage(uid=image.id)
-                path = getOutputFolderPath(self.name) / image.getName()
+                path = getOutputDataFolderPath(self.name) / image.getName()
                 records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=path))
             dataFrame = pandas.DataFrame.from_records(records)
             ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
@@ -109,7 +110,7 @@ class OmeroDownload(OmeroBase):
             self.setExecuted(True)
             return
         # dataset = omero.get_dataset(datasetId)
-        outputFolder = getOutputFolderPath(self.name)
+        outputFolder = getOutputDataFolderPath(self.name)
         for image in dataset.listChildren():
             omero_image = self.omero.getImage(uid=image.id)
             path = outputFolder / omero_image.getName()
@@ -117,9 +118,10 @@ class OmeroDownload(OmeroBase):
             if path.exists(): continue
             self.omero.downloadImage(path, omero_image=omero_image)
         outputData = self.outArray.currentData()
-        outputData.to_csv(outputFolder / 'output_data_frame.csv')
+        outputMetadataFolder = getOutputMetadataFolderPath(self.name)
+        outputData.to_csv(outputMetadataFolder / 'output_data_frame.csv')
         host, port, username = OmeroService().getSettings()
-        with open(outputFolder / 'parameters.json', 'w') as f:
+        with open(outputMetadataFolder / PARAMETERS_PATH, 'w') as f:
             json.dump(dict(host=host,port=port,username=username, datasetName=dataset.name, datasetId=dataset.id), f)
         
         self.setExecuted(True)
@@ -129,7 +131,7 @@ class OmeroDownload(OmeroBase):
             dataset = self.getDataset()
         except DoesNotExistException: # Pass if dataset does not exist
             return
-        outputFolder = getOutputFolderPath(self.name)
+        outputFolder = getOutputDataFolderPath(self.name)
         for image in dataset.listChildren():
             omero_image = self.omero.getImage(uid=image.id)
             path = outputFolder / omero_image.getName()

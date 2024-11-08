@@ -6,6 +6,7 @@
 **/.DS_Store
 **/test-data/
 **/Fiji.app/
+Workflows/
 __pycache__/
 micromamba/
 bioimageit-v*/

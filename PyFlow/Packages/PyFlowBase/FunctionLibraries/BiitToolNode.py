@@ -6,7 +6,7 @@ from pathlib import Path
 from munch import Munch
 from PyFlow import getBundlePath
 from PyFlow.invoke_in_main import inthread, inmain
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
 
@@ -289,7 +289,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		argsList = self.getArgs()
 		# for i, args in enumerate(argsList):
 		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-		outputFolderPath = getOutputFolderPath(self.name)
+		outputFolderPath = getOutputDataFolderPath(self.name)
 		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath])
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar

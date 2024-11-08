@@ -32,6 +32,7 @@ from qtpy import QtGui, QtCore
 from qtpy.QtCore import QObject, QThread
 from qtpy.QtWidgets import *
 
+from PyFlow import PARAMETERS_PATH
 from PyFlow.ToolManagement.EnvironmentManager import ExecutionException
 from PyFlow.ErrorManager import ErrorManager
 from PyFlow.UI.Tool.Tool import ShelfTool
@@ -44,7 +45,7 @@ from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArray
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import SimpleITKBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import PandasLib, ListFiles
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroLib, OmeroDownload, OmeroUpload, OmeroBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 from PyFlow.Core.OmeroService import OmeroService
 from PyFlow.invoke_in_main import inmain, inthread
 
@@ -494,7 +495,7 @@ class ExportWorkflowTool(ShelfTool):
         return f'{node.getPreviousNode().name}_out_data_frame'
     
     def exportParameters(self, parameters, outputFolder, workflowPath):
-        parametersPath = outputFolder / 'parameters.json'
+        parametersPath = outputFolder / PARAMETERS_PATH
         with open(parametersPath, 'w') as f:
             json.dump(parameters, f)
         return parametersPath.relative_to(workflowPath)
@@ -507,7 +508,7 @@ class ExportWorkflowTool(ShelfTool):
         # name = tool.info.id if tool is not None else node.name
 
         # Create processes
-        outputFolder = getOutputFolderPath(node.name)
+        outputFolder = getOutputDataFolderPath(node.name)
         outputFolder.mkdir(exist_ok=True, parents=True)
 
         if node.__class__.__name__ in OmeroLib.classes.keys():

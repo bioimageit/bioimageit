@@ -13,5 +13,14 @@
             "justMyCode": false,
             "autoReload": {"enable": true }
         },
+        {
+            "name": "workflow",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/workflow.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "autoReload": {"enable": true }
+        },
     ]
 }

@@ -403,6 +403,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/94/00/94bf8573e7487b7c37f2b613fc381880d48ec2311f2e859b8a5817deb4df/h5py-3.11.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0c/4c/b075da0092003d9a55cf2ecc1cae9384a1ca4f650d51b00fc59875fe76f6/ipdb-0.13.13-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/48/4d2818054671bb272d1b12ca65748a4145dc602a463683b5c21b260becee/ipython-8.26.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
@@ -441,6 +442,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/cd/d2/08e96790ba5e12cc23a7e322c2a2f4f5904acba6d831af29fa72ef5836a9/SimpleITK-2.3.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f1/7b/ce1eafaf1a76852e2ec9b22edecf1daa58175c090266e9f6c64afcd81d91/stack_data-0.6.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cf/db/ce8eda256fa131af12e0a76d481711abe4681b6923c27efb9a255c9e4594/tomli-2.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/65/58/f9c9e6be752e9fcb8b6a0ee9fb87e6e7a1f6bcab2cdc73f02bb7ba91ada0/tzdata-2024.1-py2.py3-none-any.whl
@@ -478,6 +480,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ac/25/a1cc81b3a742b73f9409bafe4762c9de0940cce0955d4b6754698fd5ce44/h5py-3.11.0-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0c/4c/b075da0092003d9a55cf2ecc1cae9384a1ca4f650d51b00fc59875fe76f6/ipdb-0.13.13-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/48/4d2818054671bb272d1b12ca65748a4145dc602a463683b5c21b260becee/ipython-8.26.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
@@ -513,6 +516,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/d5/0f/6c8ddb1a9c3c9e963fb603096bec243c8b510e0c5f9f5d6cd0ecaf6f681e/SimpleITK-2.3.1-cp310-cp310-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f1/7b/ce1eafaf1a76852e2ec9b22edecf1daa58175c090266e9f6c64afcd81d91/stack_data-0.6.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cf/db/ce8eda256fa131af12e0a76d481711abe4681b6923c27efb9a255c9e4594/tomli-2.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/65/58/f9c9e6be752e9fcb8b6a0ee9fb87e6e7a1f6bcab2cdc73f02bb7ba91ada0/tzdata-2024.1-py2.py3-none-any.whl
@@ -550,6 +554,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/d4/03/bbb9a992fb43d3ce46687b7c14107f0fa56e6c8704c9ca945a9392cbc8ce/h5py-3.11.0-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0c/4c/b075da0092003d9a55cf2ecc1cae9384a1ca4f650d51b00fc59875fe76f6/ipdb-0.13.13-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/48/4d2818054671bb272d1b12ca65748a4145dc602a463683b5c21b260becee/ipython-8.26.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
@@ -585,6 +590,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/d9/66/4679ce174a4d3507b3a60019fef31cf6d06f786048d1b716c409c1546d55/SimpleITK-2.3.1-cp310-cp310-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f1/7b/ce1eafaf1a76852e2ec9b22edecf1daa58175c090266e9f6c64afcd81d91/stack_data-0.6.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cf/db/ce8eda256fa131af12e0a76d481711abe4681b6923c27efb9a255c9e4594/tomli-2.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/65/58/f9c9e6be752e9fcb8b6a0ee9fb87e6e7a1f6bcab2cdc73f02bb7ba91ada0/tzdata-2024.1-py2.py3-none-any.whl
@@ -624,6 +630,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/bb/0d/fbadb9c69e2a31f641bc24e8d21671129ef3b73f0c61bb16b094fadf1385/h5py-3.11.0-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/e5/3e/741d8c82801c347547f8a2a06aa57dbb1992be9e948df2ea0eda2c8b79e8/idna-3.7-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/47/bb25ec04985d0693da478797c3d8c1092b140f3a53ccb984fbbd38affa5b/importlib_metadata-8.2.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/0c/4c/b075da0092003d9a55cf2ecc1cae9384a1ca4f650d51b00fc59875fe76f6/ipdb-0.13.13-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/73/48/4d2818054671bb272d1b12ca65748a4145dc602a463683b5c21b260becee/ipython-8.26.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7f/66/b15ce62552d84bbfcec9a4873ab79d993a1dd4edb922cbfccae192bd5b5f/jaraco.classes-3.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/40/11b7bc1898cf1dcb87ccbe09b39f5088634ac78bb25f3383ff541c2b40aa/jaraco.context-5.3.0-py3-none-any.whl
@@ -659,6 +666,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/da/d1/74b4873287626a55ea8f6a89c061f478c70067b487d241e67d17f2b5d98e/SimpleITK-2.3.1-cp310-cp310-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f1/7b/ce1eafaf1a76852e2ec9b22edecf1daa58175c090266e9f6c64afcd81d91/stack_data-0.6.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/cf/db/ce8eda256fa131af12e0a76d481711abe4681b6923c27efb9a255c9e4594/tomli-2.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/65/58/f9c9e6be752e9fcb8b6a0ee9fb87e6e7a1f6bcab2cdc73f02bb7ba91ada0/tzdata-2024.1-py2.py3-none-any.whl
@@ -1122,7 +1130,7 @@ packages:
   name: bioimageit
   version: 0.3.9
   path: .
-  sha256: 06491c6103af46234ea07d173e23178bf40a8f25f3c651e00ab22e56da530d03
+  sha256: 3b28576008cfea987528f677c53cacc0ad0a49bef065d72fceae172f21e46212
   requires_dist:
   - omero-py==5.15.0
   - simpleitk>=2.3.1,<2.4
@@ -1143,6 +1151,7 @@ packages:
   - requests>=2.32.3,<2.33 ; extra == 'package'
   - cx-freeze ; extra == 'cxf'
   - ipython ; extra == 'ipython'
+  - ipdb ; extra == 'ipython'
   requires_python: ==3.10.8
   editable: true
 - kind: pypi
@@ -1673,6 +1682,31 @@ packages:
   - importlib-resources>=1.3 ; python_version < '3.9' and extra == 'test'
   - pytest-ruff>=0.2.1 ; sys_platform != 'cygwin' and extra == 'test'
   requires_python: '>=3.8'
+- kind: pypi
+  name: ipdb
+  version: 0.13.13
+  url: https://files.pythonhosted.org/packages/0c/4c/b075da0092003d9a55cf2ecc1cae9384a1ca4f650d51b00fc59875fe76f6/ipdb-0.13.13-py3-none-any.whl
+  sha256: 45529994741c4ab6d2388bfa5d7b725c2cf7fe9deffabdb8a6113aa5ed449ed4
+  requires_dist:
+  - ipython<6.0.0,>=5.1.0 ; python_version == '2.7'
+  - toml>=0.10.2 ; python_version == '2.7'
+  - decorator<5.0.0 ; python_version == '2.7'
+  - pathlib ; python_version == '2.7'
+  - ipython<7.0.0,>=6.0.0 ; python_version == '3.4'
+  - toml>=0.10.2 ; python_version == '3.4'
+  - decorator<5.0.0 ; python_version == '3.4'
+  - ipython<7.10.0,>=7.0.0 ; python_version == '3.5'
+  - toml>=0.10.2 ; python_version == '3.5'
+  - decorator ; python_version == '3.5'
+  - ipython<7.17.0,>=7.16.3 ; python_version == '3.6'
+  - tomli ; python_version == '3.6'
+  - decorator ; python_version == '3.6'
+  - ipython>=7.31.1 ; python_version > '3.6' and python_version < '3.11'
+  - tomli ; python_version > '3.6' and python_version < '3.11'
+  - decorator ; python_version > '3.6' and python_version < '3.11'
+  - ipython>=7.31.1 ; python_version >= '3.11'
+  - decorator ; python_version >= '3.11'
+  requires_python: '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*'
 - kind: pypi
   name: ipython
   version: 8.26.0
@@ -4052,6 +4086,12 @@ packages:
   purls: []
   size: 3318875
   timestamp: 1699202167581
+- kind: pypi
+  name: tomli
+  version: 2.0.2
+  url: https://files.pythonhosted.org/packages/cf/db/ce8eda256fa131af12e0a76d481711abe4681b6923c27efb9a255c9e4594/tomli-2.0.2-py3-none-any.whl
+  sha256: 2ebe24485c53d303f690b0ec092806a085f07af5a5aa1464f3931eec36caaa38
+  requires_python: '>=3.8'
 - kind: pypi
   name: traitlets
   version: 5.14.3

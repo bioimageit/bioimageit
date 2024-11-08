@@ -3,20 +3,19 @@ import json
 import pandas
 from qtpy.QtCore import Signal
 
+from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
 from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputFolderPath, isIoPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputDataFolderPath, getOutputMetadataFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 from send2trash import send2trash
 from blinker import Signal
 
 class BiitArrayNodeBase(BiitNodeBase):
-    
-    OUTPUT_DATAFRAME = 'output_data_frame.csv'
 
     def __init__(self, name):
         super(BiitArrayNodeBase, self).__init__(name)
@@ -77,7 +76,7 @@ class BiitArrayNodeBase(BiitNodeBase):
             self.createDataFrameFromFolder(self.folderDataFramePath, False)
         
         if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
-            outputFolder = getOutputFolderPath(self.name)
+            outputFolder = getOutputMetadataFolderPath(self.name)
             if Path(outputFolder / jsonTemplate['outputDataFramePath']).exists():
                 self.setOutputAndClean(pandas.read_csv(outputFolder / jsonTemplate['outputDataFramePath'], index_col=0), False)
                 if 'executed' in jsonTemplate:
@@ -124,7 +123,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         data = data if isinstance(data, pandas.DataFrame) else None
         if data is None and resetParameters: self.initializeParameters()
         # Set parameters from new input dataFrame
-        if data is not None and resetParameters: self.setParametersFromDataframe(data, False)
+        if data is not None and resetParameters: self.setParametersFromDataframe(data, True)
         #  Once parameters are set, send change
         self.parametersChanged.send(data)
     
@@ -153,9 +152,9 @@ class BiitArrayNodeBase(BiitNodeBase):
         template = super(BiitArrayNodeBase, self).serialize()
         template['parameters'] = self.parameters.copy()
         template['folderDataFramePath'] = self.folderDataFramePath
-        outputFolder = getOutputFolderPath(self.name)
-        if Path(outputFolder / self.OUTPUT_DATAFRAME).exists():
-            template['outputDataFramePath'] = self.OUTPUT_DATAFRAME
+        outputFolder = getOutputMetadataFolderPath(self.name)
+        if Path(outputFolder / OUTPUT_DATAFRAME_PATH).exists():
+            template['outputDataFramePath'] = OUTPUT_DATAFRAME_PATH
         return template
     
     @staticmethod
@@ -264,7 +263,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         argsList = self.getArgs()
         # argsList = argsList if type(argsList) is list else [argsList]
 
-        outputFolder = getOutputFolderPath(self.name)
+        outputFolder = getOutputDataFolderPath(self.name)
         if outputFolder.exists():
             send2trash(outputFolder)
         outputFolder.mkdir(exist_ok=True, parents=True)
@@ -286,17 +285,17 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def finishExecution(self, argsList=None):
         argsList = self.getArgs() if argsList is None else argsList
-        outputFolder = getOutputFolderPath(self.name)
+        outputFolder = getOutputMetadataFolderPath(self.name)
         outputFolder.mkdir(exist_ok=True, parents=True)
 
         outputData: pandas.DataFrame = self.outArray.currentData()
         ThumbnailGenerator.get().generateThumbnails(self.name, outputData)
 
         if isinstance(outputData, pandas.DataFrame):
-            outputData.to_csv(outputFolder / self.OUTPUT_DATAFRAME)
+            outputData.to_csv(outputFolder / OUTPUT_DATAFRAME_PATH)
         
         if argsList is not None:
-            with open(outputFolder / 'parameters.json', 'w') as f:
+            with open(outputFolder / PARAMETERS_PATH, 'w') as f:
                 json.dump(argsList, f)
 
         self.setExecuted(True)
@@ -346,9 +345,9 @@ class BiitArrayNodeBase(BiitNodeBase):
         #         outputPath = row[self.getColumnName(output)]
         #         if isinstance(outputPath, Path) and outputPath.exists():
         #             outputPath.unlink()
-        outputFolder = getOutputFolderPath(self.name)
-        if outputFolder.exists():
-            send2trash(outputFolder)
+        for outputFolder in [getOutputDataFolderPath(self.name), getOutputMetadataFolderPath(self.name)]:
+            if outputFolder.exists():
+                send2trash(outputFolder)
 
     @classmethod
     def description(cls): 

@@ -9,7 +9,7 @@ from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFile
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.invoke_in_main import inmain
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFolderPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 
 # import re
 
@@ -31,7 +31,7 @@ class SimpleITKBase(BiitArrayNodeBase):
                     if input.type == 'path' and 'image' in input.name and self.getParameter(input.name, row) is not None:
                         suffixes = ''.join(Path(self.getParameter(input.name, row)).suffixes)
                         break
-                data.at[index, self.getColumnName(output)] = getOutputFolderPath(self.name) / f'{output.name}_{index}{suffixes}'
+                data.at[index, self.getColumnName(output)] = getOutputDataFolderPath(self.name) / f'{output.name}_{index}{suffixes}'
 
     def execute(self):
         data: pandas.DataFrame|None = self.getDataFrame()
@@ -59,7 +59,7 @@ class SimpleITKBase(BiitArrayNodeBase):
 class BinaryThreshold(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'binary_threshold', inputs=[
-            dict(name='image1', description='Input image path', type='imagepng'),
+            dict(name='image1', description='Input image path', type='imagepng', auto=True),
             dict(name='channel', description='Channel to threshold', default_value=0, type='integer'),
             dict(name='lowerThreshold', description='Lower threshold', default_value=0, type='integer'),
             dict(name='upperThreshold', description='Upper threshold', default_value=255, type='integer'),
@@ -108,7 +108,7 @@ class BinaryThreshold(SimpleITKBase):
 class AddScalarToImage(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'add_scalar_to_images', inputs=[
-            dict(name='image', description='Input image', type='imagepng'),
+            dict(name='image', description='Input image', type='imagepng', auto=True),
             dict(name='value', description='Value to add', default_value=50, type='integer')
         ], outputs=[
             dict(name='out', description='Output image', type='imagetiff'),
@@ -132,7 +132,7 @@ class AddScalarToImage(SimpleITKBase):
 class ExtractChannel(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'extract_channel', inputs=[
-            dict(name='image', description='Input image', type='imagepng'),
+            dict(name='image', description='Input image', type='imagepng', auto=True),
             dict(name='channel', description='Channel to extract', default_value=0, type='integer'),
         ], outputs=[
             dict(name='out', description='Output image', type='imagetiff'),
@@ -170,8 +170,8 @@ class ExtractChannel(SimpleITKBase):
 class SubtractImages(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'subtract_images', inputs=[
-            dict(name='image1', description='Input image 1', type='imagepng'),
-            dict(name='image2', description='Input image 2', type='imagepng'),
+            dict(name='image1', description='Input image 1', type='imagepng', auto=True),
+            dict(name='image2', description='Input image 2', type='imagepng', auto=True),
         ], outputs=[
             dict(name='out', description='Output image', type='imagetiff'),
         ])))
@@ -207,7 +207,7 @@ class SubtractImages(SimpleITKBase):
 class ConnectedComponents(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'connected_components', inputs=[
-            dict(name='image', description='Input image path', type='imagepng'),
+            dict(name='image', description='Input image path', type='imagepng', auto=True),
         ], outputs=[
             dict(name='labeled_image', description='Output image', type='imagetiff'),
             dict(name='labeled_image_rgb', description='Output rgb image', type='imagepng'),
@@ -251,8 +251,8 @@ class ConnectedComponents(SimpleITKBase):
 class LabelStatistics(SimpleITKBase):
 
     tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'connected_components', inputs=[
-            dict(name='image', description='Input image', type='imagepng'),
-            dict(name='label', description='Input label', type='imagepng'),
+            dict(name='image', description='Input image', type='imagepng', auto=True),
+            dict(name='label', description='Input label', type='imagepng', auto=True),
             dict(name='minSize', description='Min size of the labels', default_value=100, type='integer'),
             dict(name='maxSize', description='Max size of the labels', default_value=600, type='integer'),
         ], outputs=[

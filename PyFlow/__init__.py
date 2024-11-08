@@ -49,6 +49,9 @@ __PACKAGES = {}
 __PACKAGE_PATHS = {}
 __HASHABLE_TYPES = []
 
+PARAMETERS_PATH = 'parameters.json'
+OUTPUT_DATAFRAME_PATH = 'output_data_frame.csv'
+
 def getRootPath():
     return Path(__file__).parent.parent
 

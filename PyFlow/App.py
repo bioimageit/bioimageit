@@ -46,7 +46,7 @@ from PyFlow.UI.Tool import GET_TOOLS
 from PyFlow.UI.Utils.stylesheet import editableStyleSheet
 from PyFlow.UI.ContextMenuGenerator import ContextMenuGenerator
 from PyFlow.UI.Widgets.PreferencesWindow import PreferencesWindow
-from PyFlow.ToolManagement.EnvironmentManager import environmentManager
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager, DirectEnvironment
 
 try:
 	from PyQtAds import QtAds
@@ -150,7 +150,10 @@ class PyFlow(QMainWindow):
 		self._tools = set()
 		self.currentTempDir = ""
 		environmentManager.setCondaPath(getBundlePath() / 'micromamba' if (getBundlePath() / 'micromamba').exists() else getBundlePath().parent / 'micromamba')
-		environmentManager.environments['bioimageit'] = Munch.fromDict(dict(installedDependencies={})) # Initialize default installed dependencies for the bioimageit env
+		
+		# Launch or get the bioimageit env, so that we can cache its installed dependencies
+		self.environment = environmentManager.launch('bioimageit')
+
 		environmentManager.setProxies(versionInfo['proxies'])
 
 		self.preferencesWindow = PreferencesWindow(self)

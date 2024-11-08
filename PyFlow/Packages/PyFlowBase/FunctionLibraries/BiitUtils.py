@@ -20,11 +20,15 @@ filePathTypes = ['imagetiff', 'path']
 
 fileTypeToExtensions = dict(imagetiff='tif', trackmatemodel='xml', imagepng='png', imagejpg='jpg', movietxt='txt', numbercsv='csv', arraycsv='csv', tablecsv='csv')
 
-def getOutputFolderPath(nodeName):
+def getOutputDataFolderPath(nodeName):
     graphManager = GraphManagerSingleton().get()
     return Path(graphManager.workflowPath).resolve() / 'Data' / nodeName
 
+def getOutputMetadataFolderPath(nodeName):
+    graphManager = GraphManagerSingleton().get()
+    return Path(graphManager.workflowPath).resolve() / 'Metadata' / nodeName
+
 def getOutputFilePath(info, nodeName, index=None):
     indexPrefix = f'_{index}' if index is not None else ''
-    # return getOutputFolderPath(nodeName) / f'{info.name}{indexPrefix}.{FormatsAccess.instance().get(info.type).extension}'
-    return getOutputFolderPath(nodeName) / f'{info.name}{indexPrefix}.{fileTypeToExtensions[info.type]}'
+    # return getOutputDataFolderPath(nodeName) / f'{info.name}{indexPrefix}.{FormatsAccess.instance().get(info.type).extension}'
+    return getOutputDataFolderPath(nodeName) / f'{info.name}{indexPrefix}.{fileTypeToExtensions[info.type]}'
