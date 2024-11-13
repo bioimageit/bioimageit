@@ -9,7 +9,7 @@ class Tool(ClEsperantoTool):
 
     @staticmethod
     def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto  Deskew", description="Deskew with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser("clEsperanto Intensity stats", description="Intensity stats with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         inputs_parser = parser.add_argument_group('inputs')
         
         inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
@@ -17,7 +17,7 @@ class Tool(ClEsperantoTool):
         
         outputs_parser = parser.add_argument_group('outputs')
 
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path')
+        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_beads.csv')
 
         return parser, dict( input_image = dict(autoColumn=True) )
 

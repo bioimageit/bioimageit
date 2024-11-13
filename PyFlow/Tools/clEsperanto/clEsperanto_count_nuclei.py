@@ -17,7 +17,7 @@ class Tool(ClEsperantoTool):
         
         outputs_parser = parser.add_argument_group('outputs')
 
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path')
+        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_count.csv')
 
         return parser, dict( input_image = dict(autoColumn=True) )
 

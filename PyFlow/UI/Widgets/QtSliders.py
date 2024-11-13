@@ -971,8 +971,8 @@ class pyf_ColorSlider(QtWidgets.QWidget):
 
         self.Color.setMaximumWidth(h)
         self.Color.setMinimumWidth(h)
-        self.Color.setMaximumHeight(h - 12)
-        self.Color.setMinimumHeight(h - 12)
+        # self.Color.setMaximumHeight(h - 12)
+        # self.Color.setMinimumHeight(h - 12)
         self.slidersLay = QtWidgets.QVBoxLayout()
         inpList = [rLay, gLay, bLay]
 
@@ -981,18 +981,18 @@ class pyf_ColorSlider(QtWidgets.QWidget):
         else:
             self.ASlider.hide()
 
-        for i in [
-            self.RSlider,
-            self.GSlider,
-            self.BSlider,
-            self.ASlider,
-            self.RBox,
-            self.GBox,
-            self.BBox,
-            self.ABox,
-        ]:
-            i.setMaximumHeight(h / (len(inpList) + 1))
-            i.setMinimumHeight(h / (len(inpList) + 1))
+        # for i in [
+        #     self.RSlider,
+        #     self.GSlider,
+        #     self.BSlider,
+        #     self.ASlider,
+        #     self.RBox,
+        #     self.GBox,
+        #     self.BBox,
+        #     self.ABox,
+        # ]:
+        #     i.setMaximumHeight(h / (len(inpList) + 1))
+        #     i.setMinimumHeight(h / (len(inpList) + 1))
 
         for i in [self.RSlider, self.GSlider, self.BSlider, self.ASlider]:
             i.doubleValueChanged.connect(self.colorChanged)
@@ -1000,7 +1000,7 @@ class pyf_ColorSlider(QtWidgets.QWidget):
         for i in inpList:
             self.slidersLay.addLayout(i)
 
-        self.setMaximumHeight(h)
+        # self.setMaximumHeight(h)
         self.layout().addWidget(self.Color)
         self.layout().addLayout(self.slidersLay)
         self.layout().setSpacing(5)

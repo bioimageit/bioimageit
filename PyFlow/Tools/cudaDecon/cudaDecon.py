@@ -17,7 +17,7 @@ class Tool:
         inputs_parser.add_argument('-p', '--psf', help='Path to the PSF or OTF file.', required=True, type=Path)
         inputs_parser.add_argument('-b', '--background', help='User-supplied background to subtract. If "auto", the median value of the last Z plane will be used as background.', default='80', type=str)
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg.{input_image.exts}', type=Path)
+        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):

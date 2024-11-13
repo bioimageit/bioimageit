@@ -26,7 +26,7 @@ class Tool:
         inputs_parser.add_argument("--log_scale", action='store_true', help="Log scale (for DoH and LoG)")
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument("-o", "--output", help="Output path for the result table.", type=Path, required=True)
+        outputs_parser.add_argument("-o", "--output", help="Output path for the result table.", default='{input_image.stem}_particles.csv', type=Path, required=True)
         
         return parser, dict(input_image=dict(autoColumn=True))
 

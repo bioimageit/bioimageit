@@ -253,7 +253,7 @@ class GraphBase(ISerializable):
         
         # Now that the graph is built, the nodes can be computed and reset to executed
         nodes = list(self._nodes.values())
-        executedNodes = [n for n in nodes if n.executed]
+        executedNodes = [n for n in nodes if hasattr(n, 'executed') and n.executed]
         for node in nodes:
             node.processNode()
         for node in executedNodes:

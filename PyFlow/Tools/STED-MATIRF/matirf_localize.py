@@ -27,7 +27,7 @@ class Tool:
         inputs_parser.add_argument("--object_size_nm", type=int, help="Objects size in nm", default=300)
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument("-o", "--output", help="Output path for the denoised image.", default="{input_image.name}_localized.{input_image.exts}", type=Path)
+        outputs_parser.add_argument("-o", "--output", help="Output path for the denoised image.", default="{input_image.name}_localized{input_image.exts}", type=Path)
         return parser, dict(input_image=dict(autoColumn=True))
 
     def processDataFrame(self, dataFrame, argsList):

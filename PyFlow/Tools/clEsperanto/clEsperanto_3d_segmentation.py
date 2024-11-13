@@ -24,7 +24,7 @@ class Tool(ClEsperantoTool):
         
         outputs_parser = parser.add_argument_group('outputs')
 
-        outputs_parser.add_argument('--out', type=Path, help = 'Output image path')
+        outputs_parser.add_argument('--out', type=Path, help = 'Output image path', default='{input_image.stem}_segmentation{input_image.exts}')
 
         return parser, dict( input_image = dict(autoColumn=True) )
 

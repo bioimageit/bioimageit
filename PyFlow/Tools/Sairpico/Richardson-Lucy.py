@@ -22,7 +22,7 @@ class Tool:
         inputs_parser.add_argument("--padding", action='store_true', help="Add padding to process border pixels")
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument("-o", "--output", help="Output path for the deconvolved image.", default="{input.name}_deconvolved.{input.exts}", type=Path)
+        outputs_parser.add_argument("-o", "--output", help="Output path for the deconvolved image.", default="{input.name}_deconvolved{input.exts}", type=Path)
         return parser, dict(input=dict(autoColumn=True))
 
     def processDataFrame(self, dataFrame, argsList):

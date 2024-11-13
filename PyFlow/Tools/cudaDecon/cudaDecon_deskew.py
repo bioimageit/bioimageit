@@ -21,7 +21,7 @@ class Tool:
         inputs_parser.add_argument('-s', '--shift', help='If not 0, shift image center by this value', type=int, default=0)
         inputs_parser.add_argument('-pv', '--pad_val', help='Value to pad image with when deskewing. If None the median value of the last Z plane will be used.', type=int, default=None)
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg.{input_image.exts}', type=Path)
+        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):

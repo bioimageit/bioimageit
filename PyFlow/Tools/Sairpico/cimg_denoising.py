@@ -43,7 +43,7 @@ class Tool:
         inputs_parser.add_argument("--iter", type=int, default=4, help="Number of iterations (NDSafir only)")
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_denoised.{input_image.exts}', type=Path)
+        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):

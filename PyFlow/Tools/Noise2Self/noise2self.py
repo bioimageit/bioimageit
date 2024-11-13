@@ -19,7 +19,7 @@ class Tool:
         inputs_parser.add_argument('--iterations', type = int, help = 'Number of iterations during training')
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output denoised image path.', default='{input_image.stem}_denoised.{input_image.exts}', type=Path)
+        outputs_parser.add_argument('-o', '--out', help='The output denoised image path.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):

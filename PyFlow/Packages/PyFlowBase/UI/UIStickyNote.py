@@ -32,6 +32,8 @@ class UIStickyNote(UINodeBase):
         self.resizable = True
         self.roundness = 1
         self.textInput = InputTextField("Text Goes Here", self, singleLine=False)
+        # self.textInput.font().setPixelSize(40)
+        self.textInput.setFont(QtGui.QFont("Helvetica", 7))
         self.textInput.setPos(
             QtCore.QPointF(5, self.nodeNameWidget.boundingRect().height())
         )

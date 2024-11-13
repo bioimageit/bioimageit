@@ -16,7 +16,7 @@ class Tool(ClEsperantoTool):
         inputs_parser.add_argument('--scalar', type = float, help = 'scalar for threshold', default=1)
         
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path')
+        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_segmeasure.csv')
 
         return parser, dict( input_image = dict(autoColumn=True) )
 

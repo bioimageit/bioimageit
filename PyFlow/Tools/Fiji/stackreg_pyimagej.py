@@ -18,7 +18,7 @@ class Tool:
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
         inputs_parser.add_argument('-t', '--transformation', help='The transformation applied on each slice.', choices=['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'], type=str, default='Rigid Body')
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg.{input_image.exts}', type=Path)
+        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):
