@@ -192,7 +192,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = outputValue.replace(f'{{{name}}}', input)
+				outputValue = outputValue.replace(f'{{{name}}}', str(input))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:

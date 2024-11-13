@@ -55,6 +55,10 @@ class ColumnValueWidget(QWidget):
                 self.inputWidget.blockWidgetSignals(True)
                 self.inputWidget.setWidgetValue(node.parameters[input.name]['value'])
                 self.inputWidget.blockWidgetSignals(False)
+        if isinstance(self.inputWidget, QComboBox):
+            self.inputWidget.blockSignals(True)
+            self.inputWidget.setCurrentText(node.parameters[input.name]['value'])
+            self.inputWidget.blockSignals(False)
         self.columnSelector = None
         index = 0 if type == 'columnName' and isDataframe else 1
         if isDataframe:
