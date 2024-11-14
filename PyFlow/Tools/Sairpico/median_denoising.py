@@ -13,7 +13,7 @@ class Tool:
         inputs_parser = parser.add_argument_group('inputs')
 
         inputs_parser.add_argument("--input_image", type=Path, help="Input Image", required=True)
-        inputs_parser.add_argument("--type", choices=['2D', '3D', '3D + time'], help="Perform 2D, 3D or 3D + time denoising.", default='2D', type=str)
+        inputs_parser.add_argument("--type", choices=['2D', '3D', '4D'], help="Perform 2D, 3D or 3D + time denoising.", default='2D', type=str)
         inputs_parser.add_argument("--radius_x", type=int, help="Radius of the filter in the X direction", default=2)
         inputs_parser.add_argument("--radius_y", type=int, help="Radius of the filter in the Y direction", default=2)
         inputs_parser.add_argument("--radius_z", type=int, help="Radius of the filter in the Z direction (for 3D and 3D + time only)", default=1)
@@ -30,7 +30,7 @@ class Tool:
     def processData(self, args):
         print('Performing Median 4D filtering')
         import subprocess
-        command = 'simgmedian' + args.type.replace('3D + time', '4D').lower()
+        command = 'simgmedian' + args.type.lower()
         commandArgs = [
             command, '-i', args.input_image, '-o', args.output,
             '-rx', args.radius_x, '-ry', args.radius_y,
@@ -38,7 +38,7 @@ class Tool:
         ]
         if '3D' in args.type:
             commandArgs += ['-rz', args.radius_z]
-        if args.type == '3D + time':
+        if args.type == '4D':
             commandArgs += ['-rt', args.radius_t]
         return subprocess.run([str(ca) for ca in commandArgs])
 
