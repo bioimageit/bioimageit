@@ -4,7 +4,7 @@ import subprocess
 
 class Tool:
     categories = ['Detection']
-    dependencies = dict(python='3.9', conda=['bioimageit::hotspot==1.0.0|osx-64,win-64,linux-64'], pip=[])
+    dependencies = dict(python='3.9', conda=['bioimageit::hotspot==1.0.0|osx-64,osx-arm64,win-64,linux-64'], pip=[])
     environment = 'hotspot'
     test = ['--input_image', 'arbaGFPProjDebruiteNorm.tif', '--output_image', 'result.tif']
 

@@ -253,11 +253,11 @@ class GraphBase(ISerializable):
         
         # Now that the graph is built, the nodes can be computed and reset to executed
         nodes = list(self._nodes.values())
-        executedNodes = [n for n in nodes if hasattr(n, 'executed') and n.executed]
         for node in nodes:
             node.processNode()
-        for node in executedNodes:
-            node.executed = True
+        # executedNodes = [n for n in nodes if hasattr(n, 'executed') and n.executed]
+        # for node in executedNodes:
+        #     node.executed = True
 
         # Now that the graph is built, the nodes can listen to dataBeenSet
         # This could be moved to UIBiitArrayNodeBase? (since the UI is built after the graph)

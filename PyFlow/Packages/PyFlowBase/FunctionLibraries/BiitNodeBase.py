@@ -27,7 +27,7 @@ class BiitNodeBase(NodeBase):
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
         if 'executed' in jsonTemplate:
-            self.executed = True
+            self.executed = jsonTemplate['executed']
             # self.dirty = False # only set dirty for BiitArrayNode
             # compute output and set without affecting others
 

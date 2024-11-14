@@ -126,8 +126,7 @@ class TableTool(DockTool):
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText(f'Installing {dependenciesString} dependencies in Napari...\nThis could take a few minutes.'))
 			installDepsCommands = environmentManager.installDependencies(self.napariEnvironment.name, dependencies, True)
-			with environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands) as process:
-				environmentManager._getOutput(process)
+			environmentManager.executeCommands(environmentManager._activateConda() + installDepsCommands, waitComplete=True)
 			if self.openImageProgressDialog is not None:
 				inmain(lambda: self.openImageProgressDialog.setLabelText('Opening image...'))
 	

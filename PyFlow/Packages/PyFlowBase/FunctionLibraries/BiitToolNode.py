@@ -182,8 +182,9 @@ class BiitToolNode(BiitArrayNodeBase):
 			return environmentManager.exit(cls.environment)
 
 	def getStem(self, filename):
-		filename = filename[:-1] if filename.endswith('/') else filename
-		return filename[:filename.index('.')] if '.' in filename else filename
+		# filename = filename[:-1] if filename.endswith('/') else filename
+		# return filename[:filename.index('.')] if '.' in filename else filename
+		return Path(filename).stem
 	
 	def getSuffixes(self, filename):
 		return filename[filename.index('.'):] if '.' in filename else ''
@@ -196,7 +197,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:
-				outputValue = outputValue.replace(f'{{{name}.stem}}', self.getStem(str(input)))
+				outputValue = outputValue.replace(f'{{{name}.stem}}', self.getStem(input))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', outputValue):
 			input = inputGetter(name)
 			if input is not None:

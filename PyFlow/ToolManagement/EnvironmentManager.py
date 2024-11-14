@@ -190,8 +190,9 @@ class EnvironmentManager:
 			commandsWithChecks += checks
 		return commandsWithChecks
 
-	def _getOutput(self, process:subprocess.Popen, commands:list[str]=None, log=True, strip=True):
-		commands = str(commands) if commands is not None and len(commands)>0 else ''
+	def _getOutput(self, process:subprocess.Popen, commands:list[str], log=True, strip=True):
+		prefix = '[...] ' if len(str(commands)) > 150 else ''
+		commands = prefix + str(commands)[-150:] if commands is not None and len(commands)>0 else ''
 		outputs = []
 		for line in process.stdout:
 			if strip: 
@@ -200,11 +201,11 @@ class EnvironmentManager:
 				logger.info(line)
 			if 'CondaSystemExit' in line:
 				process.kill()
-				raise Exception(f'An error occured during the execution of the commands {commands}.')
+				raise Exception(f'The execution of the commands "{commands}" failed.')
 			outputs.append(line)
 		process.wait()
 		if process.returncode != 0:
-			raise Exception(f'An error occured during the execution of the commands {commands}.')
+			raise Exception(f'The execution of the commands "{commands}" failed.')
 		return (outputs, process.returncode)
 
 	def setProxies(self, proxies):
@@ -221,9 +222,9 @@ class EnvironmentManager:
 		
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
-	def executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True):
+	def executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True, waitComplete=False, log=True):
 		print('executeCommands', commands, launchedMessage)
-
+		rawCommands = commands.copy()
 		with tempfile.NamedTemporaryFile(suffix='.ps1' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
 			if exitIfCommandError:
 				commands = self._insertCommandErrorChecks(commands)
@@ -234,7 +235,11 @@ class EnvironmentManager:
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
 			# Use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows
-			return subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', bufsize=1)
+			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', bufsize=1)
+			if waitComplete:
+				with process:
+					return self._getOutput(process, rawCommands, log=log)
+			return process
 
 	def _removeChannel(self, condaDependency):
 		withoutChannel = condaDependency.split('::')[1] if '::' in condaDependency else condaDependency
@@ -244,16 +249,14 @@ class EnvironmentManager:
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
-				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y']) as process:
-					installedDependencies['conda'], _ = self._getOutput(process, log=False)
+				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'], waitComplete=True, log=False)
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
 		
 		if 'pip' not in installedDependencies:
 			if environment is not None:
-				with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze']) as process:
-					installedDependencies['pip'], _ = self._getOutput(process, log=False)
+				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'], waitComplete=True, log=False)
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 
@@ -318,9 +321,8 @@ class EnvironmentManager:
 	
 	def install(self, environment:str, package:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		with self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y']) as process:
-			self.environments[environment].installedDependencies = {}
-			self._getOutput(process)
+		self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y'], waitComplete=True)
+		self.environments[environment].installedDependencies = {}
 	
 	def platformCondaFormat(self):
 		machine = platform.machine()
@@ -346,6 +348,8 @@ class EnvironmentManager:
 		return [f'"{d}"' for d in finalDependencies]
 	
 	def installDependencies(self, environment:str, dependencies: Dependencies={}, raiseIncompatibilityException=True):
+		if any(['::' in d for d in dependencies['pip']]):
+			raise Exception(f'One pip dependency has a channel specifier "::" ({dependencies["pip"]}), is it a conda dependency?')
 		condaDependencies = self.formatDependencies('conda', dependencies, raiseIncompatibilityException)
 		pipDependencies = self.formatDependencies('pip', dependencies, raiseIncompatibilityException)
 		pipNoDepsDependencies = self.formatDependencies('pip_no_deps', dependencies, raiseIncompatibilityException)
@@ -381,8 +385,7 @@ class EnvironmentManager:
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
-		with self.executeCommands(createEnvCommands) as process:
-			self._getOutput(process)
+		self.executeCommands(createEnvCommands, waitComplete=True)
 		return True
 	
 	def environmentIsLaunched(self, environment:str):
