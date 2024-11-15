@@ -12,12 +12,9 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
+from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 
-class UIBiitConcatDataFramesNode(UIBiitNodeBase):
+class UIBiitNodeBase(UINodeBase):
+
     def __init__(self, raw_node):
-        super(UIBiitConcatDataFramesNode, self).__init__(raw_node)
-    
-    def createInputWidgets(self, inputsCategory, inGroup=None, pins=True):
-        # super(UIBiitConcatDataFramesNode, self).createInputWidgets(inputsCategory, inGroup, False)
-        return
+        super(UIBiitNodeBase, self).__init__(raw_node)

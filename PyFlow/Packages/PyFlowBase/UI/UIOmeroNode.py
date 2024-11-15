@@ -14,11 +14,11 @@
 
 from qtpy import QtGui
 from qtpy.QtWidgets import QComboBox
-from PyFlow.UI.Canvas.UINodeBase import UINodeBase
+from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 
-class UIOmeroNode(UINodeBase):
+class UIOmeroNode(UIBiitNodeBase):
     def __init__(self, raw_node):
         super(UIOmeroNode, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)
@@ -31,7 +31,7 @@ class UIOmeroNode(UINodeBase):
             self.headColorOverride = QtGui.QColor(100, 100, 100, 150)
             self.headColor = QtGui.QColor(100, 100, 100, 150)
 
-class UIOmeroDownload(UINodeBase):
+class UIOmeroDownload(UIOmeroNode):
     def __init__(self, raw_node):
         super(UIOmeroDownload, self).__init__(raw_node)
         raw_node.datasetIdPin.dataBeenSet.connect(self.datasetChanged)

@@ -18,7 +18,7 @@ class Tool():
         inputs_parser = parser.add_argument_group('inputs')
         inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
         outputs_parser = parser.add_argument_group('outputs')
-        # outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image}_segmentation.png', type=Path)
+        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.png', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     # Initialize your tool

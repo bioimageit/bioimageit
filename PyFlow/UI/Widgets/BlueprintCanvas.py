@@ -23,6 +23,8 @@ from qtpy import QtCore
 from qtpy import QtGui
 from qtpy import QtWidgets
 from qtpy.QtWidgets import *
+from qtpy.QtWidgets import QMessageBox
+from send2trash import send2trash
 
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Canvas.CanvasBase import CanvasBase
@@ -40,6 +42,7 @@ from PyFlow.Core.PinBase import PinBase
 from PyFlow.Core.NodeBase import NodeBase
 from PyFlow.Input import InputManager, InputAction, InputActionType
 from PyFlow.UI.Views.VariablesWidget import VARIABLE_TAG, VARIABLE_DATA_TAG
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath
 
 from PyFlow import getRawNodeInstance
 from PyFlow.Core.Common import *
@@ -473,7 +476,20 @@ class BlueprintCanvas(CanvasBase):
     def killSelectedNodes(self):
         selectedNodes = self.selectedNodes()
         if self.isShortcutsEnabled() and len(selectedNodes) > 0:
+            answer = None
             for node in selectedNodes:
+                
+                # Warning: also delete thumbnails!
+
+                # If Data and Metadata folders are not empty: ask if user wants to send them to trash, and obey
+                folders = [f for f in [getOutputDataFolderPath(node._rawNode.name), getOutputMetadataFolderPath(node._rawNode.name)] if f.exists() and len(list(f.iterdir()))>0]
+                if len(folders) > 0 and answer is None:
+                    answer = QMessageBox.warning(self.pyFlowInstance, "Delete data?", f'There are data files associated with the selected nodes. Would you like to move them to the trash?', QMessageBox.No | QMessageBox.Cancel | QMessageBox.Yes)
+                    if answer == QMessageBox.Cancel:
+                        return
+                if answer == QMessageBox.Yes:
+                    for folder in folders:
+                        send2trash(folder)
                 node._rawNode.kill()
             self.requestClearProperties.emit()
             self.requestClearTable.emit()

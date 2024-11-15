@@ -27,7 +27,7 @@ from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 class WorkflowTool(DockTool):
     """docstring for Workflow tool."""
 
-    graphFileName = 'graph.pygraph'
+    graphFileName = 'workflow.pygraph'
     workflowLoaded = Signal()
     _iconSize = 25
 

@@ -1,5 +1,4 @@
 import sys
-from importlib import import_module
 import argparse
 import json
 from pathlib import Path
@@ -7,7 +6,12 @@ from pathlib import Path
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(python='3.8', conda=['nvidia::cudatoolkit=11.0.*|win-64,linux-64', 'nvidia::cudnn=8.0.*|win-64,linux-64'], pip=['tensorflow==2.4.*', 'csbdeep==0.8.0', 'stardist==0.9.1'])
+    dependencies = dict(
+        python='3.9', 
+        conda=[], 
+        pip=['tensorflow==2.16.1', 'csbdeep==0.8.0', 'stardist==0.9.1'],
+        optional = dict(conda = ['nvidia::cudatoolkit=11.0.*|win-64,linux-64', 'nvidia::cudnn=8.0.*|win-64,linux-64'])
+        )
     environment = 'stardist'
 
     @staticmethod
@@ -23,7 +27,6 @@ class Tool:
     def initialize(self, args):
         print('Loading libraries...')
         from csbdeep.utils import normalize
-        from skimage import io
         self.normalize = normalize
         if args.model_name.startswith('2D'):
             from stardist.models import StarDist2D

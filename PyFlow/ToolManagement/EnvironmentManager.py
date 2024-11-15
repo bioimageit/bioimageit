@@ -1,4 +1,5 @@
 import logging
+import re
 import platform
 import tempfile
 import subprocess
@@ -380,7 +381,11 @@ class EnvironmentManager:
 				raise Exception(f'Error: the environment {environment} already exists.')
 			else:
 				return True
-		pythonRequirement = ' python=' + str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
+		pythonVersion = str(dependencies['python']).replace('=', '') if 'python' in dependencies and dependencies['python'] else ''
+		match = re.search(r'(\d+)\.(\d+)', pythonVersion)
+		if match and int(match.group(1))<3 or (match.group(2))<9:
+			raise Exception('Python version must be greater than 3.8')
+		pythonRequirement = ' python=' + pythonVersion if len(pythonVersion)>0 else ''
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment}{pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)

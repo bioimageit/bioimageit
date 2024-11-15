@@ -428,7 +428,7 @@ class NodeBoxTreeWidget(QTreeWidget):
         jsonTemplate = NodeBase.jsonTemplate()
         jsonTemplate["package"] = packageName
         jsonTemplate["lib"] = libName
-        jsonTemplate["type"] = pressed_text
+        jsonTemplate["type"] = item_clicked.className
         jsonTemplate["name"] = pressed_text
         jsonTemplate["className"] = item_clicked.className
         jsonTemplate["uuid"] = str(uuid.uuid4())

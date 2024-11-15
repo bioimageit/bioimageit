@@ -127,6 +127,8 @@ def createUINode(raw_instance):
         return UIForLoopBeginNode(raw_instance)
     if isinstance(raw_instance, whileLoopBegin):
         return UIWhileLoopBeginNode(raw_instance)
+    
+    
     if isinstance(raw_instance, ScriptNode):
         return UIScriptNode(raw_instance)
     # if isinstance(raw_instance, DialogNode):

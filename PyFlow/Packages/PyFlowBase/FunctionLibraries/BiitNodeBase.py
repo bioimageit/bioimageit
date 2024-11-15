@@ -1,7 +1,6 @@
 from blinker import Signal
 from PyFlow.Core import NodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
-from PyFlow.invoke_in_main import inmain
 
 class BiitNodeBase(NodeBase):
 
@@ -55,3 +54,9 @@ class BiitNodeBase(NodeBase):
 
     def clear(self):
         self.setExecuted(False, setDirty=False)
+    
+    def kill(self, *args, **kwargs):
+        super().kill(*args, **kwargs)
+        # This must be done in the UI part with a warning dialog
+        # for folder in [getOutputDataFolderPath(self.name), getOutputMetadataFolderPath(self.name)]:
+        #     send2trash(folder)

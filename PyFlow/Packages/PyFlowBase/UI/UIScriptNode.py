@@ -15,14 +15,14 @@
 import subprocess
 from pathlib import Path
 from qtpy.QtWidgets import QFileDialog, QPushButton
-from PyFlow.UI.Canvas.UINodeBase import UINodeBase
+from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
 from PyFlow.Core.Common import *
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow import getRootPath
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 
-class UIScriptNode(UINodeBase):
+class UIScriptNode(UIBiitNodeBase):
     def __init__(self, raw_node):
         super(UIScriptNode, self).__init__(raw_node)
 

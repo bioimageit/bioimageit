@@ -35,11 +35,11 @@ class Tool:
             raise Exception('The output extension must be .csv or .st.json.')
         from stracking.io import read_particles, write_tracks
         from stracking.linkers import SPLinker, EuclideanCost
-        particles = read_particles(args.input_csv)
+        particles = read_particles(str(args.input_csv))
         euclidean_cost = EuclideanCost(max_cost=args.max_connection_cost)
         tracker = SPLinker(cost=euclidean_cost, gap=args.gap)
         tracks = tracker.run(particles)
-        write_tracks(file_path=args.output, tracks=tracks, format_='csv' if args.output.suffix == '.csv' else 'st.json')
+        write_tracks(file_path=str(args.output), tracks=tracks, format_='csv' if args.output.suffix == '.csv' else 'st.json')
 
 
 if __name__ == '__main__':

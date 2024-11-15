@@ -28,6 +28,10 @@ class OmeroBase(BiitNodeBase):
         if createPins:
             self.createDatasetPins()
     
+    @staticmethod
+    def category():
+        return "Data|Omero"
+    
     def createDatasetPins(self):
         self.datasetIdPin = self.createInputPin("Dataset ID (ignored if negative)", "IntPin", -1)
         self.datasetIdPin.pinHidden = True
@@ -62,8 +66,6 @@ class OmeroDownload(OmeroBase):
         self.outArray = self.createOutputPin("DataFrame", "AnyPin")
         self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
 
-
-    
     @staticmethod
     def description():
         return """Download files from Omero: either enter the dataset name or id to download. Negative ids will be ignored."""
@@ -77,9 +79,6 @@ class OmeroDownload(OmeroBase):
         helper.addOutputStruct(StructureType.Single)
         return helper
     
-    @staticmethod
-    def category():
-        return "Omero"
     
     def compute(self, *args, **kwargs):
         if self.dirty:
@@ -191,10 +190,6 @@ class OmeroUpload(OmeroBase):
         helper.addInputDataType("StringPin")
         helper.addInputStruct(StructureType.Single)
         return helper
-    
-    @staticmethod
-    def category():
-        return "Omero"
     
     def getProject(self):
         projectId = self.projectIdPin.currentData() if self.projectIdPin.currentData() >= 0 else None

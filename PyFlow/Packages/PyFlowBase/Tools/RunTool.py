@@ -355,11 +355,7 @@ class RunTool(ShelfTool):
     
     def saveGraph(self):
         self.pyFlowInstance.save()
-        # graphManager = self.pyFlowInstance.graphManager.get()
-        # with open(Path(graphManager.workflowPath) / 'workflow.pygraph', "w") as f:
-        #     saveData = graphManager.serialize()
-        #     json.dump(saveData, f, indent=4)
-    
+
 class RunAllTool(RunTool):
     """docstring for RunAllTool."""
 

@@ -77,6 +77,10 @@ class ListFiles(PandasNodeBase):
         return """Read the files of a folder and create a pandas frames."""
 
     @staticmethod
+    def category():
+        return "Data"
+    
+    @staticmethod
     def pinTypeHints():
         helper = NodePinsSuggestionsHelper()
         helper.addInputDataType("StringPin")

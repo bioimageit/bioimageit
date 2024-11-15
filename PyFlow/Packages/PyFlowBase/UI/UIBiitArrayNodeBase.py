@@ -13,9 +13,9 @@
 ## limitations under the License.
 
 import pandas
-from qtpy import QtGui, QtCore
-from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QFrame, QLabel
-from PyFlow.UI.Canvas.UINodeBase import UINodeBase
+from qtpy import QtGui
+from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
+from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 from PyFlow.UI.EditorHistory import EditorHistory
@@ -143,7 +143,7 @@ class ColumnValueWidget(QWidget):
         EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
 
-class UIBiitArrayNodeBase(UINodeBase):
+class UIBiitArrayNodeBase(UIBiitNodeBase):
     def __init__(self, raw_node):
         super(UIBiitArrayNodeBase, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)

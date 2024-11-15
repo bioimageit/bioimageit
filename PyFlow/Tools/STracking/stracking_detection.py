@@ -34,7 +34,8 @@ class Tool:
         print('Loading libraries...')
         import numpy as np
         import skimage
-        import stracking
+        import stracking.detectors
+        import stracking.io
         self.np = np
         self.skimage = skimage
         self.stracking = stracking
@@ -52,7 +53,7 @@ class Tool:
         return self.np.array([self.skimage.io.imread(os.path.join(parent_dir, frame)) for frame in frames])
 
     def processData(self, args):
-        print('Running stracking detection with DoH')
+        print(f'Running stracking detection with {args.detector_type}')
         
         if args.detector_type == 'DoH':
             detector = self.stracking.detectors.DoHDetector(min_sigma = args.min_sigma, max_sigma = args.max_sigma, num_sigma = args.n_sigmas, threshold = args.threshold, overlap = args.overlap, log_scale = args.log_scale)
@@ -61,8 +62,8 @@ class Tool:
         elif args.detector_type == 'LoG':
             detector = self.stracking.detectors.LoGDetector(min_sigma = args.min_sigma, max_sigma = args.max_sigma, num_sigma = args.n_sigmas, threshold = args.threshold, overlap = args.overlap, log_scale = args.log_scale)
 
-        out = detector.run(self.read_movie_txt(args.input_image))
-        self.stracking.io.write_particles(args.output, out)
+        out = detector.run(self.read_movie_txt(str(args.input_image)) if args.input_image.suffix == '.txt' else self.skimage.io.imread(str(args.input_image)))
+        self.stracking.io.write_particles(str(args.output), out)
 
 if __name__ == '__main__':
     tool = Tool()

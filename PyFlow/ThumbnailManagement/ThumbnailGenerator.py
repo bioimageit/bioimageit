@@ -2,13 +2,22 @@ import json
 from pathlib import Path
 import queue
 import pandas
+import shutil
 from PyFlow.invoke_in_main import inmain, inthread
 from blinker import Signal
 # import threading
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 # Warning: we cannot import generate_thumbnails.generateThumbnails directly here, otherwise the multiprocessing will initialize the entire BioImageIT app for each parallel process!
 # from PyFlow.ThumbnailManagement.generate_thumbnails import generateThumbnails
+import sys
+if sys.version_info < (3, 11):
+	from typing_extensions import TypedDict
+else:
+	from typing import TypedDict
 
+class PathInfo(TypedDict):
+	nodes: list[str]
+	path: str
 
 class ThumbnailGenerator:
 	
@@ -17,7 +26,7 @@ class ThumbnailGenerator:
 	queue = queue.Queue()
 
 	def __init__(self) -> None:
-		self.imageToThumbnail: dict[str, str] = {}
+		self.imageToThumbnail: dict[str, PathInfo] = {}
 		self.environment = environmentManager.launch('bioimageit')
 		if self.environment.process is not None:
 			inthread(self.logOutput, self.environment.process)
@@ -69,8 +78,10 @@ class ThumbnailGenerator:
 	def getThumbnailPath(self, imagePath):
 		imagePath = str(imagePath) if isinstance(imagePath, Path) else imagePath
 		if imagePath is None or not isinstance(imagePath, str): return None
-		return Path(self.imageToThumbnail[imagePath]) if imagePath in self.imageToThumbnail else None
+		return Path(self.imageToThumbnail[imagePath]['path']) if imagePath in self.imageToThumbnail and self.imageToThumbnail[imagePath]['path'] is not None else None
 
+	# Generate a unique name for each item from the row and col indices ; since 2 images in 2 different folders could have the same stem.
+	# The same image (full path) gets a unique thumbnail stored in self.imageToThumbnail
 	def generateThumbnailPath(self, nodeName, path, rowIndex, colIndex, thumbnailsPath=None):
 		thumbnailsPath = self.getNodeThumbnailsPath(nodeName) if thumbnailsPath is None else thumbnailsPath
 		return thumbnailsPath / f'{Path(path).stem}_{rowIndex}-{colIndex}.png'
@@ -100,7 +111,7 @@ class ThumbnailGenerator:
 	def _finishGenerateThumbnails(self, results):
 		for result in results:
 			if not isinstance(result, Exception):
-				self.imageToThumbnail[result[0]] = result[1]
+				self.imageToThumbnail[result[0]]['path'] = result[1]
 		with open(self.getThumbnailsPath() / 'imageToThumbnail.json', 'w') as f:
 			json.dump(self.imageToThumbnail, f)
 		print(f'generated {len(results)} thumbnails')
@@ -115,10 +126,17 @@ class ThumbnailGenerator:
 		for ri, row in dataFrame.iterrows():
 			for ci, item in enumerate(row):
 				if not (isinstance(item, Path) or isinstance(item, str)): continue
-				if item in self.imageToThumbnail: continue
+				item = str(item)
+				if item in self.imageToThumbnail:
+					if nodeName not in self.imageToThumbnail[item]['nodes']:
+						self.imageToThumbnail[item]['nodes'].append(nodeName)
+					if self.imageToThumbnail[item]['path'] is not None: continue
+				else:
+					self.imageToThumbnail[item] = dict(nodes=[nodeName], path=None)
 				if not Path(item).is_file(): continue
 				thumbnailPath = self.generateThumbnailPath(nodeName, item, ri, ci, thumbnailsPath)
-				images.append((str(item), str(thumbnailPath)))
+				images.append((item, str(thumbnailPath)))
+
 		if len(images)>0:
 
 			# thread = threading.Thread(target=self._generateThumbnails, args=images)
@@ -131,6 +149,16 @@ class ThumbnailGenerator:
 			# self._generateThumbnails(images)
 		return 
 
+	def deleteThumbnails(self, nodeName):
+		for path, pathInfo in self.imageToThumbnail.items():
+			pathInfo['nodes'].remove(nodeName)
+			if len(pathInfo['nodes']) == 0:
+				pathInfo['path'].unlink()
+				del self.imageToThumbnail[path]
+		folder:Path = self.getNodeThumbnailsPath(nodeName)
+		if len(list(folder.iterdir()))==0:
+			folder.rmdir()
+	
 	@classmethod
 	def get(cls):
 		if cls.instance is None:

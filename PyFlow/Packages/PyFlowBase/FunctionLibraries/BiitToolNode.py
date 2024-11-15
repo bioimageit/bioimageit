@@ -36,7 +36,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		self.__class__.nInstanciatedNodes += 1
 	
 	def kill(self, *args, **kwargs):
-		super().kill(args, kwargs)
+		super().kill(*args, **kwargs)
 		self.__class__.nodeDeteleted()
 	
 	@property
