@@ -26,6 +26,7 @@ class Tool(ExoDeepFinderTool):
 
     def processData(self, args):
         print(f'Symlink {args.input_movie_folder} to {args.output_movie_folder}')
+        args.output_movie_folder.mkdir(exist_ok=True, parents=True)
         for file in sorted(list(args.input_movie_folder.iterdir())):
             link = args.output_movie_folder / file.name
             if link.is_symlink():

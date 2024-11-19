@@ -17,6 +17,7 @@ import pandas
 import os
 
 from qtpy import QtCore, QtGui
+from qtpy.QtGui import QPixmap
 from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QMessageBox
 
 from PyFlow import getRootPath
@@ -33,6 +34,22 @@ try:
 except ImportError as e:
 	ImageViewerTool = None
 
+
+class BiitTableView(QTableView):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.setMouseTracking(True)
+		self.viewport().installEventFilter(self)
+
+	def eventFilter(self, obj, event):
+		if obj == self.viewport() and event.type() == QtCore.QEvent.MouseMove:
+			index = self.indexAt(event.pos())
+			if index.isValid() and isinstance(self.model().data(index, QtCore.Qt.DisplayRole), QPixmap):
+				self.viewport().setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+			else:
+				self.viewport().unsetCursor()
+		return super().eventFilter(obj, event)
+		
 class TableTool(DockTool):
 	"""docstring for Table tool."""
 
@@ -54,7 +71,7 @@ class TableTool(DockTool):
 		self.label.hide()
 		self.layout.addWidget(self.label)
 
-		self.content = QTableView()
+		self.content = BiitTableView()
 		self.content.resize(800, 500)
 		self.content.horizontalHeader().setStretchLastSection(True)
 		self.content.setAlternatingRowColors(True)

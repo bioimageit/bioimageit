@@ -151,7 +151,8 @@ class ThumbnailGenerator:
 
 	def deleteThumbnails(self, nodeName):
 		for path, pathInfo in self.imageToThumbnail.items():
-			pathInfo['nodes'].remove(nodeName)
+			if nodeName in pathInfo['nodes']:
+				pathInfo['nodes'].remove(nodeName)
 			if len(pathInfo['nodes']) == 0:
 				Path(pathInfo['path']).unlink()
 				del self.imageToThumbnail[path]

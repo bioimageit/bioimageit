@@ -217,9 +217,15 @@ class BiitArrayNodeBase(BiitNodeBase):
     def setBoolArg(self, args, name):
         args[name] = ''
     
-    def getWorkflowDataPath(self):
+    def getWorkflowPath(self):
         graphManager = GraphManagerSingleton().get()
-        return Path(graphManager.workflowPath).resolve() / 'Data'
+        return Path(graphManager.workflowPath).resolve()
+    
+    def getWorkflowDataPath(self):
+        return self.getWorkflowPath() / 'Data'
+    
+    def getWorkflowToolsPath(self):
+        return self.getWorkflowPath() / 'Tools'
     
     def setArg(self, args, parameterName, parameter, parameterValue, index):
         if parameterValue is None: return

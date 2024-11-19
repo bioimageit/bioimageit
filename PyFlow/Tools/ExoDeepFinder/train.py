@@ -18,17 +18,17 @@ class Tool(ExoDeepFinderTool):
         inputs_parser.add_argument('-ns', '--n_steps', help='Number of steps per epochs. Can be an integer or a list of the form [nStepsModel1, nStepsModel2, ...].', default='100', type=str)
 
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='[workflow_folder]/model', type=Path)
+        outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='[workflow_folder]/model/model', type=Path)
         return parser, dict( dataset = dict(autoColumn=True) )
 
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
 
     def processAllData(self, argsList):
-        print(argsList)
         args = argsList[0]
         outputDataset = args.dataset
         output = args.output
+        output.parent.mkdir(exist_ok=True, parents=True)
         print(f'Train ExoDeepFinder from dataset {outputDataset}')
         commandArgs = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
         return subprocess.run([str(arg) for arg in commandArgs])
