@@ -287,6 +287,9 @@ class RunTool(ShelfTool):
     
     def run(self):
         print('Run')
+
+        if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
+
         self.cancelExecution = threading.Event()
 
         self.progressDialog.resetProgressPercentage()

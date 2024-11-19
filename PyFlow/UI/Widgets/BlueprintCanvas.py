@@ -488,8 +488,11 @@ class BlueprintCanvas(CanvasBase):
                     if answer == QMessageBox.Cancel:
                         return
                 if answer == QMessageBox.Yes:
+                    if hasattr(node._rawNode, 'deleteFiles') and isinstance(node._rawNode.deleteFiles, callable):
+                        node._rawNode.deleteFiles()
                     for folder in folders:
-                        send2trash(folder)
+                        if folder.exists():
+                            send2trash(folder)
                 node._rawNode.kill()
             self.requestClearProperties.emit()
             self.requestClearTable.emit()
@@ -1798,7 +1801,7 @@ class BlueprintCanvas(CanvasBase):
                 packageName = jsonData["package"]
                 nodeType = jsonData["type"]
                 libName = jsonData["lib"]
-                name = nodeType
+                name = jsonData["name"]
                 # dropItem = self.nodeFromInstance(self.itemAt(scenePos.toPoint()))
                 # if not dropItem or (isinstance(dropItem, UINodeBase) and dropItem.isCommentNode or dropItem.isTemp) or isinstance(dropItem, UIPinBase) or isinstance(dropItem, UIConnection):
                 #######################################################
@@ -1826,7 +1829,7 @@ class BlueprintCanvas(CanvasBase):
                     nodeTemplate["name"] = name
                     nodeTemplate["x"] = x
                     nodeTemplate["y"] = y
-                    nodeTemplate["meta"]["label"] = nodeType
+                    nodeTemplate["meta"]["label"] = name
                     nodeTemplate["uuid"] = str(uuid.uuid4())
                     if self.tempnode:
                         self.tempnode.updateOwningCommentNode()

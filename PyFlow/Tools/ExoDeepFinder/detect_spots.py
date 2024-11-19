@@ -18,7 +18,7 @@ class Tool:
         
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='[workflow_folder]/dataset/{movie_folder.name}/detector_segmentation.h5', type=Path)
-        outputs_parser.add_argument('-omf', '--output_movie_folder', help='Output movie folder.', default='[workflow_folder]/dataset/{movie_folder.name}', type=Path)
+        # outputs_parser.add_argument('-omf', '--output_movie_folder', help='Output movie folder.', default='[workflow_folder]/dataset/{movie_folder.name}', type=Path)
         return parser, dict( movie_folder = dict(autoColumn=True), output=dict(autoIncrement=False) )
 
     def processDataFrame(self, dataFrame, argsList):

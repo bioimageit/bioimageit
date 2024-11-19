@@ -108,11 +108,10 @@ class BiitArrayNodeBase(BiitNodeBase):
         # Reset folderDataFramePath since it should be None when the input pin has a dataFrame, 
         # otherwise folderDataFramePath and the input dataFrame are in conlict when loading the graph file (the dataFrame is given from the input, then it is overriden with folderDataFramePath)
         self.folderDataFramePath = None
-        
+
     # The input pin was plugged (resetParameters=True) or parameters were changed in the properties GUI (resetParameters=False): 
-    #    - set the node dirty, 
-    #    - unexecuted, 
-    #    - and update what depends on the dataframe:
+    #    - set the node dirty & unexecuted, 
+    #    - update what depends on the dataframe:
     #          - (deprecated) if data is None: recreate dataframe if not resetParameters
     #            if data is not None and resetParameters : update the parameters from data (but do not overwrite parameters which are already column names)
     #          - send parametersChanged to update the table view
@@ -124,7 +123,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         if data is None and resetParameters: self.initializeParameters()
         # Set parameters from new input dataFrame
         if data is not None and resetParameters: self.setParametersFromDataframe(data, True)
-        #  Once parameters are set, send change
+        #  Once parameters are set, send changes to update the table view
         self.parametersChanged.send(data)
     
     # The input pin was unplugged: reset dataFrame
@@ -154,8 +153,14 @@ class BiitArrayNodeBase(BiitNodeBase):
         template['folderDataFramePath'] = self.folderDataFramePath
         outputFolder = getOutputMetadataFolderPath(self.name)
         if Path(outputFolder / OUTPUT_DATAFRAME_PATH).exists():
-            template['outputDataFramePath'] = OUTPUT_DATAFRAME_PATH
+            if self.executed:
+                template['outputDataFramePath'] = OUTPUT_DATAFRAME_PATH
+            else:
+                Path(outputFolder / OUTPUT_DATAFRAME_PATH).unlink()
         return template
+    
+    def hasGeneratedData(self):
+        return len(list(getOutputMetadataFolderPath(self.name).iterdir())) > 0 or len(list(getOutputDataFolderPath(self.name).iterdir())) > 0
     
     @staticmethod
     def pinTypeHints():
@@ -337,14 +342,15 @@ class BiitArrayNodeBase(BiitNodeBase):
         super().clear()
     
     def deleteFiles(self):
-        self.processNode(True)
-        tool = self.__class__.tool
+        # self.processNode(True)
+        # tool = self.__class__.tool
         # data = self.outArray.getData()
         # for output in tool.info.outputs:
         #     for index, row in data.iterrows():
         #         outputPath = row[self.getColumnName(output)]
         #         if isinstance(outputPath, Path) and outputPath.exists():
         #             outputPath.unlink()
+        ThumbnailGenerator.get().deleteThumbnails(self.name)
         for outputFolder in [getOutputDataFolderPath(self.name), getOutputMetadataFolderPath(self.name)]:
             if outputFolder.exists():
                 send2trash(outputFolder)

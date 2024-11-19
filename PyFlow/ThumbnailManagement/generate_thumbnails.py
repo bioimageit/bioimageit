@@ -34,7 +34,7 @@ def thumbnail(inputPath, outputPath, size=(128,128)):
 			im = normalizeAndConvert(data[data.shape[0]//2,:,:])
 		else:
 			im = Image.open(inputPath)
-			if im.mode[0] in ['I', 'F']:
+			if im.mode[0] in ['I', 'F', 'L']:
 				im = normalizeAndConvert(np.asarray(im))
 		im.thumbnail(size)
 		im.save(outputPath)

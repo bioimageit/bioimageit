@@ -153,7 +153,7 @@ class ThumbnailGenerator:
 		for path, pathInfo in self.imageToThumbnail.items():
 			pathInfo['nodes'].remove(nodeName)
 			if len(pathInfo['nodes']) == 0:
-				pathInfo['path'].unlink()
+				Path(pathInfo['path']).unlink()
 				del self.imageToThumbnail[path]
 		folder:Path = self.getNodeThumbnailsPath(nodeName)
 		if len(list(folder.iterdir()))==0:
