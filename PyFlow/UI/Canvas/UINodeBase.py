@@ -958,7 +958,7 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
 
     def getHeaderColor(self):
         # return self.headColor
-        return QtGui.QColor(200, 240, 190, 255) if hasattr(self._rawNode, 'executed') and self._rawNode.executed else Colors.SelectionBlue.darker(60)
+        return QtGui.QColor(200, 240, 190, 255) if hasattr(self._rawNode, 'executed') and self._rawNode.executed else Colors.Orange if hasattr(self._rawNode, 'hasGeneratedData') and self._rawNode.hasGeneratedData() else Colors.SelectionBlue.darker(60)
 
     def updateNodeHeaderColor(self):
         if self.computing:

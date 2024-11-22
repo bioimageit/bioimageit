@@ -274,6 +274,10 @@ class PyFlowBase(IPackage):
     @staticmethod
     def GetNodeClasses():
         return _NODES
+    
+    @staticmethod
+    def addClass(nodeClassName, nodeClass):
+        _NODES[nodeClassName] = nodeClass
 
     @staticmethod
     def GetPinClasses():

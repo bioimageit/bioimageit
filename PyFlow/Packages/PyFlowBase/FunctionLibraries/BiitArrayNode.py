@@ -160,7 +160,9 @@ class BiitArrayNodeBase(BiitNodeBase):
         return template
     
     def hasGeneratedData(self):
-        return len(list(getOutputMetadataFolderPath(self.name).iterdir())) > 0 or len(list(getOutputDataFolderPath(self.name).iterdir())) > 0
+        dataFolder = getOutputDataFolderPath(self.name)
+        metadataFolder = getOutputMetadataFolderPath(self.name)
+        return dataFolder.exists() and len(list(dataFolder.iterdir())) > 0 or metadataFolder.exists() and len(list(metadataFolder.iterdir())) > 0
     
     @staticmethod
     def pinTypeHints():

@@ -150,14 +150,15 @@ class ThumbnailGenerator:
 		return 
 
 	def deleteThumbnails(self, nodeName):
-		for path, pathInfo in self.imageToThumbnail.items():
+		for path, pathInfo in list(self.imageToThumbnail.items()):
 			if nodeName in pathInfo['nodes']:
 				pathInfo['nodes'].remove(nodeName)
 			if len(pathInfo['nodes']) == 0:
-				Path(pathInfo['path']).unlink()
+				if 'path' in pathInfo and (pathInfo['path'] is not None) and Path(pathInfo['path']).exists():
+					Path(pathInfo['path']).unlink()
 				del self.imageToThumbnail[path]
 		folder:Path = self.getNodeThumbnailsPath(nodeName)
-		if len(list(folder.iterdir()))==0:
+		if folder.exists() and len(list(folder.iterdir()))==0:
 			folder.rmdir()
 	
 	@classmethod

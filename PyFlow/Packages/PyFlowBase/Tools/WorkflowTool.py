@@ -190,8 +190,10 @@ class WorkflowTool(DockTool):
     def saveGraph(self, path:Path=None):
         path = self.getCurrentWorkflow() if path is None else Path(path)
         path.mkdir(exist_ok=True, parents=True)
+        tmpCurrentFileName = self.pyFlowInstance.currentFileName
         self.pyFlowInstance.currentFileName = str(path / WorkflowTool.graphFileName)
-        self.pyFlowInstance.save(save_as=False)
+        if not self.pyFlowInstance.save(save_as=False, deleteData=True):
+            self.pyFlowInstance.currentFileName = tmpCurrentFileName
 
     def createWorkflowDialog(self):
         fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))

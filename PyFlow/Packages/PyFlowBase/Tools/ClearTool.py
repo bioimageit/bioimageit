@@ -44,11 +44,15 @@ class ClearTool(ShelfTool):
     def getNodesToClear(self, nodes):
         return [ node for node in nodes if RunTool.isBiitLib(node) and RunTool.wasExecuted(node) ]
     
-    def do(self):
+    def askConfirmation(self, nodes):
+        nodeNames = ', '.join([n.name for n in nodes])
+        return QMessageBox.warning(self.pyFlowInstance, "Delete nodes data?", f"Are you sure you want to delete all data of the following nodes: {nodeNames}?", QMessageBox.Cancel | QMessageBox.Yes)
 
+    def do(self):
         graphManager = self.pyFlowInstance.graphManager.get()
         nodes = graphManager.getAllNodes()
         nodesToClear = self.getNodesToClear(nodes)
+        if self.askConfirmation(nodesToClear) == QMessageBox.Cancel: return False
         for node in nodesToClear:
             node.clear()
 
@@ -70,12 +74,9 @@ class ClearAllTool(ClearTool):
     def name():
         return "Clear all"
     
-    def do(self):
+    def getNodesToClear(self):
         graphManager = self.pyFlowInstance.graphManager.get()
-        for node in graphManager.getAllNodes():
-            if ClearTool.isBiitLib(node):
-                node.clear()
-        super(ClearAllTool, self).do()
+        return [node for node in graphManager.getAllNodes() if ClearTool.isBiitLib(node)]
 
 class ClearSelectedTool(ClearTool):
     """docstring for ClearSelectedTool."""

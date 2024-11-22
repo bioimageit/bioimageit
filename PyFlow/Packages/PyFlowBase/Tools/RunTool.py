@@ -288,7 +288,7 @@ class RunTool(ShelfTool):
     def run(self):
         print('Run')
 
-        # if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
+        if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
 
         self.cancelExecution = threading.Event()
 
@@ -357,7 +357,7 @@ class RunTool(ShelfTool):
                 self.currentNode.exitTool()
     
     def saveGraph(self):
-        self.pyFlowInstance.save()
+        self.pyFlowInstance.save(deleteData=False)
 
 class RunAllTool(RunTool):
     """docstring for RunAllTool."""

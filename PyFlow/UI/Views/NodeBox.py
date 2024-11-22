@@ -26,7 +26,7 @@ from qtpy import QtGui
 from qtpy.QtWidgets import *
 
 from PyFlow import getRootPath
-from PyFlow import GET_PACKAGES
+from PyFlow import GET_PACKAGES, ADD_CLASS
 from PyFlow import GET_PACKAGE_PATH
 
 from PyFlow.Core.Common import *
@@ -141,6 +141,9 @@ class NodeBoxTreeWidget(QTreeWidget):
             node = createNode(nodePath, moduleImportPath, import_module(moduleImportPath))
         if node is not None:
             self.nodeClasses[nodeName] = node
+            ADD_CLASS('PyFlowBase', nodeName, node)
+            # packages = GET_PACKAGES()
+            # packages["PyFlowBase"].addClass(nodeName, node)
         return node
     
     def removeNodeClass(self, nodeName):

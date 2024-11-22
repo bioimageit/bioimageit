@@ -64,6 +64,8 @@ def getImportPath(toolPath):
 def GET_PACKAGES():
     return __PACKAGES
 
+def ADD_CLASS(packageName, nodeClassName, nodeClass):
+    __PACKAGES[packageName].addClass(nodeClassName, nodeClass)
 
 def GET_PACKAGE_PATH(packageName):
     if packageName in __PACKAGE_PATHS:
