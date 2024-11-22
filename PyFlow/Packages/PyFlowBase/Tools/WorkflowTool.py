@@ -18,6 +18,7 @@ import tempfile
 from blinker import Signal
 from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
+from PyFlow import getRootPath
 from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.UI.Tool.Tool import DockTool
@@ -212,6 +213,9 @@ class WorkflowTool(DockTool):
             if path is None:
                 return
         path.mkdir(exist_ok=True, parents=True)
+
+        # Copy .gitignore so that user can easily version his workflow
+        shutil.copyfile(getRootPath() / 'Scripts' / '.gitignore_template', path / '.gitignore')
 
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
         self.addWorkflow(path)

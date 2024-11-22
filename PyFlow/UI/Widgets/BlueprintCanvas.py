@@ -1687,7 +1687,7 @@ class BlueprintCanvas(CanvasBase):
             nodeTemplate["lib"] = libName
             # nodeTemplate["type"] = nodeType
             nodeTemplate["type"] = jsonData['className']
-            nodeTemplate["name"] = name
+            nodeTemplate["name"] = jsonData['name'] # name
             nodeTemplate["x"] = scenePos.x()
             nodeTemplate["y"] = scenePos.y()
             nodeTemplate["meta"]["label"] = nodeType
