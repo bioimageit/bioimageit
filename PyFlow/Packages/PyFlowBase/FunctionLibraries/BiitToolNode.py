@@ -291,12 +291,12 @@ class BiitToolNode(BiitArrayNodeBase):
 		# for i, args in enumerate(argsList):
 		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 		outputFolderPath = getOutputDataFolderPath(self.name)
-		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath])
+		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath])
+			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
 			if completedProcess is not None and completedProcess.returncode != 0:
 				raise Exception(completedProcess)
 		self.finishExecution(argsList)

@@ -1,8 +1,10 @@
-import os
+import os, sys
+from pathlib import Path
 from importlib import import_module
 
 tool = None
 moduleImportPath = None
+currentDirectory = os.getcwd()
 
 def dict2obj(d):
      
@@ -28,10 +30,14 @@ def dict2obj(d):
   
     return obj
 
-def initialize(newModuleImportPath: str, args: list[str]):
+def initialize(newModuleImportPath: str, args: list[str], toolsPath:Path):
     global tool, moduleImportPath
     toolMustBeImported = moduleImportPath != newModuleImportPath
     if toolMustBeImported:
+        if toolsPath not in sys.path:
+            sys.path.append(str(toolsPath))
+        # if '/Users/amasson/BioImageIT/Tau Proteins Microtubules Interaction/Tools' not in sys.path:
+        #   sys.path.append('/Users/amasson/BioImageIT/Tau Proteins Microtubules Interaction/Tools')
         module = import_module(newModuleImportPath)
         tool = module.Tool()
         moduleImportPath = newModuleImportPath
@@ -42,9 +48,8 @@ def initialize(newModuleImportPath: str, args: list[str]):
         tool.initialize(args)
     return tool, args
 
-def processData(moduleImportPath: str, args: list[str], nodeOutputPath):
-    tool, args = initialize(moduleImportPath, args)
-    currentDirectory = os.getcwd()
+def processData(moduleImportPath: str, args: list[str], nodeOutputPath:Path, toolsPath:Path):
+    tool, args = initialize(moduleImportPath, args, toolsPath)
     result = None
     if hasattr(tool, 'processData') and callable(tool.processData):
         os.chdir(nodeOutputPath)
@@ -56,10 +61,10 @@ def processData(moduleImportPath: str, args: list[str], nodeOutputPath):
 #     tool, args = initialize(moduleImportPath, argsList[0])
 #     tool.processAllData(args)
 
-def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath):
+def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:Path, toolsPath:Path):
     # Initialize with the args of the first row, convert them to a list of string before use
     args0 = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argsList[0].items()] for item in items]
-    tool, _ = initialize(moduleImportPath, args0)
+    tool, _ = initialize(moduleImportPath, args0, toolsPath)
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     currentDirectory = os.getcwd()
     result = None
