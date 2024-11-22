@@ -220,7 +220,7 @@ class TableTool(DockTool):
 
 	@staticmethod
 	def defaultDockArea():
-		return QtCore.Qt.RightDockWidgetArea
+		return QtCore.Qt.BottomDockWidgetArea
 
 	@staticmethod
 	def toolTip():

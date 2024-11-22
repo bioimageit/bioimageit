@@ -9,7 +9,7 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
-    test = ['--input_image', 'img02.png', '--out', 'img02_segmentation.png', '--npy', 'img02_segmentation.npy']
+    test = ['--input_image', 'img02.png', '--out', 'img02_segmentation.png', '--visualization', 'img02_segmentation.npy']
 
     @staticmethod
     def getArgumentParser():
@@ -22,8 +22,8 @@ class Tool:
         inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
         inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
         outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.png', type=Path)
-        outputs_parser.add_argument('-n', '--npy', help='The output segmentation path.', default='{input_image.stem}_segmentation.npy', type=Path)
+        outputs_parser.add_argument('-o', '--segmentation', help='The output segmentation path.', default='{input_image.stem}_segmentation.png', type=Path)
+        outputs_parser.add_argument('-v', '--visualization', help='The output visualisation path.', default='{input_image.stem}_visualization.npy', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
     def initialize(self, args):
@@ -54,21 +54,21 @@ class Tool:
         
         input_image = Path(input_image)
 
-        if args.npy:
-            print(f'[[3/4]] Save segmentation {args.npy}')
+        if args.visualization:
+            print(f'[[3/4]] Save visualization file {args.visualization}')
             # save results so you can load in gui
             self.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
-            (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.npy)
-            print(f'Saved npy: {args.npy}')
+            (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.visualization)
+            print(f'Saved visualization: {args.visualization}')
 
-        if args.out:
-            print(f'[[4/4]] Save segmentation {args.out}')
-            # save results as tif
+        if args.segmentation:
+            print(f'[[4/4]] Save segmentation {args.segmentation}')
+            # save results as png
             self.io.save_masks(image, masks, flows, input_image)
             output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
             if output_mask.exists():
-                (output_mask).rename(args.out)
-                print(f'Saved out: {args.out}')
+                (output_mask).rename(args.segmentation)
+                print(f'Saved out: {args.segmentation}')
             else:
                 print('Segmentation was not generated because no masks were found.')
 

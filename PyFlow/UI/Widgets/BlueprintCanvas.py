@@ -1157,11 +1157,11 @@ class BlueprintCanvas(CanvasBase):
                     elif currentInputAction in InputManager()[
                         "Canvas.DragNodes"
                     ] and isinstance(self.pressed_item.topLevelItem(), UINodeBase):
-                        isComment = self.pressed_item.topLevelItem().isCommentNode
-                        if isComment:
-                            self.manipulationMode = CanvasManipulationMode.MOVE
-                            if self.pressed_item.objectName() == "MouseLocked":
-                                super(BlueprintCanvas, self).mousePressEvent(event)
+                        # isComment = self.pressed_item.topLevelItem().isCommentNode
+                        # if isComment:
+                        self.manipulationMode = CanvasManipulationMode.MOVE
+                        if self.pressed_item.objectName() == "MouseLocked":
+                            super(BlueprintCanvas, self).mousePressEvent(event)
                     if currentInputAction in InputManager()["Canvas.DragCopyNodes"]:
                         self.manipulationMode = CanvasManipulationMode.COPY
 
@@ -1479,8 +1479,10 @@ class BlueprintCanvas(CanvasBase):
         self.released_item = self.itemAt(event.pos())
         self.releasedPin = self.findPinNearPosition(event.pos())
 
+        delta = self.mousePressPose - self.mouseReleasePos
         if (
             self.manipulationMode == CanvasManipulationMode.MOVE
+            and delta.manhattanLength() > 0
             and len(self.selectedNodes()) > 0
         ):
             EditorHistory().saveState("Move nodes", modify=True)

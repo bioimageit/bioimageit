@@ -3,7 +3,7 @@ import argparse
 
 class Tool():
 
-    categories = ['Custom']
+    categories = ['Workflow']
     environment = 'environmentName'
     # List your tool dependencies:
     # - the python version
