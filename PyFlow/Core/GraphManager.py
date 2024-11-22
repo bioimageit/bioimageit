@@ -382,14 +382,14 @@ class GraphManager(object):
         existingNames = [g.name for g in self.getAllGraphs()]
         return getUniqNameFromList(existingNames, name)
 
-    def getUniqNodeName(self, name):
+    def getUniqNodeName(self, name, exclude_nodes=[]):
         """Returns unique node name
 
         :param name: Source name
         :type name: str
         :rtype: str
         """
-        existingNames = [n.name for n in self.getAllNodes()]
+        existingNames = [n.name for n in self.getAllNodes() if n not in exclude_nodes]
         return getUniqNameFromList(existingNames, name)
 
     def getUniqVariableName(self, name):

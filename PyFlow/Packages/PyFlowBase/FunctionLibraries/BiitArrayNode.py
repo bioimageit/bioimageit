@@ -4,14 +4,13 @@ import pandas
 from qtpy.QtCore import Signal
 
 from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
-from PyFlow.Core import NodeBase
+from PyFlow.Core.EvaluationEngine import EvaluationEngine
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputDataFolderPath, getOutputMetadataFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
-
 from send2trash import send2trash
 from blinker import Signal
 
@@ -147,6 +146,25 @@ class BiitArrayNodeBase(BiitNodeBase):
         if not self.inArray.hasConnections(): return None
         return self.getPreviousNodes()[0]
     
+    def updateColumnNames(self, pin, oldName, newName):
+        data = pin.getData()
+        if data is None: return
+        columns = {}
+        for column in data.columns:
+            nodeName = column.split(':')[0]
+            if nodeName == oldName:
+                columns[column] = newName + ':' + column.split(':')[1]
+        data.rename(columns=columns)
+        pin.setData(data)
+
+    def updateName(self, oldName, newName):
+        # update column names in all downstream dataFrames
+        self.updateColumnNames(self.inArray, oldName, newName)
+        self.updateColumnNames(self.outArray, oldName, newName)
+        nextNodes = EvaluationEngine()._impl.getForwardNextLayerNodes(self)
+        for node in nextNodes:
+            node.updateName(oldName, newName)
+
     def serialize(self):
         template = super(BiitArrayNodeBase, self).serialize()
         template['parameters'] = self.parameters.copy()

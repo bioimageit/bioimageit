@@ -719,13 +719,16 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
         :type accepted: :class:`bool`
         """
         if accepted:
+            oldName = self._rawNode.name
             name = self.nodeNameWidget.getPlainText()
             if self.isNameValidationEnabled():
                 name = name.replace(" ", "")
-            newName = self.canvasRef().graphManager.getUniqNodeName(name)
+            newName = self.canvasRef().graphManager.getUniqNodeName(name, [self._rawNode])
             self.setName(newName)
             self.setHeaderHtml(newName)
             self.canvasRef().requestFillProperties.emit(self.createPropertiesWidget)
+            if hasattr(self._rawNode, 'updateName'):
+                self._rawNode.updateName(oldName, newName)
 
     def onNodeErrorOccurred(self, *args, **kwargs):
         # change node ui to invalid

@@ -35,7 +35,8 @@ class BiitNodeBase(NodeBase):
         template['executed'] = self.executed
         return template
     
-    def setExecuted(self, executed=True, propagate=True, setDirty=True):
+    # def setExecuted(self, executed=True, propagate=True, setDirty=True):
+    def setExecuted(self, executed=True, setDirty=True):
         if not executed and setDirty:
             self.dirty = True
             if hasattr(self, 'outArray'):
@@ -44,10 +45,11 @@ class BiitNodeBase(NodeBase):
         self.executed = executed
         # inmain(lambda: self.executedChanged.send(executed))
         # Propagate to following nodes is execution was unset?
-        if propagate and not executed:
-            nextNodes = EvaluationEngine()._impl.getEvaluationOrderIterative(self, forward=True)
+        if not executed:
+            # nextNodes = EvaluationEngine()._impl.getEvaluationOrderIterative(self, forward=True)
+            nextNodes = EvaluationEngine()._impl.getForwardNextLayerNodes(self)
             for node in [node for node in nextNodes if node != self]:
-                node.setExecuted(False, propagate=False)
+                node.setExecuted(False)
 
     def execute(self, *args, **kwargs):
         self.setExecuted()
