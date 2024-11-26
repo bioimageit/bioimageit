@@ -223,6 +223,7 @@ class BiitArrayNodeBase(BiitNodeBase):
     #         args[output.name] = str(outputPath)
 
     def setOutputArgsFromDataFrame(self, toolInfo, args, outputData, index):
+        if outputData is None: return
         for output in toolInfo.outputs:
             if self.getColumnName(output) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
             outputPath = outputData.at[index, self.getColumnName(output)]
@@ -232,7 +233,8 @@ class BiitArrayNodeBase(BiitNodeBase):
     
     def getParameter(self, name, row):
         if name not in self.parameters: return None
-        return self.parameters[name]['value'] if self.parameters[name]['type'] == 'value' else row[self.parameters[name]['columnName']]
+        parameter = self.parameters[name]
+        return parameter['value'] if parameter['type'] == 'value' else row[parameter['columnName']] if row is not None and parameter['columnName'] in row else None
     
     def setBoolArg(self, args, name):
         args[name] = ''
@@ -260,6 +262,9 @@ class BiitArrayNodeBase(BiitNodeBase):
             args[parameterName] = arg
         return
     
+    def parameterIsUndefinedAndRequired(self, parameterName, inputs, row=None):
+        return any([toolInput.required and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput.name == parameterName])
+    
     def getArgs(self):
         toolInfo = self.__class__.tool.info
         argsList = []
@@ -268,6 +273,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         if inputData is None:
             args = {}
             for parameterName, parameter in self.parameters.items():
+                if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs):
+                    raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 self.setArg(args, parameterName, parameter, parameter['value'], None)
             # self.setOutputArgs(toolInfo, args)
             self.setOutputArgsFromDataFrame(toolInfo, args, outputData, 0)
@@ -276,6 +283,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         for index, row in inputData.iterrows():
             args = {}
             for parameterName, parameter in self.parameters.items():
+                if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs, row):
+                    raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 if parameter['type'] == 'value':
                     self.setArg(args, parameterName, parameter, parameter['value'], index)
                 else:
@@ -333,10 +342,10 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def createDataFrameFromInputs(self):
         tool = self.__class__.tool
-        autoInputs = [i for i in tool.info.inputs if hasattr(i, 'auto') and i.auto]
-        if len(autoInputs) == 0: return None
+        inputs = [i for i in tool.info.inputs] # if hasattr(i, 'auto') and i.auto]
+        if len(inputs) == 0: return None
         data = pandas.DataFrame()
-        for input in autoInputs:
+        for input in inputs:
             data[self.getColumnName(input)] = [self.parameters[input.name]['value']]
         ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data

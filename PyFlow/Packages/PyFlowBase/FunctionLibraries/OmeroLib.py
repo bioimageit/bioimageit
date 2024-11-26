@@ -1,46 +1,27 @@
-import json
 import pandas
 from munch import DefaultMunch
-# from skimage.io import imsave
-
-from PyFlow import PARAMETERS_PATH
 from PyFlow.Core import FunctionLibraryBase
-from PyFlow.Core.Common import StructureType, PinOptions
-from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath
-from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 
 class OmeroLib(FunctionLibraryBase):
     """doc string for OmeroLib"""
     classes = {}
 
-class OmeroBase(BiitNodeBase):
+class OmeroBase(BiitArrayNodeBase):
 
     omero: OmeroService = OmeroService()
 
-    def __init__(self, name, createPins=True):
+    def __init__(self, name):
         super(OmeroBase, self).__init__(name)
         self.executed = None
         self.lib = 'BiitLib'
-        if createPins:
-            self.createDatasetPins()
     
     @staticmethod
     def category():
         return "Data|Omero"
-    
-    def createDatasetPins(self):
-        self.datasetIdPin = self.createInputPin("Dataset ID (ignored if negative)", "IntPin", -1)
-        self.datasetIdPin.pinHidden = True
-
-        self.datasetNamePin = self.createInputPin("Dataset name", "StringPin", "")
-        self.datasetNamePin.pinHidden = True
-        for pin in [self.datasetIdPin, self.datasetNamePin]:
-            pin.pinHidden = True
-            pin.dataBeenSet.connect(self.dataChanged)
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
@@ -50,192 +31,157 @@ class OmeroBase(BiitNodeBase):
         self.dirty = True
         self.setExecuted(False)
 
-    def getDataset(self, project=None):
-        datasetId = self.datasetIdPin.currentData() if self.datasetIdPin.currentData() >= 0 else None
-        datasetName = self.datasetNamePin.currentData() if len(self.datasetNamePin.currentData()) > 0 else None
-        if datasetId is None and datasetName is None:
-            raise Exception('Dataset name or id must be set.')
-        dataset = self.omero.getDataset(name=datasetName, uid=datasetId, project=project)
-        return dataset
+    # setOutputColumns does not apply for Omero nodes
+    def setOutputColumns(self, tool, data):
+        return
+
+    def getDatasets(self, project=None):
+        data = self.getDataFrame()
+        dataRows = data.iterrows() if data is not None else [(0, None)]
+        datasets = []
+        for index, row in dataRows:
+            datasetId = self.getParameter('dataset_id', row)
+            datasetName = self.getParameter('dataset_name', row)
+            if datasetId is None and datasetName is None:
+                raise Exception('Dataset name or id must be set.')
+            dataset = self.omero.getDataset(name=datasetName, uid=datasetId, project=project)
+            if dataset is not None:
+                datasets.append(dataset)
+        return datasets
     
 class OmeroDownload(OmeroBase):
 
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'omero_download', inputs=[
+            dict(name='dataset_id', description='Dataset ID (ignored if negative)', type='integer'),
+            dict(name='dataset_name', description='Dataset name', type='string'),
+        ], outputs=[
+            dict(name='data files', description='Output data', type='path'),
+        ])))
+    
     def __init__(self, name):
         super(OmeroDownload, self).__init__(name)
-
-        self.outArray = self.createOutputPin("DataFrame", "AnyPin")
-        self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
 
     @staticmethod
     def description():
         return """Download files from Omero: either enter the dataset name or id to download. Negative ids will be ignored."""
-    
-    @staticmethod
-    def pinTypeHints():
-        helper = NodePinsSuggestionsHelper()
-        helper.addInputDataType("StringPin")
-        helper.addOutputDataType("AnyPin")
-        helper.addInputStruct(StructureType.Single)
-        helper.addOutputStruct(StructureType.Single)
-        return helper
-    
-    
+
     def compute(self, *args, **kwargs):
-        if self.dirty:
-            try:
-                dataset = self.getDataset()
-            except DoesNotExistException as e: # Pass if dataset does not exist
-                self.dirty = False
-                self.setOutputAndClean(None)
-                self.outputMessage = str(e)
-                return
-            if dataset is None: return
-            # dataset = omero.get_dataset(datasetName)
-            records = []
+        data = super().compute(*args, **kwargs)
+        if data is None: return
+        try:
+            datasets = self.getDatasets()
+        except DoesNotExistException as e: # Pass if dataset does not exist
+            self.dirty = False
+            self.setOutputAndClean(None)
+            self.outputMessage = str(e)
+            return
+        if datasets is None or len(datasets)==0: return
+        # dataset = omero.get_dataset(datasetName)
+        records = []
+        for dataset in datasets:
             for image in dataset.listChildren():
                 image = self.omero.getImage(uid=image.id)
                 path = getOutputDataFolderPath(self.name) / image.getName()
                 records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=path))
-            dataFrame = pandas.DataFrame.from_records(records)
-            ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
-            self.setOutputAndClean(dataFrame)
-            self.dirty = False
-            self.outputMessage = None
+        dataFrame = pandas.DataFrame.from_records(records)
+        # ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
+        self.setOutputAndClean(dataFrame)
+        self.dirty = False
+        self.outputMessage = None
 
     def execute(self):
         try:
-            dataset = self.getDataset()
+            datasets = self.getDatasets()
         except DoesNotExistException: # Pass if dataset does not exist
             self.setExecuted(True)
             return
         # dataset = omero.get_dataset(datasetId)
         outputFolder = getOutputDataFolderPath(self.name)
-        for image in dataset.listChildren():
-            omero_image = self.omero.getImage(uid=image.id)
-            path = outputFolder / omero_image.getName()
-            path.parent.mkdir(exist_ok=True, parents=True)
-            if path.exists(): continue
-            self.omero.downloadImage(path, omero_image=omero_image)
-        outputData = self.outArray.currentData()
-        outputMetadataFolder = getOutputMetadataFolderPath(self.name)
-        outputData.to_csv(outputMetadataFolder / 'output_data_frame.csv')
-        host, port, username = OmeroService().getSettings()
-        with open(outputMetadataFolder / PARAMETERS_PATH, 'w') as f:
-            json.dump(dict(host=host,port=port,username=username, datasetName=dataset.name, datasetId=dataset.id), f)
+        for dataset in datasets:
+            for image in dataset.listChildren():
+                omero_image = self.omero.getImage(uid=image.id)
+                path = outputFolder / omero_image.getName()
+                path.parent.mkdir(exist_ok=True, parents=True)
+                if path.exists(): continue
+                self.omero.downloadImage(path, omero_image=omero_image)
+        # outputData = self.outArray.currentData()
+        # outputMetadataFolder = getOutputMetadataFolderPath(self.name)
+        # outputData.to_csv(outputMetadataFolder / 'output_data_frame.csv')
+        # host, port, username = OmeroService().getSettings()
+        # with open(outputMetadataFolder / PARAMETERS_PATH, 'w') as f:
+        #     json.dump(dict(host=host,port=port,username=username, datasetName=dataset.name, datasetId=dataset.id), f)
         
-        self.setExecuted(True)
-
-    def clear(self):
-        try:
-            dataset = self.getDataset()
-        except DoesNotExistException: # Pass if dataset does not exist
-            return
-        outputFolder = getOutputDataFolderPath(self.name)
-        for image in dataset.listChildren():
-            omero_image = self.omero.getImage(uid=image.id)
-            path = outputFolder / omero_image.getName()
-            if path.exists():
-                path.unlink()
-        super().clear()
-        return
+        # self.setExecuted(True)
+        argsList = self.getArgs()
+        self.finishExecution(argsList)
         
 class OmeroUpload(OmeroBase):
 
-    def __init__(self, name):
-        super(OmeroUpload, self).__init__(name, False)
-
-        self.inDataFrame = self.createInputPin("DataFrame", "AnyPin", None)
-        self.inDataFrame.enableOptions(PinOptions.AllowAny)
-
-        self.columnName = None
-        self.metaDataColumnsPin = self.createInputPin("Metadata columns", "StringPin", "")
-
-        self.createDatasetPins()
-
-        self.projectIdPin = self.createInputPin("Project ID (optional, ignored if negative)", "IntPin", -1)
-        self.projectNamePin = self.createInputPin("Project name (optional)", "StringPin", "")
-        
-        for pin in [self.metaDataColumnsPin, self.projectIdPin, self.projectNamePin]:
-            pin.pinHidden = True
-            pin.dataBeenSet.connect(self.dataChanged)
-
-    def postCreate(self, jsonTemplate=None):
-        super().postCreate(jsonTemplate)
-        self.columnName = jsonTemplate['columnName'] if 'columnName' in jsonTemplate else None
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'omero_download', inputs=[
+            dict(name='image', description='Image to upload', type='string'),
+            dict(name='metadata_columns', description='Metadata columns (for example ["column 1", "column 2"])', type='string'),
+            dict(name='dataset_id', description='Dataset ID (ignored if negative)', type='integer'),
+            dict(name='dataset_name', description='Dataset name', type='string'),
+            dict(name='project_id', description='Project ID (optional, ignored if negative)', type='integer'),
+            dict(name='project_name', description='Project name (optional)', type='string'),
+        ], outputs=[])))
     
-    def serialize(self):
-        template = super().serialize()
-        template['columnName'] = self.columnName
-        return template
+    def __init__(self, name):
+        super(OmeroUpload, self).__init__(name)
     
     @staticmethod
     def description():
         return """Update files from Omero: either enter the name or the id of the dataset to create (if it does not exist) or update (if it exists). The project name or id must be specified if there are multiple datasets with the given name, and dataset id is not providen ; or if the dataset does not exist."""
     
-    def getPreviousNodes(self):
-        if not self.inDataFrame.hasConnections(): return None
-        return [i.owningNode() for i in self.inDataFrame.affected_by]
-    
-    def getPreviousNode(self):
-        if not self.inDataFrame.hasConnections(): return None
-        return self.getPreviousNodes()[0]
-    
-    def getDataFrame(self):
-        data = self.inDataFrame.currentData()
-        return data if data is not None else self.inDataFrame.getData()
-    
-    @staticmethod
-    def pinTypeHints():
-        helper = NodePinsSuggestionsHelper()
-        helper.addInputDataType("StringPin")
-        helper.addInputStruct(StructureType.Single)
-        return helper
-    
-    def getProject(self):
-        projectId = self.projectIdPin.currentData() if self.projectIdPin.currentData() >= 0 else None
-        projectName = self.projectNamePin.currentData() if len(self.projectNamePin.currentData()) > 0 else None
-        project = self.omero.getProject(name=projectName, uid=projectId)
-        return project
+    def getProject(self, row):
+        projectId = self.getParameter('project_id', row)
+        projectName = self.getParameter('project_name', row)
+        return self.omero.getProject(name=projectName, uid=projectId)
     
     def execute(self):
         # Get or create dataset
         # Projects are not created by BioImageIT
         # See self.description()
         
-        datasetName = self.datasetNamePin.currentData()
-        
-        try:
-            project = self.getProject()
-        except DoesNotExistException:
-            project = None
-        
-        try:
-            dataset = self.getDataset(project)
-        except DoesNotExistException:
-            if project is None or len(datasetName) == 0:
-                raise DoesNotExistException(f'Neither the dataset nor the project were found (the project must exist to create the dataset).')
-            else:
-                dataset = self.omero.createDataset(DefaultMunch.fromDict(dict(md_uri=project.id)), datasetName)
-
-        data: pandas.DataFrame = self.getDataFrame()
-        if data is None: return
-        columnName = self.columnName if self.columnName is not None else data.columns[-1]
-        metaDataColumns = self.metaDataColumnsPin.currentData()
-        metaDataColumns = [mdc for mdc in metaDataColumns.split(',') if len(mdc)>0]
-        for metaDataName in metaDataColumns:
-            if metaDataName not in data.columns:
-                raise Exception(f'The column "{metaDataName}" does not exist in the input dataframe. The columns are: {data.columns}.')
-        existingImages = []
+        data = self.getDataFrame()
         for index, row in data.iterrows():
-            imagePath = row[columnName]
-            if self.omero.imageInDataset(dataset, imagePath):
-                existingImages.append(str(imagePath))
-                continue
-            self.omero.importData(dataset, imagePath, 'imagetiff', key_value_pairs={md:row[md] for md in metaDataColumns if md in row}, check_image_exists=False)
-        if len(existingImages) > 0:
-            raise Exception(f'Images {existingImages} already exist on dataset {dataset.getId()}.')
-        
-        self.setExecuted(True)
+            datasetName = self.getParameter('dataset_name', row)
+            
+            try:
+                project = self.getProject(row)
+            except DoesNotExistException:
+                project = None
+            
+            try:
+                datasets = self.getDatasets(project)
+            except DoesNotExistException:
+                if project is None or len(datasetName) == 0:
+                    raise DoesNotExistException(f'Neither the dataset nor the project were found (the project must exist to create the dataset).')
+                else:
+                    datasets = [self.omero.createDataset(DefaultMunch.fromDict(dict(md_uri=project.id)), datasetName)]
+
+            for dataset in datasets:
+                data: pandas.DataFrame = self.getDataFrame()
+                if data is None: return
+                # columnName = self.columnName if self.columnName is not None else data.columns[-1]
+                metaDataColumns = self.getParameter('metadata_columns', row)
+                metaDataColumns = [mdc for mdc in metaDataColumns.split(',') if len(mdc)>0]
+                for metaDataName in metaDataColumns:
+                    if metaDataName not in data.columns:
+                        raise Exception(f'The column "{metaDataName}" does not exist in the input dataframe. The columns are: {data.columns}.')
+                existingImages = []
+                for index, row in data.iterrows():
+                    # imagePath = row[columnName]
+                    imagePath = self.getParameter('image', row)
+                    if self.omero.imageInDataset(dataset, imagePath):
+                        existingImages.append(str(imagePath))
+                        continue
+                    self.omero.importData(dataset, imagePath, 'imagetiff', key_value_pairs={md:row[md] for md in metaDataColumns if md in row}, check_image_exists=False)
+                if len(existingImages) > 0:
+                    raise Exception(f'Images {existingImages} already exist on dataset {dataset.getId()}.')
+                
+        argsList = self.getArgs()
+        self.finishExecution(argsList)
     
 OmeroLib.classes['OmeroDownload'] = OmeroDownload
 OmeroLib.classes['OmeroUpload'] = OmeroUpload

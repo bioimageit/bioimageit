@@ -81,11 +81,11 @@ class BiitToolNode(BiitArrayNodeBase):
 		for input in self.getInputArgs():
 			select_info = dict(names=input.choices, values=input.choices)
 			auto = self.__class__.argsOptions[input.dest]['autoColumn'] if input.dest in self.__class__.argsOptions and 'autoColumn' in self.__class__.argsOptions[input.dest] else False
-			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=auto)))
+			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=auto, required=input.required)))
 		for output in self.getOutputArgs():
 			select_info = dict(names=output.choices, values=output.choices)
 			auto_increment = self.__class__.argsOptions[output.dest]['autoIncrement'] if output.dest in self.__class__.argsOptions and 'autoIncrement' in self.__class__.argsOptions[output.dest] else True
-			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info, auto_increment=auto_increment)))
+			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info, auto_increment=auto_increment, required=input.required)))
 		return
 
 	def getName(self):
@@ -227,6 +227,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		# super().setOutputColumns(tool, data)
 		for output in tool.info.outputs:
 			if output.type != 'path': continue
+			
 			# ods = output.default_value.split('.')
 			# stem = ods[0]
 			# suffixes = '.'.join(ods[1:])

@@ -270,7 +270,7 @@ class RunTool(ShelfTool):
         message.setText(text)
         message.setDetailedText(f'{exception.__class__}\n\n{traceback}')
         message.exec()
-        text += f'(Class: {exception.__class__})'
+        # text += f'(Class: {exception.__class__})'
         self.log(text)
         ErrorManager.report(text)
 
@@ -288,7 +288,11 @@ class RunTool(ShelfTool):
     def run(self):
         print('Run')
 
-        if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
+        try:
+            if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
+        except Exception as e:
+            self.displayError(e, traceback.format_tb(e.__traceback__))
+            return
 
         self.cancelExecution = threading.Event()
 

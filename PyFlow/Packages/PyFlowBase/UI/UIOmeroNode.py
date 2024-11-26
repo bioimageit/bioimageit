@@ -15,53 +15,52 @@
 from qtpy import QtGui
 from qtpy.QtWidgets import QComboBox
 from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
+from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 
-class UIOmeroNode(UIBiitNodeBase):
+class UIOmeroNode(UIBiitArrayNodeBase):
     def __init__(self, raw_node):
         super(UIOmeroNode, self).__init__(raw_node)
-        raw_node.executedChanged.connect(self.executedChanged)
+    #     raw_node.executedChanged.connect(self.executedChanged)
     
-    def executedChanged(self, executed:bool):
-        if executed:
-            self.headColorOverride = NodeDefaults().PURE_NODE_HEAD_COLOR
-            self.headColor = NodeDefaults().PURE_NODE_HEAD_COLOR
-        else:
-            self.headColorOverride = QtGui.QColor(100, 100, 100, 150)
-            self.headColor = QtGui.QColor(100, 100, 100, 150)
+    def createBaseWidgets(self, propertiesWidget):
+        super().createBaseWidgets(propertiesWidget)
+        if self.dataFrameWidget is not None:
+            self.dataFrameWidget.hide()
+
+    # def executedChanged(self, executed:bool):
+    #     if executed:
+    #         self.headColorOverride = NodeDefaults().PURE_NODE_HEAD_COLOR
+    #         self.headColor = NodeDefaults().PURE_NODE_HEAD_COLOR
+    #     else:
+    #         self.headColorOverride = QtGui.QColor(100, 100, 100, 150)
+    #         self.headColor = QtGui.QColor(100, 100, 100, 150)
 
 class UIOmeroDownload(UIOmeroNode):
     def __init__(self, raw_node):
         super(UIOmeroDownload, self).__init__(raw_node)
-        raw_node.datasetIdPin.dataBeenSet.connect(self.datasetChanged)
-        raw_node.datasetNamePin.dataBeenSet.connect(self.datasetChanged)
-    
-    def datasetChanged(self, datasetName:str):
-        self._rawNode.processNode(True)
-        self.canvasRef().tryFillPropertiesView(self)
-        self.canvasRef().tryFillTableView(self)
 
 class UIOmeroUpload(UIOmeroNode):
     def __init__(self, raw_node):
         super(UIOmeroNode, self).__init__(raw_node)
     
-    def changeColumn(self, index):
-        self._rawNode.columnName = self.columnSelector.itemText(index)
+    # def changeColumn(self, index):
+    #     self._rawNode.parameters['columnName'] = self.columnSelector.itemText(index)
     
-    def createInputWidgets(self, inputsCategory, inGroup=None, pins=True):
-        self._rawNode.inDataFrame.hidden = True
+    # def createInputWidgets(self, inputsCategory, inGroup=None, pins=True):
+    #     self._rawNode.inDataFrame.hidden = True
         
-        data = self._rawNode.getDataFrame()
-        if data is not None and len(data.columns)>0:
-            self.columnSelector = QComboBox()
-            for column in data.columns:
-                self.columnSelector.addItem(column)
-            self.columnSelector.activated.connect(self.changeColumn)
-            columnIndex = list(data.columns).index(self._rawNode.columnName) if self._rawNode.columnName in data.columns else len(data.columns)-1
-            self.columnSelector.setCurrentIndex(columnIndex)
-            inputsCategory.addWidget('Column name', self.columnSelector, group=inGroup)
+    #     data = self._rawNode.getDataFrame()
+    #     if data is not None and len(data.columns)>0:
+    #         self.columnSelector = QComboBox()
+    #         for column in data.columns:
+    #             self.columnSelector.addItem(column)
+    #         self.columnSelector.activated.connect(self.changeColumn)
+    #         columnIndex = list(data.columns).index(self._rawNode.columnName) if self._rawNode.columnName in data.columns else len(data.columns)-1
+    #         self.columnSelector.setCurrentIndex(columnIndex)
+    #         inputsCategory.addWidget('Column name', self.columnSelector, group=inGroup)
         
-        super(UIOmeroUpload, self).createInputWidgets(inputsCategory, inGroup)
+    #     super(UIOmeroUpload, self).createInputWidgets(inputsCategory, inGroup)
 
-        self._rawNode.inDataFrame.hidden = False
+    #     self._rawNode.inDataFrame.hidden = False

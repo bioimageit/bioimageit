@@ -119,6 +119,7 @@ class ThumbnailGenerator:
 		return
 	
 	def generateThumbnails(self, nodeName, dataFrame: pandas.DataFrame):
+		if dataFrame is None: return
 		thumbnailsPath = self.getNodeThumbnailsPath(nodeName)
 		thumbnailsPath.mkdir(exist_ok=True, parents=True)
 		images = []

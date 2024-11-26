@@ -148,6 +148,7 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
         super(UIBiitArrayNodeBase, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)
         raw_node.parametersChanged.connect(self.parametersChanged)
+        self.dataFrameWidget = None
     
     def parametersChanged(self, data):
         # print('parametersChanged')
@@ -165,6 +166,7 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
     
     def createBaseWidgets(self, propertiesWidget):
 
+        self.dataFrameWidget = None
         if not self._rawNode.inArray.hasConnections():
             defaultValue = self._rawNode.folderDataFramePath if self._rawNode.folderDataFramePath is not None else ''
             inputFilesLayout = QHBoxLayout()
