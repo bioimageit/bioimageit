@@ -21,11 +21,12 @@ class BiitArrayNodeBase(BiitNodeBase):
         self.parametersChanged = Signal(bool)
         self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Single, constraint="1")
         self.inArray.enableOptions(PinOptions.AllowAny)
-        self.inArray.onPinConnected.connect(self.onInputConnected) # Different from dataBeenSet since dataBeenSet is also called when createDataFrameFromFolder() (shortcut to create a dataFrame from the files in a folder) 
-        self.inArray.onPinDisconnected.connect(self.dataBeenUnset)
+        self.inArray.onPinConnectedBiit.connect(self.onInputConnected) # Different from dataBeenSet since dataBeenSet is also called when createDataFrameFromFolder() (shortcut to create a dataFrame from the files in a folder) 
+        self.inArray.onPinDisconnected.connect(self.onInputDisconnected)
         self.outArray = self.createOutputPin("out", "AnyPin", structure=StructureType.Single, constraint="1")
         self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
         self.folderDataFramePath = None
+        self.resetParameters = None
         self.initializeTool()
         self.initializeParameters()
         self.lib = 'BiitLib'
@@ -53,7 +54,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
         selectInfoValues = (input.select_info.values if isinstance(input.select_info.values, list) else input.select_info['values'])  if input.type == 'select' else None
         defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
-        return dict(type='value', columnName='', value=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else isIoPath(input.type))
+        return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else isIoPath(input.type))
 
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
@@ -90,46 +91,67 @@ class BiitArrayNodeBase(BiitNodeBase):
         if not self.graph().populating:
             self.inArray.dataBeenSet.connect(self.dataBeenSet)
 
+    def parameterColumnExists(self, data, inputName):
+        return isinstance(data, pandas.DataFrame) and self.parameters[inputName]['columnName'] in data.columns
+
     # update the parameters from data (but do not overwrite parameters which are already column names):
-    # for all inputs which are path, set the corresponding parameter to the column name
+    # for all inputs which are auto, set the corresponding parameter to the column name
     def setParametersFromDataframe(self, data, overwriteExistingColumns=False):
-        if len(data.columns) == 0: return
-        n = len(data.columns)-1
+        # if len(data.columns) == 0: return
+        n = len(data.columns)-1 if isinstance(data, pandas.DataFrame) else -1
         tool = self.__class__.tool
         for input in tool.info.inputs:
             # Overwrite parameter if overwriteExistingColumns or the column does not exist in the new dataframe
-            if hasattr(input, 'auto') and input.auto and overwriteExistingColumns or self.parameters[input.name]['type'] == 'columnName' and not self.parameters[input.name]['columnName'] in data.columns:
-                self.parameters[input.name]['type'] = 'columnName'
-                self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
-                n -= 1
+            if hasattr(input, 'auto') and input.auto and data is not None:
+                if overwriteExistingColumns or self.parameters[input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
+                    self.parameters[input.name]['type'] = 'columnName'
+                    self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
+                    n -= 1
+            # If not auto and param is from unexisting column: reset param
+            elif self.parameters[input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
+                self.parameters[input.name]['type'] = 'value'
+                self.parameters[input.name]['columnName'] = self.parameters[input.name]['defaultValue']
+
     
-    def onInputConnected(self):
+    # The input pin was plugged: reset parameters
+    def onInputConnected(self, other):
         # Reset folderDataFramePath since it should be None when the input pin has a dataFrame, 
         # otherwise folderDataFramePath and the input dataFrame are in conlict when loading the graph file (the dataFrame is given from the input, then it is overriden with folderDataFramePath)
-        self.folderDataFramePath = None
+        # Do not reset overwrite existing columns when we are loading graph
+        loadingGraph = self.graph().populating
+        if not loadingGraph:
+            self.setParametersFromDataframe(self.getCachedDataFrame(), True)
+    
+    # The input pin was unplugged: reset parameters and dataFrame
+    def onInputDisconnected(self, pin=None):
 
-    # The input pin was plugged (resetParameters=True) or parameters were changed in the properties GUI (resetParameters=False): 
+        self.inArray.setData(None)
+        self.setParametersFromDataframe(None, False)
+        if self.folderDataFramePath is not None:
+            self.createDataFrameFromFolder(self.folderDataFramePath)
+
+    # The input pin was plugged (self.resetParameters=True) or parameters were changed in the properties GUI (self.resetParameters=False): 
     #    - set the node dirty & unexecuted, 
     #    - update what depends on the dataframe:
     #          - (deprecated) if data is None: recreate dataframe if not resetParameters
     #            if data is not None and resetParameters : update the parameters from data (but do not overwrite parameters which are already column names)
     #          - send parametersChanged to update the table view
-    def dataBeenSet(self, pin=None, resetParameters=True):
+    def dataBeenSet(self, pin=None):
         self.dirty = True
         self.setExecuted(False)
         data = self.inArray.currentData()
         data = data if isinstance(data, pandas.DataFrame) else None
-        if data is None and resetParameters: self.initializeParameters()
+        # if data is None and self.resetParameters: self.initializeParameters()
         # Set parameters from new input dataFrame
-        if data is not None and resetParameters: self.setParametersFromDataframe(data, True)
+        # if data is not None: self.setParametersFromDataframe(data, self.resetParameters)
+        self.setParametersFromDataframe(data, False)
+
         #  Once parameters are set, send changes to update the table view
         self.parametersChanged.send(data)
-    
-    # The input pin was unplugged: reset dataFrame
-    def dataBeenUnset(self, pin=None):
-        self.inArray.setData(None)
-        if self.folderDataFramePath is not None:
-            self.createDataFrameFromFolder(self.folderDataFramePath)
+
+    def getCachedDataFrame(self):
+        data = self.inArray.currentData()
+        return data if isinstance(data, pandas.DataFrame) else None
 
     def getDataFrame(self):
         # data = self.inArray.currentData()

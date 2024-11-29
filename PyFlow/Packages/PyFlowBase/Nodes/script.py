@@ -1,12 +1,12 @@
 from types import MethodType
 from pathlib import Path
-
+from munch import DefaultMunch
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.Core.PyCodeCompiler import Py3CodeCompiler
 
 class ScriptNode(BiitArrayNodeBase):
     # input.name, input.type, input.description, input.default_value
-    # tool = DefaultMunch.fromDict(dict(info=dict(inputs=[dict(name="ScriptPath", type="path", description="Script path", default_value="")])))
+    tool = DefaultMunch.fromDict(dict(info=dict(inputs=[dict(name="ScriptPath", type="path", description="Script path", default_value="")])))
     def __init__(self, name):
         super(ScriptNode, self).__init__(name)
         # self.pathPin = self.createInputPin("Script path", "StringPin")

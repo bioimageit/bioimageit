@@ -72,6 +72,7 @@ class PinBase(IPin):
         # signals
         self.serializationHook = Signal()
         self.onPinConnected = Signal(object)
+        self.onPinConnectedBiit = Signal(object)
         self.onPinDisconnected = Signal(object)
         self.nameChanged = Signal(str)
         self.killed = Signal()
@@ -823,6 +824,7 @@ class PinBase(IPin):
 
     def pinConnected(self, other):
         #push(self)
+        self.onPinConnectedBiit.send(other)
         if self.isDict():
             self.updateConnectedDicts([], self._data.keyType)
 

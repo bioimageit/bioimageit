@@ -52,7 +52,7 @@ class FloatInputWidgetSimple(InputWidgetSingle):
         self.sb.setSingleStep(0.01)
         self.setWidget(self.sb)
         # self.sb.valueChanged.connect(self.dataSetCallback)
-        self.sb.editingFinished.connect(self.dataSetCallback)
+        self.sb.editingFinished.connect(lambda: self.dataSetCallback(self.sb.value()))
 
     def blockWidgetSignals(self, bLock=False):
         self.sb.blockSignals(bLock)
@@ -116,7 +116,7 @@ class IntInputWidgetSimple(InputWidgetSingle):
         self.sb.setRange(INT_RANGE_MIN, INT_RANGE_MAX)
         self.setWidget(self.sb)
         # self.sb.valueChanged.connect(self.dataSetCallback)
-        self.sb.editingFinished.connect(self.dataSetCallback)
+        self.sb.editingFinished.connect(lambda: self.dataSetCallback(self.sb.value()))
 
     def blockWidgetSignals(self, bLock=False):
         self.sb.blockSignals(bLock)

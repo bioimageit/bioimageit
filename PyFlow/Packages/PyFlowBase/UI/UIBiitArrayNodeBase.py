@@ -109,7 +109,7 @@ class ColumnValueWidget(QWidget):
         parameter = self.node.parameters[self.name]
         parameter[type] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
-        self.node.dataBeenSet(resetParameters=False)
+        self.node.dataBeenSet()
         EditorHistory().saveState("Update parameter", modify=True)
     
     def changeTypeValue(self, index, sendChanged=True):
@@ -132,14 +132,14 @@ class ColumnValueWidget(QWidget):
             type = 'value'
         self.node.parameters[self.name]['type'] = type
         if sendChanged:
-            self.node.dataBeenSet(resetParameters=False)
+            self.node.dataBeenSet()
             EditorHistory().saveState("Update parameter type", modify=True)
         #     self.node.inArray.setData(None)
 
     def changeColumnValue(self, index):
         data = self.node.inArray.currentData()
         self.node.parameters[self.name]['columnName'] = data.columns[index]
-        self.node.dataBeenSet(resetParameters=False)
+        self.node.dataBeenSet()
         EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
 
