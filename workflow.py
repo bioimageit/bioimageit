@@ -82,17 +82,15 @@ def workflow():
         node.dirty = True
         node.compute()
     
-    binaryThreshold.parameters['channel']['value'] = 0
-    binaryThreshold.parameters['lowerThreshold']['value'] = 0
-    binaryThreshold.parameters['upperThreshold']['value'] = 130
-    binaryThreshold.parameters['insideValue']['value'] = 255
-    binaryThreshold.parameters['outsideValue']['value'] = 0
-
-    labelStatistics.parameters['minSize']['value'] = 350
-    labelStatistics.parameters['maxSize']['value'] = 500
-    
-    extractChannel0.parameters['channel']['value'] = 0
-    extractChannel1.parameters['channel']['value'] = 1
+    binaryThreshold.parameters['inputs']['channel']['value'] = 0
+    binaryThreshold.parameters['inputs']['lowerThreshold']['value'] = 0
+    binaryThreshold.parameters['inputs']['upperThreshold']['value'] = 130
+    binaryThreshold.parameters['inputs']['insideValue']['value'] = 255
+    binaryThreshold.parameters['inputs']['outsideValue']['value'] = 0
+    labelStatistics.parameters['inputs']['minSize']['value'] = 350
+    labelStatistics.parameters['inputs']['maxSize']['value'] = 500
+    extractChannel0.parameters['inputs']['channel']['value'] = 0
+    extractChannel1.parameters['inputs']['channel']['value'] = 1
 
 def isBiitLib(node):
     return node.lib == 'BiitLib'

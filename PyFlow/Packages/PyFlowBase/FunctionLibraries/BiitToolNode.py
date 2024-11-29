@@ -225,8 +225,8 @@ class BiitToolNode(BiitArrayNodeBase):
 
 	def setOutputColumns(self, tool, data):
 		# super().setOutputColumns(tool, data)
-		for output in tool.info.outputs:
-			if output.type != 'path': continue
+		for outputName, output in self.parameters['outputs'].items():
+			if output['type'] != 'path': continue
 			
 			# ods = output.default_value.split('.')
 			# stem = ods[0]
@@ -235,16 +235,16 @@ class BiitToolNode(BiitArrayNodeBase):
 			for index, row in data.iterrows():
 				# finalValue = self.replaceInputArgs(output.default_value, lambda name, row=row: self.getParameter(name, row))
 
-				if output.value is None:
-					extension = output.extension if hasattr(output, 'extension') else ''
-					finalValue = self.getWorkflowDataPath() / self.name / f'{output.name}_{index}{extension}'
+				if 'value' not in output or output['value'] is None:
+					extension = output['extension'] if 'extension' in extension else ''
+					finalValue = self.getWorkflowDataPath() / self.name / f'{outputName}_{index}{extension}'
 				else:
-					outputValue = str(output.value)
+					outputValue = str(output['value'])
 					
 					# Check that [workflow_folder] and [node_folder] are used at the beginning of the outputValue (if used at all)
 					for name in ['[workflow_folder]', '[node_folder]']:
 						if name in outputValue and not outputValue.startswith(name):
-							raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {output.name}.')
+							raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {outputName}.')
 					
 					# If outputValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
 					if ('[workflow_folder]' not in outputValue) and ('[node_folder]' not in outputValue) and (not Path(outputValue).is_absolute()):
@@ -257,7 +257,7 @@ class BiitToolNode(BiitArrayNodeBase):
 					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
 					finalValue = finalValue.replace('[index]', str(index))
 
-				data.at[index, self.getColumnName(output)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
+				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
 		data = super().compute()
@@ -289,14 +289,14 @@ class BiitToolNode(BiitArrayNodeBase):
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))
 		# QThreadPool.globalInstance().start(self.worker)
 		argsList = self.getArgs()
-		# for i, args in enumerate(argsList):
-		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
+		for i, args in enumerate(argsList):
+			argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 		outputFolderPath = getOutputDataFolderPath(self.name)
 		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
-			args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
+			# args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
 			if completedProcess is not None and completedProcess.returncode != 0:
 				raise Exception(completedProcess)

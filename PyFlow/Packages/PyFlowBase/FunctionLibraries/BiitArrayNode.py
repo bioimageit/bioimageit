@@ -9,17 +9,17 @@ from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath, getOutputDataFolderPath, getOutputMetadataFolderPath, isIoPath
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from send2trash import send2trash
 from blinker import Signal
 
 class BiitArrayNodeBase(BiitNodeBase):
 
-    def __init__(self, name):
+    def __init__(self, name, pinStructureIn=StructureType.Single):
         super(BiitArrayNodeBase, self).__init__(name)
         self.parametersChanged = Signal(bool)
-        self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Single, constraint="1")
+        self.inArray = self.createInputPin("in", "AnyPin", structure=pinStructureIn, constraint="1")
         self.inArray.enableOptions(PinOptions.AllowAny)
         self.inArray.onPinConnectedBiit.connect(self.onInputConnected) # Different from dataBeenSet since dataBeenSet is also called when createDataFrameFromFolder() (shortcut to create a dataFrame from the files in a folder) 
         self.inArray.onPinDisconnected.connect(self.onInputDisconnected)
@@ -44,10 +44,6 @@ class BiitArrayNodeBase(BiitNodeBase):
         # toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
         return
 
-    def initializeParameters(self):
-        tool = self.__class__.tool if hasattr(self.__class__, 'tool') else None
-        self.parameters = {} if tool is None else { input.name: self.initializeInput(input) for input in tool.info.inputs }
-    
     def initializeInput(self, input):
         # for BiitToolNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
         # But values has a special meaning in dict, so it is a function instead of a list.
@@ -56,19 +52,38 @@ class BiitArrayNodeBase(BiitNodeBase):
         defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
         return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else isIoPath(input.type))
 
+    def initializeOutput(self, output):
+        return dict(value=output.default_value, 
+                    defaultValue=output.default_value, 
+                    type=output.type if hasattr(output, 'type') else None, 
+                    extension=output.extension if hasattr(output, 'extension') else None,
+                    help=output.help if hasattr(output, 'help') else None)
+
+    def initializeParameters(self):
+        tool = self.__class__.tool if hasattr(self.__class__, 'tool') else None
+        inputs = {} if tool is None else { input.name: self.initializeInput(input) for input in tool.info.inputs }
+        outputs = {} if tool is None else { output.name: self.initializeOutput(output) for output in tool.info.outputs }
+        self.parameters = dict(inputs=inputs, outputs=outputs)
+    
     def postCreate(self, jsonTemplate=None):
         super().postCreate(jsonTemplate)
 
         if 'parameters' in jsonTemplate:
-            # Instead of oerwriting parameters by doing self.parameters = jsonTemplate['parameters']
-            # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
-            for parameterName, parameter in jsonTemplate['parameters'].items():
-                if parameterName not in self.parameters:
-                    print(f'Warning: parameter "{parameterName}" does not exist in node "{self.name}". This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
-                    continue
-                for key, value in parameter.items():
-                    self.parameters[parameterName][key] = value
-        
+            # Hanlde old fils where parameters had only inputs
+            if 'inputs' not in jsonTemplate['parameters'] and 'outputs' not in jsonTemplate['parameters']:
+                jsonTemplate['parameters'] = dict(inputs=jsonTemplate['parameters'], outputs={})
+            
+            for io in ['inputs', 'outputs']:
+                
+                # Instead of overwriting parameters by doing self.parameters = jsonTemplate['parameters']
+                # set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
+                for parameterName, parameter in jsonTemplate['parameters'][io].items():
+                    if parameterName not in self.parameters[io]:
+                        print(f'Warning: parameter "{parameterName}" does not exist in node "{self.name}". This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
+                        continue
+                    for key, value in parameter.items():
+                        self.parameters[io][parameterName][key] = value
+            
         if 'folderDataFramePath' in jsonTemplate and jsonTemplate['folderDataFramePath'] is not None:
             self.folderDataFramePath = jsonTemplate['folderDataFramePath']
             # if not Path(self.folderDataFramePath).exists():
@@ -92,9 +107,9 @@ class BiitArrayNodeBase(BiitNodeBase):
             self.inArray.dataBeenSet.connect(self.dataBeenSet)
 
     def parameterColumnExists(self, data, inputName):
-        return isinstance(data, pandas.DataFrame) and self.parameters[inputName]['columnName'] in data.columns
+        return isinstance(data, pandas.DataFrame) and self.parameters['inputs'][inputName]['columnName'] in data.columns
 
-    # update the parameters from data (but do not overwrite parameters which are already column names):
+    # update the parameters['inputs'] from data (but do not overwrite parameters['inputs'] which are already column names):
     # for all inputs which are auto, set the corresponding parameter to the column name
     def setParametersFromDataframe(self, data, overwriteExistingColumns=False):
         # if len(data.columns) == 0: return
@@ -103,14 +118,14 @@ class BiitArrayNodeBase(BiitNodeBase):
         for input in tool.info.inputs:
             # Overwrite parameter if overwriteExistingColumns or the column does not exist in the new dataframe
             if hasattr(input, 'auto') and input.auto and data is not None:
-                if overwriteExistingColumns or self.parameters[input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
-                    self.parameters[input.name]['type'] = 'columnName'
-                    self.parameters[input.name]['columnName'] = data.columns[max(0, n)]
+                if overwriteExistingColumns or self.parameters['inputs'][input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
+                    self.parameters['inputs'][input.name]['type'] = 'columnName'
+                    self.parameters['inputs'][input.name]['columnName'] = data.columns[max(0, n)]
                     n -= 1
             # If not auto and param is from unexisting column: reset param
-            elif self.parameters[input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
-                self.parameters[input.name]['type'] = 'value'
-                self.parameters[input.name]['columnName'] = self.parameters[input.name]['defaultValue']
+            elif self.parameters['inputs'][input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
+                self.parameters['inputs'][input.name]['type'] = 'value'
+                self.parameters['inputs'][input.name]['columnName'] = self.parameters['inputs'][input.name]['defaultValue']
 
     
     # The input pin was plugged: reset parameters
@@ -217,12 +232,13 @@ class BiitArrayNodeBase(BiitNodeBase):
     def category():
         return ""
     
-    def getColumnName(self, output):
-        return self.name + ': ' + output.name
+    def getColumnName(self, parameterName):
+        return self.name + ': ' + parameterName
     
     def setOutputColumns(self, tool, data):
-        for output in tool.info.outputs:
-            data[self.getColumnName(output)] = [getOutputFilePath(output, self.name, i) for i in range(len(data))]
+        # for outputName, output in self.parameters['outputs'].items():
+        #     data[self.getColumnName(outputName)] = [getOutputFilePath(output['type'], self.name, i) for i in range(len(data))]
+        raise NotImplementedError()
 
     def compute(self, *args, **kwargs):
         if not self.dirty: return
@@ -246,16 +262,16 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def setOutputArgsFromDataFrame(self, toolInfo, args, outputData, index):
         if outputData is None: return
-        for output in toolInfo.outputs:
-            if self.getColumnName(output) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
-            outputPath = outputData.at[index, self.getColumnName(output)]
+        for outputName, output in self.parameters['outputs'].items():
+            if self.getColumnName(outputName) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
+            outputPath = outputData.at[index, self.getColumnName(outputName)]
             if isinstance(outputPath, Path):
                 outputPath.parent.mkdir(exist_ok=True, parents=True)    
-            args[output.name] = str(outputPath)
+            args[outputName] = str(outputPath)
     
     def getParameter(self, name, row):
-        if name not in self.parameters: return None
-        parameter = self.parameters[name]
+        if name not in self.parameters['inputs']: return None
+        parameter = self.parameters['inputs'][name]
         return parameter['value'] if parameter['type'] == 'value' else row[parameter['columnName']] if row is not None and parameter['columnName'] in row else None
     
     def setBoolArg(self, args, name):
@@ -292,9 +308,13 @@ class BiitArrayNodeBase(BiitNodeBase):
         argsList = []
         inputData: pandas.DataFrame = self.inArray.currentData()
         outputData: pandas.DataFrame = self.outArray.currentData()
+
+        print("id", inputData)
+        print("od", outputData)
+    
         if inputData is None:
             args = {}
-            for parameterName, parameter in self.parameters.items():
+            for parameterName, parameter in self.parameters['inputs'].items():
                 if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs):
                     raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 self.setArg(args, parameterName, parameter, parameter['value'], None)
@@ -304,7 +324,7 @@ class BiitArrayNodeBase(BiitNodeBase):
             return argsList
         for index, row in inputData.iterrows():
             args = {}
-            for parameterName, parameter in self.parameters.items():
+            for parameterName, parameter in self.parameters['inputs'].items():
                 if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs, row):
                     raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 if parameter['type'] == 'value':
@@ -367,8 +387,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         inputs = [i for i in tool.info.inputs] # if hasattr(i, 'auto') and i.auto]
         if len(inputs) == 0: return None
         data = pandas.DataFrame()
-        for input in inputs:
-            data[self.getColumnName(input)] = [self.parameters[input.name]['value']]
+        for inputName, input in self.parameters['inputs'].items():
+            data[self.getColumnName(inputName)] = [input['value']]
         ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data
 
@@ -399,14 +419,6 @@ class BiitArrayNodeBase(BiitNodeBase):
         super().clear()
     
     def deleteFiles(self):
-        # self.processNode(True)
-        # tool = self.__class__.tool
-        # data = self.outArray.getData()
-        # for output in tool.info.outputs:
-        #     for index, row in data.iterrows():
-        #         outputPath = row[self.getColumnName(output)]
-        #         if isinstance(outputPath, Path) and outputPath.exists():
-        #             outputPath.unlink()
         ThumbnailGenerator.get().deleteThumbnails(self.name)
         for outputFolder in [getOutputDataFolderPath(self.name), getOutputMetadataFolderPath(self.name)]:
             if outputFolder.exists():

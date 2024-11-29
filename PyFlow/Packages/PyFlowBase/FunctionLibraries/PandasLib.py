@@ -1,12 +1,13 @@
 from pathlib import Path
 import re
 import pandas
+from munch import DefaultMunch
 
 from PyFlow.Core import FunctionLibraryBase
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from PyFlow.Packages.PyFlowBase.Nodes import FLOW_CONTROL_COLOR
@@ -16,61 +17,43 @@ class PandasLib(FunctionLibraryBase):
     """doc string for PandasLib"""
     classes = {}
 
-class PandasNodeBase(BiitNodeBase):
+class PandasNodeBase(BiitArrayNodeBase):
 
-    def __init__(self, name):
-        super(PandasNodeBase, self).__init__(name)
-        self.executed = None
-        self.dataFrameChanged = Signal(str)
+    def __init__(self, name, pinStructureIn=StructureType.Single):
+        super(PandasNodeBase, self).__init__(name, pinStructureIn)
 
-        self.outArray = self.createOutputPin("Data frame", "AnyPin")
-        self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
-        # self.headerColor = FLOW_CONTROL_COLOR
-        self.lib = 'BiitLib'
-
+    def setOutputColumns(self, tool, data):
+        return
+    
     @staticmethod
     def category():
         return "DataFrames"
     
-class PandasNodeInOut(PandasNodeBase):
-
-    def __init__(self, name):
-        super(PandasNodeInOut, self).__init__(name)
-        self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi)
-        self.inArray.enableOptions(PinOptions.AllowAny)
-        self.inArray.dataBeenSet.connect(self.dataBeenSet)
-        
-    def getPinData(self, pin):
-        data = pin.currentData()
-        return data if data is not None else pin.getData()
-    
-    def dataBeenSet(self, pin=None):
-        self.dirty = True
-    
-    @staticmethod
-    def pinTypeHints():
-        helper = NodePinsSuggestionsHelper()
-        helper.addInputDataType("AnyPin")
-        helper.addOutputDataType("AnyPin")
-        helper.addInputStruct(StructureType.Single)
-        helper.addOutputStruct(StructureType.Single)
-        return helper
-
 class ListFiles(PandasNodeBase):
+    
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'list_files', inputs=[
+            dict(name='folderPath', description='Folder path', type='path', auto=False),
+            dict(name='filter', description='Filter', default_value='*', type='str'),
+        ], outputs=[
+            dict(name='columnName', description='Column name', type='str', default_value='path'),
+        ])))
     
     def __init__(self, name):
         super(ListFiles, self).__init__(name)
-        self.pathPin = self.createInputPin("Folder path", "StringPin", defaultValue=Path.home())
-        self.pathPin.setInputWidgetVariant("FolderPathWidget")
-        self.pathPin.dataBeenSet.connect(self.pathBeenSet)
-        
-        self.filterPin = self.createInputPin("Filter", "StringPin", '*')
-        self.filterPin.pinHidden = True
-        self.filterPin.dataBeenSet.connect(self.columnBeenSet)
+        # self.inArray.pinHidden = True
 
-        self.columnNamePin = self.createInputPin("Column name", "StringPin", "path")
-        self.columnNamePin.pinHidden = True
-        self.columnNamePin.dataBeenSet.connect(self.columnBeenSet)
+        # self.dataFrameChanged = Signal(str)
+        # self.pathPin = self.createInputPin("Folder path", "StringPin", defaultValue=Path.home())
+        # self.pathPin.setInputWidgetVariant("FolderPathWidget")
+        # self.pathPin.dataBeenSet.connect(self.pathBeenSet)
+        
+        # self.filterPin = self.createInputPin("Filter", "StringPin", '*')
+        # self.filterPin.pinHidden = True
+        # self.filterPin.dataBeenSet.connect(self.columnBeenSet)
+
+        # self.columnNamePin = self.createInputPin("Column name", "StringPin", "path")
+        # self.columnNamePin.pinHidden = True
+        # self.columnNamePin.dataBeenSet.connect(self.columnBeenSet)
 
     @staticmethod
     def description():
@@ -79,74 +62,61 @@ class ListFiles(PandasNodeBase):
     @staticmethod
     def category():
         return "Data"
-    
-    @staticmethod
-    def pinTypeHints():
-        helper = NodePinsSuggestionsHelper()
-        helper.addInputDataType("StringPin")
-        helper.addOutputDataType("AnyPin")
-        helper.addInputStruct(StructureType.Single)
-        helper.addOutputStruct(StructureType.Single)
-        return helper
 
-    def pathBeenSet(self, pin=None):
-        path = self.pathPin.currentData()
-        if self.columnNamePin.currentData() == 'path':
-            self.columnNamePin.setData(Path(path).name)
-        self.setExecuted(False)
-        self.dataFrameChanged.send(path)
+    # def pathBeenSet(self, pin=None):
+    #     path = self.pathPin.currentData()
+    #     if self.columnNamePin.currentData() == 'path':
+    #         self.columnNamePin.setData(Path(path).name)
+    #     self.setExecuted(False)
+    #     self.dataFrameChanged.send(path)
 
-    def columnBeenSet(self, pin=None):
-        path = self.pathPin.currentData()
-        self.setExecuted(False)
-        self.dataFrameChanged.send(path)
+    # def columnBeenSet(self, pin=None):
+    #     path = self.pathPin.currentData()
+    #     self.setExecuted(False)
+    #     self.dataFrameChanged.send(path)
 
     def compute(self, *args, **kwargs):
-        if not self.dirty: return
-        data = self.pathPin.currentData()
-        if len(data)==0:
+        data = super().compute(*args, **kwargs)
+        if not isinstance(data, pandas.DataFrame) or len(data)==0:
             return
-        path = Path(data)
-        if path.exists():
-            filter = self.filterPin.currentData()
-            try:
-                files = sorted(list(path.glob(filter))) if len(filter)>0 else sorted(list(path.iterdir()))
-            except ValueError as e:
-                print(e)
-                files = sorted(list(path.iterdir()))
-            files = [f for f in files if f.name != '.DS_Store']
-            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():files})
-        else:
-            dataFrame = pandas.DataFrame(data={self.columnNamePin.currentData():[]})
+        allFiles = []
+        for index, row in data.iterrows():
+            folderPath = self.getParameter('folderPath', row)
+            if folderPath is None: continue
+            path = Path(folderPath)
+            if path.exists():
+                filter = self.getParameter('filter', row)
+                try:
+                    files = sorted(list(path.glob(filter))) if filter is not None and len(filter)>0 else sorted(list(path.iterdir()))
+                except ValueError as e:
+                    print(e)
+                    files = sorted(list(path.iterdir()))
+                allFiles += [f for f in files if f.name != '.DS_Store']
+        # dataFrame = pandas.DataFrame(data={self.getColumnName(self.parameters['outputs']['columnName']['value']):allFiles})
+        dataFrame = pandas.DataFrame(data={self.parameters['outputs']['columnName']['value']:allFiles})
         ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
-        self.setOutputAndClean(dataFrame)
         self.dirty = False
+        self.setOutputAndClean(dataFrame)
+        return data
 
+class MergeDataFrames(PandasNodeBase):
 
-class MergeDataFrames(PandasNodeInOut):
-
-    mergeArgumentToType = dict(
-        how=('StringPin', 'inner'), 
-        on=('StringPin', None), 
-        left_on=('StringPin', None),
-        right_on=('StringPin', None),
-        left_index=('BoolPin', False),
-        right_index=('BoolPin', False),
-        sort=('BoolPin', False),
-        left_suffix=('StringPin', '_x'),
-        right_suffix=('StringPin', '_y'),
-    )
-
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'merge_data_frames', inputs=[
+            dict(name='how', description='How', type='str', static=True),
+            dict(name='on', description='On', type='str', static=True),
+            dict(name='left_on', description='Left on', type='str', static=True),
+            dict(name='right_on', description='Right on', type='str', static=True),
+            dict(name='left_index', description='Left index', type='bool', static=True),
+            dict(name='right_index', description='Right index', type='bool', static=True),
+            dict(name='sort', description='Sort', type='bool', static=True),
+            dict(name='left_suffix', description='Left suffix', type='str', static=True, default_value='_x'),
+            dict(name='right_suffix', description='Right suffix', type='str', static=True, default_value='_y'),
+        ], outputs=[])))
+    
     def __init__(self, name):
-        super(MergeDataFrames, self).__init__(name)
+        super(MergeDataFrames, self).__init__(name, pinStructureIn=StructureType.Multi)
         self.inArray.enableOptions(PinOptions.AllowMultipleConnections)
         
-        for arg, typeDefault in self.__class__.mergeArgumentToType.items():
-            pinName = f'merge{arg}Pin'
-            setattr(self, pinName, self.createInputPin(arg, typeDefault[0], defaultValue=typeDefault[1], structure=StructureType.Single))
-            getattr(self, pinName).pinHidden = True
-            getattr(self, pinName).dataBeenSet.connect(self.dataBeenSet)
-    
     @classmethod
     def title(cls):
         return "Merge DataFrames"
@@ -156,35 +126,29 @@ class MergeDataFrames(PandasNodeInOut):
         return """Merge multiple pandas frames."""
     # pandas.merge(left, right, how='inner', on=None, left_on=None, right_on=None, left_index=False, right_index=False, sort=False, suffixes=('_x', '_y'), copy=None, indicator=False, validate=None)
 
-    @staticmethod
-    def pinTypeHints():
-        helper = PandasNodeInOut.pinTypeHints()
-        helper.addInputStruct(StructureType.Multi)
-        return helper
-
     def compute(self, *args, **kwargs):
         if not self.dirty: return
         # data = self.inArray.currentData()
         ySortedPins = sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
-        data = [self.getPinData(p) for p in ySortedPins]
+        data = [p.getCachedDataOrEvaluatdData() for p in ySortedPins]
         data = [d for d in data if d is not None]
         if len(data)==0: return
         assert(all([isinstance(d, pandas.DataFrame) for d in data]))
         df = data[0]
-        mergeArgs = { arg: getattr(self, f'merge{arg}Pin').currentData() for arg, typeDefault in self.__class__.mergeArgumentToType.items() if getattr(self, f'merge{arg}Pin').currentData() != '' }
-        mergeArgs['suffixes'] = (mergeArgs['left_suffix'], mergeArgs['right_suffix'])
-        del mergeArgs['left_suffix']
-        del mergeArgs['right_suffix']
+        mergeArgs = { input.name: self.getParameter(input.name, None) for input in self.__class__.tool.info.inputs if self.getParameter(input.name, None) is not None and self.getParameter(input.name, None) != '' and '_suffix' not in input.name}
+        mergeArgs['suffixes'] = (self.getParameter('left_suffix', None), self.getParameter('right_suffix', None))
         for i in range(len(data)-1):
             df = df.merge(data[i+1], **mergeArgs)
 
         self.setOutputAndClean(df)
         self.dirty = False
 
-class ConcatDataFrames(PandasNodeInOut):
+class ConcatDataFrames(PandasNodeBase):
 
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'concat_dataframes', inputs=[], outputs=[])))
+    
     def __init__(self, name):
-        super(ConcatDataFrames, self).__init__(name)
+        super(ConcatDataFrames, self).__init__(name, pinStructureIn=StructureType.Multi)
         self.inArray.enableOptions(PinOptions.AllowMultipleConnections)
 
     @classmethod
@@ -195,16 +159,10 @@ class ConcatDataFrames(PandasNodeInOut):
     def description():
         return """Concat multiple pandas frames."""
 
-    @staticmethod
-    def pinTypeHints():
-        helper = PandasNodeInOut.pinTypeHints()
-        helper.addInputStruct(StructureType.Multi)
-        return helper
-
     def compute(self, *args, **kwargs):
         if not self.dirty: return
         ySortedPins = sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
-        data = [self.getPinData(p) for p in ySortedPins]
+        data = [p.getCachedDataOrEvaluatdData() for p in ySortedPins]
         data = [d for d in data if d is not None]
         if len(data)==0: return
         assert(all([isinstance(d, pandas.DataFrame) for d in data]))
@@ -214,25 +172,27 @@ class ConcatDataFrames(PandasNodeInOut):
         self.setOutputAndClean(result)
         self.dirty = False
 
-class ColumnRegex(PandasNodeInOut):
+class ColumnRegex(PandasNodeBase):
 
+    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'column_regex', inputs=[
+            dict(name='columnName', description='Column name', type='str', static=True),
+            dict(name='regex', description='Regex', default_value=r"(?P<column1>\w+)_(?P<column2>\w+)", type='str', static=True),
+        ], outputs=[])))
+    
     def __init__(self, name):
-        super(ColumnRegex, self).__init__(name)
-        self.columnName = self.createInputPin("Column name", "StringPin", "-1")
-        self.columnName.dataBeenSet.connect(self.dataBeenSet)
-        self.regex = self.createInputPin("Regex", "StringPin", r"(?P<column1>\w+)_(?P<column2>\w+)")
-        self.regex.dataBeenSet.connect(self.dataBeenSet)
-        
+        super(ColumnRegex, self).__init__(name, pinStructureIn=StructureType.Multi)
+
     @staticmethod
     def description():
         return """Create columns from a regex."""
 
     def compute(self, *args, **kwargs):
         if not self.dirty: return
-        if self.getPinData(self.inArray) is None: return
-        df: pandas.DataFrame = self.getPinData(self.inArray).copy()
-        regex = self.regex.currentData()
-        columnName = self.columnName.currentData()
+        data = self.getCachedDataFrame()
+        if data is None: return
+        df: pandas.DataFrame = data.copy()
+        regex = self.getParameter('regex', None)
+        columnName = self.getParameter('columnName', None)
         columnIndex = None
         try:
             columnIndex = int(columnName)

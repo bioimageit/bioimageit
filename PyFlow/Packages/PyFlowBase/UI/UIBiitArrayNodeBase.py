@@ -38,12 +38,12 @@ class ColumnValueWidget(QWidget):
         self.typeSelector.addItem('Value')
         self.layout.addWidget(self.typeSelector)
         self.layout.addWidget(self.inputWidget)
-        type = node.parameters[input.name]['type']
+        type = node.parameters['inputs'][input.name]['type']
         data = node.getDataFrame()
         isDataframe = isinstance(data, pandas.DataFrame)
         node.inArray.setClean()
-        defaultColumnName = node.parameters[input.name]['columnName'] if not isDataframe or node.parameters[input.name]['columnName'] in data.columns else data.columns[-1]
-        node.parameters[input.name]['columnName'] = defaultColumnName
+        defaultColumnName = node.parameters['inputs'][input.name]['columnName'] if not isDataframe or node.parameters['inputs'][input.name]['columnName'] in data.columns else data.columns[-1]
+        node.parameters['inputs'][input.name]['columnName'] = defaultColumnName
         # self.columnNameInput = createInputWidget('StringPin', lambda value: self.updateNodeParameters(value, 'columnName'), defaultColumnName, DEFAULT_WIDGET_VARIANT)
         # self.layout.addWidget(self.columnNameInput)
         self.typeSelector.activated.connect(self.changeTypeValue)
@@ -51,17 +51,17 @@ class ColumnValueWidget(QWidget):
         # self.columnNameInput.setWidgetValue(defaultColumnName)
         # self.columnNameInput.blockWidgetSignals(False)
         if isinstance(self.inputWidget, InputWidgetRaw):
-            if node.parameters[input.name]['value'] is not None:
+            if node.parameters['inputs'][input.name]['value'] is not None:
                 self.inputWidget.blockWidgetSignals(True)
-                self.inputWidget.setWidgetValue(node.parameters[input.name]['value'])
+                self.inputWidget.setWidgetValue(node.parameters['inputs'][input.name]['value'])
                 self.inputWidget.blockWidgetSignals(False)
         if isinstance(self.inputWidget, QComboBox):
             self.inputWidget.blockSignals(True)
-            self.inputWidget.setCurrentText(node.parameters[input.name]['value'])
+            self.inputWidget.setCurrentText(node.parameters['inputs'][input.name]['value'])
             self.inputWidget.blockSignals(False)
         self.columnSelector = None
         index = 0 if type == 'columnName' and isDataframe else 1
-        if isDataframe:
+        if isDataframe and not (hasattr(input, 'static') and input.static):
             # self.columnNameInput.hide()
             self.columnSelector = QComboBox()
             for column in data.columns:
@@ -106,7 +106,7 @@ class ColumnValueWidget(QWidget):
         return w
     
     def updateNodeParameters(self, value, type):
-        parameter = self.node.parameters[self.name]
+        parameter = self.node.parameters['inputs'][self.name]
         parameter[type] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
         self.node.dataBeenSet()
@@ -130,7 +130,7 @@ class ColumnValueWidget(QWidget):
         elif index==1:
             self.inputWidget.show()
             type = 'value'
-        self.node.parameters[self.name]['type'] = type
+        self.node.parameters['inputs'][self.name]['type'] = type
         if sendChanged:
             self.node.dataBeenSet()
             EditorHistory().saveState("Update parameter type", modify=True)
@@ -138,7 +138,7 @@ class ColumnValueWidget(QWidget):
 
     def changeColumnValue(self, index):
         data = self.node.inArray.currentData()
-        self.node.parameters[self.name]['columnName'] = data.columns[index]
+        self.node.parameters['inputs'][self.name]['columnName'] = data.columns[index]
         self.node.dataBeenSet()
         EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
@@ -201,12 +201,13 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
             inputsCategory.addWidget(input.name, iw, group=inGroup)
 
     def updateOutput(self, output, value):
-        output.value = value
-        data: pandas.DataFrame = self._rawNode.outArray.currentData()
-        self._rawNode.setOutputColumns(self._rawNode.__class__.tool, data)
-        self._rawNode.setOutputAndClean(data)
-        self.parametersChanged(data)
-        # data[self.getColumnName(output)] = data[self.getColumnName(output)].apply(lambda v: value)
+        output['value'] = value
+        self._rawNode.dataBeenSet()
+        # data: pandas.DataFrame = self._rawNode.outArray.currentData()
+        # self._rawNode.setOutputColumns(self._rawNode.__class__.tool, data)
+        # self._rawNode.setOutputAndClean(data)
+        # self.parametersChanged(data)
+        EditorHistory().saveState("Update parameter", modify=True)
 
     def createAdvancedCollapsibleFormWidget(self, propertiesWidget):
         advancedInputsCategory = CollapsibleFormWidget(headName="Advanced inputs")
@@ -223,20 +224,20 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
     def createOutputCollapsibleFormWidget(self, propertiesWidget):
         outputsCategory = CollapsibleFormWidget(headName="Outputs")
         
-        tool = self._rawNode.__class__.tool
+        # tool = self._rawNode.__class__.tool
         
-        for output in tool.info.outputs:
+        for outputName, output in self._rawNode.parameters['outputs'].items():
 
-            w = createInputWidget('StringPin', (lambda value, output=output: self.updateOutput(output, value)), defaultValue=output.default_value)
+            w = createInputWidget('StringPin', (lambda value, output=output: self.updateOutput(output, value)), defaultValue=output['defaultValue'])
             if w:
-                if hasattr(output, 'help'):
-                    w.setToolTip(output.help)
+                if 'help' in output:
+                    w.setToolTip(output['help'])
                 w.blockWidgetSignals(True)
-                w.setWidgetValue(output.value)
+                w.setWidgetValue(output['value'])
                 w.blockWidgetSignals(False)
-                w.setObjectName(output.name)
+                w.setObjectName(outputName)
                 
-                outputsCategory.addWidget(output.name, w)
+                outputsCategory.addWidget(outputName, w)
 
         if outputsCategory.Layout.count() > 0:
             propertiesWidget.addWidget(outputsCategory)

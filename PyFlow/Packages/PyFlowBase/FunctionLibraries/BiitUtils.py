@@ -27,8 +27,3 @@ def getOutputDataFolderPath(nodeName):
 def getOutputMetadataFolderPath(nodeName):
     graphManager = GraphManagerSingleton().get()
     return Path(graphManager.workflowPath).resolve() / 'Metadata' / nodeName
-
-def getOutputFilePath(info, nodeName, index=None):
-    indexPrefix = f'_{index}' if index is not None else ''
-    # return getOutputDataFolderPath(nodeName) / f'{info.name}{indexPrefix}.{FormatsAccess.instance().get(info.type).extension}'
-    return getOutputDataFolderPath(nodeName) / f'{info.name}{indexPrefix}.{fileTypeToExtensions[info.type]}'

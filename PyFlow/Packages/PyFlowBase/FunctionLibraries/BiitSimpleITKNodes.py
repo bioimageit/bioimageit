@@ -5,7 +5,6 @@ from munch import DefaultMunch
 import SimpleITK as sitk
 
 from PyFlow import getRootPath
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputFilePath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.invoke_in_main import inmain
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
@@ -22,8 +21,14 @@ class SimpleITKBase(BiitArrayNodeBase):
     def category(cls):
         return cls.tool.info.categories if 'categories' in cls.tool.info else 'SimpleITK|Custom'
     
+    def getFirstOuptutColumName(self):
+        print('ok')
+        keys = list(self.parameters['outputs'].keys())
+        outputName = keys[0]
+        return self.getColumnName(outputName)
+    
     def setOutputColumns(self, tool, data):
-        for output in tool.info.outputs:
+        for outputName, output in self.parameters['outputs'].items():
             for index, row in data.iterrows():
                 # Guess output file extension: find the first input image format
                 suffixes = '.tiff'
@@ -31,7 +36,7 @@ class SimpleITKBase(BiitArrayNodeBase):
                     if input.type == 'path' and 'image' in input.name and self.getParameter(input.name, row) is not None:
                         suffixes = ''.join(Path(self.getParameter(input.name, row)).suffixes)
                         break
-                data.at[index, self.getColumnName(output)] = getOutputDataFolderPath(self.name) / f'{output.name}_{index}{suffixes}'
+                data.at[index, self.getColumnName(outputName)] = getOutputDataFolderPath(self.name) / f'{outputName}_{index}{suffixes}'
 
     def execute(self):
         data: pandas.DataFrame|None = self.getDataFrame()
@@ -47,7 +52,7 @@ class SimpleITKBase(BiitArrayNodeBase):
             # if 'vector' in inputImage.GetPixelIDTypeAsString():
             #     inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
             result = self.__class__.sitkFunction(*argValues)
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
+            outputPath = Path(outputData.at[index, self.getFirstOuptutColumName()])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             if outputPath.suffix == '.tfm':
                 sitk.WriteTransform(result, outputPath)
@@ -99,7 +104,7 @@ class BinaryThreshold(SimpleITKBase):
             if 'vector' in inputImage.GetPixelIDTypeAsString():
                 inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
             thresholdedImage = sitk.BinaryThreshold(inputImage, argValues['lowerThreshold'], argValues['upperThreshold'], int(argValues['insideValue']), int(argValues['outsideValue']))
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
+            outputPath = Path(outputData.at[index, self.getFirstOuptutColumName()])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(thresholdedImage, outputPath)
         self.finishExecution()
@@ -161,7 +166,7 @@ class ExtractChannel(SimpleITKBase):
             if 'vector' in inputImage.GetPixelIDTypeAsString():
                 nChannels = inputImage.ToScalarImage().GetSize()[0]-1
                 inputImage = inputImage[min(int(self.getParameter('channel', row)), nChannels), :, :]
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
+            outputPath = Path(outputData.at[index, self.getFirstOuptutColumName()])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(inputImage, outputPath)
         self.finishExecution()
@@ -198,7 +203,7 @@ class SubtractImages(SimpleITKBase):
             inputImage1 = sitk.ReadImage(self.getParameter('image1', row), sitk.sitkInt32)
             inputImage2 = sitk.ReadImage(self.getParameter('image2', row), sitk.sitkInt32)
             resultImage = sitk.Subtract(inputImage1, inputImage2)
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
+            outputPath = Path(outputData.at[index, self.getFirstOuptutColumName()])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(sitk.Cast(resultImage, sitk.sitkUInt8), outputPath)
         self.finishExecution()
@@ -237,11 +242,11 @@ class ConnectedComponents(SimpleITKBase):
         for index, row in data.iterrows():
             inputImage = sitk.ReadImage(self.getParameter('image', row))
             labeledImage = sitk.ConnectedComponent(inputImage)
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[0])])
+            outputPath = Path(outputData.at[index, self.getColumnName('labeled_image')])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             sitk.WriteImage(sitk.Cast(labeledImage, sitk.sitkUInt16), outputPath)
             # sitk.WriteImage(labeledImage, outputPath)
-            outputPath = Path(outputData.at[index, self.getColumnName(self.tool.info.outputs[1])])
+            outputPath = Path(outputData.at[index, self.getColumnName('labeled_image_rgb')])
             outputPath.parent.mkdir(exist_ok=True, parents=True)
             labeledImageRGB = sitk.LabelToRGB(labeledImage)
             sitk.WriteImage(labeledImageRGB, outputPath)
@@ -256,7 +261,7 @@ class LabelStatistics(SimpleITKBase):
             dict(name='minSize', description='Min size of the labels', default_value=100, type='integer'),
             dict(name='maxSize', description='Max size of the labels', default_value=600, type='integer'),
         ], outputs=[
-            dict(name='connected_component', description='Output connected component', type='imagepng')
+            dict(name='connected_component', description='Output connected component', type='path')
         ])))
     
     def __init__(self, name):
@@ -283,7 +288,6 @@ class LabelStatistics(SimpleITKBase):
         data: pandas.DataFrame = self.getDataFrame()
         # outputData: pandas.DataFrame = self.outArray.currentData()
         records = []
-        n = 0
         for index, row in data.iterrows():
             imagePath = self.getParameter('image', row)
             labelPath = self.getParameter('label', row)
@@ -313,8 +317,7 @@ class LabelStatistics(SimpleITKBase):
                 # cc = image[bb[0]:bb[1], bb[2]:bb[3]]
                 # cc = image[bb[0]:bb[0]+bb[2]+1, bb[1]:bb[1]+bb[3]+1]
                 # cc = image[bb[1]:bb[1]+bb[3], bb[0]:bb[0]+bb[2]]
-                outputPath = getOutputFilePath(self.__class__.tool.info.outputs[0], self.name, n)
-                n += 1
+                outputPath = getOutputDataFolderPath(self.name) / f'connected_component_{index}.png'
                 outputPath.parent.mkdir(exist_ok=True, parents=True)
                 sitk.WriteImage(cc, outputPath)
                 records.append(dict(image=imagePath, label=labelPath, connected_component=outputPath, label_index=i, minimum=minimum, maximum=maximum, median=median, mean=mean, numPixels=numPixels, bb=str(bb)))

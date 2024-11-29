@@ -61,15 +61,20 @@ def processData(moduleImportPath: str, args: list[str], nodeOutputPath:Path, too
 #     tool, args = initialize(moduleImportPath, argsList[0])
 #     tool.processAllData(args)
 
+# def argToList(argList: dict):
+#     return [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argList.items()] for item in items]
+
 def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:Path, toolsPath:Path):
     # Initialize with the args of the first row, convert them to a list of string before use
-    args0 = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in argsList[0].items()] for item in items]
+    # args0 = argToList(argsList[0])
+    args0 = argsList[0]
     tool, _ = initialize(moduleImportPath, args0, toolsPath)
+    parser, _ = tool.getArgumentParser()
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     currentDirectory = os.getcwd()
     result = None
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
         os.chdir(nodeOutputPath)
-        result = tool.processAllData(dict2obj(argsList))
+        result = tool.processAllData([parser.parse_args(a) for a in argsList]) # dict2obj(argsList))
         os.chdir(currentDirectory)
     return result

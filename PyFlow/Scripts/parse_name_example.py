@@ -8,8 +8,8 @@ def compute(self):
     if not isinstance(data, pandas.DataFrame): return
 
     data['file_name'] = data['path'].apply(lambda value: value.name )
-    data['population'] = data['path'].apply(lambda value: re.search(r'population(\d+)_(\d+)\..+', str(value)).group(1) )
-    data['id'] = data['path'].apply(lambda value: re.search(r'population(\d+)_(\d+)\..+', str(value)).group(2) )
+    data['population'] = data['path'].apply(lambda value: re.search(r'population(\d+)_(\d+)\..+', str(value.name)).group(1) )
+    data['id'] = data['path'].apply(lambda value: re.search(r'population(\d+)_(\d+)\..+', str(value.name)).group(2) )
 
     self.outArray.setData(data)
 
