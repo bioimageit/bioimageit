@@ -22,6 +22,8 @@ variables:
  
 stages:
 - sign
+- build
+- test
  
 sign:
   stage: sign
@@ -35,3 +37,12 @@ sign:
   when: manual
   except:
     - dev
+
+job_build_windows:
+  stage: build
+  tags:
+    - windows
+  script:
+    - cd C:\bioimageit\
+    - pixi run --environment package build_pyi
+
