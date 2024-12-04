@@ -2,6 +2,7 @@ import logging
 import re
 import platform
 import tempfile
+import threading
 import subprocess
 from importlib import metadata
 from importlib import import_module
@@ -14,6 +15,8 @@ if sys.version_info < (3, 11):
 	from typing_extensions import TypedDict, Required, NotRequired, Self
 else:
 	from typing import TypedDict, Required, NotRequired, Self
+
+import psutil
 
 # class Singleton(type):
 # 	_instances = {}
@@ -93,6 +96,7 @@ class ClientEnvironment(Environment):
 		super().__init__(name)
 		self.port = port
 		self.process = process
+		self.stopEvent = threading.Event()
 		self.connection = None
 		# self.nTries = 0
 	
@@ -100,17 +104,38 @@ class ClientEnvironment(Environment):
 		self.connection = Client((EnvironmentManager.host, self.port))
 	
 	def execute(self, module:str, function: str, args: list):
-		self.connection.send(dict(action='execute', module=module, function=function, args=args))
-		while message := self.connection.recv():
-			if message['action'] == 'execution finished':
-				logger.info('execution finished')
-				return message['result'] if 'result' in message else None
-			elif message['action'] == 'error':
-				raise ExecutionException(message)
-			# if message['action'] == 'print':
-			# 	print(message['content'])
+		if self.connection.closed:
+			logger.warning(f'Connection not ready. Skipping execute {module}.{function}({args})')
+			return
+		try:
+			self.connection.send(dict(action='execute', module=module, function=function, args=args))
+			while message := self.connection.recv():
+				if message['action'] == 'execution finished':
+					logger.info('execution finished')
+					return message['result'] if 'result' in message else None
+				elif message['action'] == 'error':
+					raise ExecutionException(message)
+				# if message['action'] == 'print':
+				# 	print(message['content'])
+				else:
+					logger.warning('Got an unexpected message: ', message)
+		# If the connection was closed (subprocess killed): catch and ignore the exception, otherwise: raise it
+		except EOFError:
+			print("Connection closed gracefully by the peer.")
+		except BrokenPipeError as e:
+			print("Broken pipe. The peer process might have terminated.")
+		# except (PicklingError, TypeError) as e:
+		# 	print(f"Failed to serialize the message: {e}")
+		except OSError as e:
+			if e.errno == 9:  # Bad file descriptor
+				print("Connection closed abruptly by the peer.")
 			else:
-				logger.warning('Got an unexpected message: ', message)
+				print(f"Unexpected OSError: {e}")
+				raise e
+		
+		# Check that process are launched only once: id?
+		# Check that they are properly killed
+
 		# try:
 		# except EOFError as e:
 		# 	if self.nTries > 1:
@@ -131,7 +156,17 @@ class ClientEnvironment(Environment):
 				if e.args[0] == 'handle is closed': pass
 			self.connection.close()
 		if self.process is None: return # can be true in Debug mode
-		self.process.kill()
+		self.stopEvent.set()
+		# self.process.kill()
+
+		# Terminate the process and its children
+		parent = psutil.Process(self.process.pid)
+		for child in parent.children(recursive=True):  # Get all child processes
+			child.kill()
+		parent.kill()
+
+		# self.process.wait(timeout=1)
+
 		return
 	
 	# def __enter__(self):

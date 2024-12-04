@@ -274,10 +274,14 @@ class BiitToolNode(BiitArrayNodeBase):
 		inmain(lambda: cls.log.send(line.msg if isinstance(line, logging.LogRecord) else str(line)))
 
 	@classmethod
-	def logOutput(cls, process):
-		with process.stdout:
-			for line in process.stdout:
+	def logOutput(cls, process, stopEvent):
+		try:
+			for line in iter(process.stdout.readline, ''):  # Use iter to avoid buffering issues
+				if stopEvent.is_set():
+					break
 				cls.logLine(line)
+		except Exception as e:
+			print(f"Exception in thread: {e}")
 		return
 	
 	def execute(self, req):
@@ -285,19 +289,23 @@ class BiitToolNode(BiitArrayNodeBase):
 		additionalActivateCommands = self.Tool.additionalActivateCommands if hasattr(self.Tool, 'additionalActivateCommands') else None
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
-			inthread(self.logOutput, self.__class__.environment.process)
+			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
 		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))
 		# QThreadPool.globalInstance().start(self.worker)
 		argsList = self.getArgs()
 		for i, args in enumerate(argsList):
 			argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 		outputFolderPath = getOutputDataFolderPath(self.name)
-		self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
+		completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
+		if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
+		if completedProcess is not None and completedProcess.returncode != 0:
+			raise Exception(completedProcess)
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			# args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
+			if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
 			if completedProcess is not None and completedProcess.returncode != 0:
 				raise Exception(completedProcess)
 		self.finishExecution(argsList)

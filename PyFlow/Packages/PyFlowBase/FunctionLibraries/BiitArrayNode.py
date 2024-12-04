@@ -308,10 +308,6 @@ class BiitArrayNodeBase(BiitNodeBase):
         argsList = []
         inputData: pandas.DataFrame = self.inArray.currentData()
         outputData: pandas.DataFrame = self.outArray.currentData()
-
-        print("id", inputData)
-        print("od", outputData)
-    
         if inputData is None:
             args = {}
             for parameterName, parameter in self.parameters['inputs'].items():

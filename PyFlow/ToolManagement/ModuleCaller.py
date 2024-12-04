@@ -1,5 +1,6 @@
 import sys
 import logging
+import threading
 import traceback
 from importlib import import_module
 from multiprocessing.connection import Listener
@@ -14,11 +15,11 @@ sys.path.append('./') # Necessary to be able to import when running independentl
 
 # Configure the logging from now: write all INFO logs to environment.log, stdout and stderr 
 logging.basicConfig(
-    level=logging.INFO,
-    handlers=[
-        logging.FileHandler('environment.log'),
-        logging.StreamHandler()
-    ]
+	level=logging.INFO,
+	handlers=[
+		logging.FileHandler('environment.log'),
+		logging.StreamHandler()
+	]
 )
 
 # Create another logger for this file which will also write to environment.log, but not stdout and stderr
@@ -53,7 +54,21 @@ def getMessage(connection):
 	logger.debug(f'Waiting for message...')
 	return connection.recv()
 
+def functionExecutor(lock, connection, message):
+	try:
+		module = import_module(message['module'])
+		if not hasattr(module, message['function']):
+			raise Exception(f'Module {message["module"]} has no function {message["function"]}.')
+		result = getattr(module, message['function'])(*message['args'])
+		logger.info(f'Executed')
+		with lock:
+			connection.send(dict(action='execution finished', message='process execution done', result=result))
+	except Exception as e:
+		with lock:
+			connection.send(dict(action='error', exception=str(e), traceback=traceback.format_tb(e.__traceback__)))
+
 def launchListener():
+	lock = threading.Lock()
 	with Listener(('localhost', 0)) as listener:
 		while True:
 			# Print ready message for the environment manager (it can now open a client to send messages)
@@ -68,15 +83,16 @@ def launchListener():
 								# Redirect all outputs to connection.send
 								# with redirect_stdout(WriteProcessor(connection)):
 								logger.info(f'Execute {message["module"]}.{message["function"]}({message["args"]})')
-								module = import_module(message['module'])
-								if not hasattr(module, message['function']):
-									raise Exception(f'Module {message["module"]} has no function {message["function"]}.')
-								result = getattr(module, message['function'])(*message['args'])
-								logger.info(f'Executed')
-								connection.send(dict(action='execution finished', message='process execution done', result=result))
+								
+								thread = threading.Thread(target=functionExecutor, args=(lock, connection, message))
+								thread.start()
+
 							if message['action'] == 'exit':
 								logger.info(f'exit')
-								connection.send(dict(action='exited'))
+								with lock:
+									connection.send(dict(action='exited'))
+								connection.close()
+								listener.close()
 								return
 						except Exception as e:
 							logger.error('Caught exception:')
@@ -85,7 +101,8 @@ def launchListener():
 							# logger.error(traceback.format_exc())
 							for line in traceback.format_tb(e.__traceback__):
 								logger.error(line)
-							connection.send(dict(action='error', exception=str(e), traceback=traceback.format_tb(e.__traceback__)))
+							with lock:
+								connection.send(dict(action='error', exception=str(e), traceback=traceback.format_tb(e.__traceback__)))
 				except Exception as e:
 					logger.error('Caught exception while waiting for message:')
 					logger.error(e)
@@ -94,7 +111,8 @@ def launchListener():
 					for line in traceback.format_tb(e.__traceback__):
 						logger.error(line)
 					logger.error(message)
-					connection.send(dict(action='error', exception=str(e), traceback=traceback.format_tb(e.__traceback__)))
+					with lock:
+						connection.send(dict(action='error', exception=str(e), traceback=traceback.format_tb(e.__traceback__)))
 
 if __name__ == '__main__':
 	launchListener()

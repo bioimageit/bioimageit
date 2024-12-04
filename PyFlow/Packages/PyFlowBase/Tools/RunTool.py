@@ -57,6 +57,7 @@ logger = logging.getLogger()
 class ProgressDialog(QWidget):
 
     allNodesProcessedMessage = 'All nodes were processed.'
+    executionCanceled = 'Execution was canceled.'
 
     def __init__(self, runTool):
         super().__init__(runTool.pyFlowInstance)
@@ -331,7 +332,12 @@ class RunTool(ShelfTool):
                 self.log(f'Process node [[{n}/{len(plannedNodes)}]]: {node.name}')
                 self.currentNode = node
                 self.execute(node)
-                if self.cancelExecution.is_set(): break
+                if self.cancelExecution.is_set():
+                    self.log(self.progressDialog.executionCanceled)
+                    inmain(lambda: self.progressDialog.setCancelButtonToOk())
+                    self.executing = False
+                    self.cancelExecution.clear()
+                    return
             self.log(self.progressDialog.allNodesProcessedMessage)
             inmain(self.saveGraph)
             # inmain(lambda: self.progressDialog.hide())
@@ -343,6 +349,9 @@ class RunTool(ShelfTool):
             inmain(lambda: self.displayError(e.exception, e.traceback))
 
         except Exception as e:
+
+            print(e)
+
             for line in traceback.format_tb(e.__traceback__):
                 logger.error(line)
             
