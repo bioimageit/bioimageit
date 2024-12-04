@@ -44,5 +44,5 @@ job_build_windows:
     - windows
   script:
     - cd C:\bioimageit\
-    - pixi run --environment package build_pyi
+    - pixi run --environment package build_pyi -y
 
