@@ -6,7 +6,6 @@ from pathlib import Path
 from munch import Munch
 from PyFlow import getBundlePath
 from PyFlow.invoke_in_main import inthread, inmain
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
 
@@ -295,7 +294,7 @@ class BiitToolNode(BiitArrayNodeBase):
 		argsList = self.getArgs()
 		for i, args in enumerate(argsList):
 			argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-		outputFolderPath = getOutputDataFolderPath(self.name)
+		outputFolderPath = self.getOutputDataFolderPath()
 		completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
 		if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
 		if completedProcess is not None and completedProcess.returncode != 0:

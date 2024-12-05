@@ -1,6 +1,8 @@
+from pathlib import Path
 from blinker import Signal
 from PyFlow.Core import NodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
+from PyFlow.Core.GraphManager import GraphManagerSingleton
 
 class BiitNodeBase(NodeBase):
 
@@ -11,6 +13,14 @@ class BiitNodeBase(NodeBase):
         self.outputMessage = None               # The message which will be displayed in the Table View
         self.executed = None
         self.executedChanged = Signal(bool)
+        
+    def getOutputDataFolderPath(self):
+        graphManager = GraphManagerSingleton().get()
+        return Path(graphManager.workflowPath).resolve() / 'Data' / self.name
+
+    def getOutputMetadataFolderPath(self):
+        graphManager = GraphManagerSingleton().get()
+        return Path(graphManager.workflowPath).resolve() / 'Metadata' / self.name
     
     def setPinDataAndClean(self, pin, data):
         pin.setData(data)

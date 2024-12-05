@@ -9,13 +9,12 @@ from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath, isIoPath
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from send2trash import send2trash
 from blinker import Signal
 
 class BiitArrayNodeBase(BiitNodeBase):
-
+    
     def __init__(self, name, pinStructureIn=StructureType.Single):
         super(BiitArrayNodeBase, self).__init__(name)
         self.parametersChanged = Signal(bool)
@@ -50,7 +49,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
         selectInfoValues = (input.select_info.values if isinstance(input.select_info.values, list) else input.select_info['values'])  if input.type == 'select' else None
         defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
-        return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else isIoPath(input.type))
+        return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else False)
 
     def initializeOutput(self, output):
         return dict(value=output.default_value, 
@@ -91,7 +90,7 @@ class BiitArrayNodeBase(BiitNodeBase):
             self.createDataFrameFromFolder(self.folderDataFramePath, False)
         
         if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
-            outputFolder = getOutputMetadataFolderPath(self.name)
+            outputFolder = self.getOutputMetadataFolderPath()
             if Path(outputFolder / jsonTemplate['outputDataFramePath']).exists():
                 self.setOutputAndClean(pandas.read_csv(outputFolder / jsonTemplate['outputDataFramePath'], index_col=0), False)
                 if 'executed' in jsonTemplate:
@@ -206,7 +205,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         template = super(BiitArrayNodeBase, self).serialize()
         template['parameters'] = self.parameters.copy()
         template['folderDataFramePath'] = self.folderDataFramePath
-        outputFolder = getOutputMetadataFolderPath(self.name)
+        outputFolder = self.getOutputMetadataFolderPath()
         if Path(outputFolder / OUTPUT_DATAFRAME_PATH).exists():
             if self.executed:
                 template['outputDataFramePath'] = OUTPUT_DATAFRAME_PATH
@@ -215,8 +214,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         return template
     
     def hasGeneratedData(self):
-        dataFolder = getOutputDataFolderPath(self.name)
-        metadataFolder = getOutputMetadataFolderPath(self.name)
+        dataFolder = self.getOutputDataFolderPath()
+        metadataFolder = self.getOutputMetadataFolderPath()
         return dataFolder.exists() and len(list(dataFolder.iterdir())) > 0 or metadataFolder.exists() and len(list(metadataFolder.iterdir())) > 0
     
     @staticmethod
@@ -341,7 +340,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         argsList = self.getArgs()
         # argsList = argsList if type(argsList) is list else [argsList]
 
-        outputFolder = getOutputDataFolderPath(self.name)
+        outputFolder = self.getOutputDataFolderPath()
         if outputFolder.exists():
             send2trash(outputFolder)
         outputFolder.mkdir(exist_ok=True, parents=True)
@@ -363,7 +362,7 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def finishExecution(self, argsList=None):
         argsList = self.getArgs() if argsList is None else argsList
-        outputFolder = getOutputMetadataFolderPath(self.name)
+        outputFolder = self.getOutputMetadataFolderPath()
         outputFolder.mkdir(exist_ok=True, parents=True)
 
         outputData: pandas.DataFrame = self.outArray.currentData()
@@ -416,7 +415,7 @@ class BiitArrayNodeBase(BiitNodeBase):
     
     def deleteFiles(self):
         ThumbnailGenerator.get().deleteThumbnails(self.name)
-        for outputFolder in [getOutputDataFolderPath(self.name), getOutputMetadataFolderPath(self.name)]:
+        for outputFolder in [self.getOutputDataFolderPath(), self.getOutputMetadataFolderPath()]:
             if outputFolder.exists():
                 send2trash(outputFolder)
 

@@ -4,7 +4,6 @@ from PyFlow.Core import FunctionLibraryBase
 
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 
 class OmeroLib(FunctionLibraryBase):
     """doc string for OmeroLib"""
@@ -81,7 +80,7 @@ class OmeroDownload(OmeroBase):
         for dataset in datasets:
             for image in dataset.listChildren():
                 image = self.omero.getImage(uid=image.id)
-                path = getOutputDataFolderPath(self.name) / image.getName()
+                path = self.getOutputDataFolderPath()(self.name) / image.getName()
                 records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=path))
         dataFrame = pandas.DataFrame.from_records(records)
         # ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
@@ -96,7 +95,7 @@ class OmeroDownload(OmeroBase):
             self.setExecuted(True)
             return
         # dataset = omero.get_dataset(datasetId)
-        outputFolder = getOutputDataFolderPath(self.name)
+        outputFolder = self.getOutputDataFolderPath()(self.name)
         for dataset in datasets:
             for image in dataset.listChildren():
                 omero_image = self.omero.getImage(uid=image.id)

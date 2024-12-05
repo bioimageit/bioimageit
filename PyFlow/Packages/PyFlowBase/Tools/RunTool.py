@@ -45,7 +45,6 @@ from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArray
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import SimpleITKBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import PandasLib, ListFiles
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroLib, OmeroDownload, OmeroUpload, OmeroBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath
 from PyFlow.Core.OmeroService import OmeroService
 from PyFlow.invoke_in_main import inmain, inthread
 
@@ -520,7 +519,7 @@ class ExportWorkflowTool(ShelfTool):
         # name = tool.info.id if tool is not None else node.name
 
         # Create processes
-        outputFolder = getOutputDataFolderPath(node.name)
+        outputFolder = node.getOutputDataFolderPath(node)
         outputFolder.mkdir(exist_ok=True, parents=True)
 
         if node.__class__.__name__ in OmeroLib.classes.keys():

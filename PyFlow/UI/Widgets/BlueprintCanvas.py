@@ -42,7 +42,6 @@ from PyFlow.Core.PinBase import PinBase
 from PyFlow.Core.NodeBase import NodeBase
 from PyFlow.Input import InputManager, InputAction, InputActionType
 from PyFlow.UI.Views.VariablesWidget import VARIABLE_TAG, VARIABLE_DATA_TAG
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getOutputDataFolderPath, getOutputMetadataFolderPath
 
 from PyFlow import getRawNodeInstance
 from PyFlow.Core.Common import *
@@ -482,7 +481,7 @@ class BlueprintCanvas(CanvasBase):
                 # Warning: also delete thumbnails!
 
                 # If Data and Metadata folders are not empty: ask if user wants to send them to trash, and obey
-                folders = [f for f in [getOutputDataFolderPath(node._rawNode.name), getOutputMetadataFolderPath(node._rawNode.name)] if f.exists() and len(list(f.iterdir()))>0]
+                folders = [f for f in [node._rawNode.getOutputDataFolderPath(), node._rawNode.getOutputMetadataFolderPath()] if f.exists() and len(list(f.iterdir()))>0]
                 if len(folders) > 0 and answer is None:
                     answer = QMessageBox.warning(self.pyFlowInstance, "Delete data?", f'There are data files associated with the selected nodes. Would you like to move them to the trash?', QMessageBox.No | QMessageBox.Cancel | QMessageBox.Yes)
                     if answer == QMessageBox.Cancel:

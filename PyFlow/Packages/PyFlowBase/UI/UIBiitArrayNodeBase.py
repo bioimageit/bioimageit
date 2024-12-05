@@ -21,9 +21,16 @@ from PyFlow.Core.Common import *
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget, InputWidgetRaw
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitUtils import getPinTypeFromIoType, filePathTypes
 
 class ColumnValueWidget(QWidget):
+
+    ioTypeToPinType = dict(
+        string='StringPin',
+        float='FloatPin',
+        integer='IntPin',
+        boolean='BoolPin',
+        select='StringPin'
+    )
 
     def __init__(self, input, node, parent=None):
         super(ColumnValueWidget, self).__init__(parent=parent)
@@ -74,6 +81,9 @@ class ColumnValueWidget(QWidget):
         self.typeSelector.setCurrentIndex(index)
         self.changeTypeValue(index, False)
     
+    def getPinTypeFromIoType(self, ioType):
+        return self.ioTypeToPinType[ioType] if ioType in self.ioTypeToPinType else 'StringPin'
+
     # inputWidgetVariant: PathWidget, FilePathWidget, FolderPathWidget, ObjectPathWidth, EnumWidget
     def createInput(self, name, type, description, defaultValue, selectInfo):
         if type == 'select':
@@ -89,9 +99,9 @@ class ColumnValueWidget(QWidget):
             w.setToolTip(description)
             w.setObjectName(name)
             return w
-        inputWidgetVariant = 'PathWidget' if type in filePathTypes else DEFAULT_WIDGET_VARIANT
+        inputWidgetVariant = 'PathWidget' if type == 'path' else DEFAULT_WIDGET_VARIANT
         w = createInputWidget(
-            getPinTypeFromIoType(type),
+            self.getPinTypeFromIoType(type),
             lambda value: self.updateNodeParameters(value, 'value'),
             defaultValue,
             inputWidgetVariant
