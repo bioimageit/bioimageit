@@ -23,7 +23,7 @@ dependencies = ["omero-py==5.15.0",
 
 [project.optional-dependencies]
 install = ["pyinstaller"]
-package = ["requests>=2.32.3, <2.33"]
+package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7"]
 cxf = ["cx_Freeze"]
 ipython = ["ipython", "ipdb"]
 
