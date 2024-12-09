@@ -9,6 +9,7 @@ from pathlib import Path
 import logging
 from importlib import import_module
 import shutil
+import psutil
 
 def getBundlePath():
 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
