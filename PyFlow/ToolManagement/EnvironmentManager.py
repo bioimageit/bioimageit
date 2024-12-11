@@ -330,13 +330,7 @@ class EnvironmentManager:
 		commands = []
 		if platform.system() == 'Windows':
 			commands += [f'Set-Location -Path "{condaPath}"', 
-		   			'Invoke-Webrequest -URI https://micro.mamba.pm/api/micromamba/win-64/latest -OutFile micromamba.tar.bz2', 
-					'if (Test-Path micromamba.tar) {',
-						'Remove-Item micromamba.tar -verbose',
-					'}',
-					'bzip2 -d micromamba.tar.bz2',
-		   			'tar xf micromamba.tar',
-					'Remove-Item micromamba.tar']
+					'Invoke-Webrequest -URI https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-win-64 -OutFile micromamba.exe']
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
