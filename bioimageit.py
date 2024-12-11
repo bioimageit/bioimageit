@@ -286,6 +286,7 @@ def main():
 
         EnvironmentManager = import_module('EnvironmentManager')
         environmentManager = EnvironmentManager.environmentManager
+        environmentManager.copyMicromambaDependencies(getBundlePath() / 'data')
 
         environment = 'bioimageit'
 

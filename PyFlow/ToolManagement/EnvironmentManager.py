@@ -4,6 +4,7 @@ import platform
 import tempfile
 import threading
 import subprocess
+import shutil
 from importlib import metadata
 from importlib import import_module
 from pathlib import Path
@@ -320,6 +321,12 @@ class EnvironmentManager:
 			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']
 		else:
 			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
+	
+	def copyMicromambaDependencies(self, dependenciesFolder):
+		if not self._isWindows(): return
+		condaPath, condaBinPath = self._getCondaPaths()
+		for dll in sorted(list(dependenciesFolder.glob('*.dll'))):
+			shutil.copyfile(dll, condaBinPath.parent / dll.name)
 	
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()

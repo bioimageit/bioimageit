@@ -5,7 +5,7 @@ a = Analysis(
     ['bioimageit.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('data/', 'data/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
