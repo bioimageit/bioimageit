@@ -267,6 +267,7 @@ class EnvironmentManager:
 				commands = self._insertCommandErrorChecks(commands)
 			tmp.write('\n'.join(commands))
 			tmp.flush()
+			tmp.close()
 			executeFile = ['powershell', '-NoProfile', '-ExecutionPolicy', 'ByPass', '-File', tmp.name] if self._isWindows() else ['/bin/bash', tmp.name]
 			if not self._isWindows():
 				subprocess.run(['chmod', 'u+x', tmp.name])
