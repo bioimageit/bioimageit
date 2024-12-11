@@ -215,7 +215,7 @@ class WorkflowTool(DockTool):
         path.mkdir(exist_ok=True, parents=True)
 
         # Copy .gitignore so that user can easily version his workflow
-        shutil.copyfile(getRootPath() / 'Scripts' / '.gitignore_template', path / '.gitignore')
+        shutil.copyfile(getRootPath() / 'PyFlow' / 'Scripts' / '.gitignore_template', path / '.gitignore')
 
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
         self.addWorkflow(path)

@@ -272,7 +272,7 @@ class EnvironmentManager:
 			if not self._isWindows():
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
-			# Use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows
+			# We should be able to use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows ; but it does not work.
 			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, errors='replace', bufsize=1)
 			if waitComplete:
 				with process:
@@ -319,13 +319,14 @@ class EnvironmentManager:
 		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
 		if platform.system() == 'Windows':
-			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']
+			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']
 		else:
 			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
 	
 	def copyMicromambaDependencies(self, dependenciesFolder):
 		if not self._isWindows(): return
 		condaPath, condaBinPath = self._getCondaPaths()
+		condaPath.mkdir(exist_ok=True, parents=True)
 		for dll in sorted(list(dependenciesFolder.glob('*.dll'))):
 			shutil.copyfile(dll, condaPath / condaBinPath.parent / dll.name)
 	
