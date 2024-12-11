@@ -310,7 +310,7 @@ class EnvironmentManager:
 		return platform.system() == 'Windows'
 	
 	def _getCondaPaths(self):
-		return self.condaPath.resolve(), Path('bin/micromamba' if platform.system() != 'Windows' else 'Library/bin/micromamba.exe')
+		return self.condaPath.resolve(), Path('bin/micromamba' if platform.system() != 'Windows' else 'micromamba.exe')
 
 	def _setupCondaChannels(self):
 		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
@@ -327,7 +327,7 @@ class EnvironmentManager:
 		if not self._isWindows(): return
 		condaPath, condaBinPath = self._getCondaPaths()
 		for dll in sorted(list(dependenciesFolder.glob('*.dll'))):
-			shutil.copyfile(dll, condaBinPath.parent / dll.name)
+			shutil.copyfile(dll, condaPath / condaBinPath.parent / dll.name)
 	
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
