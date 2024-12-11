@@ -272,7 +272,7 @@ class EnvironmentManager:
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
 			# Use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows
-			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', bufsize=1)
+			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, errors='replace', bufsize=1)
 			if waitComplete:
 				with process:
 					return self._getOutput(process, rawCommands, log=log)
