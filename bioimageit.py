@@ -19,7 +19,7 @@ os.chdir(getBundlePath())
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler(getBundlePath() / 'initialize.log', mode='w'),
+        logging.FileHandler(getBundlePath() / 'initialize.log', mode='w', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )

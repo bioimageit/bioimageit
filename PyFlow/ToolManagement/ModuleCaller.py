@@ -17,7 +17,7 @@ sys.path.append('./') # Necessary to be able to import when running independentl
 logging.basicConfig(
 	level=logging.INFO,
 	handlers=[
-		logging.FileHandler('environment.log'),
+		logging.FileHandler('environment.log', encoding='utf-8'),
 		logging.StreamHandler()
 	]
 )

@@ -8,10 +8,6 @@ This project currently heavily relies on [PyFlow](https://github.com/wonderworks
 
 BioImageIT was made possible thanks to [omero-py](https://github.com/ome/omero-py), [pandas](https://pandas.pydata.org/), [Qt](https://doc.qt.io/), [Conda](https://conda.anaconda.org/), and many others.
 
-## 
-
-BioImageIT is distributed with 3 Dlls from the VC++ 2015 redistributables provided in local deployment mode as explicitly allowed by Microsoft's [Deployment in Visual C++](https://learn.microsoft.com/en-us/cpp/windows/deployment-in-visual-cpp?view=msvc-160#local-deployment) (see [Redistributing Visual C++ Files](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-160#redistributable-files-and-licensing) and [Microsoft software license terms for Visual Studio 2017 tools, add-ons and extensions](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-160#redistributable-files-and-licensing)).
-
 ## Overview
 
 Open science and FAIR principles are major topics in the field of modern microscopy for biology. This is due to both new data acquisition technologies like super-resolution and light sheet microscopy that generate large datasets but also to the new data analysis methodologies such as deep learning that automate data mining with high accuracy. Nevertheless data are still rarely shared and annotated because this implies a lot of manual and tedious work and software packaging. We present BioImageIT an open source framework that integrates automation of image data management with data processing. Scientists then only need to import their data once in BioImageIT, which automatically generates and manages the metadata every time an operation is performed on the data. This accelerates the data mining process with no need any more to deal with IT integration and manual analysis and annotations required to build training sets for machine learning techniques. BioImageIT then automatically implements FAIR principles. The interest of bioImageIT is thus twofold. 
@@ -77,3 +73,7 @@ This environment only requires `requests` and `pyinstaller` with Python 3.12.
 - Copy the port number printed in the output: "Listening port 62996"
 - Back in bioimageit: EnvironmentManager.launch, set Debug to True when the environment is the one to debug (for example), and past the port number
 - Debug BioImageIT
+
+## Distribution
+
+BioImageIT is distributed with 3 Dlls from the VC++ 2015 redistributables provided in local deployment mode as explicitly allowed by Microsoft's [Deployment in Visual C++](https://learn.microsoft.com/en-us/cpp/windows/deployment-in-visual-cpp?view=msvc-160#local-deployment) (see [Redistributing Visual C++ Files](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-160#redistributable-files-and-licensing) and [Microsoft software license terms for Visual Studio 2017 tools, add-ons and extensions](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-160#redistributable-files-and-licensing)).
