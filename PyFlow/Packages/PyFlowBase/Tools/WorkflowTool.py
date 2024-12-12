@@ -330,7 +330,7 @@ class WorkflowTool(DockTool):
         return
     
     def currentItemChanged(self, current, previous):
-
+        if current is None: return # current is None when the list is empty: for example when user renames the only workflow
         # path = current.data(QtCore.Qt.UserRole)
         path = Path(current.text())
         # Ask to save current workflow: load if user saves or discard, return to previous item if user cancels
