@@ -11,15 +11,20 @@ from importlib import import_module
 import shutil
 import psutil
 
+# Bundle path is _internal when frozen, and bioimageit/ otherwise
 def getBundlePath():
+	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
+
+# Root path is bioimageit/ in all cases
+def getRootPath():
 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
 
-os.chdir(getBundlePath())
+os.chdir(getRootPath())
 
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler(getBundlePath() / 'initialize.log', mode='w', encoding='utf-8'),
+        logging.FileHandler(getRootPath() / 'initialize.log', mode='w', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -110,7 +115,7 @@ def downloadSources(sources:Path, versionName):
     updateLabel("Extracting files...")
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
-        z.extractall(getBundlePath())
+        z.extractall(getRootPath())
 
     window.update_idletasks()
     
