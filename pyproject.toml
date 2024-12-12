@@ -24,7 +24,6 @@ dependencies = ["omero-py==5.15.0",
 [project.optional-dependencies]
 install = ["pyinstaller"]
 package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7"]
-cxf = ["cx_Freeze"]
 ipython = ["ipython", "ipdb"]
 
 [tool.pixi.feature.package.dependencies]
@@ -53,26 +52,8 @@ zeroc-ice = "==3.6.5"
 [tool.pixi.environments]
 default = { solve-group = "default" }
 install = { features = ["install"], solve-group = "default" }
-cxf = { features = ["cxf", "package"], no-default-feature = true }
 dev = { features = ["ipython"], solve-group = "default" }
 package = { features = ["install", "package"], no-default-feature = true }
 
 [tool.pixi.feature.package.tasks]
 build_pyi = "pyinstaller bioimageit.spec"
-
-[tool.pixi.feature.cxf.tasks]
-build_cxf = "cxfreeze build"
-
-# CX Freeze (not used yet, using pyinstaller instead)
-[tool.cxfreeze]
-executables = [
-    {script = "bioimageit.py", base = "console"}
-]
-
-[tool.cxfreeze.build_exe]
-packages = ["requests"]
-excludes = ["PyFlow"]
-include_files = ["PyFlow/ToolManagement/EnvironmentManager.py"]
-# include_path = "bioimageit-latest"
-# zip_exclude_packages = []
-# bin_path_includes = []
