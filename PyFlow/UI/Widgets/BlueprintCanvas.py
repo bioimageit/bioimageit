@@ -2126,7 +2126,7 @@ class BlueprintCanvasWidget(QWidget):
         self.leCompoundName.setValidator(nameValidator)
         self.leCompoundName.returnPressed.connect(self.onActiveCompoundNameAccepted)
 
-        rxLetters = QtCore.QRegularExpression('[a-zA-Z]+(\|[a-zA-Z]+)*')
+        rxLetters = QtCore.QRegularExpression(r'[a-zA-Z]+(\|[a-zA-Z]+)*')
         categoryValidator = QtGui.QRegularExpressionValidator(rxLetters, self.leCompoundCategory)
         self.leCompoundCategory.setValidator(categoryValidator)
         self.leCompoundCategory.returnPressed.connect(

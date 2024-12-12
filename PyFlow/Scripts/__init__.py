@@ -19,7 +19,7 @@ import json
 import threading
 
 from PyFlow.App import PyFlow
-from PyFlow import graphUiParser
+# from PyFlow import graphUiParser
 from qtpy.QtWidgets import QApplication
 from PyFlow import INITIALIZE
 from PyFlow.Core.Common import *
@@ -126,5 +126,5 @@ def main():
         loopThread.start()
         loopThread.join()
 
-    if parsedArguments.mode == "runui":
-        graphUiParser.run(filePath)
+    # if parsedArguments.mode == "runui":
+    #     graphUiParser.run(filePath)

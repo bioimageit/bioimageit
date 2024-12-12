@@ -701,7 +701,7 @@ def extractDigitsFromEndOfString(string):
     :returns: Numbers in the final of the string
     :rtype: int
     """
-    result = re.search("(\d+)$", string)
+    result = re.search(r"(\d+)$", string)
     if result is not None:
         return int(result.group(0))
 
