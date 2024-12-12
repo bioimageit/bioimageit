@@ -86,7 +86,7 @@ class TestGeneral(unittest.TestCase):
 
                 args = module.Tool.test
                 args = [arg if arg.startswith('--') else str((outputFolderPath / arg).resolve()) if (outputFolderPath / arg).exists() else arg for arg in args]
-                environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, args, outputFolderPath])
+                environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, args, outputFolderPath, toolPath])
 
                 validated_tools.append(moduleImportPath)
                 

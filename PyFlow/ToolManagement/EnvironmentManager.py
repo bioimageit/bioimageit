@@ -423,7 +423,7 @@ class EnvironmentManager:
 		match = re.search(r'(\d+)\.(\d+)', pythonVersion)
 		if match and int(match.group(1))<3 or int(match.group(2))<9:
 			raise Exception('Python version must be greater than 3.8')
-		pythonRequirement = ' python=' + pythonVersion if len(pythonVersion)>0 else ''
+		pythonRequirement = ' python=' + pythonVersion if len(pythonVersion)>0 else ' python'
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment}{pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
