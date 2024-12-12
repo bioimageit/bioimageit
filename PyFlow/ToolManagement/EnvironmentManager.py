@@ -327,7 +327,7 @@ class EnvironmentManager:
 	
 	def copyMicromambaDependencies(self, dependenciesFolder):
 		if not self._isWindows(): return
-		if dependenciesFolder.exists() or not dependenciesFolder.is_dir():
+		if not dependenciesFolder.is_dir():
 			raise Exception(f'The dependencies folder "{dependenciesFolder}" does not exist.')
 		condaPath, condaBinPath = self._getCondaPaths()
 		condaPath.mkdir(exist_ok=True, parents=True)
