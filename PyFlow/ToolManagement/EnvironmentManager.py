@@ -163,8 +163,10 @@ class ClientEnvironment(Environment):
 		# Terminate the process and its children
 		parent = psutil.Process(self.process.pid)
 		for child in parent.children(recursive=True):  # Get all child processes
-			child.kill()
-		parent.kill()
+			if child.is_running():
+				child.kill()
+		if parent.is_running():
+			parent.kill()
 
 		# self.process.wait(timeout=1)
 
@@ -273,7 +275,7 @@ class EnvironmentManager:
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
 			# We should be able to use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows ; but it does not work.
-			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, errors='replace', bufsize=1)
+			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', errors='replace', bufsize=1)
 			if waitComplete:
 				with process:
 					return self._getOutput(process, rawCommands, log=log)
@@ -423,7 +425,7 @@ class EnvironmentManager:
 		match = re.search(r'(\d+)\.(\d+)', pythonVersion)
 		if match and (int(match.group(1))<3 or int(match.group(2))<9):
 			raise Exception('Python version must be greater than 3.8')
-		pythonRequirement = ' python=' + pythonVersion if len(pythonVersion)>0 else ' python'
+		pythonRequirement = ' python=' + (pythonVersion if len(pythonVersion)>0 else platform.python_version())
 		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment}{pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)

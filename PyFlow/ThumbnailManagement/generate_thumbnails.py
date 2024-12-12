@@ -12,7 +12,7 @@ if __name__ == '__main__':
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.FileHandler('thumbnails.log'),
+        logging.FileHandler('thumbnails.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )

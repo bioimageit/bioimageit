@@ -28,7 +28,7 @@ bundlePath = Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Pat
 logging.basicConfig(
     level=logging.INFO,
     handlers=[
-        logging.handlers.RotatingFileHandler(bundlePath / 'bioimageit.log', maxBytes=5000000, backupCount=1),
+        logging.handlers.RotatingFileHandler(bundlePath / 'bioimageit.log', maxBytes=5000000, backupCount=1, encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
