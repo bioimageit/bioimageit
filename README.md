@@ -63,6 +63,10 @@ It is possible to run and debug the project with Visual Studio Code by selecting
 }
 ```
 
+## Tests
+
+Run `python -m unittest PyFlow/Tests/Test_Tools.py` in the default env (run `pixi shell` to activate the default env) to execute the Tools tests.
+
 ## Packaging
 
 The command `pixi run build_pyi` packages BioImageIT in the `dist/` repository. 
