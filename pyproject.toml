@@ -30,8 +30,8 @@ ipython = ["ipython", "ipdb"]
 python = "3.12"
 
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
+requires = ["hatchling"]
 
 [tool.setuptools.package-dir]
 biit = "PyFlow"
@@ -39,11 +39,6 @@ biit = "PyFlow"
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
-
-[tool.pixi.pypi-dependencies]
-bioimageit = { path = ".", editable = true }
-
-[tool.pixi.tasks]
 
 [tool.pixi.dependencies]
 zeroc-ice = "==3.6.5"
