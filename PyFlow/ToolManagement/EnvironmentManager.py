@@ -343,6 +343,8 @@ class EnvironmentManager:
 		commands = []
 		if platform.system() == 'Windows':
 			commands += [f'Set-Location -Path "{condaPath}"', 
+					# Download and install the latest Visual C++ Redistributables silently
+					'Invoke-WebRequest -URI "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "$env:Temp\vc_redist.x64.exe"; Start-Process "$env:Temp\vc_redist.x64.exe" -ArgumentList "/quiet /norestart" -Wait; Remove-Item "$env:Temp\vc_redist.x64.exe"',
 					'Invoke-Webrequest -URI https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-win-64 -OutFile micromamba.exe']
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
