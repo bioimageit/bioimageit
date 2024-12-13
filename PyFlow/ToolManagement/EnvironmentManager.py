@@ -370,8 +370,9 @@ class EnvironmentManager:
 		self.environments[environment].installedDependencies = {}
 	
 	def platformCondaFormat(self):
-		machine = platform.machine()
-		machine = '64' if machine == 'x86_64' else machine
+		machine = platform.machine() # machine can be arm64, AMD64 or maybe x86_64
+		# Set machine to 64 or arm64
+		machine = '64' if machine == 'x86_64' or machine == 'AMD64' else machine
 		return dict(Darwin='osx', Windows='win', Linux='linux')[platform.system()] + '-' + machine
 
 	def formatDependencies(self, package_manager:str, dependencies: list[str], raiseIncompatibilityException=False):
