@@ -291,7 +291,8 @@ def main():
 
         EnvironmentManager = import_module('EnvironmentManager')
         environmentManager = EnvironmentManager.environmentManager
-        environmentManager.copyMicromambaDependencies(getBundlePath() / 'data')
+        arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
+        environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
 
         environment = 'bioimageit'
 
