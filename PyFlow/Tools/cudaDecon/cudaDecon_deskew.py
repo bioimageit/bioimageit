@@ -5,7 +5,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Deconvolution']
-    dependencies = dict(conda=['conda-forge::pycudadecon|linux-64,win-64'], pip=[])
+    dependencies = dict(conda=['conda-forge::pycudadecon|linux-64,win-64'], pip=['scikit-image==0.24.0'])
     environment = 'condadecon'
     test = ['--input_image', 'deskew.tif', '--output_image', 'deskewed.tif']
     
@@ -38,11 +38,7 @@ class Tool:
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
-        try:
-            background = int(args.background) if args.background != 'auto' else args.background
-        except ValueError as e:
-            sys.exit('Error: the background argument must be an integer or "auto"; but it is "{args.background}".')
-        
+
         print(f'[[1/3]] Load image {input_image}')
         im = self.io.imread(input_image)
         

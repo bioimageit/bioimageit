@@ -44,7 +44,7 @@ class Tool(ClEsperantoTool):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
 
-        print(f'[[1/4]] Load image {input_image}')
+        print(f'[[1/4]] Load image {args.input_image}')
                 
         input_image = args.input_image
         voxel_size_x = args.voxel_size_x
@@ -57,13 +57,13 @@ class Tool(ClEsperantoTool):
         radius_z = args.radius_z
         output = args.out
 
-        image = self.io.imread(input_image)
-        print("Input image : {}".format(input_image))
+        image = self.io.imread(args.input_image)
+        print("Input image : {}".format(args.input_image))
         print("Loaded image size : " + str(image.shape))
         input_to_GPU = self.cle.push(image)
         print("Image size in GPU : " + str(input_to_GPU.shape))
 
-        print(f'[[2/4]] Resample image {input_image}')
+        print(f'[[2/4]] Resample image {args.input_image}')
 
         resampled = self.cle.create([int(input_to_GPU.shape[0] * voxel_size_z), int(input_to_GPU.shape[1] * voxel_size_y), int(input_to_GPU.shape[2] * voxel_size_x)])
         self.cle.scale(input_to_GPU, resampled, factor_x=voxel_size_x, factor_y=voxel_size_y, factor_z=voxel_size_z, centered=False)
@@ -74,7 +74,7 @@ class Tool(ClEsperantoTool):
         a_slice = self.cle.create([resampled.shape[1], resampled.shape[0]])
         num_slices = resampled.shape[0]
 
-        print(f'[[3/4]] Process image {input_image}')
+        print(f'[[3/4]] Process image {args.input_image}')
 
         mean_intensity_stack = self.cle.mean_of_all_pixels(resampled)
         corrected_slice = None

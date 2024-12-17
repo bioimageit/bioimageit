@@ -1,12 +1,27 @@
 import subprocess
 import sys
 import argparse
+import platform
 from pathlib import Path
 
 class Tool:
 
     categories = ['Format conversion']
-    dependencies = dict(conda=['bioconda::bftools'], pip=[])
+    # dependencies = dict(conda=['bioconda::bftools'], pip=[])
+    dependencies = dict(conda=['conda-forge::openjdk=11'], pip=[])
+    additionalInstallCommands = dict(all=[], 
+                                     windows=[f'Set-Location -Path "{Path(__file__).parent.resolve()}"',
+                                              f'Invoke-WebRequest -URI https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip -OutFile bftools.zip',
+                                              f'Expand-Archive -Force bftools.zip',
+                                              f'Remove-Item bftools.zip'],
+                                     linux=[f'cd {Path(__file__).parent.resolve()}',
+                                            'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
+                                            'unzip -o bftools.zip',
+                                            'rm bftools.zip'], 
+                                     mac=[f'cd {Path(__file__).parent.resolve()}',
+                                            'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
+                                            'unzip -o bftools.zip',
+                                            'rm bftools.zip'])
     environment = 'bftools'
     test = ['--input_image', 'img02.png', '--overwrite', '--output_image', 'img02.tif']
 
@@ -58,28 +73,37 @@ class Tool:
             sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Convert image {args.input_image}')
-        command = ['bfconvert']
-        
+
+        argumentList = []
         # Set boolean options
         for key, value in args.__dict__.items():
             if isinstance(value, bool) and value:
-                command += [f'-{key}']
+                argumentList += [f'-{key}']
         
         # Set options which must be passed as is
         for option in ['compression', 'series', 'cache_dir', 'map', 'crop', 'channel', 'z', 'timepoint', 'tilex', 'tiley', 'pyramid_scale', 'pyramid_resolutions']:
-            if option == 'compression' and getattr(args, option) == '': continue
-            if getattr(args, option) is not None:
-                command += [f'-{option}'.replace('_', '-'), getattr(args, option)]
+            value = getattr(args, option)
+            if option == 'compression' and value == '': continue
+            if value is not None:
+                # argumentList += [f'-{option}'.replace('_', '-'), value if option not in ['cache_dir', 'map'] else f'"{value}"']
+                argumentList += [f'-{option}'.replace('_', '-'), value]
 
         # Parse and set the range option
         if args.range is not None:
             rangeIndices = args.range.split(',')
             if len(rangeIndices)!=2:
                 raise Exception('Range must be of the form MIN,MAX')
-            command += ['-range', rangeIndices[0], rangeIndices[1]]
+            argumentList += ['-range', rangeIndices[0], rangeIndices[1]]
         
-        command += [args.input_image, args.output_image]
-        return subprocess.run([str(c) for c in command])
+        # argumentList += [f'"{args.input_image}"', f'"{args.output_image}"']
+        argumentList += [args.input_image, args.output_image]
+        # return subprocess.run([str(c) for c in argumentList])
+        parent = Path(__file__).parent.resolve()
+        command = [str(parent / 'bfconvert')] if platform.system() != 'Windows' else [str(parent / 'bftools/bftools/bfconvert.bat')]
+        command += [str(c) for c in argumentList]
+        print('command:')
+        print(command)
+        return subprocess.run(command)
 
 if __name__ == '__main__':
     tool = Tool()

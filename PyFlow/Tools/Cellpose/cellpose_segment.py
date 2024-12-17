@@ -58,6 +58,7 @@ class Tool:
             print(f'[[3/4]] Save visualization file {args.visualization}')
             # save results so you can load in gui
             self.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
+            if args.visualization.exists(): args.visualization.unlink()
             (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.visualization)
             print(f'Saved visualization: {args.visualization}')
 
@@ -67,6 +68,7 @@ class Tool:
             self.io.save_masks(image, masks, flows, input_image)
             output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
             if output_mask.exists():
+                if args.segmentation.exists(): args.segmentation.unlink()
                 (output_mask).rename(args.segmentation)
                 print(f'Saved out: {args.segmentation}')
             else:
