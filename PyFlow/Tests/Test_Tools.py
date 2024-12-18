@@ -10,7 +10,7 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 
 environmentManager.setCondaPath(getBundlePath() / 'micromamba')
 # environmentManager.environments['bioimageit'] = DirectEnvironment('bioimageit')  # Initialize default installed dependencies for the bioimageit env
-environment = environmentManager.launch('bioimageit')
+# environment = environmentManager.launch('bioimageit')
 
 toolsPath = Path('PyFlow/Tools/')
 

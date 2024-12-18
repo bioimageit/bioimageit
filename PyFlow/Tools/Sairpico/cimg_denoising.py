@@ -58,7 +58,7 @@ class Tool:
         
         print('Process {args.input_image}')
         import subprocess
-        return subprocess.run(["-denoise",
+        return subprocess.run(["denoise",
                                 "-i", str(args.input_image),
                                 "-o", str(args.output_image),
                                 "-first", str(args.first),
