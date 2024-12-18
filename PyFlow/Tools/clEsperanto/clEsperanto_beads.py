@@ -41,13 +41,13 @@ class Tool(ClEsperantoTool):
         import csv
         from itertools import zip_longest
 
-        print(f'[[1/3]] Load image {input_image}')
 
         input_image = args.input_image
         # sigma = args.sigma
         scalar = args.scalar
         output = args.out
 
+        print(f'[[1/3]] Load image {input_image}')
         image = self.io.imread(input_image)
         print("Input image : {}".format(input_image))
         print("Loaded image size : " + str(image.shape))

@@ -37,12 +37,12 @@ class Tool(ClEsperantoTool):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         
-        print(f'[[1/3]] Load image {input_image}')
 
         input_image = args.input_image
         spot_sigma = args.spot_sigma
         output = args.out
 
+        print(f'[[1/3]] Load image {input_image}')
         image = self.io.imread(input_image)
 
         blue_chan = image[...,0]
