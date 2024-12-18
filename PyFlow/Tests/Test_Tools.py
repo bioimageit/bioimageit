@@ -2,6 +2,7 @@ import threading
 import json
 import unittest
 import logging
+import shutil
 from importlib import import_module
 from pathlib import Path
 from munch import Munch
@@ -56,6 +57,7 @@ class TestGeneral(unittest.TestCase):
                 validated_tools_data = json.load(f)
                 validated_tools = validated_tools_data['validated_tools']
                 if get_git_revision_hash() != validated_tools_data['git_revision_hash']:
+                    shutil.copyfile(toolValidationPath, toolValidationPath.parent / f'{toolValidationPath.stem}_{validated_tools_data["git_revision_hash"]}.json')
                     validated_tools = []
 
         for toolPath in getTools(toolsPath):

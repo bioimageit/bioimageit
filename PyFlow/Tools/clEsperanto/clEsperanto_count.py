@@ -39,13 +39,13 @@ class Tool(ClEsperantoTool):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         
-        print(f'[[1/3]] Load image {input_image}')
 
         input_image = args.input_image
         input_sigma_x = args.sigma_x
         input_sigma_y = args.sigma_y
         output = args.out
 
+        print(f'[[1/3]] Load image {input_image}')
         image = self.io.imread(input_image)
         print("Input image : {}".format(input_image))
         print("Loaded image size : " + str(image.shape))

@@ -40,7 +40,6 @@ class Tool(ClEsperantoTool):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         
-        print(f'[[1/3]] Load image {input_image}')
 
         input_image = args.input_image
         voxel_size_x_in_microns = args.voxel_size_x
@@ -49,6 +48,7 @@ class Tool(ClEsperantoTool):
         deskewing_angle_in_degrees = args.angle
         output = args.out
 
+        print(f'[[1/3]] Load image {input_image}')
         image = self.io.imread(input_image)
 
         print("Input image : {}".format(input_image))
