@@ -56,7 +56,7 @@ class Tool:
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         
-        print('Process {args.input_image}')
+        print(f'Process {args.input_image}')
         import subprocess
         return subprocess.run(["denoise",
                                 "-i", str(args.input_image),
