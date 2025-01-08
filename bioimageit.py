@@ -36,45 +36,57 @@ projectId = 54065 # The BioImageIT Project on Gitlab
 proxies = None
 versionPath = Path('version.json')
 
-# Create the install window
-window = tk.Tk()
-window.title("BioImageIT")
+gui = None
 
-# Create a StringVar to hold the label text
-labelText = tk.StringVar()
-labelText.set("Starting...")
+class Gui:
 
-# Create a label widget
-label = tk.Label(window, textvariable=labelText)
-label.pack(pady=10)
+    nSteps = 3
 
-# Create a progress bar widget
-nSteps = 4
-progressBar = ttk.Progressbar(window, maximum=nSteps)
-progressBar.pack(pady=10, padx=20, fill=tk.X)
+    def __init__(self):
+        # Create the install window
+        self.window = tk.Tk()
+        self.window.title("BioImageIT")
 
-logText = tk.Text(window, height=5, width=52)
-logText.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+        # Create a StringVar to hold the label text
+        self.labelText = tk.StringVar()
+        self.labelText.set("Starting...")
 
-# Create a Scrollbar and attach it to the Text widget
-logScroll = tk.Scrollbar(window, command=logText.yview)
-logScroll.pack(side=tk.RIGHT, fill=tk.Y)
-logText.config(yscrollcommand=logScroll.set)
+        # Create a label widget
+        self.label = tk.Label(self.window, textvariable=self.labelText)
+        self.label.pack(pady=10)
+
+        # Create a progress bar widget
+        self.progressBar = ttk.Progressbar(self.window, maximum=self.nSteps)
+        self.progressBar.pack(pady=10, padx=20, fill=tk.X)
+
+        self.logText = tk.Text(self.window, height=5, width=52)
+        self.logText.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+        # Create a Scrollbar and attach it to the Text widget
+        self.logScroll = tk.Scrollbar(self.window, command=self.logText.yview)
+        self.logScroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.logText.config(yscrollcommand=self.logScroll.set)
+
+def logMainThread(message):
+    gui.logText.insert(tk.END, message)
+    gui.logText.yview(tk.END)  # Auto-scroll to the latest log entry
+    gui.window.update_idletasks()
 
 def log(message):
-    logText.insert(tk.END, message)
-    logText.yview(tk.END)  # Auto-scroll to the latest log entry
-    window.update_idletasks()
+    if gui is None: return
+    gui.window.after(0, lambda: logMainThread(message))
     
 def updateLabel(message):
     logging.info(message)
-    labelText.set(message)
+    if gui is None: return
+    gui.window.after(0, lambda: gui.labelText.set(message))
     log(message + '\n')
 
 def getVersions():
     import requests
-    progressBar.step(1)
-    updateLabel('Checking BioImageIT versions...')
+    # gui.progressBar.step(1)
+    # updateLabel('Checking BioImageIT versions...')
+    logging.info('Checking BioImageIT versions...')
     r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/tags', proxies=proxies)
     return r.json()
 
@@ -82,9 +94,12 @@ def getLatestVersion():
     return getVersions()[0]
 
 def downloadSources(sources:Path, versionName):
+    global gui
+    gui = Gui()
+
     updateLabel(f'Downloading BioImageIT {versionName}...')
     
-    progressBar.step(2)
+    gui.progressBar.step(2)
     
     import requests, zipfile, io
     url = f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/archive.zip'
@@ -98,18 +113,18 @@ def downloadSources(sources:Path, versionName):
     blockSize = 1024  # 1 Kibibyte
     downloadedData = io.BytesIO()
 
-    progressBar.configure(maximum=totalSize)
+    gui.progressBar.configure(maximum=totalSize)
 
     # Download the file in chunks and update the progress bar
     for data in response.iter_content(blockSize):
         downloadedData.write(data)
         downloadedSize = downloadedData.tell()
-        progressBar.step(downloadedSize)
+        gui.progressBar.step(downloadedSize)
         logging.info(f"Downloaded {downloadedSize} of {totalSize} bytes")
-        window.update_idletasks()
+        gui.window.update_idletasks()
 
-    progressBar.configure(maximum=nSteps)
-    progressBar.step(2)
+    gui.progressBar.configure(maximum=gui.nSteps)
+    gui.progressBar.step(1)
 
     # Extract the zip file from memory
     updateLabel("Extracting files...")
@@ -117,7 +132,7 @@ def downloadSources(sources:Path, versionName):
     with zipfile.ZipFile(downloadedData, 'r') as z:
         z.extractall(getRootPath())
 
-    window.update_idletasks()
+    gui.window.update_idletasks()
     
 
 def downloadLatestVersion():
@@ -160,7 +175,8 @@ class ProxyDialog:
 
 def getProxySettingsFromGUI():
     dialog = ProxyDialog()
-    window.wait_window(dialog.top)
+    if gui is not None:
+        gui.window.wait_window(dialog.top)
 
 def getProxySettingsFromConda():
 
@@ -239,7 +255,8 @@ def tryDownloadLatestVersionOrGetProxySettingsFromConda():
 
 def createEnvironment(sources, environmentManager, environment):
     import tomllib
-    progressBar.step(3)
+    if gui is not None:
+        gui.window.after(0, lambda: gui.progressBar.step(3))
     updateLabel('Creating BioImageIT environment...')
     with open(sources / "pyproject.toml", "rb") as f:
         projectConfiguration = tomllib.load(f)
@@ -248,8 +265,7 @@ def createEnvironment(sources, environmentManager, environment):
         condaDependencies = [key + value for key, value in projectConfiguration['tool']['pixi']['dependencies'].items()]
     environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion))
 
-def main():
-
+def updateVersion():
     if versionPath.exists():
         with open(versionPath, 'r') as f:
             versionInfo = json.load(f)
@@ -257,7 +273,7 @@ def main():
         versionInfo = dict(autoUpdate=True, version='unknown', proxies=None)
 
     sources = Path(versionInfo['version'])
-    proxies = versionInfo['proxies'] if versionInfo['proxies'] != 'None' else None
+    proxies = versionInfo['proxies'] if 'proxies' in versionInfo else None
 
     # If the selected version does not exist: auto update
     if versionInfo['autoUpdate']:
@@ -273,59 +289,72 @@ def main():
         versionInfo['proxies'] = proxies
         with open(versionPath, 'w') as f:
             json.dump(versionInfo, f)
+    return sources
 
-        
-        # Do not import with 
-        # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
-        # since PyInstaller would freeze the EnvironmentManager and we could not benefit from its updates
-        # Copy EnvironmentManager to avoid importing all PyFlow dependencies
-        shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'EnvironmentManager.py')
-        sys.path.append(str(sources.resolve()))
-        # Imports from the Environment manager must be available now
-        from multiprocessing.connection import Client
-        if sys.version_info < (3, 11):
-            from typing_extensions import TypedDict, Required, NotRequired, Self
-        else:
-            from typing import TypedDict, Required, NotRequired, Self
-        print(Client, TypedDict, Required, NotRequired, Self)
-
-        EnvironmentManager = import_module('EnvironmentManager')
-        environmentManager = EnvironmentManager.environmentManager
-        arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
-        environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
-
-        environment = 'bioimageit'
-
-        if not environmentManager.environmentExists(environment):
-            EnvironmentManager.attachLogHandler(log)
-            createEnvironment(sources, environmentManager, environment)
-
-        progressBar.step(4)
-        updateLabel('Launching BioImageIT...')
-
-        executable = 'python'
-        # Hack for OS X to display BioImageIT in the menu instead of python
-        if platform.system() == 'Darwin':
-            condaPath, _ = environmentManager._getCondaPaths()
-            python = condaPath / 'envs/' / environment / 'bin' / 'python'
-            pythonSymlink = sources / 'BioImageIT'
-            if not pythonSymlink.exists():
-                Path(pythonSymlink).symlink_to(python)
-            executable = './BioImageIT'
-
-        with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
-
-            for line in process.stdout:
-                log(line)
-                if line.strip() == 'Initialization complete':
-                    window.destroy()
-
-            # process.wait() # useless with the context manager
+def launchBiit(sources):
     
+    # Do not import with 
+    # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
+    # since PyInstaller would freeze the EnvironmentManager and we could not benefit from its updates
+    # Copy EnvironmentManager to avoid importing all PyFlow dependencies
+    shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'EnvironmentManager.py')
+    sys.path.append(str(sources.resolve()))
+    # Imports from the Environment manager must be available now
+    from multiprocessing.connection import Client
+    if sys.version_info < (3, 11):
+        from typing_extensions import TypedDict, Required, NotRequired, Self
+    else:
+        from typing import TypedDict, Required, NotRequired, Self
+    print(Client, TypedDict, Required, NotRequired, Self)
 
+    EnvironmentManager = import_module('EnvironmentManager')
+    environmentManager = EnvironmentManager.environmentManager
+    arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
+    environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
+
+    environment = 'bioimageit'
+
+    if not environmentManager.environmentExists(environment):
+        EnvironmentManager.attachLogHandler(log)
+        createEnvironment(sources, environmentManager, environment)
+
+    if gui is not None:
+        gui.window.after(0, lambda: gui.progressBar.step(4))
+    updateLabel('Launching BioImageIT...')
+
+    executable = 'python'
+    # Hack for OS X to display BioImageIT in the menu instead of python
+    if platform.system() == 'Darwin':
+        condaPath, _ = environmentManager._getCondaPaths()
+        python = condaPath / 'envs/' / environment / 'bin' / 'python'
+        pythonSymlink = sources / 'BioImageIT'
+        if not pythonSymlink.exists():
+            Path(pythonSymlink).symlink_to(python)
+        executable = './BioImageIT'
+
+    with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
+
+        for line in process.stdout:
+            log(line)
+            if line.strip() == 'Initialization complete':
+                if gui is not None:
+                    gui.window.after(0, close_window)
+    
+def close_window():
+    """Properly close the Tkinter window."""
+    global gui
+    gui.window.quit()
+    gui.window.destroy()
+    gui.window.update()
+    gui.window.update_idletasks()
+    gui = None
+
+sources = updateVersion()
 # Start the task in a separate thread to keep the GUI responsive
-thread = threading.Thread(target=main, daemon=True)
+thread = threading.Thread(target=lambda: launchBiit(sources), daemon=True)
 thread.start()
 
 # Start the Tkinter event loop
-window.mainloop()
+if gui is not None:
+    gui.window.mainloop()
+thread.join()
