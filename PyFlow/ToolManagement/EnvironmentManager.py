@@ -330,10 +330,11 @@ class EnvironmentManager:
 	def _shellHook(self):
 		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
+		showConfig = [f'{self.condaBin} config sources', f'{self.condaBin} config list']
 		if platform.system() == 'Windows':
-			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']
+			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"'] + showConfig
 		else:
-			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']
+			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"'] + showConfig
 	
 	def copyMicromambaDependencies(self, dependenciesFolder):
 		if not self._isWindows(): return
@@ -414,7 +415,7 @@ class EnvironmentManager:
 	
 	def getProxyString(self):
 		if self.proxies is None: return None
-		return 'https://' + self.proxies['https'] if 'https' in self.proxies else 'http://' + self.proxies['http'] if 'http' in self.proxies else None
+		return self.proxies['https'] if 'https' in self.proxies else self.proxies['http'] if 'http' in self.proxies else None
 	
 	def installDependencies(self, environment:str, dependencies: Dependencies={}, raiseIncompatibilityException=True):
 		if any(['::' in d for d in dependencies['pip']]):
