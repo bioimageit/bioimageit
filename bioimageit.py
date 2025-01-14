@@ -265,11 +265,7 @@ def getProxySettingsFromConda():
                 with open(condaConfigurationFile, 'r') as f:
                     configuration = yaml.safe_load(f)
                     if 'proxy_servers' in configuration:
-                        global gui
-                        if gui is None:
-                            gui = Gui()
-                        
-                        result = tk.messagebox.askyesno(title='Use conda proxy settings', message='You need to configure the proxy settings.\nBioImageIT found your conda proxy settings and will use them for this time.\nWould you like to always use your conda proxy settings?')
+                        result = tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
                         setProxies(configuration['proxy_servers'], save=result)
         
     # set REQUESTS_CA_BUNDLE to override the certificate bundle trusted by Requests
@@ -379,9 +375,10 @@ def launchBiit(sources):
     updateLabel('Launching BioImageIT...')
 
     executable = 'python'
+    condaPath, _ = environmentManager._getCondaPaths()
+
     # Hack for OS X to display BioImageIT in the menu instead of python
     if platform.system() == 'Darwin':
-        condaPath, _ = environmentManager._getCondaPaths()
         python = condaPath / 'envs/' / environment / 'bin' / 'python'
         pythonSymlink = sources / 'BioImageIT'
         if not pythonSymlink.exists():
@@ -389,12 +386,19 @@ def launchBiit(sources):
         executable = './BioImageIT'
 
     with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
-
+        
+        initialized = False
         for line in process.stdout:
             log(line)
             if line.strip() == 'Initialization complete':
+                initialized = True
                 if gui is not None:
                     gui.window.after(0, close_window)
+    if not initialized:
+        result = tk.messagebox.askyesno(title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created. Would you like to delete and recreate the BioImageIT environment ({condaPath / 'envs/' / environment})?") 
+        if result:
+            shutil.rmtree(condaPath / 'envs/' / environment)
+            launchBiit(sources)
     
 def close_window():
     """Properly close the Tkinter window."""
