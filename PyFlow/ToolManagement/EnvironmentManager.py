@@ -364,7 +364,7 @@ class EnvironmentManager:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
 			machine = '64' if machine == 'x86_64' else machine
-			proxies = f'--proxies "{proxies}"' if proxies is not None else ''
+			proxies = f'--proxy "{proxies}"' if proxies is not None else ''
 			commands += [f'cd "{condaPath}"', f'echo "Installing micromamba..."', f'curl {proxies} -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
 		commands += self._shellHook()
 		return commands + self._setupCondaChannels()
@@ -430,7 +430,7 @@ class EnvironmentManager:
 		installDepsCommands += [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
 		installDepsCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		proxies = self.getProxyString()
-		proxies = f'--proxies {proxies}' if proxies is not None else ''
+		proxies = f'--proxy {proxies}' if proxies is not None else ''
 		installDepsCommands += [f'pip install {proxies} {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
 		installDepsCommands += [f'pip install {proxies} --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
 		if environment in self.environments:
