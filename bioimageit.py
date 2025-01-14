@@ -2,16 +2,17 @@ import sys
 import os
 import platform
 import json
+import webbrowser
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox 
 import threading
 from pathlib import Path
 import logging
 from importlib import import_module
 import shutil
-import psutil
+import yaml
 
-# Bundle path is _internal when frozen, and bioimageit/ otherwise
+# Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise
 def getBundlePath():
 	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
 
@@ -35,6 +36,7 @@ logger.info('Initializing BioImageIT...')
 projectId = 54065 # The BioImageIT Project on Gitlab
 proxies = None
 versionPath = Path('version.json')
+versionInfo = None
 
 gui = None
 
@@ -74,14 +76,33 @@ def logMainThread(message):
 
 def log(message):
     if gui is None: return
-    gui.window.after(0, lambda: logMainThread(message))
+    gui.window.after(0, lambda: logMainThread(message + '\n'))
     
 def updateLabel(message):
     logging.info(message)
     if gui is None: return
     gui.window.after(0, lambda: gui.labelText.set(message))
-    log(message + '\n')
+    log(message)
 
+def setProxies(newProxies, save=True):
+    global proxies
+    proxies = newProxies
+    if save and proxies is not None:
+        versionInfo['proxies'] = proxies
+        with open(versionPath, 'w') as f:
+            json.dump(versionInfo, f)
+
+        configuration = {}
+        mambaConfigPath = Path('micromamba/.mambarc')
+        if mambaConfigPath.exists():
+            with open(mambaConfigPath, 'r') as f:
+                newConfiguration = yaml.safe_load(f)
+                if newConfiguration is not None:
+                    configuration = newConfiguration
+        configuration['proxy_servers'] = proxies
+        with open(mambaConfigPath, 'w') as f:
+            yaml.safe_dump(configuration, f)
+    
 def getVersions():
     import requests
     # gui.progressBar.step(1)
@@ -150,33 +171,42 @@ class ProxyDialog:
         top = self.top = tk.Toplevel(parent)
         top.title("Proxy Settings")
         
-        self.label = ttk.Label(top, text = """Enter your config settings in yaml format, as in https://tinyurl.com/3ta9zn6t""")
+        self.label = ttk.Label(top, text = """Enter your proxy settings (in yaml format)""")
+
+        self.link = tk.Label(top, text="See the conda documentation about proxy configuration for more information.", cursor="hand2")
+        self.link.bind("<Button-1>", lambda e: self.browse("https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/settings.html#proxy-servers-configure-conda-for-use-behind-a-proxy-server"))
+        self.link.config(fg="blue")
 
         self.textArea = tk.Text(top, height = 5, width = 52)
         self.textArea.insert(tk.END, """#For example:
-    http: http://user:pass@corp.com:8080
-    https: http://user:pass@corp.com:8080
-    # Or
-    'http://10.20.1.128': 'http://10.10.1.10:5323'
-    # ...
-    """)
+http: http://user:pass@example.com:8080
+https: http://user:pass@example.com:8080
+""")
 
         self.button = ttk.Button(top, text = "Confirm", command=self.parse)
 
         self.label.pack()
+        self.link.pack()
         self.textArea.pack()
         self.button.pack()
+        
+        top.attributes('-topmost', True)
+        top.update()
+
+    def browse(self, url):
+        webbrowser.open_new(url)
 
     def parse(self):
-        import yaml
-        global proxies
-        proxies = yaml.safe_load(self.textArea.get("1.0",tk.END))
+        setProxies(yaml.safe_load(self.textArea.get("1.0",tk.END)))
+        
         self.top.destroy()
 
 def getProxySettingsFromGUI():
-    dialog = ProxyDialog()
-    if gui is not None:
-        gui.window.wait_window(dialog.top)
+    global gui
+    if gui is None:
+        gui = Gui()
+    dialog = ProxyDialog(gui.window)
+    gui.window.wait_window(dialog.top)
 
 def getProxySettingsFromConda():
 
@@ -219,20 +249,28 @@ def getProxySettingsFromConda():
         "$CONDARC",
         "$MAMBARC"
     ]
+    # Add BioImageIT micromamba configurations
+    condaConfigurations += [
+        "micromamba/.condarc",
+        "micromamba/condarc",
+        "micromamba/condarc.d/",
+        "micromamba/.mambarc",
+    ]
 
-    import yaml
     for condaConfiguration in condaConfigurations:
-        condaConfiguration = Path(condaConfiguration).resolve()
+        condaConfiguration = Path(os.path.expandvars(condaConfiguration)).resolve()
         if condaConfiguration.exists():
             condaConfigurationFiles = sorted(list(condaConfiguration.glob('*.yml') + condaConfiguration.glob('*.yaml'))) if condaConfiguration.is_dir() else [condaConfiguration]
             for condaConfigurationFile in condaConfigurationFiles:
                 with open(condaConfigurationFile, 'r') as f:
                     configuration = yaml.safe_load(f)
                     if 'proxy_servers' in configuration:
-                        global proxies
-                        proxies = configuration['proxy_servers']
+                        result = tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
+                        setProxies(configuration['proxy_servers'], save=result)
         
     # set REQUESTS_CA_BUNDLE to override the certificate bundle trusted by Requests
+
+
 
 def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
     import requests
@@ -241,7 +279,14 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
     except requests.exceptions.ProxyError as e:
         logging.warning(e)
         getProxySettingsFromGUI()
-        return downloadLatestVersion()
+        try:
+            return downloadLatestVersion()
+        except requests.exceptions.ProxyError as e:
+            logging.warning(e)
+            log(e)
+            log('Error: Unable to check BioImageIT version. Please check your proxy settings.')
+            messagebox.showwarning("showwarning", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
+            return None
 
 def tryDownloadLatestVersionOrGetProxySettingsFromConda():
     import requests
@@ -266,6 +311,8 @@ def createEnvironment(sources, environmentManager, environment):
     environmentManager.create(environment, dict(pip=pipDependencies, conda=condaDependencies, python=pythonVersion))
 
 def updateVersion():
+    global versionInfo
+
     if versionPath.exists():
         with open(versionPath, 'r') as f:
             versionInfo = json.load(f)
@@ -273,25 +320,31 @@ def updateVersion():
         versionInfo = dict(autoUpdate=True, version='unknown', proxies=None)
 
     sources = Path(versionInfo['version'])
-    proxies = versionInfo['proxies'] if 'proxies' in versionInfo else None
+    setProxies(versionInfo['proxies'] if 'proxies' in versionInfo else None)
 
     # If the selected version does not exist: auto update
     if versionInfo['autoUpdate']:
         try:
-            sources = tryDownloadLatestVersionOrGetProxySettingsFromConda()
+            newSources = tryDownloadLatestVersionOrGetProxySettingsFromConda()
+            sources = newSources if newSources is not None else sources
         except Exception as e:
             logging.warning('Could not check the BioImageIT versions:')
             logging.warning(e)
             if versionInfo['version'] == 'unknown':
                 sys.exit(f'The bioimageit sources could not be downloaded.')
-        
-        versionInfo['version'] = sources.name
-        versionInfo['proxies'] = proxies
-        with open(versionPath, 'w') as f:
-            json.dump(versionInfo, f)
+        if sources is not None:
+            versionInfo['version'] = sources.name
+            with open(versionPath, 'w') as f:
+                json.dump(versionInfo, f)
     return sources
 
 def launchBiit(sources):
+
+    if not sources.resolve().is_dir():
+        message = 'Unable to find BioImageIT sources directory. Please check your Internet connection and proxy setttings and retry.'
+        logging.error(message)
+        log(message)
+        return
     
     # Do not import with 
     # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
@@ -300,13 +353,12 @@ def launchBiit(sources):
     shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'EnvironmentManager.py')
     sys.path.append(str(sources.resolve()))
     # Imports from the Environment manager must be available now
-    from multiprocessing.connection import Client
-    if sys.version_info < (3, 11):
-        from typing_extensions import TypedDict, Required, NotRequired, Self
-    else:
-        from typing import TypedDict, Required, NotRequired, Self
-    print(Client, TypedDict, Required, NotRequired, Self)
-
+    # from multiprocessing.connection import Client
+    # if sys.version_info < (3, 11):
+    #     from typing_extensions import TypedDict, Required, NotRequired, Self
+    # else:
+    #     from typing import TypedDict, Required, NotRequired, Self
+    
     EnvironmentManager = import_module('EnvironmentManager')
     environmentManager = EnvironmentManager.environmentManager
     arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
@@ -323,9 +375,10 @@ def launchBiit(sources):
     updateLabel('Launching BioImageIT...')
 
     executable = 'python'
+    condaPath, _ = environmentManager._getCondaPaths()
+
     # Hack for OS X to display BioImageIT in the menu instead of python
     if platform.system() == 'Darwin':
-        condaPath, _ = environmentManager._getCondaPaths()
         python = condaPath / 'envs/' / environment / 'bin' / 'python'
         pythonSymlink = sources / 'BioImageIT'
         if not pythonSymlink.exists():
@@ -333,12 +386,19 @@ def launchBiit(sources):
         executable = './BioImageIT'
 
     with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
-
+        
+        initialized = False
         for line in process.stdout:
             log(line)
             if line.strip() == 'Initialization complete':
+                initialized = True
                 if gui is not None:
                     gui.window.after(0, close_window)
+    if not initialized:
+        result = tk.messagebox.askyesno(title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created. Would you like to delete and recreate the BioImageIT environment ({condaPath / 'envs/' / environment})?") 
+        if result:
+            shutil.rmtree(condaPath / 'envs/' / environment)
+            launchBiit(sources)
     
 def close_window():
     """Properly close the Tkinter window."""

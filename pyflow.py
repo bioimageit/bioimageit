@@ -23,7 +23,7 @@ import logging
 import logging.handlers
 from pathlib import Path
 
-bundlePath = Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent.parent
+bundlePath = Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 logging.basicConfig(
     level=logging.INFO,

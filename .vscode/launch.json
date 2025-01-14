@@ -22,5 +22,14 @@
             "justMyCode": false,
             "autoReload": {"enable": true }
         },
+        {
+            "name": "launcher",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/bioimageit.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "autoReload": {"enable": true }
+        },
     ]
 }
