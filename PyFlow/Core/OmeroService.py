@@ -3,6 +3,7 @@ import locale
 import keyring
 import numpy as np
 import platform
+import json
 from PIL import Image
 from omero.gateway import BlitzGateway, DatasetWrapper, ProjectWrapper
 import omero
@@ -13,6 +14,7 @@ from omero.rtypes import rstring, rbool
 from omero.model import ChecksumAlgorithmI
 from omero.callbacks import CmdCallbackI
 from omero.model.enums import ChecksumAlgorithmSHA1160
+from PyFlow import getRootPath
 from PyFlow.Core.Common import *
 from PyFlow.ConfigManager import ConfigManager
 # from bioimageit_omero import OmeroMetadataService
@@ -44,7 +46,26 @@ class OmeroService(object):
 
         # self.client.createSession(username, password)
         # self.connection = BlitzGateway(username, password, host=host, port=port, client_obj=self.client, secure=True)
-        self.connection = BlitzGateway(username, password, host=host, port=port, secure=True)
+        
+        # self.connection = BlitzGateway(username, password, host=host, port=port, secure=True)
+        
+        proxies = []
+        versionPath = getRootPath() / 'version.json'
+        if versionPath.exists():
+            with open(versionPath, 'r') as f:
+                versionInfo = json.load(f)
+                for protocol in ['https', 'http']:
+                    if protocol in versionInfo['proxies']:
+                        # http://1:1@127.0.0.1:8888
+                        hostPort = versionInfo['proxies'][protocol].split('@')[1] if '@' in versionInfo['proxies'][protocol] else versionInfo['proxies'][protocol]
+                        proxyHost, proxyPort = hostPort.split(':')
+                        proxies = [f'--Ice.HTTPProxyHost={proxyHost}', f'--Ice.HTTPProxyPort={proxyPort}']
+                        break
+
+        client = client([f'--omero.host={host}', f'--omero.port={port}', f'--omero.user={username}', f'--omero.pass={password}'] + proxies)
+
+        client.createSession()
+        self.connection = BlitzGateway(client_obj=client, secure=True)
         self.client = self.connection.c
         self.connection.connect()
     

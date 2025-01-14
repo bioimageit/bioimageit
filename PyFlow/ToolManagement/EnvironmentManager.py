@@ -202,12 +202,21 @@ class EnvironmentManager:
 	condaBin = 'micromamba'
 	host = 'localhost'
 	environments: dict[str, Environment] = {}
+	proxies = None
 	
 	def __init__(self, condaPath:str|Path=Path('micromamba')) -> None:
 		self.setCondaPath(condaPath)
 	
 	def setCondaPath(self, condaPath:str|Path):
 		self.condaPath = Path(condaPath)
+		# Set proxy from condaPath
+		condaConfigPath = condaPath / '.mambarc'
+		import yaml
+		if condaConfigPath.exists():
+			with open(condaConfigPath, 'r') as f:
+				condaConfig = yaml.safe_load(f)
+				if 'proxies' in condaConfig:
+					self.proxies = condaConfig['proxies']
 	
 	def _insertCommandErrorChecks(self, commands):
 		commandsWithChecks = []
@@ -248,6 +257,7 @@ class EnvironmentManager:
 		return (outputs, process.returncode)
 
 	def setProxies(self, proxies):
+		self.proxies = proxies
 		condaPath, _ = self._getCondaPaths()
 		condaConfigPath = condaPath / '.mambarc'
 		condaConfig = dict()
@@ -340,19 +350,22 @@ class EnvironmentManager:
 		if platform.system() not in ['Windows', 'Linux', 'Darwin']:
 			raise Exception(f'Platform {platform.system()} is not supported.')
 		condaPath.mkdir(exist_ok=True, parents=True)
-		commands = []
+		commands = self.getProxyEnvironmentVariablesCommands()
+		proxies = self.getProxyString()
 		if platform.system() == 'Windows':
+			proxies = f'-Proxy {proxies}' if proxies is not None else ''
 			commands += [f'Set-Location -Path "{condaPath}"', 
 					# Download and install the latest Visual C++ Redistributables silently
 					f'echo "Installing Visual C++ Redistributable if necessary..."',
-					'Invoke-WebRequest -URI "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "$env:Temp\\vc_redist.x64.exe"; Start-Process "$env:Temp\\vc_redist.x64.exe" -ArgumentList "/quiet /norestart" -Wait; Remove-Item "$env:Temp\\vc_redist.x64.exe"',
+					f'Invoke-WebRequest {proxies} -URI "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "$env:Temp\\vc_redist.x64.exe"; Start-Process "$env:Temp\\vc_redist.x64.exe" -ArgumentList "/quiet /norestart" -Wait; Remove-Item "$env:Temp\\vc_redist.x64.exe"',
 					f'echo "Installing micromamba..."',
-					'Invoke-Webrequest -URI https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-win-64 -OutFile micromamba.exe']
+					f'Invoke-Webrequest {proxies} -URI https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-win-64 -OutFile micromamba.exe']
 		else:
 			system = 'osx' if platform.system() == 'Darwin' else 'linux'
 			machine = platform.machine()
 			machine = '64' if machine == 'x86_64' else machine
-			commands += [f'cd "{condaPath}"', f'echo "Installing micromamba..."', f'curl -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
+			proxies = f'--proxies "{proxies}"' if proxies is not None else ''
+			commands += [f'cd "{condaPath}"', f'echo "Installing micromamba..."', f'curl {proxies} -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
 		commands += self._shellHook()
 		return commands + self._setupCondaChannels()
 
@@ -395,6 +408,14 @@ class EnvironmentManager:
 				finalDependencies.append(dependency)
 		return [f'"{d}"' for d in finalDependencies]
 	
+	def getProxyEnvironmentVariablesCommands(self):
+		if self.proxies is None: return []
+		return [f'export {name.lower()}_proxy="{value}"' if not self._isWindows() else f'$Env:{name.lower()}_proxy="{value}"' for name, value in self.proxies.items()]
+	
+	def getProxyString(self):
+		if self.proxies is None: return None
+		return 'https://' + self.proxies['https'] if 'https' in self.proxies else 'http://' + self.proxies['http'] if 'http' in self.proxies else None
+	
 	def installDependencies(self, environment:str, dependencies: Dependencies={}, raiseIncompatibilityException=True):
 		if any(['::' in d for d in dependencies['pip']]):
 			raise Exception(f'One pip dependency has a channel specifier "::" ({dependencies["pip"]}), is it a conda dependency?')
@@ -405,10 +426,13 @@ class EnvironmentManager:
 			condaDependencies += self.formatDependencies('conda', dependencies['optional'])
 			pipDependencies += self.formatDependencies('pip', dependencies['optional'])
 			pipNoDepsDependencies += self.formatDependencies('pip_no_deps', dependencies['optional'])
-		installDepsCommands = [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
+		installDepsCommands = self.getProxyEnvironmentVariablesCommands()
+		installDepsCommands += [f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
 		installDepsCommands += [f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
-		installDepsCommands += [f'pip install {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
-		installDepsCommands += [f'pip install --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
+		proxies = self.getProxyString()
+		proxies = f'--proxies {proxies}' if proxies is not None else ''
+		installDepsCommands += [f'pip install {proxies} {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
+		installDepsCommands += [f'pip install {proxies} --no-dependencies {" ".join(pipNoDepsDependencies)}'] if len(pipNoDepsDependencies)>0 else []
 		if environment in self.environments:
 			self.environments[environment].installedDependencies = {}
 		return installDepsCommands

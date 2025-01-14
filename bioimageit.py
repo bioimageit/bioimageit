@@ -257,15 +257,15 @@ def getProxySettingsFromConda():
         "micromamba/.mambarc",
     ]
 
-    for condaConfiguration in condaConfigurations:
-        condaConfiguration = Path(os.path.expandvars(condaConfiguration)).resolve()
+    for condaConfigurationFilename in condaConfigurations:
+        condaConfiguration = Path(os.path.expandvars(condaConfigurationFilename)).resolve()
         if condaConfiguration.exists():
             condaConfigurationFiles = sorted(list(condaConfiguration.glob('*.yml') + condaConfiguration.glob('*.yaml'))) if condaConfiguration.is_dir() else [condaConfiguration]
             for condaConfigurationFile in condaConfigurationFiles:
                 with open(condaConfigurationFile, 'r') as f:
                     configuration = yaml.safe_load(f)
                     if 'proxy_servers' in configuration:
-                        result = tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
+                        result = condaConfigurationFilename != "micromamba/.mambarc" or tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
                         setProxies(configuration['proxy_servers'], save=result)
         
     # set REQUESTS_CA_BUNDLE to override the certificate bundle trusted by Requests
@@ -363,8 +363,9 @@ def launchBiit(sources):
     environmentManager = EnvironmentManager.environmentManager
     arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
     environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
-
     environment = 'bioimageit'
+    
+    environmentManager.setProxies(proxies)
 
     if not environmentManager.environmentExists(environment):
         EnvironmentManager.attachLogHandler(log)
