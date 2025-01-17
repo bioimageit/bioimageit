@@ -33,6 +33,9 @@ logging.basicConfig(
 logger = logging.getLogger()
 logger.info('Initializing BioImageIT...')
 
+# Import EnvironmentManager to make its modules available in bundle
+import PyFlow.ToolManagement.EnvironmentManager
+
 projectId = 54065 # The BioImageIT Project on Gitlab
 proxies = None
 versionPath = Path('version.json')
@@ -332,6 +335,7 @@ def updateVersion():
             logging.warning(e)
             if versionInfo['version'] == 'unknown':
                 sys.exit(f'The bioimageit sources could not be downloaded.')
+        
         if sources is not None:
             versionInfo['version'] = sources.name
             with open(versionPath, 'w') as f:
@@ -339,29 +343,22 @@ def updateVersion():
     return sources
 
 def launchBiit(sources):
-
+    global gui
     if not sources.resolve().is_dir():
         message = 'Unable to find BioImageIT sources directory. Please check your Internet connection and proxy setttings and retry.'
         logging.error(message)
         log(message)
         return
     
-    # Do not import with 
-    # from PyFlow.ToolManagement.EnvironmentManager import environmentManager, attachLogHandler
-    # since PyInstaller would freeze the EnvironmentManager and we could not benefit from its updates
     # Copy EnvironmentManager to avoid importing all PyFlow dependencies
-    shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'EnvironmentManager.py')
+    # Give it a different name so that it is imported in place of the frozen EnvironmentManager
+    shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'NewEnvironmentManager.py')
     sys.path.append(str(sources.resolve()))
     # Imports from the Environment manager must be available now
-    # from multiprocessing.connection import Client
-    # if sys.version_info < (3, 11):
-    #     from typing_extensions import TypedDict, Required, NotRequired, Self
-    # else:
-    #     from typing import TypedDict, Required, NotRequired, Self
+    EnvironmentManager = import_module('NewEnvironmentManager')
     
-    EnvironmentManager = import_module('EnvironmentManager')
     environmentManager = EnvironmentManager.environmentManager
-    arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64' 
+    arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64'
     environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
     environment = 'bioimageit'
     
@@ -396,10 +393,9 @@ def launchBiit(sources):
                 if gui is not None:
                     gui.window.after(0, close_window)
     if not initialized:
-        result = tk.messagebox.askyesno(title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created. Would you like to delete and recreate the BioImageIT environment ({condaPath / 'envs/' / environment})?") 
+        result = tk.messagebox.askyesno(title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
         if result:
             shutil.rmtree(condaPath / 'envs/' / environment)
-            launchBiit(sources)
     
 def close_window():
     """Properly close the Tkinter window."""
@@ -411,6 +407,10 @@ def close_window():
     gui = None
 
 sources = updateVersion()
+
+if not Path('micromamba/envs/bioimageit').exists() and gui is None:
+    gui = Gui()
+
 # Start the task in a separate thread to keep the GUI responsive
 thread = threading.Thread(target=lambda: launchBiit(sources), daemon=True)
 thread.start()
