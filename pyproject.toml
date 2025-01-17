@@ -27,7 +27,7 @@ package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7", "pyyaml>=6.0.2,<7"]
 ipython = ["ipython", "ipdb"]
 
 [tool.pixi.feature.package.dependencies]
-python = "3.12"
+python = "3.12.*"
 
 [build-system]
 build-backend = "hatchling.build"

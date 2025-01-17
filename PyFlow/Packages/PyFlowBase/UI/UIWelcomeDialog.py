@@ -20,6 +20,14 @@ class WelcomeDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.workflowTool = workflowTool
         self.setModal(True)
+
+        self.setWindowFlags(
+            QtCore.Qt.Window |
+            QtCore.Qt.CustomizeWindowHint |
+            QtCore.Qt.WindowTitleHint |
+            QtCore.Qt.WindowMinimizeButtonHint
+            )
+        
         self.setWindowTitle("Welcome to BioImageIT")
 
         welcomeMessage = QtWidgets.QLabel(

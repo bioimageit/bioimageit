@@ -50,7 +50,12 @@ class Tool:
         auto_diameter = args.auto_diameter if type(args.auto_diameter) is bool else args.auto_diameter == 'True'
 
         print('[[2/4]] Compute segmentation', image.shape)
-        masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
+        try:
+            masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
+        except Exception as e:
+            print(e)
+            raise e
+        print('segmentation finished.')
         
         input_image = Path(input_image)
 
