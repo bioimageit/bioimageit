@@ -6,9 +6,9 @@ image: ubuntu:22.04
 # for example by updating the version to release
 # to trigger signature
 variables:
-  RELEASED_VERSION: "0.3.9"
-  UNSIGNED_TARFILE: BioImageIT_v0.3.9.app.tar.gz
-  UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/BioImageIT_v0.3.9.app.tar.gz"
+  RELEASED_VERSION: "0.3.29"
+  UNSIGNED_TARFILE: bioimageit_macOS_arm64_v0.3.29.app.tar.gz
+  UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/bioimageit_macOS_arm64_v0.3.29.app.tar.gz"
 
 .reference_script: &reference_script
   - export DEBIAN_FRONTEND="noninteractive"
@@ -44,5 +44,5 @@ job_build_windows:
     - windows
   script:
     - cd C:\bioimageit\
-    - pixi run --environment package build_pyi -y
+    - pixi run --environment package build -y
 

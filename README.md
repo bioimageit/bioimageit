@@ -69,6 +69,10 @@ The command `pixi run build` packages BioImageIT in the `dist/` repository.
 It runs "`pyinstaller bioimageit.spec`" in the `package` environment defined in `pyproject.toml`.
 This environment only requires `requests` and `pyinstaller` with Python 3.12.
 
+## Upload a release
+
+Once a release is ready, upload it on Gitlab with `python update_release.py -f release_name.zip` (see `Scripts/`).
+
 ## Debug Modules
 
 - Open ToolManagement/ in a new VSCode window: `code PyFlow/ToolManagement`
