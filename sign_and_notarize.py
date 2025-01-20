@@ -56,4 +56,4 @@ if final_status == 'Accepted':
   print('Get app path...')
   path=client.package('BioImageIT.app', '')
   print('Download...')
-  client.download(path=path, output_file=f'{args.output_dir}/{args.soft_name}-{args.version_name}-signed.tgz')
+  client.download(path_with_params=path, output_file=f'{args.output_dir}/{args.soft_name}-{args.version_name}-signed.tgz')
