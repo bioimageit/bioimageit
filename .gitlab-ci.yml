@@ -22,10 +22,11 @@ variables:
 
 .sign_and_notarize_mac_os: &sign_and_notarize_mac_os
   # fetch the app to sign
-  - curl -s $UNSIGNED_TARFILE_URL --output $UNSIGNED_TARFILE
+  # - curl -s $UNSIGNED_TARFILE_URL --output $UNSIGNED_TARFILE
+  # - "curl --fail-with-body --output $UNSIGNED_TARFILE --header \"JOB-TOKEN: $CI_JOB_TOKEN\" $UNSIGNED_TARFILE_URL"
   # upload it to server, using multipart/form-data
-  # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=ExampleApp -F version_name=$RELEASED_VERSION -F files=@$UNSIGNED_TARFILE http://172.17.0.1:8080/upload/MacOS
-  # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=ExampleApp -F version_name=$RELEASED_VERSION -F files=@entitlements.plist http://172.17.0.1:8080/upload/MacOS
+  - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=$SIGNEDBY_SOFT_NAME -F version_name=$RELEASED_VERSION -F files=@$UNSIGNED_TARFILE http://172.17.0.1:8080/upload/MacOS
+  - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=$SIGNEDBY_SOFT_NAME -F version_name=$RELEASED_VERSION -F files=@entitlements.plist http://172.17.0.1:8080/upload/MacOS
   - mkdir artifacts
   - python3 sign_and_notarize.py --soft-name $SIGNEDBY_SOFT_NAME --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN 
     --output-dir artifacts $VERBOSE
