@@ -28,16 +28,19 @@ client=SignServerClient(
 )
  
 if not args.skip_upload:
+  print('Upload files to the server...')
   # upload files to the server
   for file_to_upload in ['entitlements.plist', os.environ['UNSIGNED_TARFILE']]:
     result=client.upload(file_to_upload)
  
 # client.sign(['BioImageIT_v0.3.9.app/Contents/MacOS/Plugins/*'], '--deep --force --verbose 2')
+print('Sign...')
+client.sign(['BioImageIT.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
  
-client.sign(['BioImageIT.app'], f'--options=runtime --entitlements entitlements.plist --verbose 2')
- 
+print('Notarize...')
 submission_id = client.notarize('BioImageIT.app', '')
  
+print('Wait for notarization end...')
 submission_info=client.wait_for_notarization_end(submission_id, wait_interval=20)
  
 final_status=submission_info["status"]
@@ -48,6 +51,9 @@ if final_status == 'Invalid':
   raise SystemExit(f'Notarization failed')
  
 if final_status == 'Accepted':
+  print('Staple app...')
   client.staple('BioImageIT.app', '')
+  print('Get app path...')
   path=client.package('BioImageIT.app', '')
+  print('Download...')
   client.download(path=path, output_file=f'{args.output_dir}/{args.soft_name}-{args.version_name}-signed.tgz')
