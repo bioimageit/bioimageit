@@ -43,6 +43,8 @@ versionInfo = None
 
 gui = None
 
+updateVersionFinishedEvent = threading.Event()
+
 class Gui:
 
     nSteps = 3
@@ -102,9 +104,9 @@ def setProxies(newProxies, save=True):
                 newConfiguration = yaml.safe_load(f)
                 if newConfiguration is not None:
                     configuration = newConfiguration
-        configuration['proxy_servers'] = proxies
-        with open(mambaConfigPath, 'w') as f:
-            yaml.safe_dump(configuration, f)
+            configuration['proxy_servers'] = proxies
+            with open(mambaConfigPath, 'w') as f:
+                yaml.safe_dump(configuration, f)
     
 def getVersions():
     import requests
@@ -117,20 +119,10 @@ def getVersions():
 def getLatestVersion():
     return getVersions()[0]
 
-def downloadSources(sources:Path, versionName):
-    global gui
-    gui = Gui()
-
-    updateLabel(f'Downloading BioImageIT {versionName}...')
-    
-    gui.progressBar.step(2)
+def downloadSources(versionName):
     
     import requests, zipfile, io
     url = f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/archive.zip'
-
-    # r = requests.get(url, params={'sha': versionName}, proxies=proxies)
-    # z = zipfile.ZipFile(io.BytesIO(r.content))
-    # z.extractall()
     
     response = requests.get(url, params={'sha': versionName}, proxies=proxies, stream=True)
     totalSize = int(response.headers.get('content-length', 0))
@@ -155,17 +147,27 @@ def downloadSources(sources:Path, versionName):
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
         z.extractall(getRootPath())
-
-    gui.window.update_idletasks()
-    
+    updateVersionFinishedEvent.set()
 
 def downloadLatestVersion():
+    global gui
     tag = getLatestVersion()
-
-    sources = Path(f"bioimageit-{tag['name']}-{tag['target']}")
+    versionName = tag['name']
+    sources = Path(f"bioimageit-{versionName}-{tag['target']}")
 
     if not sources.exists():
-        downloadSources(sources, tag['name'])
+        if gui is None:
+            gui = Gui()
+    
+        updateLabel(f'Downloading BioImageIT {versionName}...')
+        
+        gui.progressBar.step(2)
+        
+        downloadSourcesThread = threading.Thread(target=lambda: downloadSources(versionName), daemon=True)
+        downloadSourcesThread.start()
+
+        # gui.window.update_idletasks()
+
     return sources
 
 class ProxyDialog:
@@ -286,7 +288,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
             return downloadLatestVersion()
         except requests.exceptions.ProxyError as e:
             logging.warning(e)
-            log(e)
+            log(str(e))
             log('Error: Unable to check BioImageIT version. Please check your proxy settings.')
             messagebox.showwarning("showwarning", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
             return None
@@ -331,25 +333,29 @@ def updateVersion():
             newSources = tryDownloadLatestVersionOrGetProxySettingsFromConda()
             sources = newSources if newSources is not None else sources
         except Exception as e:
-            logging.warning('Could not check the BioImageIT versions:')
+            logging.warning('Could not get the BioImageIT versions:')
             logging.warning(e)
             if versionInfo['version'] == 'unknown':
                 sys.exit(f'The bioimageit sources could not be downloaded.')
         
-        if sources is not None:
-            versionInfo['version'] = sources.name
-            with open(versionPath, 'w') as f:
-                json.dump(versionInfo, f)
     return sources
 
 def launchBiit(sources):
     global gui
-    if not sources.resolve().is_dir():
+
+    # Wait for download to be finished
+    updateVersionFinishedEvent.wait()
+    
+    if sources is None or not sources.resolve().is_dir():
         message = 'Unable to find BioImageIT sources directory. Please check your Internet connection and proxy setttings and retry.'
         logging.error(message)
         log(message)
         return
-    
+    else:
+        versionInfo['version'] = sources.name
+        with open(versionPath, 'w') as f:
+            json.dump(versionInfo, f)
+        
     # Copy EnvironmentManager to avoid importing all PyFlow dependencies
     # Give it a different name so that it is imported in place of the frozen EnvironmentManager
     shutil.copyfile(sources / 'PyFlow' / 'ToolManagement' / 'EnvironmentManager.py', sources / 'NewEnvironmentManager.py')
@@ -406,16 +412,19 @@ def close_window():
     gui.window.update_idletasks()
     gui = None
 
-sources = updateVersion()
-
-if not Path('micromamba/envs/bioimageit').exists() and gui is None:
+if (not Path('micromamba/envs/bioimageit').exists()) and gui is None:
     gui = Gui()
 
+sources = updateVersion()
+
 # Start the task in a separate thread to keep the GUI responsive
-thread = threading.Thread(target=lambda: launchBiit(sources), daemon=True)
-thread.start()
+launchBiitThread = threading.Thread(target=lambda: launchBiit(sources), daemon=True)
+launchBiitThread.start()
 
 # Start the Tkinter event loop
 if gui is not None:
     gui.window.mainloop()
-thread.join()
+
+gui = None
+updateVersionFinishedEvent.set()
+launchBiitThread.join()

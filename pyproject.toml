@@ -51,4 +51,4 @@ dev = { features = ["ipython"], solve-group = "default" }
 package = { features = ["install", "package"], no-default-feature = true }
 
 [tool.pixi.feature.package.tasks]
-build_pyi = "pyinstaller bioimageit.spec"
+build = "pyinstaller bioimageit.spec"

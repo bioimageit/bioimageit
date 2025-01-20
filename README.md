@@ -65,7 +65,7 @@ Run `python -m unittest PyFlow/Tests/Test_Tools.py` in the default env (run `pix
 
 ## Packaging
 
-The command `pixi run build_pyi` packages BioImageIT in the `dist/` repository. 
+The command `pixi run build` packages BioImageIT in the `dist/` repository. 
 It runs "`pyinstaller bioimageit.spec`" in the `package` environment defined in `pyproject.toml`.
 This environment only requires `requests` and `pyinstaller` with Python 3.12.
 
