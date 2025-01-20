@@ -34,9 +34,9 @@ if not args.skip_upload:
  
 # client.sign(['BioImageIT_v0.3.9.app/Contents/MacOS/Plugins/*'], '--deep --force --verbose 2')
  
-client.sign(['BioImageIT_v0.3.9.app'], f'--options=runtime --entitlements entitlements.plist --verbose 2')
+client.sign(['BioImageIT.app'], f'--options=runtime --entitlements entitlements.plist --verbose 2')
  
-submission_id = client.notarize('BioImageIT_v0.3.9.app', '')
+submission_id = client.notarize('BioImageIT.app', '')
  
 submission_info=client.wait_for_notarization_end(submission_id, wait_interval=20)
  
@@ -48,6 +48,6 @@ if final_status == 'Invalid':
   raise SystemExit(f'Notarization failed')
  
 if final_status == 'Accepted':
-  client.staple('BioImageIT_v0.3.9.app', '')
-  path=client.package('BioImageIT_v0.3.9.app', '')
+  client.staple('BioImageIT.app', '')
+  path=client.package('BioImageIT.app', '')
   client.download(path=path, output_file=f'{args.output_dir}/{args.soft_name}-{args.version_name}-signed.tgz')
