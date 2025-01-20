@@ -1,48 +1,194 @@
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
 image: ubuntu:22.04
- 
+
 # Developers are expected to push an update to this file
 # for example by updating the version to release
 # to trigger signature
 variables:
   RELEASED_VERSION: "0.3.29"
-  UNSIGNED_TARFILE: bioimageit_macOS_arm64_v0.3.29.app.tar.gz
-  UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/bioimageit_macOS_arm64_v0.3.29.app.tar.gz"
+  SIGNEDBY_SOFT_NAME: "BioImageIT"
+  UNSIGNED_TARFILE: "bioimageit_macOS_arm64_v0.3.29.app.tar.gz"
+  UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE"
+  UNSIGNED_TARFILE_WIN: "bioimageit_windows_x86_64_v0.3.29.tar.gz"
+  UNSIGNED_TARFILE_URL_WIN: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE_WIN"
+  VERBOSE: ""
 
-.reference_script: &reference_script
+.setup_environment: &setup_environment
   - export DEBIAN_FRONTEND="noninteractive"
   - apt update
   - apt -y install --no-install-recommends curl ca-certificates xz-utils python3 python3-pip
   - python3 -m pip install --user --extra-index-url https://si-repository.inria.fr/ci sign_server
+
+.sign_and_notarize_mac_os: &sign_and_notarize_mac_os
   # fetch the app to sign
-  - "curl --fail-with-body --output $UNSIGNED_TARFILE --header \"JOB-TOKEN: $CI_JOB_TOKEN\" $UNSIGNED_TARFILE_URL"
+  - curl -s $UNSIGNED_TARFILE_URL --output $UNSIGNED_TARFILE
+  # upload it to server, using multipart/form-data
+  # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=ExampleApp -F version_name=$RELEASED_VERSION -F files=@$UNSIGNED_TARFILE http://172.17.0.1:8080/upload/MacOS
+  # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=ExampleApp -F version_name=$RELEASED_VERSION -F files=@entitlements.plist http://172.17.0.1:8080/upload/MacOS
   - mkdir artifacts
-  - python3 sign_and_notarize.py --soft-name BioImage-IT --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts
- 
+  - python3 sign_and_notarize.py --soft-name $SIGNEDBY_SOFT_NAME --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN 
+    --output-dir artifacts $VERBOSE
+  # Alternativly, it is possible to upload it to server, using POST and pointing to a local dir that will be copied to server
+  # - tar xf ExampleApp.app.tar.xz
+  # - 'curl -s http://172.17.0.1:8080/MacOS/upload -X POST -d "{\"ci_job_token\":\"${CI_JOB_TOKEN}\", \"software\": \"ExampleApp\", \"uploaded_dir\": \"${CI_PROJECT_DIR}/ExampleApp.app\", \"version_name\": \"${RELASED_VERSION}\"}" -H "Content-Type: application/json"'
+
+  # As we are not running a notrization, package the result
+  # - 'curl -s --fail-with-body  http://172.17.0.1:8080/package/MacOS -X POST -d "{\"ci_job_token\":\"${CI_JOB_TOKEN}\", \"software\": \"ExampleApp\", \"version_name\": \"${RELEASED_VERSION}\", \"verbose\":\"True\"}" -H "Content-Type: application/json"'
+  # Download the result
+  # 
+  # - curl --fail-with-body http://172.17.0.1:8080/download/MacOS/ExampleApp/${RELEASED_VERSION}?ci_job_token=${CI_JOB_TOKEN} --output artifacts/ExampleApp-${RELEASED_VERSION}-signed.tgz
+
+.sign_win: &sign_win
+- export VERBOSE="--verbose"
+# fetch the app to sign
+- curl -s $UNSIGNED_TARFILE_URL_WIN --output $UNSIGNED_TARFILE_WIN
+- mkdir artifacts
+- python3 sign_and_notarize.py --soft-name $SIGNEDBY_SOFT_NAME --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN 
+  --file-to-sign $UNSIGNED_TARFILE_WIN --output-dir artifacts --target-os Win $VERBOSE
+
+
 stages:
 - sign
-- build
-- test
- 
-sign:
+
+prod:
   stage: sign
   tags:
     - codesign.inria.fr
+  before_script:
+    - *setup_environment
   script:
-    - *reference_script
+    - *sign_and_notarize_mac_os
+  when: manual
+  only: 
+    - main
   artifacts:
     paths:
       - artifacts/*.tgz
-  when: manual
-  except:
-    - dev
 
-job_build_windows:
-  stage: build
+prod_win:
+  stage: sign
   tags:
-    - windows
+    - codesign.inria.fr
+  before_script:
+    - *setup_environment
   script:
-    - cd C:\bioimageit\
-    - pixi run --environment package build -y
+    - *sign_win
+  when: manual
+  only: 
+    - main
+  artifacts:
+    paths:
+      - artifacts/*.exe
 
+qualif:
+  stage: sign
+  tags:
+    - qlf-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - *sign_and_notarize_mac_os
+  when: manual
+  only: 
+    - qualif
+  artifacts:
+    paths:
+      - artifacts/*.tgz
+
+qualif_win:
+  stage: sign
+  tags:
+    - qlf-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - *sign_win
+  when: manual
+  only: 
+    - qualif
+  artifacts:
+    paths:
+      - artifacts/*.exe
+
+
+dev:
+  stage: sign
+  tags:
+    - dev-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - *sign_and_notarize_mac_os
+  when: manual
+  only:
+    - dev
+  artifacts:
+    paths:
+      - artifacts/*.tgz
+
+dev_win:
+  stage: sign
+  tags:
+    - dev-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - *sign_win
+  when: manual
+  only:
+    - dev
+  artifacts:
+    paths:
+      - artifacts/*.exe
+
+dmg_on_dev:
+  stage: sign
+  tags:
+    - dev-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - export PACKAGE_AS_DMG=1
+    - export RELEASED_VERSION=11.0-dmg
+    - *sign_and_notarize_mac_os
+  when: manual
+  only:
+    - dev
+  artifacts:
+    paths:
+      - artifacts/*.dmg
+
+dmg_on_qualif:
+  stage: sign
+  tags:
+    - qlf-codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - export PACKAGE_AS_DMG=1
+    - export RELEASED_VERSION=11.0-dmg
+    - *sign_and_notarize_mac_os
+  when: manual
+  only:
+    - qualif
+  artifacts:
+    paths:
+      - artifacts/*.dmg
+
+dmg_on_prod:
+  stage: sign
+  tags:
+    - codesign.inria.fr
+  before_script:
+    - *setup_environment
+  script:
+    - export PACKAGE_AS_DMG=1
+    - export RELEASED_VERSION=11.0-dmg
+    - *sign_and_notarize_mac_os
+  when: manual
+  only:
+    - main
+  artifacts:
+    paths:
+      - artifacts/*.dmg
