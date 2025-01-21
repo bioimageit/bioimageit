@@ -69,9 +69,15 @@ The command `pixi run build` packages BioImageIT in the `dist/` repository.
 It runs "`pyinstaller bioimageit.spec`" in the `package` environment defined in `pyproject.toml`.
 This environment only requires `requests` and `pyinstaller` with Python 3.12.
 
+## Sign the app
+
+Once a release is ready, upload it on Gitlab-int with `python update_release.py -f release_name.tar.gz -pid 474 -s gitlab-int.inria.fr ` (see `Scripts/`).
+Modify the `.gitlab-ci.yml` to target the proper release file and version.
+Then, run the prod job tagged with codesign.inria.fr from `https://gitlab-int.inria.fr/amasson/bioimageit/-/jobs`.
+
 ## Upload a release
 
-Once a release is ready, upload it on Gitlab with `python update_release.py -f release_name.zip` (see `Scripts/`).
+Once a release is signed, upload it on Gitlab with `python update_release.py -f release_name.zip -p 54065` (see `Scripts/`).
 
 ## Debug Modules
 
