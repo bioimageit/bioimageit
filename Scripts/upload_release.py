@@ -16,17 +16,24 @@ def upload_package(server_name, package_name, package_version, project_id, file_
             # response = requests.put(url, headers=headers, data=file)
 
             with tqdm(total=file_size, unit="B", unit_scale=True, desc="Uploading", ncols=80) as progress_bar:
-                def progress_callback(monitor):
-                    progress_bar.update(monitor.bytes_read - progress_bar.n)
+                # def progress_callback(monitor):
+                #     progress_bar.update(monitor.bytes_read - progress_bar.n)
 
-                from requests_toolbelt.multipart.encoder import MultipartEncoderMonitor
+                # from requests_toolbelt.multipart.encoder import MultipartEncoderMonitor
 
-                monitor = MultipartEncoderMonitor.from_fields(
-                    fields={'file': (file_path.split('/')[-1], file)},
-                    callback=progress_callback
-                )
-                headers['Content-Type'] = monitor.content_type
-                response = requests.put(url, headers=headers, data=monitor)
+                # monitor = MultipartEncoderMonitor.from_fields(
+                #     fields={'file': (file_path.name, file)},
+                #     callback=progress_callback
+                # )
+                # headers['Content-Type'] = monitor.content_type
+                # response = requests.put(url, headers=headers, data=monitor)
+
+                def stream_file():
+                    while chunk := file.read(1024):
+                        progress_bar.update(len(chunk))
+                        yield chunk
+
+                response = requests.put(url, headers=headers, data=stream_file())
 
         if response.status_code == 201:
             print("File uploaded successfully!")

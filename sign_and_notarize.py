@@ -63,10 +63,14 @@ def mac_os_sign():
         # upload files to the server
         for file_to_upload in ['entitlements.plist', os.environ['UNSIGNED_TARFILE']]:
             result = client.upload(file_to_upload)
-    client.sign([client.software + '.app/Contents/MacOS/Plugins/*'],
-                '--deep --force --verbose 2')
-    client.sign([client.software + '.app'],
-                f'--options=runtime --entitlements entitlements.plist --verbose 2')
+    
+    # client.sign([client.software + '.app/Contents/MacOS/Plugins/*'],
+    #             '--deep --force --verbose 2')
+    # client.sign([client.software + '.app'],
+    #             f'--options=runtime --entitlements entitlements.plist --verbose 2')
+
+    client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
+
 
     if should_package_as_dmg():
         unsigned_dmg = client.makedmg(format='UDBZ', fs='hfs+')
