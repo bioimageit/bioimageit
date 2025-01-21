@@ -265,9 +265,9 @@ class EnvironmentManager:
 		if condaConfigPath.exists():
 			with open(condaConfigPath, 'r') as f:
 				condaConfig = yaml.safe_load(f)
-		condaConfig['proxy_servers'] = proxies
-		with open(condaConfigPath, 'w') as f:
-			yaml.safe_dump(condaConfig, f)
+			condaConfig['proxy_servers'] = proxies
+			with open(condaConfigPath, 'w') as f:
+				yaml.safe_dump(condaConfig, f)
 		
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
