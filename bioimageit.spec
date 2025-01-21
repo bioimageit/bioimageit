@@ -45,7 +45,7 @@ coll = COLLECT(
 )
 app = BUNDLE(
     coll,
-    name='BioImageIT.app',
+    name='BioImage-IT.app',
     icon='PyFlow/UI/resources/Logo.icns',
     bundle_identifier=None,
 )
