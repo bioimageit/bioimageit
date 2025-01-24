@@ -53,11 +53,10 @@ def getSession():
     global session
     if session is not None: return session
     import requests
-    from requests.adapters import HTTPAdapter, Retry
+    from requests.adapters import HTTPAdapter
     session = requests.Session()
-    retries = Retry(total=2)
-    session.mount('http://', HTTPAdapter(max_retries=retries))
-    session.mount('https://', HTTPAdapter(max_retries=retries))
+    session.mount('http://', HTTPAdapter(max_retries=2))
+    session.mount('https://', HTTPAdapter(max_retries=2))
     return session
 
 class Gui:
@@ -294,8 +293,8 @@ def getProxySettingsFromConda():
                 with open(condaConfigurationFile, 'r') as f:
                     configuration = yaml.safe_load(f)
                     if 'proxy_servers' in configuration:
-                        import tkinter as tk
-                        result = condaConfigurationFilename != "micromamba/.mambarc" or tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
+                        from tkinter import messagebox
+                        result = condaConfigurationFilename != "micromamba/.mambarc" or messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
                         setProxies(configuration['proxy_servers'], save=result)
         
     # set REQUESTS_CA_BUNDLE to override the certificate bundle trusted by Requests
@@ -368,7 +367,8 @@ def updateVersion():
 
 def environmentErrorDialog(condaPath, environment, title, message):
     import tkinter as tk
-    result = tk.messagebox.askyesno(title=title, message=message)
+    from tkinter import messagebox
+    result = messagebox.askyesno(title=title, message=message)
     if result:
         shutil.rmtree(condaPath / 'envs/' / environment)
     

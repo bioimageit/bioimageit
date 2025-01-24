@@ -12,7 +12,10 @@
             "program": "${workspaceFolder}/pyflow.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "autoReload": {"enable": true }
+            "autoReload": {"enable": true },
+            "windows": {
+                "python": ".pixi/envs/default/python.exe"
+            }
         },
         {
             "name": "workflow",
@@ -31,7 +34,10 @@
             "program": "${workspaceFolder}/bioimageit.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "autoReload": {"enable": true }
+            "autoReload": {"enable": true },
+            "windows": {
+                "python": ".pixi/envs/package/python.exe"
+            }
         },
     ]
 }
