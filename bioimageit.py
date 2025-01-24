@@ -131,7 +131,7 @@ def getVersions():
     # gui.progressBar.step(1)
     # updateLabel('Checking BioImageIT versions...')
     logging.info('Checking BioImageIT versions...')
-    r = session.get(f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/tags', proxies=proxies, timeout=2)
+    r = session.get(f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/tags', proxies=proxies, timeout=1)
     return r.json()
 
 def getLatestVersion():
@@ -142,7 +142,7 @@ def downloadSources(versionName):
     import zipfile, io
     url = f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/archive.zip'
     session = getSession()
-    response = session.get(url, params={'sha': versionName}, proxies=proxies, stream=True, timeout=2)
+    response = session.get(url, params={'sha': versionName}, proxies=proxies, stream=True, timeout=1)
     totalSize = int(response.headers.get('content-length', 0))
     blockSize = 1024  # 1 Kibibyte
     downloadedData = io.BytesIO()
@@ -220,7 +220,6 @@ https: http://user:pass@example.com:8080
         
         top.attributes('-topmost', True)
         top.update()
-        parent.wait_window(top)
 
     def browse(self, url):
         webbrowser.open_new(url)
@@ -231,10 +230,18 @@ https: http://user:pass@example.com:8080
         
         self.top.destroy()
 
+proxyDialogClosedEvent = threading.Event()
+
+def openProxyDialog():
+    dialog = ProxyDialog(gui.window)
+    gui.window.wait_window(dialog.top)
+    proxyDialogClosedEvent.set()
 
 def getProxySettingsFromGUI():
     waitGui()
-    gui.window.after(0, lambda: ProxyDialog(gui.window))
+    gui.window.after(0, openProxyDialog)
+    while not proxyDialogClosedEvent.is_set():
+        time.sleep(0.01)
     
 def getProxySettingsFromConda():
 
