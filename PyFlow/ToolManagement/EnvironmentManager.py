@@ -19,16 +19,13 @@ else:
 
 import psutil
 
-# class Singleton(type):
-# 	_instances = {}
-# 	def __call__(cls, *args, **kwargs):
-# 		if cls not in cls._instances:
-# 			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-# 		return cls._instances[cls]
 if len(logging.root.handlers)==0: 
 	logging.basicConfig()
-	
+
 logger = logging.getLogger(__name__)
+fileHandler = logging.FileHandler('environment.log', encoding='utf-8')
+fileHandler.setLevel(logging.INFO)
+logger.addHandler(fileHandler)	
 
 class ExecutionException(Exception):
 	"""Exception raised when the environment raises an error when executing the requested function.

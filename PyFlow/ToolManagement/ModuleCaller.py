@@ -17,14 +17,14 @@ sys.path.append('./') # Necessary to be able to import when running independentl
 logging.basicConfig(
 	level=logging.INFO,
 	handlers=[
-		logging.FileHandler('environment.log', encoding='utf-8'),
+		logging.FileHandler('environment_modules.log', encoding='utf-8'),
 		logging.StreamHandler()
 	]
 )
 
 # Create another logger for this file which will also write to environment.log, but not stdout and stderr
-logger = logging.getLogger(__name__)
-fileHandler = logging.FileHandler('environment.log', encoding='utf-8')
+logger = logging.getLogger(__name__) # Name should contain the module name
+fileHandler = logging.FileHandler('environment_modules.log', encoding='utf-8')
 fileHandler.setLevel(logging.INFO)
 logger.addHandler(fileHandler)
 

@@ -2,6 +2,7 @@ import sys
 import os
 import platform
 import json
+import time
 import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox 
@@ -43,7 +44,10 @@ versionInfo = None
 
 gui = None
 
-updateVersionFinishedEvent = threading.Event()
+createGui = threading.Event()
+guiCreated = threading.Event()
+loading = threading.Event()
+loading.set()
 
 class Gui:
 
@@ -147,24 +151,27 @@ def downloadSources(versionName):
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
         z.extractall(getRootPath())
-    updateVersionFinishedEvent.set()
+
+def waitGui():
+    if gui is None:
+        createGui.set()
+    
+    while not guiCreated.is_set():
+        time.sleep(0.01)
 
 def downloadLatestVersion():
-    global gui
     tag = getLatestVersion()
     versionName = tag['name']
     sources = Path(f"bioimageit-{versionName}-{tag['target']}")
 
     if not sources.exists():
-        if gui is None:
-            gui = Gui()
-    
+        waitGui()
+
         updateLabel(f'Downloading BioImageIT {versionName}...')
         
         gui.progressBar.step(2)
-        
-        downloadSourcesThread = threading.Thread(target=lambda: downloadSources(versionName), daemon=True)
-        downloadSourcesThread.start()
+
+        downloadSources(versionName)
 
         # gui.window.update_idletasks()
 
@@ -207,9 +214,8 @@ https: http://user:pass@example.com:8080
         self.top.destroy()
 
 def getProxySettingsFromGUI():
-    global gui
     if gui is None:
-        gui = Gui()
+        waitGui()
     dialog = ProxyDialog(gui.window)
     gui.window.wait_window(dialog.top)
 
@@ -340,12 +346,17 @@ def updateVersion():
         
     return sources
 
-def launchBiit(sources):
-    global gui
-
-    # Wait for download to be finished
-    updateVersionFinishedEvent.wait()
+def environmentErrorDialog(condaPath, environment, title, message):
+    result = tk.messagebox.askyesno(title=title, message=message)
+    if result:
+        shutil.rmtree(condaPath / 'envs/' / environment)
     
+def environmentError(condaPath, environment, title, message):
+    waitGui()
+    gui.window.after(0, lambda: environmentErrorDialog(condaPath, environment, title, message))
+
+def launchBiit(sources):
+
     if sources is None or not sources.resolve().is_dir():
         message = 'Unable to find BioImageIT sources directory. Please check your Internet connection and proxy setttings and retry.'
         logging.error(message)
@@ -369,17 +380,21 @@ def launchBiit(sources):
     environment = 'bioimageit'
     
     environmentManager.setProxies(proxies)
+    condaPath, _ = environmentManager._getCondaPaths()
 
     if not environmentManager.environmentExists(environment):
         EnvironmentManager.attachLogHandler(log)
-        createEnvironment(sources, environmentManager, environment)
+        try:
+            createEnvironment(sources, environmentManager, environment)
+        except Exception as e:
+            environmentError(condaPath, environment, title='Error while creating environment', message=f"An error occured when creating the BioImageIT environment:\n{e}\n\nCheck the logs in the environment.log file for more information.\nWould you like to remove the existing environment so that it will be recreated the next time you launch BioImageIT?")
+            return
 
     if gui is not None:
         gui.window.after(0, lambda: gui.progressBar.step(4))
     updateLabel('Launching BioImageIT...')
 
     executable = 'python'
-    condaPath, _ = environmentManager._getCondaPaths()
 
     # Hack for OS X to display BioImageIT in the menu instead of python
     if platform.system() == 'Darwin':
@@ -396,12 +411,11 @@ def launchBiit(sources):
             log(line)
             if line.strip() == 'Initialization complete':
                 initialized = True
+                loading.clear()
                 if gui is not None:
                     gui.window.after(0, close_window)
     if not initialized:
-        result = tk.messagebox.askyesno(title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
-        if result:
-            shutil.rmtree(condaPath / 'envs/' / environment)
+        environmentError(condaPath, environment, title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
     
 def close_window():
     """Properly close the Tkinter window."""
@@ -412,19 +426,42 @@ def close_window():
     gui.window.update_idletasks()
     gui = None
 
-if (not Path('micromamba/envs/bioimageit').exists()) and gui is None:
+environmentExists = Path('micromamba/envs/bioimageit').exists()
+versionExists = versionPath.exists()
+sourcesExist = len(list(Path.cwd().glob('bioimageit-*'))) > 0
+
+if not (environmentExists and versionExists and sourcesExist):
     gui = Gui()
 
-sources = updateVersion()
+def updateVersionAndLaunchBiit():
+    try:
+        sources = updateVersion()
+        launchBiit(sources)
+    except Exception as e:
+        waitGui()
+        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive
-launchBiitThread = threading.Thread(target=lambda: launchBiit(sources), daemon=True)
-launchBiitThread.start()
+thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True)
+thread.start()
 
-# Start the Tkinter event loop
+timeout = 5   # [seconds]
+timeout_start = time.time()
+
+# For timeout seconds: just check the createGui flag and create the gui if necessary
+while time.time() < timeout_start + timeout:
+    if createGui.is_set():
+        gui = Gui()
+        break
+    time.sleep(0.1)
+
+# If still loading after timeout seconds: create GUI
+if loading.is_set() and gui is None:
+    gui = Gui()
+
 if gui is not None:
+    guiCreated.set()
     gui.window.mainloop()
+    gui = None
 
-gui = None
-updateVersionFinishedEvent.set()
-launchBiitThread.join()
+thread.join()
