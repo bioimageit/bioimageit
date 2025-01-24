@@ -71,9 +71,11 @@ This environment only requires `requests` and `pyinstaller` with Python 3.12.
 
 ## Sign the app
 
-Once a release is ready, upload it on Gitlab-int with `python update_release.py -f release_name.tar.gz -pid 474 -s gitlab-int.inria.fr ` (see `Scripts/`).
-Modify the `.gitlab-ci.yml` to target the proper release file and version.
-Then, run the prod job tagged with codesign.inria.fr from `https://gitlab-int.inria.fr/amasson/bioimageit/-/jobs`.
+Once a release is ready:
+- Create an archive: `tar czf bioimageit_macOS_arm64_vVERSION_NUMBER.app.tar.gz BioImage-IT.app` with the proper version number
+- Upload it on Gitlab-int with `python update_release.py -f bioimageit_macOS_arm64_vVERSION_NUMBER.app.tar.gz -pid 474 -s gitlab-int.inria.fr ` (see `Scripts/`).
+- Modify the `.gitlab-ci.yml` to target the proper release file and version.
+- Run the prod job tagged with codesign.inria.fr from `https://gitlab-int.inria.fr/amasson/bioimageit/-/jobs`.
 
 ## Upload a release
 
