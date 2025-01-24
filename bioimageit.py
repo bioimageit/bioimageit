@@ -234,8 +234,8 @@ https: http://user:pass@example.com:8080
 
 def getProxySettingsFromGUI():
     waitGui()
-    gui.window.after(0, ProxyDialog(gui.window))
-
+    gui.window.after(0, lambda: ProxyDialog(gui.window))
+    
 def getProxySettingsFromConda():
 
     condaConfigurations = ["/etc/conda/.condarc",
