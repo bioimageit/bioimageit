@@ -4,8 +4,6 @@ import platform
 import json
 import time
 import webbrowser
-import tkinter as tk
-from tkinter import ttk, messagebox 
 import threading
 from pathlib import Path
 import logging
@@ -49,11 +47,27 @@ guiCreated = threading.Event()
 loading = threading.Event()
 loading.set()
 
+session = None
+
+def getSession():
+    global session
+    if session is not None: return session
+    import requests
+    from requests.adapters import HTTPAdapter, Retry
+    session = requests.Session()
+    retries = Retry(total=2)
+    session.mount('http://', HTTPAdapter(max_retries=retries))
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    return session
+
 class Gui:
 
     nSteps = 3
 
     def __init__(self):
+        import tkinter as tk
+        from tkinter import ttk
+
         # Create the install window
         self.window = tk.Tk()
         self.window.title("BioImageIT")
@@ -79,6 +93,7 @@ class Gui:
         self.logText.config(yscrollcommand=self.logScroll.set)
 
 def logMainThread(message):
+    import tkinter as tk
     gui.logText.insert(tk.END, message)
     gui.logText.yview(tk.END)  # Auto-scroll to the latest log entry
     gui.window.update_idletasks()
@@ -113,11 +128,11 @@ def setProxies(newProxies, save=True):
                 yaml.safe_dump(configuration, f)
     
 def getVersions():
-    import requests
+    session = getSession()
     # gui.progressBar.step(1)
     # updateLabel('Checking BioImageIT versions...')
     logging.info('Checking BioImageIT versions...')
-    r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/tags', proxies=proxies)
+    r = session.get(f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/tags', proxies=proxies, timeout=2)
     return r.json()
 
 def getLatestVersion():
@@ -125,10 +140,10 @@ def getLatestVersion():
 
 def downloadSources(versionName):
     
-    import requests, zipfile, io
+    import zipfile, io
     url = f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/archive.zip'
-    
-    response = requests.get(url, params={'sha': versionName}, proxies=proxies, stream=True)
+    session = getSession()
+    response = session.get(url, params={'sha': versionName}, proxies=proxies, stream=True, timeout=2)
     totalSize = int(response.headers.get('content-length', 0))
     blockSize = 1024  # 1 Kibibyte
     downloadedData = io.BytesIO()
@@ -180,6 +195,8 @@ def downloadLatestVersion():
 class ProxyDialog:
 
     def __init__(self, parent):
+        import tkinter as tk
+        from tkinter import ttk
         top = self.top = tk.Toplevel(parent)
         top.title("Proxy Settings")
         
@@ -210,6 +227,7 @@ https: http://user:pass@example.com:8080
         webbrowser.open_new(url)
 
     def parse(self):
+        import tkinter as tk
         setProxies(yaml.safe_load(self.textArea.get("1.0",tk.END)))
         
         self.top.destroy()
@@ -276,6 +294,7 @@ def getProxySettingsFromConda():
                 with open(condaConfigurationFile, 'r') as f:
                     configuration = yaml.safe_load(f)
                     if 'proxy_servers' in configuration:
+                        import tkinter as tk
                         result = condaConfigurationFilename != "micromamba/.mambarc" or tk.messagebox.askyesno(title='Use conda proxy settings', message=f'You need to configure the proxy settings.\nBioImageIT found your conda proxy settings in {condaConfigurationFile} and will use them for this time.\nWould you like to always use your conda proxy settings?\n\nThe proxy settings are {configuration["proxy_servers"]}')
                         setProxies(configuration['proxy_servers'], save=result)
         
@@ -293,6 +312,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
         try:
             return downloadLatestVersion()
         except requests.exceptions.ProxyError as e:
+            from tkinter import messagebox
             logging.warning(e)
             log(str(e))
             log('Error: Unable to check BioImageIT version. Please check your proxy settings.')
@@ -347,6 +367,7 @@ def updateVersion():
     return sources
 
 def environmentErrorDialog(condaPath, environment, title, message):
+    import tkinter as tk
     result = tk.messagebox.askyesno(title=title, message=message)
     if result:
         shutil.rmtree(condaPath / 'envs/' / environment)
@@ -438,6 +459,7 @@ def updateVersionAndLaunchBiit():
         sources = updateVersion()
         launchBiit(sources)
     except Exception as e:
+        from tkinter import messagebox
         waitGui()
         gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files for more information.") )
 
