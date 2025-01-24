@@ -204,6 +204,7 @@ https: http://user:pass@example.com:8080
         
         top.attributes('-topmost', True)
         top.update()
+        parent.wait_window(top)
 
     def browse(self, url):
         webbrowser.open_new(url)
@@ -213,11 +214,10 @@ https: http://user:pass@example.com:8080
         
         self.top.destroy()
 
+
 def getProxySettingsFromGUI():
-    if gui is None:
-        waitGui()
-    dialog = ProxyDialog(gui.window)
-    gui.window.wait_window(dialog.top)
+    waitGui()
+    gui.window.after(0, ProxyDialog(gui.window))
 
 def getProxySettingsFromConda():
 
