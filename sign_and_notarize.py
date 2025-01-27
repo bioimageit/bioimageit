@@ -88,6 +88,7 @@ def mac_os_sign():
     client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}_unsigned_recursive.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}_unsigned_recursive.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
     client.pretty_print_inspected_path(client.inspect_path(client.software + '_unsigned_recursive.app'))
 
