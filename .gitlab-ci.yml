@@ -12,6 +12,7 @@ variables:
   UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE"
   UNSIGNED_TARFILE_WIN: "bioimageit_windows_x86_64_v0.3.33.tar.gz"
   UNSIGNED_TARFILE_URL_WIN: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE_WIN"
+  SKIP_UPLOAD: ""
   VERBOSE: ""
 
 .setup_environment: &setup_environment
@@ -28,8 +29,7 @@ variables:
   # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=$SIGNEDBY_SOFT_NAME -F version_name=$RELEASED_VERSION -F files=@$UNSIGNED_TARFILE http://172.17.0.1:8080/upload/MacOS
   # - curl -s --fail-with-body -F ci_job_token=${CI_JOB_TOKEN} -F software=$SIGNEDBY_SOFT_NAME -F version_name=$RELEASED_VERSION -F files=@entitlements.plist http://172.17.0.1:8080/upload/MacOS
   - mkdir artifacts
-  - python3 sign_and_notarize.py --soft-name $SIGNEDBY_SOFT_NAME --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN 
-    --output-dir artifacts $VERBOSE
+  - python3 sign_and_notarize.py --soft-name $SIGNEDBY_SOFT_NAME --version-name $RELEASED_VERSION --ci-job-token $CI_JOB_TOKEN --output-dir artifacts $VERBOSE $SKIP_UPLAD
   # Alternativly, it is possible to upload it to server, using POST and pointing to a local dir that will be copied to server
   # - tar xf ExampleApp.app.tar.xz
   # - 'curl -s http://172.17.0.1:8080/MacOS/upload -X POST -d "{\"ci_job_token\":\"${CI_JOB_TOKEN}\", \"software\": \"ExampleApp\", \"uploaded_dir\": \"${CI_PROJECT_DIR}/ExampleApp.app\", \"version_name\": \"${RELASED_VERSION}\"}" -H "Content-Type: application/json"'
