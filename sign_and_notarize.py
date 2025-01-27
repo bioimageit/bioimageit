@@ -70,34 +70,34 @@ def mac_os_sign():
     #             f'--options=runtime --entitlements entitlements.plist --verbose 2')
 
     # client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
-    # client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libffi.8.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libncurses.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libtcl8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libpython3.12.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libbz2.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libssl.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libcrypto.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/liblzma.5.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libtk8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
-    client.sign([f'{client.software}_unsigned_recursive.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
+    # client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libffi.8.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libncurses.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libtcl8.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libpython3.12.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libbz2.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libssl.3.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libcrypto.3.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/liblzma.5.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libtk8.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}_nolinks.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
-    client.pretty_print_inspected_path(client.inspect_path(client.software + '_unsigned_recursive.app'))
+    client.pretty_print_inspected_path(client.inspect_path(client.software + '_nolinks.app'))
 
     if should_package_as_dmg():
         unsigned_dmg = client.makedmg(format='UDBZ', fs='hfs+')
         client.sign([unsigned_dmg], '--verbose=2')
         notarized_path = unsigned_dmg
     else:
-        notarized_path = client.software + '_unsigned_recursive.app'
+        notarized_path = client.software + '_nolinks.app'
 
     if not notarize(notarized_path):
         print('Notarization failed !')
