@@ -77,14 +77,14 @@ def mac_os_sign():
     client.sign([f'{client.software}_unsigned_recursive.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}_unsigned_recursive.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
-    client.pretty_print_inspected_path(client.inspect_path(client.software + '.app'))
+    client.pretty_print_inspected_path(client.inspect_path(client.software + '_unsigned_recursive.app'))
 
     if should_package_as_dmg():
         unsigned_dmg = client.makedmg(format='UDBZ', fs='hfs+')
         client.sign([unsigned_dmg], '--verbose=2')
         notarized_path = unsigned_dmg
     else:
-        notarized_path = client.software + '.app'
+        notarized_path = client.software + '_unsigned_recursive.app'
 
     if not notarize(notarized_path):
         print('Notarization failed !')
