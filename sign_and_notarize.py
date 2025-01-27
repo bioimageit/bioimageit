@@ -70,11 +70,11 @@ def mac_os_sign():
     #             f'--options=runtime --entitlements entitlements.plist --verbose 2')
 
     # client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}_unsigned.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_unsigned.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_unsigned.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_unsigned.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}_unsigned.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
     client.pretty_print_inspected_path(client.inspect_path(client.software + '.app'))
 
