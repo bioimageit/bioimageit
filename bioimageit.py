@@ -71,6 +71,13 @@ class Gui:
         self.window = tk.Tk()
         self.window.title("BioImageIT")
 
+        width, height = 800, 500
+        screen_width = self.window.winfo_screenwidth()
+        screen_height = self.window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.window.geometry(f"{width}x{height}+{x}+{y}")
+
         # Create a StringVar to hold the label text
         self.labelText = tk.StringVar()
         self.labelText.set("Starting...")

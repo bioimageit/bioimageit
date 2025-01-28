@@ -167,6 +167,9 @@ class PyFlow(QMainWindow):
 		self._currentFileName = ""
 		self.currentFileName = None
 
+		self.resize(QtGui.QGuiApplication.primaryScreen().geometry().size())
+		self.move(QtGui.QGuiApplication.primaryScreen().geometry().center() - self.rect().center())
+
 	def winTitle(self, versionInfo=None):
 		versionInfo = self.getVersionInfo() if versionInfo is None else versionInfo
 		version = versionInfo['version'].split('-')[1] if 'version' in versionInfo and len(versionInfo['version'].split('-')) == 3 else None
