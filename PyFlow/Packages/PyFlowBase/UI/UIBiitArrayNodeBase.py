@@ -191,6 +191,8 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
                 self.dataFrameWidget.setObjectName('DataFrameFolder')
             self.dataFrameWidget.le.editingFinished.connect(lambda: self.canvasRef().requestFillProperties.emit(self.createPropertiesWidget))
             inputFilesLayout.addWidget(self.dataFrameWidget)
+            inputFilesLabel.hide()
+            self.dataFrameWidget.hide()
             propertiesWidget.contentLayout.addLayout(inputFilesLayout)
             
             # self.line = QFrame()
