@@ -76,7 +76,7 @@ class ListFiles(PandasNodeBase):
     #     self.dataFrameChanged.send(path)
 
     def compute(self, *args, **kwargs):
-        data = super().compute(*args, **kwargs)
+        data = self.updateDataFrameIfDirty()
         if not isinstance(data, pandas.DataFrame) or len(data)==0:
             return
         allFiles = []
@@ -97,7 +97,7 @@ class ListFiles(PandasNodeBase):
         ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
         self.dirty = False
         self.setOutputAndClean(dataFrame)
-        return data
+        return dataFrame
 
 class MergeDataFrames(PandasNodeBase):
 

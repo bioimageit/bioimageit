@@ -259,7 +259,7 @@ class BiitToolNode(BiitArrayNodeBase):
 				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def compute(self):
-		data = super().compute()
+		data = self.updateDataFrameIfDirty()
 		if data is None: return
 		data = self.tool.processDataFrame(data, [Munch.fromDict(args) for args in self.getArgs()])
 		self.setOutputAndClean(data if isinstance(data, pandas.DataFrame) else data['dataFrame'])

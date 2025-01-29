@@ -134,7 +134,8 @@ class BiitArrayNodeBase(BiitNodeBase):
         # Do not reset overwrite existing columns when we are loading graph
         loadingGraph = self.graph().populating
         if not loadingGraph:
-            self.setParametersFromDataframe(self.getCachedDataFrame(), True)
+            dataFrame = self.getCachedDataFrame()
+            self.setParametersFromDataframe(dataFrame if dataFrame is not None else self.getDataFrame(), True)
     
     # The input pin was unplugged: reset parameters and dataFrame
     def onInputDisconnected(self, pin=None):
@@ -239,8 +240,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         #     data[self.getColumnName(outputName)] = [getOutputFilePath(output['type'], self.name, i) for i in range(len(data))]
         raise NotImplementedError()
 
-    def compute(self, *args, **kwargs):
-        if not self.dirty: return
+    def updateDataFrame(self):
         data = self.getDataFrame()
         tool = self.__class__.tool
         if not isinstance(data, pandas.DataFrame): 
@@ -248,8 +248,18 @@ class BiitArrayNodeBase(BiitNodeBase):
             if data is None: return
         data = data.copy()
         self.setOutputColumns(tool, data)
+        return data
+    
+    def updateDataFrameIfDirty(self):
+        if not self.dirty: return
+        return self.updateDataFrame()
+    
+    def compute(self, set_output=True, *args, **kwargs):
+        if not self.dirty: return
+        data = self.updateDataFrame()
         self.dirty = False
-        self.setOutputAndClean(data)
+        if set_output:
+            self.setOutputAndClean(data)
         return data
     
     # def setOutputArgs(self, toolInfo, args):
@@ -383,7 +393,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         if len(inputs) == 0: return None
         data = pandas.DataFrame()
         for inputName, input in self.parameters['inputs'].items():
-            data[self.getColumnName(inputName)] = [input['value']]
+            data[self.getColumnName(inputName)] = [input['value']] if input['value'] is not None else []
         ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data
 

@@ -65,7 +65,7 @@ class OmeroDownload(OmeroBase):
         return """Download files from Omero: either enter the dataset name or id to download. Negative ids will be ignored."""
 
     def compute(self, *args, **kwargs):
-        data = super().compute(*args, **kwargs)
+        data = self.updateDataFrameIfDirty()
         if data is None: return
         try:
             datasets = self.getDatasets()
