@@ -65,7 +65,7 @@ import asyncio
 import PyFlow.UI.resources
 # from PyFlow.Wizards.PackageWizard import PackageWizard
 
-from PyFlow import INITIALIZE, getBundlePath
+from PyFlow import INITIALIZE, getRootPath
 from PyFlow.Input import InputAction, InputActionType
 from PyFlow.Input import InputManager
 from PyFlow.ConfigManager import ConfigManager
@@ -149,7 +149,7 @@ class PyFlow(QMainWindow):
 		self.setWindowIcon(QtGui.QIcon(":/Logo.png"))
 		self._tools = set()
 		self.currentTempDir = ""
-		environmentManager.setCondaPath(getBundlePath() / 'micromamba' if (getBundlePath() / 'micromamba').exists() else getBundlePath().parent / 'micromamba')
+		environmentManager.setCondaPath(getRootPath() / 'micromamba')
 		
 		# Launch or get the bioimageit env, so that we can cache its installed dependencies
 		self.environment = environmentManager.launch('bioimageit')
@@ -176,8 +176,7 @@ class PyFlow(QMainWindow):
 		return "BioImageIT {0}".format(version) if version is not None else "BioImageIT"
 
 	def getVersionInfo(self):
-		# The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
-		versionJson = getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
+		versionJson = getRootPath() / 'version.json'
 		with open(versionJson, 'r') as f:
 			return json.load(f)
 		

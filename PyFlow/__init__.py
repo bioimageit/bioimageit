@@ -20,6 +20,7 @@
 # __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import importlib
+import re
 import pkgutil
 import collections.abc
 from copy import copy
@@ -52,14 +53,26 @@ __HASHABLE_TYPES = []
 PARAMETERS_PATH = 'parameters.json'
 OUTPUT_DATAFRAME_PATH = 'output_data_frame.csv'
 
-def getRootPath():
-    return Path(__file__).parent.parent
 
-def getBundlePath():
-	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else getRootPath()
+def sources_folder_has_version(string):
+    pattern = r"^bioimageit-v\d+\.\d+\.\d+-[a-f0-9]+$"
+    return bool(re.match(pattern, str(string)))
+
+sourcesPath = Path(__file__).parent.parent
+rootPath = sourcesPath.parent if sources_folder_has_version(sourcesPath) else sourcesPath
+
+# This is the sources parent folder when bioimageit is frozen / packaged / built ; and the sources folder when developing
+def getSourcesPath():
+    return rootPath
+
+def getSourcesPath():
+    return sourcesPath
+
+# def getRootPath():
+# 	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else getSourcesPath()
 
 def getImportPath(toolPath):
-    return '.'.join(toolPath.resolve().relative_to(getRootPath()).with_suffix('').parts)
+    return '.'.join(toolPath.resolve().relative_to(getSourcesPath()).with_suffix('').parts)
 
 def GET_PACKAGES():
     return __PACKAGES

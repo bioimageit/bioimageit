@@ -19,7 +19,7 @@ from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
 from PyFlow.Core.Common import *
 from PyFlow.UI.Widgets.InputWidgets import createInputWidget
 from PyFlow.ConfigManager import ConfigManager
-from PyFlow import getRootPath
+from PyFlow import getSourcesPath
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 
 class UIScriptNode(UIBiitNodeBase):
@@ -34,7 +34,7 @@ class UIScriptNode(UIBiitNodeBase):
         scriptPath = Path(scriptPath)
         scriptPath.parent.mkdir(exist_ok=True, parents=True)
         self._rawNode.scriptPath = scriptPath
-        examplePath = getRootPath() / 'PyFlow' / 'Scripts' / 'template.py'
+        examplePath = getSourcesPath() / 'PyFlow' / 'Scripts' / 'template.py'
         with open(scriptPath, 'w') as destinationFile, open(examplePath, 'r') as exampleFile:
             destinationFile.write(exampleFile.read())
         editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")

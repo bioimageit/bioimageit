@@ -21,7 +21,7 @@ from qtpy import QtCore, QtGui, initial_api
 
 from PyFlow.Core.Common import *
 from PyFlow.Input import InputAction, InputManager, InputActionType
-from PyFlow import getBundlePath
+from PyFlow import getRootPath, getSourcesPath
 from packaging.version import Version
 
 @SingletonDecorator
@@ -33,11 +33,11 @@ class ConfigManager(object):
 
     CONFIGS_STORAGE = {}
 
-    CONFIGS_DIR = getBundlePath() / "Configs"
+    CONFIGS_DIR = getRootPath() / "Configs"
     INPUT_CONFIG_PATH = os.path.join(CONFIGS_DIR, "input.json")
 
     def __init__(self, *args, **kwargs):
-        self.updateConfigs()
+        self.updateConfigsDir()
         self.registerConfigFile("PREFS", os.path.join(self.CONFIGS_DIR, "prefs.ini"))
         self.registerConfigFile(
             "APP_STATE", os.path.join(self.CONFIGS_DIR, "config.ini")
@@ -55,29 +55,14 @@ class ConfigManager(object):
                 data = json.load(f)
                 InputManager().loadFromData(data)
 
-    def updateConfig(self):
+    def updateConfigsDir(self):
         # Check if the previous version before this one has configs
-        initialConfigsPath = getBundlePath() / 'Configs_initial'
+        initialConfigsPath = getSourcesPath() / 'Configs'
+        
         # Replace Configs with existing configs (of previously installed version, if exists)
-        if not initialConfigsPath.exists():
-            self.CONFIGS_DIR.rename(initialConfigsPath)
+        if not self.CONFIGS_DIR.exists():
+            shutil.copyfile(initialConfigsPath, self.CONFIGS_DIR)
             
-            # Check if older version exists: if so, get its configs, otherwise just clone the initial configs named Configs_initial
-
-            # Get all sources except this one
-            allSources = [s for s in getBundlePath().parent.glob('bioimageit-v*') if s != getBundlePath()]
-            if len(allSources) > 0:
-                versions = [(s, s.name.split('-')[1][1:]) for s in allSources] # create a list of tuples: (sources path, version number)
-                versions.sort(key=lambda i: Version(i[1])) # sort the tuples by version number
-                # Find and copy latest configs:
-                # Go through all versions from latest to oldest: copy configs as soon as they exist and leave
-                while len(versions)>0:
-                    previousSources = versions.pop()[0]
-                    if (previousSources / 'Configs').exists():
-                        shutil.copytree(previousSources / 'Configs', self.CONFIGS_DIR)
-                        break
-            if not self.CONFIGS_DIR.exists():
-                shutil.copytree(initialConfigsPath, self.CONFIGS_DIR)
 
     @staticmethod
     def shouldRedirectOutput():

@@ -4,7 +4,7 @@ import pandas
 from munch import DefaultMunch
 import SimpleITK as sitk
 
-from PyFlow import getRootPath
+from PyFlow import getSourcesPath
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.invoke_in_main import inmain
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
@@ -375,7 +375,7 @@ classes['LabelStatistics'] = LabelStatistics
 
 def createFunctionNodes():
 
-    with open(getRootPath() / 'Scripts' / 'simpleITK_functions.json', 'r') as f:
+    with open(getSourcesPath() / 'Scripts' / 'simpleITK_functions.json', 'r') as f:
         tools = json.load(f)
 
     for tool in tools.values():

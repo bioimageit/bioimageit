@@ -4,7 +4,7 @@ import re
 import pandas
 from pathlib import Path
 from munch import Munch
-from PyFlow import getBundlePath
+from PyFlow import getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
@@ -18,7 +18,7 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environ
 # with open(path.parent.parent / 'biit' / 'config.json' if path.name == 'ToolManagement' else path / 'biit' / 'config.json', 'r') as file:
 # 	condaPath = Path(json.load(file)['runner']['conda_dir'])
 
-environmentManager.setCondaPath(getBundlePath() / 'micromamba')
+environmentManager.setCondaPath(getRootPath() / 'micromamba')
 
 class BiitToolNode(BiitArrayNodeBase):
 
