@@ -20,10 +20,6 @@ class Tool:
         outputs_parser.add_argument('-o', '--output', help='Output segmentation.', default='[workflow_folder]/dataset/{movie_folder.name}/detector_segmentation.h5', type=Path)
         # outputs_parser.add_argument('-omf', '--output_movie_folder', help='Output movie folder.', default='[workflow_folder]/dataset/{movie_folder.name}', type=Path)
         return parser, dict( movie_folder = dict(autoColumn=True), output=dict(autoIncrement=False) )
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print(f'Detect spots in {args.movie_folder / args.tiff}')
         commandArgs = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]

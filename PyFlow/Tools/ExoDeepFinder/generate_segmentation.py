@@ -17,10 +17,6 @@ class Tool(ExoDeepFinderTool):
         outputs_parser.add_argument('-oa', '--output_annotation', help='Output annotation (a symlink to the annotation input).', default='[workflow_folder]/dataset/{movie_folder.name}/expert_annotation.xml', type=Path)
         outputs_parser.add_argument('-os', '--output_segmentation', help='Output segmentation (in .h5 format).', default='[workflow_folder]/dataset/{movie_folder.name}/expert_segmentation.h5', type=Path)
         return parser, dict( movie_folder = dict(autoColumn=True), output_annotation=dict(autoIncrement=False) , output_segmentation=dict(autoIncrement=False) )
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print(f'Generate segmentation for {args.movie} with {args.annotation}')
         commandArgs = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]

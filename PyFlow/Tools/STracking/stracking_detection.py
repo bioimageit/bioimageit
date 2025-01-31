@@ -39,10 +39,6 @@ class Tool:
         self.np = np
         self.skimage = skimage
         self.stracking = stracking
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def read_txt_movie_list(self, path):
         with open(path, 'r') as file:
             return [line.strip() for line in file]

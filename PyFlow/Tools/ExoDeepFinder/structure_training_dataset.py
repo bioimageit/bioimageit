@@ -18,10 +18,6 @@ class Tool(ExoDeepFinderTool):
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output folder', type=Path, default='[workflow_folder]/train_valid')
         return parser, dict( movies_folder = dict(autoColumn=True) )
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-    
     def processAllData(self, argsList):
         args = argsList[0]
         inputDatasetPath = Path(args.movies_folder)
