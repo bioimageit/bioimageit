@@ -1,121 +1,86 @@
-import re
+import sys
+from importlib import import_module
+import argparse
 import json
 from pathlib import Path
 
-def parse_arguments(arg_parser_content, group_name):
-    """Parse arguments from the given content of argument groups."""
-    args_pattern = re.compile(rf'{group_name}_parser.add_argument\((.*?)\)', re.DOTALL)
-    arguments = []
-    for match in args_pattern.finditer(arg_parser_content):
-        arg_str = match.group(1)
-
-        # Extract flags
-        flags_match = re.findall(r'\s*"([^"]+)"', arg_str.split(',', 1)[0])
-        flags = flags_match if flags_match else []
-
-        # Extract help text
-        help_match = re.search(r'help="(.*?)"', arg_str)
-        help_text = help_match.group(1) if help_match else ""
-
-        # Extract type
-        type_match = re.search(r'type=(\w+)', arg_str)
-        type_value = type_match.group(1) if type_match else "str"
-        if type_value == "Path":
-            type_value = Path
-        elif type_value == "int":
-            type_value = int
-        elif type_value == "bool":
-            type_value = bool
-        elif type_value == "float":
-            type_value = float
-        elif type_value == "str":
-            type_value = str
-        else:
-            raise Exception('Unimplemented type')
-
-        # Extract default value
-        default_match = re.search(r'default=([\w"\[\]]+)', arg_str)
-        default_value = eval(default_match.group(1)) if default_match else None
-
-        # Extract required flag
-        required_match = re.search(r'required=(True|False)', arg_str)
-        required = required_match.group(1) == "True" if required_match else False
-
-        # Handle store_true and store_false
-        if "store_true" in arg_str:
-            type_value = bool
-            default_value = True
-        elif "store_false" in arg_str:
-            type_value = bool
-            default_value = False
-
-        # Build argument dict
-        argument = {
-            "flags": flags,
-            "help": help_text,
-            "type": type_value,
-        }
-        if required:
-            argument["required"] = True
-        if default_value is not None:
-            argument["default"] = default_value
-
-        arguments.append(argument)
-
-    return arguments
-
-def convert_script(script_path):
-    with open(script_path, "r", encoding="utf-8") as file:
-        content = file.read()
-
-    # Extract the content before the getArgumentParser function
-    before_gap_match = re.search(r'(.*?)(?=def getArgumentParser\(.*?\):)', content, re.DOTALL)
-    before_gap = before_gap_match.group(0) if before_gap_match else content
-
-    # Extract getArgumentParser function content
-    get_arg_parser_match = re.search(r'def getArgumentParser\(.*?\):(.+?)\n\s{4}return', content, re.DOTALL)
-    arg_parser_content = get_arg_parser_match.group(1) if get_arg_parser_match else ""
-
-    # Extract the description
-    match_desc = re.search(r'argparse\.ArgumentParser\("(.*?)", description="(.*?)"', arg_parser_content)
-    name = match_desc.group(1) if match_desc else "Unknown"
-    description = match_desc.group(2) if match_desc else "No description."
-
-    # Define groups and match their sections
-    groups = {
-        "inputs": None,
-        "advanced": None,
-        "outputs": None
-    }
-    
-    # Match each group within the function content
-    for group in groups.keys():
-        group_match = re.search(rf'{group}_parser = parser.add_argument_group(', arg_parser_content, re.DOTALL)
-        if group_match:
-            groups[group] = parse_arguments(group_match.group(1), group)
-    
-    # Construct new script content
-    new_content = f"""
 class Tool:
-    name = "{name}"
-    description = "{description}"
 
-    inputs = {json.dumps(groups['inputs'], indent=4, default=str)}
+    categories = ['Segmentation']
+    dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
+    environment = 'cellpose'
+    test = ['--input_image', 'img02.png', '--segmentation', 'img02_segmentation.png', '--visualization', 'img02_segmentation.npy']
+    modelType = None
 
-    advanced = {json.dumps(groups['advanced'], indent=4, default=str)}
+    @staticmethod
+    def getArgumentParser():
+        parser = argparse.ArgumentParser("Cellpose", description="Segment cells with cellpose.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        inputs_parser = parser.add_argument_group('inputs')
+        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
+        inputs_parser.add_argument('-m', '--model_type', help='Model type. “cyto”=cytoplasm model; “nuclei”=nucleus model; “cyto2”=cytoplasm model with additional user images; “cyto3”=super-generalist model.', default='cyto', choices=['cyto', 'nuclei', 'cyto2', 'cyto3'], type=str)
+        inputs_parser.add_argument('-g', '--use_gpu', help='Use GPU (default is CPU).', action='store_true')
+        inputs_parser.add_argument('-a', '--auto_diameter', help='Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.', action='store_true')
+        inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
+        inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
+        outputs_parser = parser.add_argument_group('outputs')
+        outputs_parser.add_argument('-s', '--segmentation', help='The output segmentation path.', default='{input_image.stem}_segmentation.png', type=Path)
+        outputs_parser.add_argument('-v', '--visualization', help='The output visualisation path.', default='{input_image.stem}_visualization.npy', type=Path)
+        return parser, dict( input_image = dict(autoColumn=True) )
 
-    outputs = {json.dumps(groups['outputs'], indent=4, default=str)}
-"""
+    def processData(self, args):
 
-    # Combine the unchanged part and new content
-    result_content = before_gap + new_content
+        if not args.input_image.exists():
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
+        input_image = str(args.input_image)
+        
+        print(f'[[1/5]] Load libraries and model {args.model_type}')
+        print('Loading libraries...')
+        import cellpose.models
+        import cellpose.io
 
-    # Write the new content
-    new_script_path = script_path.with_suffix(".modified.py")
-    with open(new_script_path, "w", encoding="utf-8") as file:
-        file.write(result_content)
+        if self.modelType != args.model_type:
+            print('Loading model...')
+            self.modelType = args.model_type
+            self.model = cellpose.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=self.modelType)
 
-    print(f"Converted script saved to: {new_script_path}")
+        print(f'[[2/5]] Load image {input_image}')
+        channels = json.loads(args.channels)
+        image = cellpose.io.imread(input_image)
+        auto_diameter = args.auto_diameter if type(args.auto_diameter) is bool else args.auto_diameter == 'True'
 
-# Example usage
-convert_script(Path("your_script.py"))
+        print('[[3/5]] Compute segmentation', image.shape)
+        try:
+            masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
+        except Exception as e:
+            print(e)
+            raise e
+        print('segmentation finished.')
+        
+        input_image = Path(input_image)
+
+        if args.visualization:
+            print(f'[[4/5]] Save visualization file {args.visualization}')
+            # save results so you can load in gui
+            cellpose.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
+            if args.visualization.exists(): args.visualization.unlink()
+            (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.visualization)
+            print(f'Saved visualization: {args.visualization}')
+
+        if args.segmentation:
+            print(f'[[5/5]] Save segmentation {args.segmentation}')
+            # save results as png
+            cellpose.io.save_masks(image, masks, flows, input_image)
+            output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
+            if output_mask.exists():
+                if args.segmentation.exists(): args.segmentation.unlink()
+                (output_mask).rename(args.segmentation)
+                print(f'Saved out: {args.segmentation}')
+            else:
+                print('Segmentation was not generated because no masks were found.')
+
+if __name__ == '__main__':
+    tool = Tool()
+    parser, _ = tool.getArgumentParser()
+    args = parser.parse_args()
+    tool.initialize(args)
+    tool.processData(args)
