@@ -39,7 +39,8 @@ class Tool():
 if __name__ == "__main__":
     # When this script is called directly: instanciate the tool, parse the arguments and launch the processing
     tool = Tool()
-    parser, _ = tool.getArgumentParser()
+    from ToolParser import create_parser
+    parser = create_parser(Tool)
     args = parser.parse_args()
     tool.initialize(args)
     tool.processData(args)

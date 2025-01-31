@@ -2,9 +2,9 @@ import re
 import json
 from pathlib import Path
 
-def parse_arguments(arg_parser_content, group_name):
+def parse_arguments(arg_parser_content):
     """Parse arguments from the given content of argument groups."""
-    args_pattern = re.compile(rf'{group_name}_parser.add_argument\((.*?)\)', re.DOTALL)
+    args_pattern = re.compile(r'add_argument\((.*?)\)', re.DOTALL)
     arguments = []
     for match in args_pattern.finditer(arg_parser_content):
         arg_str = match.group(1)
@@ -72,6 +72,10 @@ def convert_script(script_path):
     before_gap_match = re.search(r'(.*?)(?=def getArgumentParser\(.*?\):)', content, re.DOTALL)
     before_gap = before_gap_match.group(0) if before_gap_match else content
 
+    # Extract the content after the getArgumentParser function
+    after_gap_match = re.search(r'return parser, dict(.*?)', content, re.DOTALL)
+    after_gap = after_gap_match.group(0) if after_gap_match else content
+
     # Extract getArgumentParser function content
     get_arg_parser_match = re.search(r'def getArgumentParser\(.*?\):(.+?)\n\s{4}return', content, re.DOTALL)
     arg_parser_content = get_arg_parser_match.group(1) if get_arg_parser_match else ""
@@ -90,9 +94,9 @@ def convert_script(script_path):
     
     # Match each group within the function content
     for group in groups.keys():
-        group_match = re.search(rf'{group}_parser = parser.add_argument_group(', arg_parser_content, re.DOTALL)
+        group_match = re.search(rf'{group}_parser = .*?add_argument_group\(.*?\)\s*(.+?)(\n\s*\n|$)', arg_parser_content, re.DOTALL)
         if group_match:
-            groups[group] = parse_arguments(group_match.group(1), group)
+            groups[group] = parse_arguments(group_match.group(1))
     
     # Construct new script content
     new_content = f"""
@@ -108,14 +112,16 @@ class Tool:
 """
 
     # Combine the unchanged part and new content
-    result_content = before_gap + new_content
+    result_content = before_gap + new_content + after_gap
 
     # Write the new content
-    new_script_path = script_path.with_suffix(".modified.py")
-    with open(new_script_path, "w", encoding="utf-8") as file:
+    with open(script_path, "w", encoding="utf-8") as file:
         file.write(result_content)
 
-    print(f"Converted script saved to: {new_script_path}")
+base_dir = "/Users/amasson/Travail/bioimageit/PyFlow/Tools"
 
-# Example usage
-convert_script(Path("your_script.py"))
+for tool_folder in sorted(list(Path(base_dir).iterdir())):
+    if not tool_folder.is_dir(): continue
+    for file in sorted(list(tool_folder.iterdir())):
+        if file.suffix == ".py":
+            convert_script(file)

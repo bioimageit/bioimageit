@@ -105,6 +105,8 @@ class Tool:
 if __name__ == '__main__':
     tool = Tool()
     parser, _ = tool.getArgumentParser()
+    # or
+	# parser = create_parser(module.Tool)
     args = parser.parse_args()
     tool.processData(args)
     """

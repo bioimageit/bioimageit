@@ -1,6 +1,7 @@
 import os, sys
 from pathlib import Path
 from importlib import import_module
+from PyFlow.ToolManagement.ToolParser import create_parser
 
 tool = None
 moduleImportPath = None
@@ -41,7 +42,7 @@ def initialize(newModuleImportPath: str, args: list[str], toolsPath:Path):
         module = import_module(newModuleImportPath)
         tool = module.Tool()
         moduleImportPath = newModuleImportPath
-    parser, _ = tool.getArgumentParser()
+    parser = create_parser(tool)
     parser.exit_on_error = False
     args = parser.parse_args(args)
     if toolMustBeImported and hasattr(tool, 'initialize') and callable(tool.initialize):
@@ -69,7 +70,7 @@ def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:P
     # args0 = argToList(argsList[0])
     args0 = argsList[0]
     tool, _ = initialize(moduleImportPath, args0, toolsPath)
-    parser, _ = tool.getArgumentParser()
+    parser = create_parser(tool)
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     currentDirectory = os.getcwd()
     result = None

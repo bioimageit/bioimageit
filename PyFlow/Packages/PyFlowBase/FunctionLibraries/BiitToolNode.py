@@ -8,6 +8,7 @@ from PyFlow import getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
+from PyFlow.ToolManagement.ToolParser import create_parser
 
 # class Status(Enum):
 # 	STOPPED = 1
@@ -330,12 +331,15 @@ def createNode(modulePath, moduleImportPath, module):
 	# toolId = f'{tool.info.id}_v{tool.info.version}'
 	# toolId = f'{tool.info.id}_biitarray'
 	if not hasattr(module, 'Tool'): return None
-	parser, argsOptions = module.Tool.getArgumentParser()
+
+	# parser, argsOptions = module.Tool.getArgumentParser()
+
+	parser = create_parser(module.Tool)
 
 	# Creates a new class type named {modulePath.stem} which inherits BiitToolNode and have the attributes of the given dict
 	toolClass = type(modulePath.stem, (BiitToolNode, ), dict( 
 		parser = parser,
-		argsOptions = argsOptions,
+		# argsOptions = argsOptions,
 		toolName = modulePath.stem,
 		toolPath = modulePath,
 		toolImportPath = moduleImportPath,
