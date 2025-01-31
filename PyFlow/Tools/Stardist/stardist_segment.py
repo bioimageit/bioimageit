@@ -13,6 +13,7 @@ class Tool:
         optional = dict(conda = ['nvidia::cudatoolkit=11.0.*|win-64,linux-64', 'nvidia::cudnn=8.0.*|win-64,linux-64'])
         )
     environment = 'stardist'
+    modelName = None
 
     @staticmethod
     def getArgumentParser():
@@ -24,40 +25,40 @@ class Tool:
         outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
-    def initialize(self, args):
-        print('Loading libraries...')
-        from csbdeep.utils import normalize
-        from skimage import io
-        self.io = io
-        self.normalize = normalize
-        if args.model_name.startswith('2D'):
-            from stardist.models import StarDist2D
-            self.model = StarDist2D.from_pretrained(args.model_name)
-        else:
-            from stardist.models import StarDist3D
-            self.model = StarDist3D.from_pretrained(args.model_name)
-    
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
+        print(f'[[1/3]] Load libraries and model {args.model_name}')
+
+        print('Loading libraries...')
+        from csbdeep.utils import normalize
+        from skimage import io
+
+        if self.modelName != args.model_name:
+            self.modelName = args.model_name
+            if args.model_name.startswith('2D'):
+                from stardist.models import StarDist2D
+                self.model = StarDist2D.from_pretrained(args.model_name)
+            else:
+                from stardist.models import StarDist3D
+                self.model = StarDist3D.from_pretrained(args.model_name)
+        
+
         print(f'[[1/3]] Load image {input_image}')
-        image = self.io.imread(input_image)
+        image = io.imread(input_image)
         if len(image.shape)==3:
             image = image[:,:,0]
         if len(image.shape)>3:
             sys.exit(f'Error: input image {args.input_image} has too many dimension, should be 2 or 3 (in which case the channel 0 will be segmented).')
 
         print('[[2/3]] Compute segmentation', image.shape)
-        labels, _ = self.model.predict_instances(self.normalize(image))
+        labels, _ = self.model.predict_instances(normalize(image))
         input_image = Path(input_image)
 
         print(f'[[3/3]] Save segmentation {args.out}')
-        self.io.imsave(args.out, labels)
+        io.imsave(args.out, labels)
         print(f'Saved segmentation: {args.out}')
 
 if __name__ == '__main__':

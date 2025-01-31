@@ -261,7 +261,8 @@ class BiitToolNode(BiitArrayNodeBase):
 	def compute(self):
 		data = self.updateDataFrameIfDirty()
 		if data is None: return
-		data = self.tool.processDataFrame(data, [Munch.fromDict(args) for args in self.getArgs()])
+		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
+			data = self.tool.processDataFrame(data, [Munch.fromDict(args) for args in self.getArgs()])
 		self.setOutputAndClean(data if isinstance(data, pandas.DataFrame) else data['dataFrame'])
 		if (not isinstance(data, pandas.DataFrame)) and 'outputMessage' in data:
 			self.outputMessage = data['outputMessage']

@@ -46,12 +46,6 @@ class Tool:
         outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
-    def initialize(self, args):
-        print('Loading libraries...')
-        
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')

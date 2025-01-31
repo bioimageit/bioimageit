@@ -62,7 +62,7 @@ sourcesPath = Path(__file__).parent.parent
 rootPath = sourcesPath.parent if sources_folder_has_version(sourcesPath) else sourcesPath
 
 # This is the sources parent folder when bioimageit is frozen / packaged / built ; and the sources folder when developing
-def getSourcesPath():
+def getRootPath():
     return rootPath
 
 def getSourcesPath():

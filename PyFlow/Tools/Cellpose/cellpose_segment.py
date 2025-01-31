@@ -10,6 +10,7 @@ class Tool:
     dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
     test = ['--input_image', 'img02.png', '--segmentation', 'img02_segmentation.png', '--visualization', 'img02_segmentation.npy']
+    modelType = None
 
     @staticmethod
     def getArgumentParser():
@@ -26,30 +27,28 @@ class Tool:
         outputs_parser.add_argument('-v', '--visualization', help='The output visualisation path.', default='{input_image.stem}_visualization.npy', type=Path)
         return parser, dict( input_image = dict(autoColumn=True) )
 
-    def initialize(self, args):
-        print('Loading libraries...')
-        # self.models = import_module('cellpose.models')
-        # self.io: cellpose.io = import_module('cellpose.io')
-        import cellpose.models
-        import cellpose.io
-        self.models = cellpose.models
-        self.io = cellpose.io
-        self.model = self.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=args.model_type)
-    
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
+
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
+        
+        print(f'[[1/5]] Load libraries and model {args.model_type}')
+        print('Loading libraries...')
+        import cellpose.models
+        import cellpose.io
 
-        print(f'[[1/4]] Load image {input_image}')
+        if self.modelType != args.model_type:
+            print('Loading model...')
+            self.modelType = args.model_type
+            self.model = cellpose.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=self.modelType)
+
+        print(f'[[2/5]] Load image {input_image}')
         channels = json.loads(args.channels)
-        image = self.io.imread(input_image)
+        image = cellpose.io.imread(input_image)
         auto_diameter = args.auto_diameter if type(args.auto_diameter) is bool else args.auto_diameter == 'True'
 
-        print('[[2/4]] Compute segmentation', image.shape)
+        print('[[3/5]] Compute segmentation', image.shape)
         try:
             masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
         except Exception as e:
@@ -60,17 +59,17 @@ class Tool:
         input_image = Path(input_image)
 
         if args.visualization:
-            print(f'[[3/4]] Save visualization file {args.visualization}')
+            print(f'[[4/5]] Save visualization file {args.visualization}')
             # save results so you can load in gui
-            self.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
+            cellpose.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
             if args.visualization.exists(): args.visualization.unlink()
             (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.visualization)
             print(f'Saved visualization: {args.visualization}')
 
         if args.segmentation:
-            print(f'[[4/4]] Save segmentation {args.segmentation}')
+            print(f'[[5/5]] Save segmentation {args.segmentation}')
             # save results as png
-            self.io.save_masks(image, masks, flows, input_image)
+            cellpose.io.save_masks(image, masks, flows, input_image)
             output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
             if output_mask.exists():
                 if args.segmentation.exists(): args.segmentation.unlink()
