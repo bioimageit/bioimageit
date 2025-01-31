@@ -1,26 +1,42 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'IXMtest_A02_s9.tif', '--out', 'IXMtest_A02_s9_voronoi.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Voronoi Otsu", description="Voronoi otsu labeling with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--sigma_spot_detection', type = float, help = 'sigma_spot_detection', default=5)
-        inputs_parser.add_argument('--sigma_outline', type = float, help = 'sigma_outline', default=1)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'output image path', default='{input_image.stem}_voronoi_otsu{input_image.exts}')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Voronoi Otsu"
+    description = "Voronoi otsu labeling with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--sigma_spot_detection'],
+                help = 'sigma_spot_detection',
+                default = 5,
+                type = float,
+            ),
+            dict(
+                names = ['--sigma_outline'],
+                help = 'sigma_outline',
+                default = 1,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output image path',
+                default = '{input_image.stem}_voronoi_otsu{input_image.exts}',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -56,9 +72,3 @@ class Tool(ClEsperantoTool):
 
         self.io.imsave(output, segmented)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

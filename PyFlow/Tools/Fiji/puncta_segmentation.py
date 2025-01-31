@@ -1,5 +1,4 @@
 import sys
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -10,15 +9,26 @@ class Tool:
     additionalActivateCommands = dict(all=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'pyimagej'
     test = ['--input_image', 'test_still.tif', '--output_path', 'test_still_puncta.csv']
-    
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Puncta Segmentation", description="Segment puncta from an image using the “Analyze Particles” ImageJ plugin.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_path', help='The output dataFrame path.', default='{input_image.stem}_puncta.csv', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+        
+    name = "Puncta Segmentation"
+    description = "Segment puncta from an image using the “Analyze Particles” ImageJ plugin."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output_path'],
+                help = 'The output dataFrame path.',
+                default = '{input_image.stem}_puncta.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -84,9 +94,3 @@ class Tool:
         df = self.ij.py.from_java(sci_table)
         df.to_csv(args.output_path, index=False)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

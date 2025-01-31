@@ -1,25 +1,36 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'IXMtest_A02_s9.tif', '--out', 'IXMtest_A02_s9_info.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Basic Stats", description="Basic stats with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--spot_sigma', type = float, help = 'spot_sigma', default=3.5)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_stats.csv')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Basic Stats"
+    description = "Basic stats with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--spot_sigma'],
+                help = 'spot_sigma',
+                default = 3.5,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output csv file path',
+                default = '{input_image.stem}_stats.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -176,9 +187,3 @@ class Tool(ClEsperantoTool):
                 "mean_max_distance_to_mass_center_ratio"))
             wr.writerows(export_data)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

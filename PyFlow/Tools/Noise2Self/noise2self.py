@@ -1,5 +1,4 @@
 import sys
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -7,20 +6,51 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=['pytorch::pytorch', 'pytorch::torchvision'], pip=['matplotlib', 'noise2self'])
     environment = 'noise2self'
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Noise2Self", description="Noise2Self - Learning Denoising from Single Noisy Images.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-m', '--model_name', help='The model to use.', default='Unet', type=str, choices=['BabyUnet', 'DnCNN', 'SingleConvolution', 'Unet'])
-        inputs_parser.add_argument('--num_of_layers', type = int, help = 'Number of layers in the convolutional network')
-        inputs_parser.add_argument('--masker_width', type = int, help = 'Width of the mask')
-        inputs_parser.add_argument('--iterations', type = int, help = 'Number of iterations during training')
-
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output denoised image path.', default='{input_image.stem}_denoised{input_image.exts}', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "Noise2Self"
+    description = "Noise2Self - Learning Denoising from Single Noisy Images."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['-m', '--model_name'],
+                help = 'The model to use.',
+                default = 'Unet',
+                choices = ['BabyUnet', 'DnCNN', 'SingleConvolution', 'Unet'],
+                type = str,
+            ),
+            dict(
+                names = ['--num_of_layers'],
+                help = 'Number of layers in the convolutional network',
+                default = None,
+                type = int,
+            ),
+            dict(
+                names = ['--masker_width'],
+                help = 'Width of the mask',
+                default = None,
+                type = int,
+            ),
+            dict(
+                names = ['--iterations'],
+                help = 'Number of iterations during training',
+                default = None,
+                type = int,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--out'],
+                help = 'The output denoised image path.',
+                default = '{input_image.stem}_denoised{input_image.exts}',
+                type = Path,
+            ),
+    ]
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
@@ -127,9 +157,3 @@ class Tool:
         
         imsave(output_image, denoised)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

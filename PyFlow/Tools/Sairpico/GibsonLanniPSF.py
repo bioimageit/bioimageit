@@ -1,4 +1,3 @@
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -6,27 +5,80 @@ class Tool:
     categories = ['PSF']
     dependencies = dict(python='3.9', conda=['sylvainprigent::simglib=0.1.2|osx-64,win-64,linux-64'], pip=[])
     environment = 'simglib'
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("GibsonLanniPSF", description="3D Gibson-Lanni PSF.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-
-        inputs_parser.add_argument("--width", type=int, help="Image width", default=256)
-        inputs_parser.add_argument("--height", type=int, help="Image height", default=256)
-        inputs_parser.add_argument("--depth", type=int, help="Image depth", default=20)
-        
-        inputs_parser.add_argument("--wavelength", type=float, help="Excitation wavelength (nm)", default=610)
-        inputs_parser.add_argument("--psxy", type=float, help="Pixel size in XY (nm)", default=100)
-        inputs_parser.add_argument("--psz", type=float, help="Pixel size in Z (nm)", default=250)
-        inputs_parser.add_argument("--na", type=float, help="Numerical Aperture", default=1.4)
-        inputs_parser.add_argument("--ni", type=float, help="Refractive index immersion", default=1.5)
-        inputs_parser.add_argument("--ns", type=float, help="Refractive index sample", default=1.3)
-        inputs_parser.add_argument("--ti", type=float, help="Working distance (mum)", default=150)
-
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output', help='The output Gibson-Lanni PSF image path.', default='psf_gibsonlanni.tiff', type=Path)
-        return parser, dict()
+    
+    name = "GibsonLanniPSF"
+    description = "3D Gibson-Lanni PSF."
+    inputs = [
+            dict(
+                names = ['--width'],
+                help = 'Image width',
+                default = 256,
+                type = int,
+            ),
+            dict(
+                names = ['--height'],
+                help = 'Image height',
+                default = 256,
+                type = int,
+            ),
+            dict(
+                names = ['--depth'],
+                help = 'Image depth',
+                default = 20,
+                type = int,
+            ),
+            dict(
+                names = ['--wavelength'],
+                help = 'Excitation wavelength (nm)',
+                default = 610,
+                type = float,
+            ),
+            dict(
+                names = ['--psxy'],
+                help = 'Pixel size in XY (nm)',
+                default = 100,
+                type = float,
+            ),
+            dict(
+                names = ['--psz'],
+                help = 'Pixel size in Z (nm)',
+                default = 250,
+                type = float,
+            ),
+            dict(
+                names = ['--na'],
+                help = 'Numerical Aperture',
+                default = 1.4,
+                type = float,
+            ),
+            dict(
+                names = ['--ni'],
+                help = 'Refractive index immersion',
+                default = 1.5,
+                type = float,
+            ),
+            dict(
+                names = ['--ns'],
+                help = 'Refractive index sample',
+                default = 1.3,
+                type = float,
+            ),
+            dict(
+                names = ['--ti'],
+                help = 'Working distance (mum)',
+                default = 150,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output'],
+                help = 'The output Gibson-Lanni PSF image path.',
+                default = 'psf_gibsonlanni.tiff',
+                type = Path,
+            ),
+    ]
+    
     def processData(self, args):
         print('Generate Gibson-Lanni PSF')
         import subprocess
@@ -47,9 +99,3 @@ class Tool:
         
         return subprocess.run([str(ca) for ca in commandArgs])
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

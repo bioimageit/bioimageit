@@ -1,5 +1,4 @@
 import sys
-import argparse
 import json
 from pathlib import Path
 
@@ -14,16 +13,33 @@ class Tool:
         )
     environment = 'stardist'
     modelName = None
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Stardist", description="Segment cells with stardist.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-m', '--model_name', help='The model to use.', required=True, choices=['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo', '3D_demo'], type=str)
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation{input_image.exts}', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "Stardist"
+    description = "Segment cells with stardist."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['-m', '--model_name'],
+                help = 'The model to use.',
+                required = True,
+                choices = ['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo', '3D_demo'],
+                type = str,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--out'],
+                help = 'The output mask path.',
+                default = '{input_image.stem}_segmentation{input_image.exts}',
+                type = Path,
+            ),
+    ]
 
     def processData(self, args):
         if not args.input_image.exists():
@@ -61,9 +77,3 @@ class Tool:
         io.imsave(args.out, labels)
         print(f'Saved segmentation: {args.out}')
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

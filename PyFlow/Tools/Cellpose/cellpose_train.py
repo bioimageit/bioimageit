@@ -1,5 +1,4 @@
 import sys
-import argparse
 import json
 from pathlib import Path
 
@@ -8,33 +7,105 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
     environment = 'cellpose'
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Cellpose", description="Segment cells with cellpose.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-tr', '--train_directory', help='The directory path containing the training data.', required=True, type=Path)
-        inputs_parser.add_argument('-te', '--test_directory', help='The directory path containing the testing data.', default=None, type=Path)
-        inputs_parser.add_argument('-if', '--image_filter', help='The filter for selecting image files.', default='_img', type=str)
-        inputs_parser.add_argument('-mf', '--mask_filter', help='The filter for selecting mask files.', default=None, type=str)
-        inputs_parser.add_argument('-lold', '--look_one_level_down', help='Whether to look for data in subdirectories of train_dir and test_dir.', action='store_true')
-
-        inputs_parser.add_argument('-m', '--model_type', help='Model type. Full built-in models: cyto="cytoplasm model", nuclei="nucleus model", cyto2="cytoplasm model with additional user images", cyto3="super-generalist model". For other built-in models, see https://cellpose.readthedocs.io/en/latest/models.html', default='cyto3', choices=['cyto', 'cyto2', 'cyto3', 'nuclei', 'tissuenet_cp3', 'tissuenet_cp3', 'livecell_cp3', 'yeast_PhC_cp3', 'yeast_BF_cp3', 'bact_phase_cp3', 'bact_fluor_cp3', 'deepbacs_cp3', 'cyto2_cp3', 'CP', 'CPx', 'TN1', 'TN2', 'TN3', 'LC1', 'LC2', 'LC3', 'LC4'], type=str)
-        inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
-        inputs_parser.add_argument('-g', '--use_gpu', help='Use GPU (default is CPU).', action='store_true')
-
-        inputs_parser.add_argument('-sn', '--skip_normalizaton', help='Whether to sktip the data normalization.', action='store_false')
-        inputs_parser.add_argument('-wd', '--weight_decay', help='Weight decay for the optimizer.', default=1e-5, type=float)
-        inputs_parser.add_argument('-sdg', '--SDG', help='Whether to use SGD as optimization instead of RAdam.', action='store_true')
-        inputs_parser.add_argument('-lr', '--learning_rate', help='Learning rate for the training.', default=0.005, type=float)
-        inputs_parser.add_argument('-ne', '--n_epochs', help='Number of times to go through the whole training set during training.', default=2000, type=int)
-        inputs_parser.add_argument('-mn', '--model_name', help='Name of the new network.', default=None, type=str)
-
-        inputs_parser.add_argument('-e', '--evaluate', help='Whether to evaluate the model after training.', action='store_true')
-
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output path.', default='[node_folder]/model/', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "Cellpose"
+    description = "Segment cells with cellpose."
+    inputs = [
+            dict(
+                names = ['-tr', '--train_directory'],
+                help = 'The directory path containing the training data.',
+                required = True,
+                type = Path,
+            ),
+            dict(
+                names = ['-te', '--test_directory'],
+                help = 'The directory path containing the testing data.',
+                default = None,
+                type = Path,
+            ),
+            dict(
+                names = ['-if', '--image_filter'],
+                help = 'The filter for selecting image files.',
+                default = '_img',
+                type = str,
+            ),
+            dict(
+                names = ['-mf', '--mask_filter'],
+                help = 'The filter for selecting mask files.',
+                default = None,
+                type = str,
+            ),
+            dict(
+                names = ['-lold', '--look_one_level_down'],
+                help = 'Whether to look for data in subdirectories of train_dir and test_dir.',
+                default = False,
+            ),
+            dict(
+                names = ['-m', '--model_type'],
+                help = 'Model type. Full built-in models: cyto="cytoplasm model", nuclei="nucleus model", cyto2="cytoplasm model with additional user images", cyto3="super-generalist model". For other built-in models, see https://cellpose.readthedocs.io/en/latest/models.html',
+                default = 'cyto3',
+                choices = ['cyto', 'cyto2', 'cyto3', 'nuclei', 'tissuenet_cp3', 'tissuenet_cp3', 'livecell_cp3', 'yeast_PhC_cp3', 'yeast_BF_cp3', 'bact_phase_cp3', 'bact_fluor_cp3', 'deepbacs_cp3', 'cyto2_cp3', 'CP', 'CPx', 'TN1', 'TN2', 'TN3', 'LC1', 'LC2', 'LC3', 'LC4'],
+                type = str,
+            ),
+            dict(
+                names = ['-c', '--channels'],
+                help = 'Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.',
+                default = '[0,0]',
+                type = str,
+            ),
+            dict(
+                names = ['-g', '--use_gpu'],
+                help = 'Use GPU (default is CPU).',
+                default = False,
+            ),
+            dict(
+                names = ['-sn', '--skip_normalizaton'],
+                help = 'Whether to sktip the data normalization.',
+                default = True,
+            ),
+            dict(
+                names = ['-wd', '--weight_decay'],
+                help = 'Weight decay for the optimizer.',
+                default = 1e-05,
+                type = float,
+            ),
+            dict(
+                names = ['-sdg', '--SDG'],
+                help = 'Whether to use SGD as optimization instead of RAdam.',
+                default = False,
+            ),
+            dict(
+                names = ['-lr', '--learning_rate'],
+                help = 'Learning rate for the training.',
+                default = 0.005,
+                type = float,
+            ),
+            dict(
+                names = ['-ne', '--n_epochs'],
+                help = 'Number of times to go through the whole training set during training.',
+                default = 2000,
+                type = int,
+            ),
+            dict(
+                names = ['-mn', '--model_name'],
+                help = 'Name of the new network.',
+                default = None,
+                type = str,
+            ),
+            dict(
+                names = ['-e', '--evaluate'],
+                help = 'Whether to evaluate the model after training.',
+                default = False,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--out'],
+                help = 'The output path.',
+                default = '[node_folder]/model/',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -91,9 +162,3 @@ class Tool:
             print(f'[[4/4]] Skip model evaluation')
 
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

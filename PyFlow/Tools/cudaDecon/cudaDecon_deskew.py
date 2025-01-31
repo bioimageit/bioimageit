@@ -1,5 +1,4 @@
 import sys
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -8,21 +7,62 @@ class Tool:
     dependencies = dict(conda=['conda-forge::pycudadecon|linux-64,win-64'], pip=['scikit-image==0.24.0'])
     environment = 'condadecon'
     test = ['--input_image', 'deskew.tif', '--output_image', 'deskewed.tif']
-    
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("condaDecon", description="CUDA/C++ implementation of an accelerated Richardson Lucy Deconvolution algorithm.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-dx', '--dxdata', help='XY Pixel size of image volume.', type=float, default=0.1)
-        inputs_parser.add_argument('-dz', '--dzdata', help='Z-step size in image volume. In a typical light sheet stage-scanning acquisition, this corresponds to the step size that the stage takes between planes, NOT the final Z-step size between planeds after deskewing along the optical axis of the detection objective.', type=float, default=0.5)
-        inputs_parser.add_argument('-a', '--angle', help='Deskew angle (usually, angle between sheet and axis of stage motion).', type=float, default=31.5)
-        inputs_parser.add_argument('-w', '--width', help='If not 0, crop output image to specified width', type=int, default=0)
-        inputs_parser.add_argument('-s', '--shift', help='If not 0, shift image center by this value', type=int, default=0)
-        inputs_parser.add_argument('-pv', '--pad_val', help='Value to pad image with when deskewing. If None the median value of the last Z plane will be used.', type=int, default=None)
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg{input_image.exts}', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+        
+    name = "condaDecon"
+    description = "CUDA/C++ implementation of an accelerated Richardson Lucy Deconvolution algorithm."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['-dx', '--dxdata'],
+                help = 'XY Pixel size of image volume.',
+                default = 0.1,
+                type = float,
+            ),
+            dict(
+                names = ['-dz', '--dzdata'],
+                help = 'Z-step size in image volume. In a typical light sheet stage-scanning acquisition, this corresponds to the step size that the stage takes between planes, NOT the final Z-step size between planeds after deskewing along the optical axis of the detection objective.',
+                default = 0.5,
+                type = float,
+            ),
+            dict(
+                names = ['-a', '--angle'],
+                help = 'Deskew angle (usually, angle between sheet and axis of stage motion).',
+                default = 31.5,
+                type = float,
+            ),
+            dict(
+                names = ['-w', '--width'],
+                help = 'If not 0, crop output image to specified width',
+                default = 0,
+                type = int,
+            ),
+            dict(
+                names = ['-s', '--shift'],
+                help = 'If not 0, shift image center by this value',
+                default = 0,
+                type = int,
+            ),
+            dict(
+                names = ['-pv', '--pad_val'],
+                help = 'Value to pad image with when deskewing. If None the median value of the last Z plane will be used.',
+                default = None,
+                type = int,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output_image'],
+                help = 'The output image path.',
+                default = '{input_image.stem}_stackreg{input_image.exts}',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -44,9 +84,3 @@ class Tool:
         print(f'[[3/3]] Save image')
         self.io.imsave(args.output_image, out_im)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

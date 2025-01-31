@@ -1,25 +1,36 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'test.png', '--out', 'test_nuclei_count.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto count with channels", description="Count particles with channels in clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--spot_sigma', type = str, help = 'Spot sigma', default=20)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_count.csv')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto count with channels"
+    description = "Count particles with channels in clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--spot_sigma'],
+                help = 'Spot sigma',
+                default = 20,
+                type = str,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output csv file path',
+                default = '{input_image.stem}_count.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -128,9 +139,3 @@ class Tool(ClEsperantoTool):
             f.write("rb = " + str(number_of_double_rb) + "\t")
             f.write("rg = " + str(number_of_double_rg))
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

@@ -1,6 +1,5 @@
 import sys
 from importlib import import_module
-import argparse
 import json
 from pathlib import Path
 
@@ -11,21 +10,61 @@ class Tool:
     environment = 'cellpose'
     test = ['--input_image', 'img02.png', '--segmentation', 'img02_segmentation.png', '--visualization', 'img02_segmentation.npy']
     modelType = None
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Cellpose", description="Segment cells with cellpose.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-m', '--model_type', help='Model type. “cyto”=cytoplasm model; “nuclei”=nucleus model; “cyto2”=cytoplasm model with additional user images; “cyto3”=super-generalist model.', default='cyto', choices=['cyto', 'nuclei', 'cyto2', 'cyto3'], type=str)
-        inputs_parser.add_argument('-g', '--use_gpu', help='Use GPU (default is CPU).', action='store_true')
-        inputs_parser.add_argument('-a', '--auto_diameter', help='Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.', action='store_true')
-        inputs_parser.add_argument('-d', '--diameter', help='Estimate of the cell diameters (in pixels).', default=30, type=int)
-        inputs_parser.add_argument('-c', '--channels', help='Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.', default='[0,0]', type=str)
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-s', '--segmentation', help='The output segmentation path.', default='{input_image.stem}_segmentation.png', type=Path)
-        outputs_parser.add_argument('-v', '--visualization', help='The output visualisation path.', default='{input_image.stem}_visualization.npy', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "Cellpose"
+    description = "Segment cells with cellpose."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['-m', '--model_type'],
+                help = 'Model type. “cyto”=cytoplasm model; “nuclei”=nucleus model; “cyto2”=cytoplasm model with additional user images; “cyto3”=super-generalist model.',
+                default = 'cyto',
+                choices = ['cyto', 'nuclei', 'cyto2', 'cyto3'],
+                type = str,
+            ),
+            dict(
+                names = ['-g', '--use_gpu'],
+                help = 'Use GPU (default is CPU).',
+                default = False,
+            ),
+            dict(
+                names = ['-a', '--auto_diameter'],
+                help = 'Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.',
+                default = False,
+            ),
+            dict(
+                names = ['-d', '--diameter'],
+                help = 'Estimate of the cell diameters (in pixels).',
+                default = 30,
+                type = int,
+            ),
+            dict(
+                names = ['-c', '--channels'],
+                help = 'Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.',
+                default = '[0,0]',
+                type = str,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-s', '--segmentation'],
+                help = 'The output segmentation path.',
+                default = '{input_image.stem}_segmentation.png',
+                type = Path,
+            ),
+            dict(
+                names = ['-v', '--visualization'],
+                help = 'The output visualisation path.',
+                default = '{input_image.stem}_visualization.npy',
+                type = Path,
+            ),
+    ]
 
     def processData(self, args):
 
@@ -78,9 +117,3 @@ class Tool:
             else:
                 print('Segmentation was not generated because no masks were found.')
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

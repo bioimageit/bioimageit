@@ -1,32 +1,78 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'IXMtest_A02_s9.tif', '--out', 'IXMtest_A02_s9_mask.tif']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Segmentation", description="Segment with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--sigma_spot_detection', type = float, help = 'sigma_spot_detection')
-        inputs_parser.add_argument('--sigma_outline', type = float, help = 'sigma_outline')
-        inputs_parser.add_argument('--voxel_size_x', type = float, help = 'voxel_size_x')
-        inputs_parser.add_argument('--voxel_size_y', type = float, help = 'voxel_size_y')
-        inputs_parser.add_argument('--voxel_size_z', type = float, help = 'voxel_size_z')
-        inputs_parser.add_argument('--radius_x', type = float, help = 'radius_x')
-        inputs_parser.add_argument('--radius_y', type = float, help = 'radius_y')
-        inputs_parser.add_argument('--radius_z', type = float, help = 'radius_z')
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'Output image path', default='{input_image.stem}_segmentation{input_image.exts}')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Segmentation"
+    description = "Segment with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--sigma_spot_detection'],
+                help = 'sigma_spot_detection',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--sigma_outline'],
+                help = 'sigma_outline',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--voxel_size_x'],
+                help = 'voxel_size_x',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--voxel_size_y'],
+                help = 'voxel_size_y',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--voxel_size_z'],
+                help = 'voxel_size_z',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--radius_x'],
+                help = 'radius_x',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--radius_y'],
+                help = 'radius_y',
+                default = None,
+                type = float,
+            ),
+            dict(
+                names = ['--radius_z'],
+                help = 'radius_z',
+                default = None,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'Output image path',
+                default = '{input_image.stem}_segmentation{input_image.exts}',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -95,9 +141,3 @@ class Tool(ClEsperantoTool):
 
         self.io.imsave(output, segmented)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

@@ -1,27 +1,42 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'segmentation.tif', '--sigma_x', '1', '--sigma_y', '1', '--out', 'segmentation_count.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Count objects", description="Count objects with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-
-        inputs_parser.add_argument('--sigma_x', type = float, help = 'sigma_x', default=0)
-        inputs_parser.add_argument('--sigma_y', type = float, help = 'sigma_y', default=0)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'output file path', default='{input_image.stem}_count.csv')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Count objects"
+    description = "Count objects with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--sigma_x'],
+                help = 'sigma_x',
+                default = 0,
+                type = float,
+            ),
+            dict(
+                names = ['--sigma_y'],
+                help = 'sigma_y',
+                default = 0,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output file path',
+                default = '{input_image.stem}_count.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -62,9 +77,3 @@ class Tool(ClEsperantoTool):
         with open(args.out, 'w') as f:
             f.write(str(num_labels))
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

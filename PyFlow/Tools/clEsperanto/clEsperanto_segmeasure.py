@@ -1,24 +1,36 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'test.png', '--out', 'test_segmeasure.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Seg-measure", description="Detect hot spots / local maxima / beads in an image and how to measure their FWHM. To make the algorithm work, the beads should be sufficiently sparse. .", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--scalar', type = float, help = 'scalar for threshold', default=1)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_segmeasure.csv')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Seg-measure"
+    description = "Detect hot spots / local maxima / beads in an image and how to measure their FWHM. To make the algorithm work, the beads should be sufficiently sparse. ."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--scalar'],
+                help = 'scalar for threshold',
+                default = 1,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output csv file path',
+                default = '{input_image.stem}_segmeasure.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -78,9 +90,3 @@ class Tool(ClEsperantoTool):
             wr.writerow(("bbox_width","bbox_height"))
             wr.writerows(export_data)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

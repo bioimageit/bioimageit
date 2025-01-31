@@ -1,4 +1,3 @@
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -6,24 +5,69 @@ class Tool:
     categories = ['Deconvolution']
     dependencies = dict(python='3.9', conda=['sylvainprigent::simglib=0.1.2|osx-64,win-64,linux-64'], pip=[])
     environment = 'simglib'
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("SPITFIR(e)", description="SPITFIR(e) deconvolution.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-
-        inputs_parser.add_argument("--input", type=Path, help="Input Image", required=True)
-        inputs_parser.add_argument("--type", choices=['2D', '2D Slice', '3D'], help="Perform 2D, 2D Slice or 3D deconvolution.", default='2D', type=str)
-        inputs_parser.add_argument("--sigma", type=float, help="Gaussian PSF width (for 2D and 2D Slice only)", default=1.5)
-        inputs_parser.add_argument("--psf", type=Path, help="PSF Image (for 3D only)")
-        inputs_parser.add_argument("--regularization", type=float, help="Regularization parameter pow(2,-x)", default=12)
-        inputs_parser.add_argument("--weighting", type=float, help="Weighting", default=0.6)
-        inputs_parser.add_argument("--method", choices=['HV', 'SV'], default='HV', help="Method for regularization")
-        inputs_parser.add_argument("--padding", action='store_true', help="Add padding to process border pixels")
-
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument("-o", "--output", help="Output path for the deconvolved image.", default="{input.name}_deconvolved{input.exts}", type=Path)
-        return parser, dict(input=dict(autoColumn=True))
+    
+    name = "SPITFIR(e)"
+    description = "SPITFIR(e) deconvolution."
+    inputs = [
+            dict(
+                names = ['--input'],
+                help = 'Input Image',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--type'],
+                help = 'Perform 2D, 2D Slice or 3D deconvolution.',
+                default = '2D',
+                choices = ['2D', '2D Slice', '3D'],
+                type = str,
+            ),
+            dict(
+                names = ['--sigma'],
+                help = 'Gaussian PSF width (for 2D and 2D Slice only)',
+                default = 1.5,
+                type = float,
+            ),
+            dict(
+                names = ['--psf'],
+                help = 'PSF Image (for 3D only)',
+                default = None,
+                type = Path,
+            ),
+            dict(
+                names = ['--regularization'],
+                help = 'Regularization parameter pow(2,-x)',
+                default = 12,
+                type = float,
+            ),
+            dict(
+                names = ['--weighting'],
+                help = 'Weighting',
+                default = 0.6,
+                type = float,
+            ),
+            dict(
+                names = ['--method'],
+                help = 'Method for regularization',
+                default = 'HV',
+                choices = ['HV', 'SV'],
+            ),
+            dict(
+                names = ['--padding'],
+                help = 'Add padding to process border pixels',
+                default = False,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output'],
+                help = 'Output path for the deconvolved image.',
+                default = '{input.name}_deconvolved{input.exts}',
+                type = Path,
+            ),
+    ]
+    
     def processData(self, args):
         print('Performing SPITFIR(e) 2D deconvolution')
         import subprocess
@@ -38,8 +82,3 @@ class Tool:
             commandArgs += ['-psf', args.psf]
         return subprocess.run([str(ca) for ca in commandArgs])
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.processData(args)

@@ -1,25 +1,36 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'test.png', '--out', 'test_intensity_stats.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Intensity stats", description="Intensity stats with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--spot_sigma', type = str, help = 'Spot sigma', default=20)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'output csv file path', default='{input_image.stem}_beads.csv')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Intensity stats"
+    description = "Intensity stats with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--spot_sigma'],
+                help = 'Spot sigma',
+                default = 20,
+                type = str,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'output csv file path',
+                default = '{input_image.stem}_beads.csv',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -106,9 +117,3 @@ class Tool(ClEsperantoTool):
             wr.writerow(("intensity_vector_bg","intensity_vector_br","intensity_vector_gb","intensity_vector_gr","intensity_vector_rb","intensity_vector_rg"))
             wr.writerows(export_data)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

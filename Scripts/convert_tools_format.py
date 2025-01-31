@@ -1,4 +1,5 @@
 from importlib import import_module
+import os
 import sys
 import re
 from pathlib import Path
@@ -12,6 +13,7 @@ def convert_parser_to_dict(parser, custom_settings):
     outputs = []
     
     for action in parser._actions:
+
         if action.dest == 'help': continue
         arg_dict = {
             'names': action.option_strings,
@@ -72,7 +74,8 @@ def dict_to_formatted_string(d):
     for key in ['name', 'description']:
         lines.append(f'    {key} = "{d[key]}"')
     
-    for section in ['inputs', 'outputs']:
+    for section in ['inputs', 'advanced', 'outputs']:
+        if section == 'advanced' and len(d[section]) == 0: continue
         lines.append(f'    {section} = [')
         for item in d[section]:
             lines.append('        ' + format_dict(item) + ',')
@@ -84,13 +87,17 @@ def dict_to_formatted_string(d):
 def convert_script(script_path, tool_description):
     with open(script_path, "r", encoding="utf-8") as file:
         content = file.read()
+    
+    print()
+    print(script_path)
+    import ipdb ; ipdb.set_trace()
 
     # Extract the content before the getArgumentParser function
     before_gap_match = re.search(r'(.*?)(?=def getArgumentParser\(.*?\):)', content, re.DOTALL)
     before_gap = before_gap_match.group(0) if before_gap_match else content
 
     # Extract the content after the getArgumentParser function
-    after_gap_match = re.search(r'return parser, dict[^\n]*(.*)', content, re.DOTALL)
+    after_gap_match = re.search(r'return parser, [^\n]*(.*)', content, re.DOTALL)
     after_gap = after_gap_match.group(1) if after_gap_match else content
 
     new_content = dict_to_formatted_string(tool_description)
@@ -99,7 +106,7 @@ def convert_script(script_path, tool_description):
     result_content = before_gap.replace('\n    @staticmethod\n', '') + '\n' + new_content + after_gap
     
     result_content = result_content.split("if __name__ == '__main__':")[0]
-    result_content.replace('import argparse\n', '')
+    result_content = result_content.replace('import argparse\n', '')
 
     # Write the new content
     with open(script_path, "w", encoding="utf-8") as file:
@@ -107,20 +114,32 @@ def convert_script(script_path, tool_description):
 
 base_dir = "/Users/amasson/Travail/bioimageit/PyFlow/Tools"
 
+def getImportPath(toolPath):
+    return '.'.join(toolPath.resolve().relative_to(Path(base_dir)).with_suffix('').parts)
+
+sys.path.append(base_dir)
+
 for tool_folder in sorted(list(Path(base_dir).iterdir())):
     if not tool_folder.is_dir(): continue
+    
     for file in sorted(list(tool_folder.iterdir())):
-        if file.suffix == ".py" and file.name != 'cellpose_segment.py':
+
+        if file.suffix == ".py": # and file.name == 'convert_image.py':
+            
+            os.chdir(str(file.parent))
+            sys.path.append(str(file.parent))
 
             # Get the parser and custom settings from the getArgumentParser function
+            module = import_module(getImportPath(file))
+            
+            if not hasattr(module, 'Tool'): continue
+            if not hasattr(module.Tool, 'getArgumentParser'): continue
 
-            sys.path.append(str(file.parent))
-            # module = import_module(file.stem)
-            import importlib
-            spec = importlib.util.spec_from_file_location(file.stem, file)
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[file.stem] = module
-            spec.loader.exec_module(module)
+            # import importlib
+            # spec = importlib.util.spec_from_file_location(file.stem, file)
+            # module = importlib.util.module_from_spec(spec)
+            # sys.modules[file.stem] = module
+            # spec.loader.exec_module(module)
 
             parser, custom_settings = module.Tool.getArgumentParser()
 

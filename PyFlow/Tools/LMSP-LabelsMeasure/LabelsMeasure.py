@@ -1,5 +1,4 @@
 import sys
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -8,18 +7,44 @@ class Tool:
     dependencies = dict(python='3.12', conda=[], pip=['pandas==2.2.2', 'scikit-image==0.24.0', 'scipy==1.14.1'])
     environment = 'scikit-image_scipy'
     test = ['--input_image', 'img02.png', '--label', 'img02_segmentation.png', '--pixel', '4', '--out', 'measurements.csv']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("LabelsMeasure", description="LabelsMeasure provides the tools to generate the regions of interest from label images.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('--label', type = Path, help = 'Label image path, from cellpose for instance.', required=True)
-        inputs_parser.add_argument('--pixel', type = int, help = 'Size of the pixel erosion', required=True)
-        inputs_parser.add_argument('--binary_map', action='store_true', help='If false, labels in your black & white image')
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output csv path.', default='{input_image.stem}_measurements.csv', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "LabelsMeasure"
+    description = "LabelsMeasure provides the tools to generate the regions of interest from label images."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--label'],
+                help = 'Label image path, from cellpose for instance.',
+                required = True,
+                type = Path,
+            ),
+            dict(
+                names = ['--pixel'],
+                help = 'Size of the pixel erosion',
+                required = True,
+                type = int,
+            ),
+            dict(
+                names = ['--binary_map'],
+                help = 'If false, labels in your black & white image',
+                default = False,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--out'],
+                help = 'The output csv path.',
+                default = '{input_image.stem}_measurements.csv',
+                type = Path,
+            ),
+    ]
+    
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
@@ -83,9 +108,3 @@ class Tool:
         table.to_csv(args.out)
         print("Table saved as {}".format(args.out))
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

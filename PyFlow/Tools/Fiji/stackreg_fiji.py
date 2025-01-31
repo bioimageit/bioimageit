@@ -1,5 +1,4 @@
 import sys
-import argparse
 from pathlib import Path
 
 class Tool:
@@ -26,16 +25,34 @@ class Tool:
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'])
     environment = 'fiji'
     test = ['--input_image', 'celegans_stack.tif', '--output_image', 'stackreg.tif']
+        
+    name = "StackReg"
+    description = "Stack registration with the StackReg Fiji plugin."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['-t', '--transformation'],
+                help = 'The transformation applied on each slice.',
+                default = 'Rigid Body',
+                choices = ['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'],
+                type = str,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output_image'],
+                help = 'The output image path.',
+                default = '{input_image.stem}_stackreg{input_image.exts}',
+                type = Path,
+            ),
+    ]
     
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("StackReg", description="Stack registration with the StackReg Fiji plugin.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        inputs_parser.add_argument('-t', '--transformation', help='The transformation applied on each slice.', choices=['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'], type=str, default='Rigid Body')
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--output_image', help='The output image path.', default='{input_image.stem}_stackreg{input_image.exts}', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')
@@ -52,9 +69,3 @@ class Tool:
         return subprocess.run(command)
         
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

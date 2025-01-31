@@ -1,27 +1,47 @@
 import sys
-import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
 
     test = ['--input_image', 'AICS_12_134_C=0.tif', '--corrected_binary', '--out', 'AICS_12_134_C=0_mask.tif']
-
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("clEsperanto Cell Segmentation", description="Cell segmentation with clEsperanto.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        
-        inputs_parser.add_argument('--input_image', type = Path, help = 'Input image path')
-        inputs_parser.add_argument('--corrected_binary', action='store_true', help = 'if non corrected is not good')
-        inputs_parser.add_argument('--radius_x', type = float, help = 'radius_x', default=10)
-        inputs_parser.add_argument('--radius_y', type = float, help = 'radius_y', default=10)
-        
-        outputs_parser = parser.add_argument_group('outputs')
-
-        outputs_parser.add_argument('--out', type=Path, help = 'Output image path', default='{input_image.stem}_segmentation{input_image.exts}')
-
-        return parser, dict( input_image = dict(autoColumn=True) )
+    
+    name = "clEsperanto Cell Segmentation"
+    description = "Cell segmentation with clEsperanto."
+    inputs = [
+            dict(
+                names = ['--input_image'],
+                help = 'Input image path',
+                default = None,
+                type = Path,
+                autoColumn = True,
+            ),
+            dict(
+                names = ['--corrected_binary'],
+                help = 'if non corrected is not good',
+                default = False,
+            ),
+            dict(
+                names = ['--radius_x'],
+                help = 'radius_x',
+                default = 10,
+                type = float,
+            ),
+            dict(
+                names = ['--radius_y'],
+                help = 'radius_y',
+                default = 10,
+                type = float,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['--out'],
+                help = 'Output image path',
+                default = '{input_image.stem}_segmentation{input_image.exts}',
+                type = Path,
+            ),
+    ]
 
     def initialize(self, args):
         print('Loading libraries...')
@@ -61,9 +81,3 @@ class Tool(ClEsperantoTool):
 
         self.io.imsave(output, labels)
 
-if __name__ == '__main__':
-    tool = Tool()
-    parser, _ = tool.getArgumentParser()
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)
