@@ -11,36 +11,34 @@ class Tool():
     # - the pip packages which will be installed with 'pip install packageName'
     dependencies = dict(python='==3.10', conda=[], pip=[])
 
-    # Describe the tool inputs & outputs with ArgumentParser
-    @staticmethod
-    def getArgumentParser():
-        parser = argparse.ArgumentParser("Tool name", description="Tool description", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        inputs_parser = parser.add_argument_group('inputs')
-        inputs_parser.add_argument('-i', '--input_image', help='The input image path.', required=True, type=Path)
-        outputs_parser = parser.add_argument_group('outputs')
-        outputs_parser.add_argument('-o', '--out', help='The output mask path.', default='{input_image.stem}_segmentation.png', type=Path)
-        return parser, dict( input_image = dict(autoColumn=True) )
-
-    # Initialize your tool
+    name = "Tool name"
+    description = "Tool description."
+    inputs = [
+            dict(
+                names = ['-i', '--input_image'],
+                help = 'The input image path.',
+                required = True,
+                type = Path,
+                autoColumn = True,
+            ),
+    ]
+    outputs = [
+            dict(
+                names = ['-o', '--output_image'],
+                help = 'The output image.',
+                default = '{input_image.stem}_detections{input_image.exts}',
+                type = Path,
+            ),
+    ]
+    
+    # Initialize your tool (optional)
     def initialize(self, args):
         print('Loading libraries...')
-        # Import your models
-        # For example
-        # self.models = import_module('cellpose.models')
     
-    # Process the data frame
+    # Process the data frame (optional)
     def processDataFrame(self, dataFrame, argsList):
         return dataFrame
     
     # Process the data
     def processData(self, args):
         return
-
-if __name__ == "__main__":
-    # When this script is called directly: instanciate the tool, parse the arguments and launch the processing
-    tool = Tool()
-    from ToolParser import create_parser
-    parser = create_parser(Tool)
-    args = parser.parse_args()
-    tool.initialize(args)
-    tool.processData(args)

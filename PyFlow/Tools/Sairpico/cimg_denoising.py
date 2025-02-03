@@ -67,6 +67,7 @@ class Tool:
                 names = ['--np'],
                 help = 'Add artificial Poisson noise before applying the algorithm',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--msg'],
@@ -78,6 +79,7 @@ class Tool:
                 names = ['--stab'],
                 help = 'Variance stabilization for Poisson noise removal',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--patch'],

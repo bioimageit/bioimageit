@@ -20,6 +20,7 @@ class Tool(ClEsperantoTool):
                 names = ['--corrected_binary'],
                 help = 'if non corrected is not good',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--radius_x'],

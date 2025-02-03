@@ -40,31 +40,37 @@ class Tool:
                 names = ['--stitch'],
                 help = 'Stitch input files with similar names.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--separate'],
                 help = 'Split RGB images into separate channels.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--merge'],
                 help = 'Combine separate channels into RGB image.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--expand'],
                 help = 'Expand indexed color to RGB.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--bigtiff'],
                 help = 'Force BigTIFF files to be written.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--nobigtiff'],
                 help = 'Do not automatically switch to BigTIFF.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--compression'],
@@ -82,11 +88,13 @@ class Tool:
                 names = ['--noflat'],
                 help = 'Do not flatten subresolutions.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--cache'],
                 help = 'Cache the initialized reader.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--cache-dir'],
@@ -98,6 +106,7 @@ class Tool:
                 names = ['--no-sas'],
                 help = 'Do not preserve the OME-XML StructuredAnnotation elements.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--map'],
@@ -115,26 +124,31 @@ class Tool:
                 names = ['--nogroup'],
                 help = 'Force multi-file datasets to be read as individual files.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--nolookup'],
                 help = 'Disable the conversion of lookup tables.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--autoscale'],
                 help = 'Automatically adjust brightness and contrast before converting; this may mean that the original pixel values are not preserved.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--overwrite'],
                 help = 'Always overwrite the output file, if it already exists.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--nooverwrite'],
                 help = 'Never overwrite the output file, if it already exists.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--crop'],
@@ -164,16 +178,19 @@ class Tool:
                 names = ['--padded'],
                 help = 'Filename indexes for series, z, c and t will be zero padded.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--novalid'],
                 help = 'Will not validate the OME-XML for the output file.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--validate'],
                 help = 'Will validate the generated OME-XML for the output file.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['--tilex'],

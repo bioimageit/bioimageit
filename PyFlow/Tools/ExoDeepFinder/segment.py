@@ -30,6 +30,7 @@ class Tool(ExoDeepFinderTool):
                 names = ['-v', '--visualization'],
                 help = 'Generate visualization images.',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

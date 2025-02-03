@@ -32,11 +32,13 @@ class Tool:
                 names = ['-g', '--use_gpu'],
                 help = 'Use GPU (default is CPU).',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-a', '--auto_diameter'],
                 help = 'Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-d', '--diameter'],

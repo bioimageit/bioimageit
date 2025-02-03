@@ -34,6 +34,7 @@ class Tool:
                 names = ['--binary_map'],
                 help = 'If false, labels in your black & white image',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

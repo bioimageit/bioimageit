@@ -24,6 +24,7 @@ class Tool(ExoDeepFinderTool):
                 names = ['-klu', '--keep_labels_unchanged'],
                 help = 'By default, bright spots are removed (labels 1 are set to 0) and exocytose events (labels 2) are set to 1. This option skip this step, so labels are kept unchanged.',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

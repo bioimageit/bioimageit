@@ -39,6 +39,7 @@ class Tool:
                 names = ['-lold', '--look_one_level_down'],
                 help = 'Whether to look for data in subdirectories of train_dir and test_dir.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-m', '--model_type'],
@@ -57,11 +58,13 @@ class Tool:
                 names = ['-g', '--use_gpu'],
                 help = 'Use GPU (default is CPU).',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-sn', '--skip_normalizaton'],
                 help = 'Whether to sktip the data normalization.',
                 default = True,
+                type = bool
             ),
             dict(
                 names = ['-wd', '--weight_decay'],
@@ -73,6 +76,7 @@ class Tool:
                 names = ['-sdg', '--SDG'],
                 help = 'Whether to use SGD as optimization instead of RAdam.',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-lr', '--learning_rate'],
@@ -96,6 +100,7 @@ class Tool:
                 names = ['-e', '--evaluate'],
                 help = 'Whether to evaluate the model after training.',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

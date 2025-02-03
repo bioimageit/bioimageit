@@ -45,6 +45,7 @@ class Tool:
                 names = ['--padding'],
                 help = 'Add padding to process border pixels',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

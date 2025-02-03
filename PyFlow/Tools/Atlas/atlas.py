@@ -41,6 +41,7 @@ class Tool:
                 names = ['-v', '--verbose'],
                 help = 'Verbose mode.',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [

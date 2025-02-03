@@ -58,6 +58,7 @@ class Tool:
                 names = ['-ts', '--time_series'],
                 help = 'Consider the image as a sequence (for 3D only).',
                 default = False,
+                type = bool,
             ),
             dict(
                 names = ['-nfr', '--n_frames'],

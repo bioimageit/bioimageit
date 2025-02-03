@@ -65,6 +65,7 @@ class Tool:
                 names = ['--log_scale'],
                 help = 'Log scale (for DoH and LoG)',
                 default = False,
+                type = bool,
             ),
     ]
     outputs = [
