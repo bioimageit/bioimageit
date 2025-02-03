@@ -52,6 +52,7 @@ class Tool:
                 help = 'Method for regularization',
                 default = 'HV',
                 choices = ['HV', 'SV'],
+                type = str,
             ),
             dict(
                 names = ['--padding'],

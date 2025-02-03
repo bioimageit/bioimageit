@@ -77,6 +77,7 @@ class Tool:
                 help = 'Specify the codec to use when saving images.',
                 default = '',
                 choices = ['', 'Uncompressed', 'LZW', 'JPEG-2000', 'JPEG-2000 Lossy', 'JPEG', 'zlib'],
+                type = str,
             ),
             dict(
                 names = ['--series'],

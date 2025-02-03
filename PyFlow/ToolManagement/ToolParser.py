@@ -1,9 +1,9 @@
 import argparse
 
-specialKeys = ['names', 'autoColumn']
+specialKeys = ['names', 'autoColumn', 'autoIncrement']
 
 def add_argument(parser: argparse._ArgumentGroup, arg: dict):
-    if arg['type'] == bool:
+    if 'type' in arg and arg['type'] == bool:
         arg = arg.copy()
         arg['action'] = 'store_true' if arg['default'] else 'store_false'
         del arg['type']
