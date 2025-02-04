@@ -6,7 +6,7 @@ class Tool:
     # Taken from https://py.imagej.net/en/latest/Puncta-Segmentation.html
     categories = ['Fiji', 'Segmentation']
     dependencies = dict(python='3.10', conda=['conda-forge::pyimagej==1.5.0', 'conda-forge::openjdk=11'], pip=['numpy==1.26.4'])
-    additionalActivateCommands = dict(all=[], mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"'])
+    additionalActivateCommands = dict(all=[], mac=['export DYLD_FALLBACK_LIBRARY_PATH="/usr/local/lib/"'])
     environment = 'pyimagej'
     test = ['--input_image', 'test_still.tif', '--output_path', 'test_still_puncta.csv']
         

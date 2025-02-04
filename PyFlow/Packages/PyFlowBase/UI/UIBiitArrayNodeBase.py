@@ -34,8 +34,8 @@ class ColumnValueWidget(QWidget):
 
     def __init__(self, input, node, parent=None):
         super(ColumnValueWidget, self).__init__(parent=parent)
-        self.name = input.name
-        self.inputWidget = self.createInput(input.name, input.type, input.description, input.default_value, input.select_info if hasattr(input, 'select_info') else None)
+        self.name = input['name']
+        self.inputWidget = self.createInput(self.name, input['type'], input['help'], input['default'], input['choices'] if 'choices' in input else None)
         self.node = node
         self.setContentsMargins(0, 0, 0, 0)
         self.layout = QHBoxLayout(self)
@@ -45,12 +45,12 @@ class ColumnValueWidget(QWidget):
         self.typeSelector.addItem('Value')
         self.layout.addWidget(self.typeSelector)
         self.layout.addWidget(self.inputWidget)
-        type = node.parameters['inputs'][input.name]['type']
+        type = node.parameters['inputs'][self.name]['type']
         data = node.getDataFrame()
         isDataframe = isinstance(data, pandas.DataFrame)
         node.inArray.setClean()
-        defaultColumnName = node.parameters['inputs'][input.name]['columnName'] if not isDataframe or node.parameters['inputs'][input.name]['columnName'] in data.columns else data.columns[-1]
-        node.parameters['inputs'][input.name]['columnName'] = defaultColumnName
+        defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1]
+        node.parameters['inputs'][self.name]['columnName'] = defaultColumnName
         # self.columnNameInput = createInputWidget('StringPin', lambda value: self.updateNodeParameters(value, 'columnName'), defaultColumnName, DEFAULT_WIDGET_VARIANT)
         # self.layout.addWidget(self.columnNameInput)
         self.typeSelector.activated.connect(self.changeTypeValue)
@@ -58,17 +58,17 @@ class ColumnValueWidget(QWidget):
         # self.columnNameInput.setWidgetValue(defaultColumnName)
         # self.columnNameInput.blockWidgetSignals(False)
         if isinstance(self.inputWidget, InputWidgetRaw):
-            if node.parameters['inputs'][input.name]['value'] is not None:
+            if node.parameters['inputs'][self.name]['value'] is not None:
                 self.inputWidget.blockWidgetSignals(True)
-                self.inputWidget.setWidgetValue(node.parameters['inputs'][input.name]['value'])
+                self.inputWidget.setWidgetValue(node.parameters['inputs'][self.name]['value'])
                 self.inputWidget.blockWidgetSignals(False)
         if isinstance(self.inputWidget, QComboBox):
             self.inputWidget.blockSignals(True)
-            self.inputWidget.setCurrentText(node.parameters['inputs'][input.name]['value'])
+            self.inputWidget.setCurrentText(node.parameters['inputs'][self.name]['value'])
             self.inputWidget.blockSignals(False)
         self.columnSelector = None
         index = 0 if type == 'columnName' and isDataframe else 1
-        if isDataframe and not (hasattr(input, 'static') and input.static):
+        if isDataframe and not ('static' in input and input['static']):
             # self.columnNameInput.hide()
             self.columnSelector = QComboBox()
             for column in data.columns:
@@ -207,10 +207,10 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
         # super(UIBiitArrayNodeBase, self).createInputWidgets(inputsCategory, inGroup, False)
         tool = self._rawNode.__class__.tool
         
-        for input in tool.info.inputs:
-            if input.is_advanced: continue
+        for input in tool.inputs:
+            if input['advanced']: continue
             iw = ColumnValueWidget(input, self._rawNode, inputsCategory)
-            inputsCategory.addWidget(input.name, iw, group=inGroup)
+            inputsCategory.addWidget(input['name'], iw, group=inGroup)
 
     def updateOutput(self, output, value):
         output['value'] = value
@@ -225,10 +225,10 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
         advancedInputsCategory = CollapsibleFormWidget(headName="Advanced inputs")
 
         tool = self._rawNode.__class__.tool
-        for input in tool.info.inputs:
-            if not input.is_advanced: continue
+        for input in tool.inputs:
+            if not input['advanced']: continue
             iw = ColumnValueWidget(input, self._rawNode, advancedInputsCategory)
-            advancedInputsCategory.addWidget(input.name, iw)
+            advancedInputsCategory.addWidget(input['name'], iw)
         if advancedInputsCategory.Layout.count() > 0:
             propertiesWidget.addWidget(advancedInputsCategory)
             advancedInputsCategory.setCollapsed(True)

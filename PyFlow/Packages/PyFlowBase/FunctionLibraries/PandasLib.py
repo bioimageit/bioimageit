@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+from tkinter.tix import Tree
 import pandas
 from munch import DefaultMunch
 
@@ -31,13 +32,30 @@ class PandasNodeBase(BiitArrayNodeBase):
     
 class ListFiles(PandasNodeBase):
     
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'list_files', inputs=[
-            dict(name='folderPath', description='Folder path', type='path', auto=False),
-            dict(name='filter', description='Filter', default_value='*', type='str'),
-        ], outputs=[
-            dict(name='columnName', description='Column name', type='str', default_value='path'),
-        ])))
-    
+    name = "list_files"
+    description = "List files from compuer."
+    inputs = [
+            dict(
+            names = ['--folderPath'],
+            help = 'Folder path',
+            type = Path,
+            required = True,
+        ),
+        dict(
+            names = ['--filter'],
+            help = 'Filter',
+            type = str,
+            default = '*',
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--columnName'],
+            help = 'Column name',
+            type = str,
+        ),
+    ]
+
     def __init__(self, name):
         super(ListFiles, self).__init__(name)
         # self.inArray.pinHidden = True
@@ -101,18 +119,76 @@ class ListFiles(PandasNodeBase):
 
 class MergeDataFrames(PandasNodeBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'merge_data_frames', inputs=[
-            dict(name='how', description='How', type='str', static=True),
-            dict(name='on', description='On', type='str', static=True),
-            dict(name='left_on', description='Left on', type='str', static=True),
-            dict(name='right_on', description='Right on', type='str', static=True),
-            dict(name='left_index', description='Left index', type='bool', static=True),
-            dict(name='right_index', description='Right index', type='bool', static=True),
-            dict(name='sort', description='Sort', type='bool', static=True),
-            dict(name='left_suffix', description='Left suffix', type='str', static=True, default_value='_x'),
-            dict(name='right_suffix', description='Right suffix', type='str', static=True, default_value='_y'),
-        ], outputs=[])))
-    
+    name = "merge_data_frames"
+    description = "Merge DataFrames."
+    inputs = [
+            dict(
+            names = ['--how'],
+            help = 'How',
+            type = str,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--on'],
+            help = 'On',
+            type = str,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--left_on'],
+            help = 'Left on',
+            type = str,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--right_on'],
+            help = 'Right on',
+            type = str,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--left_index'],
+            help = 'Left index',
+            type = bool,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--right_index'],
+            help = 'Right index',
+            type = bool,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--sort'],
+            help = 'Sort',
+            type = bool,
+            default = None,
+            static=True
+        ),
+        dict(
+            names = ['--left_suffix'],
+            help = 'Left suffix',
+            type = str,
+            default = '_x',
+            static=True
+        ),
+        dict(
+            names = ['--right_suffix'],
+            help = 'Right suffix',
+            type = str,
+            default = '_y',
+            static=True
+        ),
+    ]
+    outputs = [
+    ]
+
     def __init__(self, name):
         super(MergeDataFrames, self).__init__(name, pinStructureIn=StructureType.Multi)
         self.inArray.enableOptions(PinOptions.AllowMultipleConnections)
@@ -135,7 +211,7 @@ class MergeDataFrames(PandasNodeBase):
         if len(data)==0: return
         assert(all([isinstance(d, pandas.DataFrame) for d in data]))
         df = data[0]
-        mergeArgs = { input.name: self.getParameter(input.name, None) for input in self.__class__.tool.info.inputs if self.getParameter(input.name, None) is not None and self.getParameter(input.name, None) != '' and '_suffix' not in input.name}
+        mergeArgs = { input['name']: self.getParameter(input['name'], None) for input in self.__class__.tool.inputs if self.getParameter(input['name'], None) is not None and self.getParameter(input['name'], None) != '' and '_suffix' not in input['name']}
         mergeArgs['suffixes'] = (self.getParameter('left_suffix', None), self.getParameter('right_suffix', None))
         for i in range(len(data)-1):
             df = df.merge(data[i+1], **mergeArgs)
@@ -174,11 +250,27 @@ class ConcatDataFrames(PandasNodeBase):
 
 class ColumnRegex(PandasNodeBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'column_regex', inputs=[
-            dict(name='columnName', description='Column name', type='str', static=True),
-            dict(name='regex', description='Regex', default_value=r"(?P<column1>\w+)_(?P<column2>\w+)", type='str', static=True),
-        ], outputs=[])))
-    
+    name = "column_regex"
+    description = "Filter a column with a regular expression."
+    inputs = [
+            dict(
+            required = True,
+            names = ['--columnName'],
+            help = 'Column name',
+            type = str,
+            static = True,
+        ),
+        dict(
+            names = ['--regex'],
+            help = 'Regex',
+            type = str,
+            default = r'(?P<column1>\w+)_(?P<column2>\w+)',
+            static = True,
+        ),
+    ]
+    outputs = [
+    ]
+
     def __init__(self, name):
         super(ColumnRegex, self).__init__(name, pinStructureIn=StructureType.Multi)
 

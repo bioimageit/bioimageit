@@ -18,7 +18,7 @@ class SimpleITKBase(BiitArrayNodeBase):
 
     @classmethod
     def category(cls):
-        return cls.tool.info.categories if 'categories' in cls.tool.info else 'SimpleITK|Custom'
+        return cls.tool.categories if hasattr(cls.tool, 'categories') else 'SimpleITK|Custom'
     
     def getFirstOuptutColumName(self):
         print('ok')
@@ -31,9 +31,9 @@ class SimpleITKBase(BiitArrayNodeBase):
             for index, row in data.iterrows():
                 # Guess output file extension: find the first input image format
                 suffixes = '.tiff'
-                for input in tool.info.inputs:
-                    if input.type == 'path' and 'image' in input.name and self.getParameter(input.name, row) is not None:
-                        suffixes = ''.join(Path(self.getParameter(input.name, row)).suffixes)
+                for input in tool.inputs:
+                    if input['type'] == Path and 'image' in input['name'] and self.getParameter(input['name'], row) is not None:
+                        suffixes = ''.join(Path(self.getParameter(input['name'], row)).suffixes)
                         break
                 data.at[index, self.getColumnName(outputName)] = self.getOutputDataFolderPath() / f'{outputName}_{index}{suffixes}'
 
@@ -45,9 +45,9 @@ class SimpleITKBase(BiitArrayNodeBase):
         outputData: pandas.DataFrame = self.outArray.currentData()
         for index, row in data.iterrows():
             argValues = []
-            for input in self.tool.info.inputs:
-                parameter = self.getParameter(input.name, row)
-                argValues.append(parameter if input.type != 'path' else sitk.ReadTransform(parameter) if str(parameter).endswith('.tfm') else sitk.ReadImage(parameter))
+            for input in self.tool.inputs:
+                parameter = self.getParameter(input['name'], row)
+                argValues.append(parameter if input['type'] != 'path' else sitk.ReadTransform(parameter) if str(parameter).endswith('.tfm') else sitk.ReadImage(parameter))
             # if 'vector' in inputImage.GetPixelIDTypeAsString():
             #     inputImage = inputImage.ToScalarImage()[self.getParameter('channel', row), :, :]
             result = self.__class__.sitkFunction(*argValues)
@@ -62,17 +62,56 @@ class SimpleITKBase(BiitArrayNodeBase):
 
 class BinaryThreshold(SimpleITKBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'binary_threshold', inputs=[
-            dict(name='image1', description='Input image path', type='path', auto=True),
-            dict(name='channel', description='Channel to threshold', default_value=0, type='integer'),
-            dict(name='lowerThreshold', description='Lower threshold', default_value=0, type='integer'),
-            dict(name='upperThreshold', description='Upper threshold', default_value=255, type='integer'),
-            dict(name='insideValue', description='Inside value', default_value=1, type='integer'),
-            dict(name='outsideValue', description='Outside value', default_value=0, type='integer'),
-        ], outputs=[
-            dict(name='thresholded_image', description='Output image path', type='path'),
-        ])))
-    
+    name = "Binary threshold"
+    description = "SimpleITK Binary threshold."
+    inputs = [
+            dict(
+            names = ['--image1'],
+            help = 'Input image path',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--channel'],
+            help = 'Channel to threshold',
+            type = int,
+            default = 0,
+        ),
+        dict(
+            names = ['--lowerThreshold'],
+            help = 'Lower threshold',
+            type = int,
+            default = 0,
+        ),
+        dict(
+            names = ['--upperThreshold'],
+            help = 'Upper threshold',
+            type = int,
+            default = 255,
+        ),
+        dict(
+            names = ['--insideValue'],
+            help = 'Inside value',
+            type = int,
+            default = 1,
+        ),
+        dict(
+            names = ['--outsideValue'],
+            help = 'Outside value',
+            type = int,
+            default = 0,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--thresholded_image'],
+            help = 'Output image path',
+            type = Path,
+        ),
+    ]
+
+
     def __init__(self, name):
         super(BinaryThreshold, self).__init__(name)
     
@@ -111,13 +150,31 @@ class BinaryThreshold(SimpleITKBase):
     
 class AddScalarToImage(SimpleITKBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'add_scalar_to_images', inputs=[
-            dict(name='image', description='Input image', type='path', auto=True),
-            dict(name='value', description='Value to add', default_value=50, type='integer')
-        ], outputs=[
-            dict(name='out', description='Output image', type='path'),
-        ])))
-    
+    name = "add_scalar_to_images"
+    description = "Add a scalar value to all image values."
+    inputs = [
+            dict(
+            names = ['--image'],
+            help = 'Input image',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--value'],
+            help = 'Value to add',
+            type = int,
+            default = 50,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--out'],
+            help = 'Output image',
+            type = Path,
+        ),
+    ]
+
     def __init__(self, name):
         super(AddScalarToImage, self).__init__(name)
 
@@ -135,12 +192,30 @@ class AddScalarToImage(SimpleITKBase):
     
 class ExtractChannel(SimpleITKBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'extract_channel', inputs=[
-            dict(name='image', description='Input image', type='path', auto=True),
-            dict(name='channel', description='Channel to extract', default_value=0, type='integer'),
-        ], outputs=[
-            dict(name='out', description='Output image', type='path'),
-        ])))
+    name = "extract_channel"
+    description = "Extract an image channel."
+    inputs = [
+            dict(
+            names = ['--image'],
+            help = 'Input image',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--channel'],
+            help = 'Channel to extract',
+            type = int,
+            default = 0,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--out'],
+            help = 'Output image',
+            type = Path,
+        ),
+    ]
     
     def __init__(self, name):
         super(ExtractChannel, self).__init__(name)
@@ -173,13 +248,32 @@ class ExtractChannel(SimpleITKBase):
     
 class SubtractImages(SimpleITKBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'subtract_images', inputs=[
-            dict(name='image1', description='Input image 1', type='path', auto=True),
-            dict(name='image2', description='Input image 2', type='path', auto=True),
-        ], outputs=[
-            dict(name='out', description='Output image', type='path'),
-        ])))
-    
+    name = "subtract_images"
+    description = "Subtract images."
+    inputs = [
+            dict(
+            names = ['--image1'],
+            help = 'Input image 1',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--image2'],
+            help = 'Input image 2',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--out'],
+            help = 'Output image',
+            type = Path,
+        ),
+    ]
+
     def __init__(self, name):
         super(SubtractImages, self).__init__(name)
     
@@ -210,13 +304,30 @@ class SubtractImages(SimpleITKBase):
     
 class ConnectedComponents(SimpleITKBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'connected_components', inputs=[
-            dict(name='image', description='Input image path', type='path', auto=True),
-        ], outputs=[
-            dict(name='labeled_image', description='Output image', type='path'),
-            dict(name='labeled_image_rgb', description='Output rgb image', type='path'),
-        ])))
-    
+    name = "connected_components"
+    description = "Compute connected components in the given binary image."
+    inputs = [
+            dict(
+            names = ['--image'],
+            help = 'Input image path',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--labeled_image'],
+            help = 'Output image',
+            type = Path,
+        ),
+        dict(
+            names = ['--labeled_image_rgb'],
+            help = 'Output rgb image',
+            type = Path,
+        ),
+    ]
+
     def __init__(self, name):
         super(ConnectedComponents, self).__init__(name)
 
@@ -253,16 +364,45 @@ class ConnectedComponents(SimpleITKBase):
         return 
         
 class LabelStatistics(SimpleITKBase):
-
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'connected_components', inputs=[
-            dict(name='image', description='Input image', type='path', auto=True),
-            dict(name='label', description='Input label', type='path', auto=True),
-            dict(name='minSize', description='Min size of the labels', default_value=100, type='integer'),
-            dict(name='maxSize', description='Max size of the labels', default_value=600, type='integer'),
-        ], outputs=[
-            dict(name='connected_component', description='Output connected component', type='path')
-        ])))
     
+    name = "label_statistics"
+    description = "Compute label statistics from a label image."
+    inputs = [
+            dict(
+            names = ['--image'],
+            help = 'Input image',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--label'],
+            help = 'Input label',
+            type = Path,
+            required = True,
+            autoColumn = True,
+        ),
+        dict(
+            names = ['--minSize'],
+            help = 'Min size of the labels',
+            type = int,
+            default = 100,
+        ),
+        dict(
+            names = ['--maxSize'],
+            help = 'Max size of the labels',
+            type = int,
+            default = 600,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--connected_component'],
+            help = 'Output connected component',
+            type = Path,
+        ),
+    ]
+
     def __init__(self, name):
         super(LabelStatistics, self).__init__(name)
 

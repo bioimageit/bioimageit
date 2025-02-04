@@ -8,7 +8,7 @@ from PyFlow import getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
-from PyFlow.ToolManagement.ToolParser import create_parser
+# from PyFlow.ToolManagement.ToolParser import create_parser
 
 # class Status(Enum):
 # 	STOPPED = 1
@@ -53,56 +53,56 @@ class BiitToolNode(BiitArrayNodeBase):
 		if cls.nInstanciatedNodes == 0:
 			cls.exitTool()
 
-	def actionToBiitType(self, action):
-		if action.choices != None:
-			return 'select'
-		if action.const and type(action.default) is bool:
-			return 'boolean'
-		else:
-			return {str: 'string', float: 'float', int: 'integer', Path: 'path', None: 'string'}[action.type]
+	# def actionToBiitType(self, action):
+	# 	if action.choices != None:
+	# 		return 'select'
+	# 	if action.const and type(action.default) is bool:
+	# 		return 'boolean'
+	# 	else:
+	# 		return {str: 'string', float: 'float', int: 'integer', Path: 'path', None: 'string'}[action.type]
 		
-	def initializeTool(self):
-		tool = Munch.fromDict(dict(info=dict(id=self.name, inputs=[], outputs=[])))
-		self.__class__.tool = tool
-		# tool:
-		#   info:
-		#      categories:[]
-		#      command: ''
-		#      description: ''
-		#      help: ''
-		#      inputs:  default_value, description, help, is_advanced, is_data, name, type, value, select_info: names:[], values:[], value, type
-		#      outputs:
-		#      id: ''
-		#      name: ''
-		#      requiremenets: [{origin: '', type: '', env: '', init: '', package: ''}]
-		#      tests: [[]]
-		#    xml_file_url
-		# toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
-		for input in self.getInputArgs():
-			select_info = dict(names=input.choices, values=input.choices)
-			auto = self.__class__.argsOptions[input.dest]['autoColumn'] if input.dest in self.__class__.argsOptions and 'autoColumn' in self.__class__.argsOptions[input.dest] else False
-			tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=auto, required=input.required)))
-		for output in self.getOutputArgs():
-			select_info = dict(names=output.choices, values=output.choices)
-			auto_increment = self.__class__.argsOptions[output.dest]['autoIncrement'] if output.dest in self.__class__.argsOptions and 'autoIncrement' in self.__class__.argsOptions[output.dest] else True
-			tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info, auto_increment=auto_increment, required=input.required)))
-		return
+	# def initializeTool(self):
+	# 	tool = Munch.fromDict(dict(info=dict(id=self.name, inputs=[], outputs=[])))
+	# 	self.__class__.tool = tool
+	# 	# tool:
+	# 	#   info:
+	# 	#      categories:[]
+	# 	#      command: ''
+	# 	#      description: ''
+	# 	#      help: ''
+	# 	#      inputs:  default_value, description, help, is_advanced, is_data, name, type, value, select_info: names:[], values:[], value, type
+	# 	#      outputs:
+	# 	#      id: ''
+	# 	#      name: ''
+	# 	#      requiremenets: [{origin: '', type: '', env: '', init: '', package: ''}]
+	# 	#      tests: [[]]
+	# 	#    xml_file_url
+	# 	# toolInfo['inputs'].append({ key: value for key, value in input.__dict__.items() if key not in ['select_info']})
+	# 	for input in self.getInputArgs():
+	# 		select_info = dict(names=input.choices, values=input.choices)
+	# 		auto = self.__class__.argsOptions[input.dest]['autoColumn'] if input.dest in self.__class__.argsOptions and 'autoColumn' in self.__class__.argsOptions[input.dest] else False
+	# 		tool.info.inputs.append(Munch.fromDict(dict(name=input.dest, type=self.actionToBiitType(input), is_advanced=input.container.title == 'advanced', value=input.default, help=input.help, description=input.help, default_value=input.default, select_info=select_info, auto=auto, required=input.required)))
+	# 	for output in self.getOutputArgs():
+	# 		select_info = dict(names=output.choices, values=output.choices)
+	# 		auto_increment = self.__class__.argsOptions[output.dest]['autoIncrement'] if output.dest in self.__class__.argsOptions and 'autoIncrement' in self.__class__.argsOptions[output.dest] else True
+	# 		tool.info.outputs.append(Munch.fromDict(dict(name=output.dest, type=self.actionToBiitType(output), is_advanced=False, value=output.default, help=output.help, description=output.help, default_value=output.default, select_info=select_info, auto_increment=auto_increment, required=input.required)))
+	# 	return
 
 	def getName(self):
 		return self.name.replace('_', ' ').title()
 
-	def getArgGroup(self, name):
-		argGroup = [ag for ag in self.__class__.parser._action_groups if ag.title == name]
-		return argGroup[0] if len(argGroup) > 0 else None
+	# def getArgGroup(self, name):
+	# 	argGroup = [ag for ag in self.__class__.parser._action_groups if ag.title == name]
+	# 	return argGroup[0] if len(argGroup) > 0 else None
 
-	def getInputArgs(self):
-		inputs = self.getArgGroup('inputs')
-		if inputs is None: return []
-		return inputs._group_actions + [ac for ag in inputs._action_groups for ac in ag._group_actions]
+	# def getInputArgs(self):
+	# 	inputs = self.getArgGroup('inputs')
+	# 	if inputs is None: return []
+	# 	return inputs._group_actions + [ac for ag in inputs._action_groups for ac in ag._group_actions]
 
-	def getOutputArgs(self):
-		outputs = self.getArgGroup('outputs')
-		return outputs._group_actions if outputs is not None else []
+	# def getOutputArgs(self):
+	# 	outputs = self.getArgGroup('outputs')
+	# 	return outputs._group_actions if outputs is not None else []
 
 	def postCreate(self, jsonTemplate=None):
 		super().postCreate(jsonTemplate)
@@ -320,7 +320,7 @@ def compute(self, *args, **kwargs):
 	
 @classmethod
 def description(cls): 
-	return cls.parser.description
+	return cls.Tool.description
 
 @classmethod
 def category(cls):
@@ -334,11 +334,11 @@ def createNode(modulePath, moduleImportPath, module):
 
 	# parser, argsOptions = module.Tool.getArgumentParser()
 
-	parser = create_parser(module.Tool)
+	# parser = create_parser(module.Tool)
 
 	# Creates a new class type named {modulePath.stem} which inherits BiitToolNode and have the attributes of the given dict
 	toolClass = type(modulePath.stem, (BiitToolNode, ), dict( 
-		parser = parser,
+		# parser = parser,
 		# argsOptions = argsOptions,
 		toolName = modulePath.stem,
 		toolPath = modulePath,

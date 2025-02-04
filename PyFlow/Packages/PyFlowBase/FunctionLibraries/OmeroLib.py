@@ -1,7 +1,7 @@
 import pandas
 from munch import DefaultMunch
 from PyFlow.Core import FunctionLibraryBase
-
+from pathlib import Path
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
 
@@ -50,13 +50,30 @@ class OmeroBase(BiitArrayNodeBase):
     
 class OmeroDownload(OmeroBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'omero_download', inputs=[
-            dict(name='dataset_id', description='Dataset ID (ignored if negative)', type='integer'),
-            dict(name='dataset_name', description='Dataset name', type='string'),
-        ], outputs=[
-            dict(name='data files', description='Output data', type='path'),
-        ])))
-    
+    name = "omero_download"
+    description = "Download data from an Omero database."
+    inputs = [
+            dict(
+            names = ['--dataset_id'],
+            help = 'Dataset ID (ignored if negative)',
+            type = int,
+            default = None,
+        ),
+        dict(
+            names = ['--dataset_name'],
+            help = 'Dataset name',
+            type = str,
+            default = None,
+        ),
+    ]
+    outputs = [
+        dict(
+            names = ['--data files'],
+            help = 'Output data',
+            type = Path,
+        ),
+    ]
+
     def __init__(self, name):
         super(OmeroDownload, self).__init__(name)
 
@@ -116,14 +133,48 @@ class OmeroDownload(OmeroBase):
         
 class OmeroUpload(OmeroBase):
 
-    tool = DefaultMunch.fromDict(dict(info=dict(fullname=lambda: 'omero_download', inputs=[
-            dict(name='image', description='Image to upload', type='string'),
-            dict(name='metadata_columns', description='Metadata columns (for example ["column 1", "column 2"])', type='string'),
-            dict(name='dataset_id', description='Dataset ID (ignored if negative)', type='integer'),
-            dict(name='dataset_name', description='Dataset name', type='string'),
-            dict(name='project_id', description='Project ID (optional, ignored if negative)', type='integer'),
-            dict(name='project_name', description='Project name (optional)', type='string'),
-        ], outputs=[])))
+    name = "omero_upload"
+    description = "Upload data to an Omero database."
+    inputs = [
+            dict(
+            names = ['--image'],
+            help = 'Image to upload',
+            type = str,
+            required = True,
+        ),
+        dict(
+            names = ['--metadata_columns'],
+            help = 'Metadata columns (for example ["column 1", "column 2"])',
+            type = str,
+            default = None,
+        ),
+        dict(
+            names = ['--dataset_id'],
+            help = 'Dataset ID (ignored if negative)',
+            type = int,
+            default = None,
+        ),
+        dict(
+            names = ['--dataset_name'],
+            help = 'Dataset name',
+            type = str,
+            default = None,
+        ),
+        dict(
+            names = ['--project_id'],
+            help = 'Project ID (optional, ignored if negative)',
+            type = int,
+            default = None,
+        ),
+        dict(
+            names = ['--project_name'],
+            help = 'Project name (optional)',
+            type = str,
+            default = None,
+        ),
+    ]
+    outputs = [
+    ]
     
     def __init__(self, name):
         super(OmeroUpload, self).__init__(name)

@@ -47,21 +47,25 @@ class BiitArrayNodeBase(BiitNodeBase):
         # for BiitToolNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
         # But values has a special meaning in dict, so it is a function instead of a list.
         # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
-        selectInfoValues = (input.select_info.values if isinstance(input.select_info.values, list) else input.select_info['values'])  if input.type == 'select' else None
-        defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
-        return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else False)
+        defaultValue = input['choices'][0] if 'choices' in input and len(input['choices']) > 0 and input['default'] is None else input['default']
+        return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input['type'], auto=input['autoColumn'] if 'autoColumn' in input else False, advanced=input['advanced'])
+        
+        # selectInfoValues = (input.select_info.values if isinstance(input.select_info.values, list) else input.select_info['values'])  if input.type == 'select' else None
+        # defaultValue = selectInfoValues[0] if input.type == 'select' and (input.default_value is None or input.default_value == '') else input.default_value
+        # return dict(type='value', columnName='', value=defaultValue, defaultValue=defaultValue, dataType=input.type, auto=input.auto if hasattr(input, 'auto') else False)
+
 
     def initializeOutput(self, output):
-        return dict(value=output.default_value, 
-                    defaultValue=output.default_value, 
-                    type=output.type if hasattr(output, 'type') else None, 
-                    extension=output.extension if hasattr(output, 'extension') else None,
-                    help=output.help if hasattr(output, 'help') else None)
+        return dict(value=output['default'], 
+                    defaultValue=output['default'], 
+                    type=output['type'] if 'type' in output else None, 
+                    extension=output['extension'] if 'extension' in output else None,
+                    help=output['help'] if 'help' in output else None)
 
     def initializeParameters(self):
         tool = self.__class__.tool if hasattr(self.__class__, 'tool') else None
-        inputs = {} if tool is None else { input.name: self.initializeInput(input) for input in tool.info.inputs }
-        outputs = {} if tool is None else { output.name: self.initializeOutput(output) for output in tool.info.outputs }
+        inputs = {} if tool is None else { input.name: self.initializeInput(input) for input in tool['inputs'] }
+        outputs = {} if tool is None else { output.name: self.initializeOutput(output) for output in tool['outputs'] }
         self.parameters = dict(inputs=inputs, outputs=outputs)
     
     def postCreate(self, jsonTemplate=None):
@@ -114,17 +118,18 @@ class BiitArrayNodeBase(BiitNodeBase):
         # if len(data.columns) == 0: return
         n = len(data.columns)-1 if isinstance(data, pandas.DataFrame) else -1
         tool = self.__class__.tool
-        for input in tool.info.inputs:
+        for input in tool.inputs:
+            inputName = input['name']
             # Overwrite parameter if overwriteExistingColumns or the column does not exist in the new dataframe
-            if hasattr(input, 'auto') and input.auto and data is not None:
-                if overwriteExistingColumns or self.parameters['inputs'][input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
-                    self.parameters['inputs'][input.name]['type'] = 'columnName'
-                    self.parameters['inputs'][input.name]['columnName'] = data.columns[max(0, n)]
+            if 'autoIncrement' in input and input['autoIncrement'] and data is not None:
+                if overwriteExistingColumns or self.parameters['inputs'][inputName]['type'] == 'columnName' and not self.parameterColumnExists(data, inputName):
+                    self.parameters['inputs'][inputName]['type'] = 'columnName'
+                    self.parameters['inputs'][inputName]['columnName'] = data.columns[max(0, n)]
                     n -= 1
             # If not auto and param is from unexisting column: reset param
-            elif self.parameters['inputs'][input.name]['type'] == 'columnName' and not self.parameterColumnExists(data, input.name):
-                self.parameters['inputs'][input.name]['type'] = 'value'
-                self.parameters['inputs'][input.name]['columnName'] = self.parameters['inputs'][input.name]['defaultValue']
+            elif self.parameters['inputs'][inputName]['type'] == 'columnName' and not self.parameterColumnExists(data, inputName):
+                self.parameters['inputs'][inputName]['type'] = 'value'
+                self.parameters['inputs'][inputName]['columnName'] = self.parameters['inputs'][inputName]['defaultValue']
 
     
     # The input pin was plugged: reset parameters
@@ -269,7 +274,7 @@ class BiitArrayNodeBase(BiitNodeBase):
     #             outputPath.parent.mkdir(exist_ok=True, parents=True)
     #         args[output.name] = str(outputPath)
 
-    def setOutputArgsFromDataFrame(self, toolInfo, args, outputData, index):
+    def setOutputArgsFromDataFrame(self, args, outputData, index):
         if outputData is None: return
         for outputName, output in self.parameters['outputs'].items():
             if self.getColumnName(outputName) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
@@ -310,33 +315,33 @@ class BiitArrayNodeBase(BiitNodeBase):
         return
     
     def parameterIsUndefinedAndRequired(self, parameterName, inputs, row=None):
-        return any([toolInput.required and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput.name == parameterName])
+        return any([toolInput['required'] and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput['name'] == parameterName])
     
     def getArgs(self):
-        toolInfo = self.__class__.tool.info
+        tool = self.__class__.tool
         argsList = []
         inputData: pandas.DataFrame = self.inArray.currentData()
         outputData: pandas.DataFrame = self.outArray.currentData()
         if inputData is None:
             args = {}
             for parameterName, parameter in self.parameters['inputs'].items():
-                if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs):
+                if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs):
                     raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 self.setArg(args, parameterName, parameter, parameter['value'], None)
             # self.setOutputArgs(toolInfo, args)
-            self.setOutputArgsFromDataFrame(toolInfo, args, outputData, 0)
+            self.setOutputArgsFromDataFrame(args, outputData, 0)
             argsList.append(args)
             return argsList
         for index, row in inputData.iterrows():
             args = {}
             for parameterName, parameter in self.parameters['inputs'].items():
-                if self.parameterIsUndefinedAndRequired(parameterName, toolInfo.inputs, row):
+                if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs, row):
                     raise Exception(f'The parameter {parameterName} is undefined, but required.')
                 if parameter['type'] == 'value':
                     self.setArg(args, parameterName, parameter, parameter['value'], index)
                 else:
                     self.setArg(args, parameterName, parameter, row[parameter['columnName']], index)
-            self.setOutputArgsFromDataFrame(toolInfo, args, outputData, index)
+            self.setOutputArgsFromDataFrame(args, outputData, index)
             argsList.append(args)
         # else:
         #     argsList = RunTool.getInputArgs(toolInfo, self)
@@ -344,30 +349,30 @@ class BiitArrayNodeBase(BiitNodeBase):
         return argsList
 
     def execute(self, req, logTool):
-        toolInfo = self.__class__.tool.info
-        tool = req.get_tool(f'{toolInfo.id}_v{toolInfo.version}')
+        # toolInfo = self.__class__.tool.info
+        # tool = req.get_tool(f'{toolInfo.id}_v{toolInfo.version}')
 
-        argsList = self.getArgs()
-        # argsList = argsList if type(argsList) is list else [argsList]
+        # argsList = self.getArgs()
+        # # argsList = argsList if type(argsList) is list else [argsList]
 
-        outputFolder = self.getOutputDataFolderPath()
-        if outputFolder.exists():
-            send2trash(outputFolder)
-        outputFolder.mkdir(exist_ok=True, parents=True)
+        # outputFolder = self.getOutputDataFolderPath()
+        # if outputFolder.exists():
+        #     send2trash(outputFolder)
+        # outputFolder.mkdir(exist_ok=True, parents=True)
         
-        job_id = req.new_job()
-        try:
-            req.runner_service.set_up(tool, job_id)
-            # for args in argsList:
-            #     preparedArgs = req._prepare_command(tool, args)
-            #     req.runner_service.exec(tool, preparedArgs, job_id)
-            #     # req.exec(tool, **args)
-            preparedArgs = [req._prepare_command(tool, args) for args in argsList]
-            req.runner_service.exec_multi(tool, preparedArgs, job_id, outputFolder, logTool)
-            req.runner_service.tear_down(tool, job_id)
-        except Exception as err:
-            req.notify_error(str(err), job_id)
-        self.finishExecution(argsList)
+        # job_id = req.new_job()
+        # try:
+        #     req.runner_service.set_up(tool, job_id)
+        #     # for args in argsList:
+        #     #     preparedArgs = req._prepare_command(tool, args)
+        #     #     req.runner_service.exec(tool, preparedArgs, job_id)
+        #     #     # req.exec(tool, **args)
+        #     preparedArgs = [req._prepare_command(tool, args) for args in argsList]
+        #     req.runner_service.exec_multi(tool, preparedArgs, job_id, outputFolder, logTool)
+        #     req.runner_service.tear_down(tool, job_id)
+        # except Exception as err:
+        #     req.notify_error(str(err), job_id)
+        # self.finishExecution(argsList)
         return True
 
     def finishExecution(self, argsList=None):
@@ -389,7 +394,7 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     def createDataFrameFromInputs(self):
         tool = self.__class__.tool
-        inputs = [i for i in tool.info.inputs] # if hasattr(i, 'auto') and i.auto]
+        inputs = [i for i in tool.inputs] # if hasattr(i, 'auto') and i.auto]
         if len(inputs) == 0: return None
         data = pandas.DataFrame()
         for inputName, input in self.parameters['inputs'].items():
@@ -431,17 +436,15 @@ class BiitArrayNodeBase(BiitNodeBase):
 
     @classmethod
     def description(cls): 
-        return cls.tool.info.help if hasattr(cls, 'tool') and hasattr(cls.tool, 'info') and hasattr(cls.tool.info, 'help') else ''
+        return cls.tool.description if hasattr(cls, 'tool') and hasattr(cls.tool, 'description') else ''
 
     @classmethod
     def category(cls):
-        return '|'.join(cls.tool.info.categories)
+        return '|'.join(cls.tool.categories)
 
 def createNode(tool):
     # Hide the version number for now, but it would be nice to add it later when there are multiple versions of the tool
-    # toolId = f'{tool.info.id}_v{tool.info.version}'
-    # toolId = f'{tool.info.id}_biitarray'
-    toolId = f'{tool.info.id}'
+    toolId = f'{tool.id}'
     toolClass = type(toolId, (BiitArrayNodeBase, ), dict(tool = tool))
     return toolClass
 
