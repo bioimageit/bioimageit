@@ -20,10 +20,6 @@ class Tool(ExoDeepFinderTool):
         options = dict( input_movie_folder = dict(autoColumn=True), output_movie_folder = dict(autoIncrement=False), output_movie = dict(autoIncrement=False) )
         
         return parser, options
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print(f'Symlink {args.input_movie_folder} to {args.output_movie_folder}')
         args.output_movie_folder.mkdir(exist_ok=True, parents=True)

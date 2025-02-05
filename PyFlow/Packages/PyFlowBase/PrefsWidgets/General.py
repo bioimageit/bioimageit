@@ -22,7 +22,7 @@ import json
 from qtpy import QtCore
 from qtpy.QtWidgets import *
 
-from PyFlow import getBundlePath
+from PyFlow import getRootPath
 from PyFlow.UI.EditorHistory import EditorHistory
 from PyFlow.UI.Widgets.PropertiesFramework import CollapsibleFormWidget
 from PyFlow.UI.Widgets.PreferencesWindow import CategoryWidgetBase
@@ -175,8 +175,7 @@ class GeneralPreferences(CategoryWidgetBase):
             pass
     
     def getVersionPath(self):
-        # The version.json is on top of sources (above bundle path) when the app is released, but is under bundle path when launching in development / debugging
-        return getBundlePath() / 'version.json' if (getBundlePath() / 'version.json').exists() else getBundlePath().parent / 'version.json'
+        return getRootPath() / 'version.json'
 
     def getInstalledVersion(self):
         with open(self.getVersionPath(), 'r') as f:
@@ -190,7 +189,7 @@ class GeneralPreferences(CategoryWidgetBase):
         import zipfile, io
         r = requests.get(f'https://gitlab.inria.fr/api/v4/projects/{self.projectId}/repository/archive.zip', params={'sha': versionName}, proxies=proxies)
         z = zipfile.ZipFile(io.BytesIO(r.content))
-        z.extractall(getBundlePath())
+        z.extractall(getRootPath())
         if not self.progressDialog.wasCanceled():
             inmain(self.setVersionJson, autoUpdate, proxies, newSources)
 
@@ -216,7 +215,7 @@ class GeneralPreferences(CategoryWidgetBase):
         if versionInfo['autoUpdate']:
             versionName = self.versionSelector.itemText(1)
             versionTarget = self.versionSelector.itemData(1)
-        newSources = (getBundlePath() / f'bioimageit-{versionName}-{versionTarget}').resolve()
+        newSources = (getRootPath() / f'bioimageit-{versionName}-{versionTarget}').resolve()
         if not newSources.exists():
             self.showProgressAndDownloadVersion(versionInfo['autoUpdate'], versionName, versionInfo['proxies'], newSources)
         else:

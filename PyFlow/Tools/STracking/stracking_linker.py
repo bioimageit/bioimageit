@@ -19,10 +19,6 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument("-o", "--output", help="Output path for the tracks (the extension can be .st.json or .csv and defines the output format).", default="{input_csv.stem}_tracks.st.json", type=Path)
         return parser, dict(input_csv=dict(autoColumn=True))
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print('Performing stracking linking')
         # import subprocess

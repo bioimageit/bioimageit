@@ -27,10 +27,6 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='The output Gibson-Lanni PSF image path.', default='psf_gibsonlanni.tiff', type=Path)
         return parser, dict()
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print('Generate Gibson-Lanni PSF')
         import subprocess

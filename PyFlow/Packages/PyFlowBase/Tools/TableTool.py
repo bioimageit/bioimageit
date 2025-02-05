@@ -20,7 +20,7 @@ from qtpy import QtCore, QtGui
 from qtpy.QtGui import QPixmap
 from qtpy.QtWidgets import QTableView, QLabel, QVBoxLayout, QWidget, QProgressDialog, QMessageBox
 
-from PyFlow import getRootPath
+from PyFlow import getSourcesPath
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.UI.Tool.Tool import DockTool
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager
@@ -95,7 +95,7 @@ class TableTool(DockTool):
 
 		napariEnvironment = ConfigManager().getPrefsValue("PREFS", "General/ImageViewerCmd")
 		napariEnvironment = napariEnvironment if isinstance(napariEnvironment, str) and len(napariEnvironment) > 0 else environment
-		napariManagerPath = getRootPath() / 'PyFlow' / 'Viewer' / 'NapariManager.py'
+		napariManagerPath = getSourcesPath() / 'PyFlow' / 'Viewer' / 'NapariManager.py'
 		if self.openImageProgressDialog is not None and not environmentManager.environmentIsLaunched(napariEnvironment):
 			inmain(lambda: self.openImageProgressDialog.setLabelText('Installing and launching napari...\nThis could take a few minutes.'))
 		self.napariEnvironment = environmentManager.createAndLaunch(napariEnvironment, dependencies, customCommand=f'python -u "{napariManagerPath}"', environmentVariables=env)

@@ -25,7 +25,7 @@ from qtpy import QtCore, QtWidgets
 from qtpy import QtGui
 from qtpy.QtWidgets import *
 
-from PyFlow import getRootPath
+from PyFlow import getSourcesPath
 from PyFlow import GET_PACKAGES, ADD_CLASS
 from PyFlow import GET_PACKAGE_PATH
 
@@ -596,8 +596,8 @@ class NodesBox(QFrame):
         print('file changed:', filePath)
         filePath = Path(filePath).resolve()
         if filePath.exists():
-            if filePath.resolve().is_relative_to(getRootPath()):
-                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getRootPath())).replace('.py', '').replace('/', '.'))
+            if filePath.resolve().is_relative_to(getSourcesPath()):
+                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getSourcesPath())).replace('.py', '').replace('/', '.'))
             else:
                 nodeClass = self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()

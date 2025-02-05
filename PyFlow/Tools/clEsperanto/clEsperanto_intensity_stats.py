@@ -29,10 +29,6 @@ class Tool(ClEsperantoTool):
 
         self.cle = cle
         self.io = skimage.io
-    
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         if not args.input_image.exists():
             sys.exit(f'Error: input image {args.input_image} does not exist.')

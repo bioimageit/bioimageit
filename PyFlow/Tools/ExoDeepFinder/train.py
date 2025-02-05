@@ -20,10 +20,6 @@ class Tool(ExoDeepFinderTool):
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='Output folder where the model will be stored', default='[workflow_folder]/model/model', type=Path)
         return parser, dict( dataset = dict(autoColumn=True) )
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processAllData(self, argsList):
         args = argsList[0]
         outputDataset = args.dataset

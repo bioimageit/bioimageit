@@ -172,7 +172,7 @@ def downloadSources(versionName):
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
         z.extractall(getRootPath())
-
+    
 def waitGui():
     if gui is None:
         createGui.set()
@@ -478,7 +478,7 @@ def updateVersionAndLaunchBiit():
         gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive
-thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True)
+thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True) # deamon could be False because of thread.join() at the end
 thread.start()
 
 timeout = 5   # [seconds]

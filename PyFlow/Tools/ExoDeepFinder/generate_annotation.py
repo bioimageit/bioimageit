@@ -18,10 +18,6 @@ class Tool(ExoDeepFinderTool):
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-a', '--annotation', help='Output annotation file (in .xml format).', default='[workflow_folder]/dataset/{segmentation.parent.name}/annotation.xml', type=Path)
         return parser, dict( segmentation = dict(autoColumn=True) )
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print(f'Annotate {args.segmentation}')
         klu = ['-klu'] if args.keep_labels_unchanged else []

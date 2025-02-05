@@ -1,6 +1,6 @@
 import json
 from mailjet_rest import Client
-from PyFlow import getBundlePath
+from PyFlow import getRootPath
 from PyFlow.ConfigManager import ConfigManager
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 
@@ -29,11 +29,11 @@ class ErrorManager:
     def getLogs():
         logs = ''
         try:
-            with open(getBundlePath() / 'bioimageit.log', 'r') as f:
+            with open(getRootPath() / 'bioimageit.log', 'r') as f:
                 lines = f.readlines()
                 logs += '\n\nLogs:\n\n'
                 logs += lines[len(lines)-500:] # Send the 100 last lines of the logs
-            with open(getBundlePath() / 'environment.log', 'r') as f:
+            with open(getRootPath() / 'environment.log', 'r') as f:
                 lines = f.readlines()
                 logs += '\n\nEnvironment logs:\n\n'
                 logs += lines[len(lines)-500:] # Send the 100 last lines of the logs

@@ -15,7 +15,7 @@
 from qtpy import QtWidgets
 from qtpy import QtCore, QtGui
 
-from PyFlow import getBundlePath
+from PyFlow import getSourcesPath
 from PyFlow.UI.Canvas.UICommon import clearLayout
 from PyFlow.UI.Widgets.EditPropertiesWidget import EditPropertiesTreeWidget
 
@@ -91,7 +91,7 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.setWindowTitle(self.objectName())
         # self.pbHead.setStyleSheet(self.pbHead.styleSheet() + "\nText-align:left;")
         self.pbHead.setStyleSheet("Text-align:left;")
-        resourcesPath = getBundlePath() / 'PyFlow' / 'UI' / 'resources'
+        resourcesPath = getSourcesPath() / 'PyFlow' / 'UI' / 'resources'
         self.contentHiddenIcon = QtGui.QIcon(str(resourcesPath / "ArrowRight.png")) # QtGui.QIcon(":/Plus.png")
         self.contentVisibleIcon = QtGui.QIcon(str(resourcesPath / "ArrowDown.png")) # QtGui.QIcon(":/Minus.png")
         # self.contentHiddenIcon = self.pbHead.style().standardIcon(

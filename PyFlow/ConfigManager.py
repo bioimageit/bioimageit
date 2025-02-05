@@ -15,12 +15,14 @@
 
 import os
 import json
+import shutil
 
-from qtpy import QtCore, QtGui
+from qtpy import QtCore, QtGui, initial_api
 
 from PyFlow.Core.Common import *
 from PyFlow.Input import InputAction, InputManager, InputActionType
-from PyFlow import getBundlePath
+from PyFlow import getRootPath, getSourcesPath
+from packaging.version import Version
 
 @SingletonDecorator
 class ConfigManager(object):
@@ -31,14 +33,15 @@ class ConfigManager(object):
 
     CONFIGS_STORAGE = {}
 
-    CONFIGS_DIR = getBundlePath() / "Configs"
+    CONFIGS_DIR = getRootPath() / "Configs"
     INPUT_CONFIG_PATH = os.path.join(CONFIGS_DIR, "input.json")
 
     def __init__(self, *args, **kwargs):
+        self.updateConfigsDir()
         self.registerConfigFile("PREFS", os.path.join(self.CONFIGS_DIR, "prefs.ini"))
         self.registerConfigFile(
             "APP_STATE", os.path.join(self.CONFIGS_DIR, "config.ini")
-        )
+        )      
 
         if not os.path.exists(self.INPUT_CONFIG_PATH):
             self.createDefaultInput()
@@ -51,6 +54,15 @@ class ConfigManager(object):
             with open(self.INPUT_CONFIG_PATH, "r") as f:
                 data = json.load(f)
                 InputManager().loadFromData(data)
+
+    def updateConfigsDir(self):
+        # Check if the previous version before this one has configs
+        initialConfigsPath = getSourcesPath() / 'Configs'
+        
+        # Replace Configs with existing configs (of previously installed version, if exists)
+        if not self.CONFIGS_DIR.exists():
+            shutil.copyfile(initialConfigsPath, self.CONFIGS_DIR)
+            
 
     @staticmethod
     def shouldRedirectOutput():

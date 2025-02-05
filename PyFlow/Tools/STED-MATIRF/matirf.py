@@ -26,10 +26,6 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument("-o", "--output", help="Output path for the denoised image.", default="{input_image.name}_denoised{input_image.exts}", type=Path)
         return parser, dict(input_image=dict(autoColumn=True))
-
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print('Performing MATIRF deconvolution')
         import subprocess

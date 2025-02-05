@@ -18,10 +18,6 @@ class Tool(ExoDeepFinderTool):
         options = dict( tiff = dict(autoColumn=True), output = dict(autoIncrement=False) )
         
         return parser, options
-    
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         print(f'Convert {args.tiff} to {args.output}')
         # Never use --make_subfolder in edf_convert_tiff_to_h5 since we do not want to modify the input folder

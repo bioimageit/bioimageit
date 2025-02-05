@@ -41,9 +41,6 @@ class Tool:
         import cellpose
         self.cellpose = cellpose
     
-    def processDataFrame(self, dataFrame, argsList):
-        return dataFrame
-
     def processData(self, args):
         if not args.train_directory.exists():
             sys.exit('Error: train directory {args.train_directory} does not exist.')

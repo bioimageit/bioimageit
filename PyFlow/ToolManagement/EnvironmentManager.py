@@ -327,7 +327,7 @@ class EnvironmentManager:
 	def _shellHook(self):
 		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
-		showConfig = [f'{self.condaBin} config sources', f'{self.condaBin} config list']
+		showConfig = ['echo "Mamba config sources:"', f'{self.condaBin} config sources'] #, f'{self.condaBin} config list'] unfortunately this would show the password
 		if platform.system() == 'Windows':
 			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"'] + showConfig
 		else:
