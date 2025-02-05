@@ -1,6 +1,6 @@
 [project]
 name = "bioimageit"
-version = "0.3.33"
+version = "0.3.37"
 description = "A FAIR data management and image analysis framework"
 authors = [{name = "Arthur Masson", email = "arthur.masson@inria.fr"}]
 license = { file = "LICENSE" }
