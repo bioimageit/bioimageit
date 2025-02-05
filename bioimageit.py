@@ -417,7 +417,6 @@ def launchBiit(sources):
     environmentManager = EnvironmentManager.environmentManager
     
     if platform.system() == 'Darwin' and getattr(sys, 'frozen', False):
-        shutil.copytree(Path(sys._MEIPASS) / 'micromamba', getRootPath() / 'micromamba')
         environmentManager.setCondaPath(getRootPath() / 'micromamba')
 
     arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64'
@@ -484,8 +483,9 @@ def updateVersionAndLaunchBiit():
         launchBiit(sources)
     except Exception as e:
         from tkinter import messagebox
+        logger.error(f'An error occured while launching BioImageIT:\n{e}')
         waitGui()
-        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files for more information.") )
+        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files (in {str(getRootPath())}) for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive
 thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True) # deamon could be False because of thread.join() at the end
