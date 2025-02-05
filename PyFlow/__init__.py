@@ -19,13 +19,11 @@
 # this line adds extension-packages not installed inside the PyFlow directory
 # __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-import importlib
 import re
 import pkgutil
 import collections.abc
 from copy import copy
 import os
-import sys
 import json
 from pathlib import Path
 
@@ -54,12 +52,12 @@ PARAMETERS_PATH = 'parameters.json'
 OUTPUT_DATAFRAME_PATH = 'output_data_frame.csv'
 
 
-def sources_folder_has_version(string):
+def sourcesFolderHasVersion(sourcesPath:Path):
     pattern = r"^bioimageit-v\d+\.\d+\.\d+-[a-f0-9]+$"
-    return bool(re.match(pattern, str(string)))
+    return bool(re.match(pattern, sourcesPath.name))
 
 sourcesPath = Path(__file__).parent.parent
-rootPath = sourcesPath.parent if sources_folder_has_version(sourcesPath) else sourcesPath
+rootPath = sourcesPath.parent if sourcesFolderHasVersion(sourcesPath) else sourcesPath
 
 # This is the sources parent folder when bioimageit is frozen / packaged / built ; and the sources folder when developing
 def getRootPath():
