@@ -87,6 +87,7 @@ def mac_os_sign():
     client.sign([f'{client.software}.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libreadline.8.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
     client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
