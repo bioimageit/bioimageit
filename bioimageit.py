@@ -11,14 +11,18 @@ from importlib import import_module
 import shutil
 import yaml
 
-# Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise
+# Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise, only used to copy files for windows
 def getBundlePath():
 	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 # Root path is bioimageit/ in all cases
 def getRootPath():
-	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
+    if getattr(sys, 'frozen', False):
+        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path('~/Library/Application Support/BioImageIT').resolve()
+    else:
+        return Path(__file__).parent
 
+getRootPath().mkdir(exist_ok=True, parents=True)
 os.chdir(getRootPath())
 
 logging.basicConfig(
