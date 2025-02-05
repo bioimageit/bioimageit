@@ -8,9 +8,9 @@ image: ubuntu:22.04
 variables:
   RELEASED_VERSION: "0.3.36"
   SIGNEDBY_SOFT_NAME: "BioImage-IT"
-  UNSIGNED_TARFILE: "bioimageit_macOS_arm64_v$RELEASED_VERSION_unsigned_recursive.app.tar.gz"
+  UNSIGNED_TARFILE: "bioimageit_macOS_arm64_v0.3.36_unsigned_recursive.app.tar.gz"
   UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE"
-  UNSIGNED_TARFILE_WIN: "bioimageit_windows_x86_64_v$RELEASED_VERSION_unsigned_recursive.tar.gz"
+  UNSIGNED_TARFILE_WIN: "bioimageit_windows_x86_64_v0.3.36_unsigned_recursive.tar.gz"
   UNSIGNED_TARFILE_URL_WIN: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE_WIN"
   SKIP_UPLOAD: ""
   VERBOSE: ""
