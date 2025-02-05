@@ -6,7 +6,7 @@ image: ubuntu:22.04
 # for example by updating the version to release
 # to trigger signature
 variables:
-  RELEASED_VERSION: "0.3.38"
+  RELEASED_VERSION: "0.3.39"
   SIGNEDBY_SOFT_NAME: "BioImage-IT"
   UNSIGNED_TARFILE: "bioimageit_macOS_arm64_v$RELEASED_VERSION.app.tar.gz"
   UNSIGNED_TARFILE_URL: "https://gitlab-int.inria.fr/api/v4/projects/474/packages/generic/1/v1.0/$UNSIGNED_TARFILE"
