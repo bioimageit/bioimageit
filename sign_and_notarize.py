@@ -70,34 +70,34 @@ def mac_os_sign():
     #             f'--options=runtime --entitlements entitlements.plist --verbose 2')
 
     # client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
-    # client.sign([f'{client.software}_unl.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libffi.8.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libncurses.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libtcl8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libpython3.12.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libbz2.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libssl.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libcrypto.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/liblzma.5.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libtk8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}_unl.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
-    client.sign([f'{client.software}_unl.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
+    # client.sign([f'{client.software}.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libffi.8.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libncurses.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libtcl8.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libpython3.12.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libbz2.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libssl.3.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libcrypto.3.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/liblzma.5.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libtk8.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
+    client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 
-    client.pretty_print_inspected_path(client.inspect_path(client.software + '_unl.app'))
+    client.pretty_print_inspected_path(client.inspect_path(client.software + '.app'))
 
     if should_package_as_dmg():
         unsigned_dmg = client.makedmg(format='UDBZ', fs='hfs+')
         client.sign([unsigned_dmg], '--verbose=2')
         notarized_path = unsigned_dmg
     else:
-        notarized_path = client.software + '_unl.app'
+        notarized_path = client.software + '.app'
 
     if not notarize(notarized_path):
         print('Notarization failed !')
