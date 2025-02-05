@@ -18,7 +18,7 @@ def getBundlePath():
 # Root path is bioimageit/ in all cases
 def getRootPath():
     if getattr(sys, 'frozen', False):
-        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path.home().resolve() / 'Library' / 'Application Support' / 'BioImageIT'
+        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path.home().resolve() / 'Applications' / 'BioImageIT'
     else:
         return Path(__file__).parent
 
@@ -37,6 +37,7 @@ logger = logging.getLogger()
 logger.info('Initializing BioImageIT...')
 
 # Import EnvironmentManager to make its modules available in bundle
+from PyFlow import getSourcesPath
 import PyFlow.ToolManagement.EnvironmentManager
 
 projectId = 54065 # The BioImageIT Project on Gitlab
@@ -414,6 +415,11 @@ def launchBiit(sources):
     EnvironmentManager = import_module('NewEnvironmentManager')
     
     environmentManager = EnvironmentManager.environmentManager
+    
+    if platform.system() == 'Darwin' and getattr(sys, 'frozen', False):
+        shutil.copytree(Path(sys._MEIPASS) / 'micromamba', getRootPath() / 'micromamba')
+        environmentManager.setCondaPath(getRootPath() / 'micromamba')
+
     arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64'
     environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
     environment = 'bioimageit'
