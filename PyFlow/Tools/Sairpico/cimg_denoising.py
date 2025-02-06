@@ -1,7 +1,4 @@
-import sys
-from importlib import import_module
 import argparse
-import json
 from pathlib import Path
 
 class Tool:

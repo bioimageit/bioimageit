@@ -1,7 +1,5 @@
 import subprocess
-import sys
 import argparse
-import json
 from pathlib import Path
 
 class Tool:

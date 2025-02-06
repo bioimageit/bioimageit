@@ -1,4 +1,3 @@
-import sys
 import argparse
 from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool

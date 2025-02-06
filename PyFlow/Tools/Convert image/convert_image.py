@@ -1,5 +1,4 @@
 import subprocess
-import sys
 import argparse
 import platform
 from pathlib import Path

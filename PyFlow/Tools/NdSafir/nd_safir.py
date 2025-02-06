@@ -1,6 +1,5 @@
 import argparse
 import subprocess
-import sys
 from pathlib import Path
 from .core import ndsafir_series
 
