@@ -21,7 +21,6 @@ class SimpleITKBase(BiitArrayNodeBase):
         return cls.tool.categories if hasattr(cls.tool, 'categories') else 'SimpleITK|Custom'
     
     def getFirstOuptutColumName(self):
-        print('ok')
         keys = list(self.parameters['outputs'].keys())
         outputName = keys[0]
         return self.getColumnName(outputName)
