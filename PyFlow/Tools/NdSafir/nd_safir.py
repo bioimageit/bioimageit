@@ -30,7 +30,7 @@ class Tool:
         return parser, dict( input_image = dict(autoColumn=True) )
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         noise = Tool.noiseChoices.index(args.noise)
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         if args.type == '4D':

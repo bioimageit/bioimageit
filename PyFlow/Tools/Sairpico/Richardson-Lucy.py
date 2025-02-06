@@ -29,7 +29,7 @@ class Tool:
         import subprocess
 
         if args.type == '3D' and args.psf is None or not args.psf.exists():
-            sys.exit('Error: the argument psf must point to an existing PSF image file, it is set to "{args.psf}" which does not exist.')
+            raise Exception(f'Error: the argument psf must point to an existing PSF image file, it is set to "{args.psf}" which does not exist.')
 
         commandArgs = [
             'simgrichardsonlucy' + args.type.replace(' ', '').lower(),

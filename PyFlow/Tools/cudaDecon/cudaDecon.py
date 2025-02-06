@@ -28,12 +28,12 @@ class Tool:
         self.io = io
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
         try:
             background = int(args.background) if args.background != 'auto' else args.background
         except ValueError as e:
-            sys.exit('Error: the background argument must be an integer or "auto"; but it is "{args.background}".')
+            raise Exception(f'Error: the background argument must be an integer or "auto"; but it is "{args.background}".')
         
         print(f'[[1/3]] Load image {input_image}')
         im = self.io.imread(input_image)
