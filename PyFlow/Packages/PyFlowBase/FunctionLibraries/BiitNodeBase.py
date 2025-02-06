@@ -14,6 +14,10 @@ class BiitNodeBase(NodeBase):
         self.executed = None
         self.executedChanged = Signal(bool)
         
+    @property
+    def packageName(self):
+        return 'PyFlowBase'
+
     def getOutputDataFolderPath(self):
         graphManager = GraphManagerSingleton().get()
         return Path(graphManager.workflowPath).resolve() / 'Data' / self.name
