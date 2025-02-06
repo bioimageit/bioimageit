@@ -18,7 +18,7 @@ def getBundlePath():
 # Root path is bioimageit/ in all cases
 def getRootPath():
     if getattr(sys, 'frozen', False):
-        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path.home().resolve() / 'Applications' / 'BioImageIT'
+        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path(sys._MEIPASS).parent.parent.parent / 'BioImage-IT.data'
     else:
         return Path(__file__).parent
 
