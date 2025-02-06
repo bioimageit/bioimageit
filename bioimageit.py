@@ -11,14 +11,18 @@ from importlib import import_module
 import shutil
 import yaml
 
-# Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise
+# Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise, only used to copy files for windows
 def getBundlePath():
 	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 # Root path is bioimageit/ in all cases
 def getRootPath():
-	return Path(sys._MEIPASS).parent if getattr(sys, 'frozen', False) else Path(__file__).parent
+    if getattr(sys, 'frozen', False):
+        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path(sys._MEIPASS).parent.parent.parent / 'BioImage-IT.data'
+    else:
+        return Path(__file__).parent
 
+getRootPath().mkdir(exist_ok=True, parents=True)
 os.chdir(getRootPath())
 
 logging.basicConfig(
@@ -33,6 +37,7 @@ logger = logging.getLogger()
 logger.info('Initializing BioImageIT...')
 
 # Import EnvironmentManager to make its modules available in bundle
+from PyFlow import getSourcesPath
 import PyFlow.ToolManagement.EnvironmentManager
 
 projectId = 54065 # The BioImageIT Project on Gitlab
@@ -410,6 +415,10 @@ def launchBiit(sources):
     EnvironmentManager = import_module('NewEnvironmentManager')
     
     environmentManager = EnvironmentManager.environmentManager
+    
+    if platform.system() == 'Darwin' and getattr(sys, 'frozen', False):
+        environmentManager.setCondaPath(getRootPath() / 'micromamba')
+
     arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64'
     environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
     environment = 'bioimageit'
@@ -474,8 +483,9 @@ def updateVersionAndLaunchBiit():
         launchBiit(sources)
     except Exception as e:
         from tkinter import messagebox
+        logger.error(f'An error occured while launching BioImageIT:\n{e}')
         waitGui()
-        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files for more information.") )
+        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files (in {str(getRootPath())}) for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive
 thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True) # deamon could be False because of thread.join() at the end

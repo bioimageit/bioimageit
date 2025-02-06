@@ -61,8 +61,7 @@ class ConfigManager(object):
         
         # Replace Configs with existing configs (of previously installed version, if exists)
         if not self.CONFIGS_DIR.exists():
-            shutil.copyfile(initialConfigsPath, self.CONFIGS_DIR)
-            
+            shutil.copytree(initialConfigsPath, self.CONFIGS_DIR)
 
     @staticmethod
     def shouldRedirectOutput():

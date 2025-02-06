@@ -487,7 +487,7 @@ class BlueprintCanvas(CanvasBase):
                     if answer == QMessageBox.Cancel:
                         return
                 if answer == QMessageBox.Yes:
-                    if hasattr(node._rawNode, 'clear') and isinstance(node._rawNode.clear, callable):
+                    if hasattr(node._rawNode, 'clear') and callable(node._rawNode.clear):
                         node._rawNode.clear()
                     for folder in folders:
                         if folder.exists():

@@ -11,7 +11,7 @@ class Tool:
                                               f'Invoke-WebRequest -URI https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-win64.zip -OutFile fiji.zip',
                                               f'Expand-Archive -Force fiji.zip',
                                               f'Remove-Item fiji.zip'
-                                              f'Copy-Item "{(Path(__file__).parent / "StackReg").resolve()}" -Destination "{Path("Fiji.app/plugins").resolve()}"'],
+                                              f'Copy-Item "{(Path(__file__).parent / "StackReg").resolve()}" -Destination "{Path("fiji/Fiji.app/plugins").resolve()}"'],
                                      linux=[f'cd {Path(__file__).parent.resolve()}',
                                             'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-linux64.zip',
                                             'unzip -o fiji-2.14.0-linux64.zip',
@@ -60,7 +60,8 @@ class Tool:
         print(f'[[1/1]] Run Fiji macro')
         import subprocess
         import platform
-        fijiPath = str(Path(__file__).parent.resolve() / 'Fiji.app/Contents/MacOS/ImageJ-macosx') if platform.system() == 'Darwin' else 'fiji' if platform.system() == 'Linux' else 'Fiji.exe'
+        fijiExecutable = 'Fiji.app/Contents/MacOS/ImageJ-macosx' if platform.system() == 'Darwin' else 'Fiji.app/fiji' if platform.system() == 'Linux' else 'fiji\Fiji.app\ImageJ-win64.exe'
+        fijiPath = str(Path(__file__).parent.resolve() / fijiExecutable)
         macroPath = str(Path(__file__).parent.resolve() / 'StackReg' / 'stackreg.ijm')
         transformation = args.transformation.replace(' ', '_')
         pluginsArgs = ['--plugins', str(Path(__file__).parent.resolve() / 'Fiji.app/plugins/')] if platform.system() == 'Darwin' else []
