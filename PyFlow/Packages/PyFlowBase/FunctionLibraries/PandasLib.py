@@ -169,6 +169,9 @@ class ConcatDataFrames(PandasNodeBase):
         result = pandas.concat(data, axis=1)
         # Remove duplicated columns
         result = result.loc[:,~result.columns.duplicated()].copy()
+        # Replace every NaN with the first non-NaN value in the same column above it.
+        # propagate[s] last valid observation forward to next valid
+        result = result.fillna(method='ffill')
         self.setOutputAndClean(result)
         self.dirty = False
 

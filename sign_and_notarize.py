@@ -68,7 +68,7 @@ def mac_os_sign():
     client.sign([f'{client.software}.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/*.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
     client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 

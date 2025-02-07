@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "name": "BioImageIT",
             "type": "debugpy",
             "python": ".pixi/envs/default/bin/python",
@@ -12,7 +19,9 @@
             "program": "${workspaceFolder}/pyflow.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "autoReload": {"enable": true },
+            "autoReload": {
+                "enable": true
+            },
             "windows": {
                 "python": ".pixi/envs/default/python.exe"
             }
@@ -24,7 +33,9 @@
             "program": "${workspaceFolder}/workflow.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "autoReload": {"enable": true }
+            "autoReload": {
+                "enable": true
+            }
         },
         {
             "name": "launcher",
@@ -34,7 +45,9 @@
             "program": "${workspaceFolder}/bioimageit.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "autoReload": {"enable": true },
+            "autoReload": {
+                "enable": true
+            },
             "windows": {
                 "python": ".pixi/envs/package/python.exe"
             }
