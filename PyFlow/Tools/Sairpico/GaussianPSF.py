@@ -22,6 +22,7 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument('-o', '--output', help='The output 3D Gaussian PSF path.', default='psf.tiff', type=Path)
         return parser, dict()
+    
     def processData(self, args):
         print('Generate PSF')
         import subprocess

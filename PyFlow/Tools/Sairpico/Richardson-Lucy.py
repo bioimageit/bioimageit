@@ -38,9 +38,9 @@ class Tool:
             '-padding', 'true' if args.padding else 'false'
         ]
         if  args.type != '3D':
-            commandArgs += ['-sigma', args.sigma]
+            commandArgs += ['-sigma', args.sigma, '-lambda', getattr(args, 'lambda')]
         else:
-            commandArgs += ['-psf', args.psf, '-lambda', getattr(args, 'lambda')]
+            commandArgs += ['-psf', args.psf]
         return subprocess.run([str(ca) for ca in commandArgs])
 
 if __name__ == '__main__':
