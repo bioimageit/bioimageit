@@ -15,9 +15,9 @@ class Tool:
         inputs_parser.add_argument("-i", "--input", type=Path, required=True, help="Input image (x and y axis should ideally be even numbers)")
         inputs_parser.add_argument("--type", choices=['2D', '2D Slice', '3D'], help="Perform 2D, 2D Slice or 3D deconvolution.", default='2D', type=str)
         inputs_parser.add_argument("--sigma", type=float, help="Gaussian PSF width (for 2D and 2D Slice only)", default=1.5)
+        inputs_parser.add_argument("--lambda", type=float, help="Regularization parameter (for 2D and 2D Slice only)", default=0)
         inputs_parser.add_argument("--psf", type=Path, help="PSF Image (for 3D only)")
         inputs_parser.add_argument("--niter", type=int, help="Number of iterations", default=15)
-        inputs_parser.add_argument("--lambda", type=float, help="Regularization parameter (unused in 3D)", default=0)
         inputs_parser.add_argument("--padding", action='store_true', help="Add padding to process border pixels")
 
         outputs_parser = parser.add_argument_group('outputs')
