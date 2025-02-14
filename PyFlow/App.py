@@ -154,7 +154,8 @@ class PyFlow(QMainWindow):
 		# Launch or get the bioimageit env, so that we can cache its installed dependencies
 		self.environment = environmentManager.launch('bioimageit')
 
-		environmentManager.setProxies(versionInfo['proxies'])
+		if 'proxies' in versionInfo:
+			environmentManager.setProxies(versionInfo['proxies'])
 
 		self.preferencesWindow = PreferencesWindow(self)
 		self.preferencesWindow.settingsUpdated.connect(OmeroService().reset)

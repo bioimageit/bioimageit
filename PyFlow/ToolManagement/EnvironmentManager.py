@@ -197,6 +197,7 @@ class DirectEnvironment(Environment):
 class EnvironmentManager:
 
 	condaBin = 'micromamba'
+	condaBinConfig = "micromamba --rc-file micromamba/.mambarc"
 	host = 'localhost'
 	environments: dict[str, Environment] = {}
 	proxies = None
@@ -205,9 +206,10 @@ class EnvironmentManager:
 		self.setCondaPath(condaPath)
 	
 	def setCondaPath(self, condaPath:str|Path):
-		self.condaPath = Path(condaPath)
+		self.condaPath = Path(condaPath).resolve()
 		# Set proxy from condaPath
-		condaConfigPath = condaPath / '.mambarc'
+		condaConfigPath = self.condaPath / '.mambarc'
+		self.condaBinConfig = f'{self.condaBin} --rc-file "{condaConfigPath}"'
 		import yaml
 		if condaConfigPath.exists():
 			with open(condaConfigPath, 'r') as f:
@@ -322,16 +324,18 @@ class EnvironmentManager:
 		return self.condaPath.resolve(), Path('bin/micromamba' if platform.system() != 'Windows' else 'micromamba.exe')
 
 	def _setupCondaChannels(self):
-		return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
-	
+		# return [f'{self.condaBin} config append channels conda-forge', f'{self.condaBin} config append channels nodefaults', f'{self.condaBin} config set channel_priority flexible']
+		# Do not interfer with rc files nor use them
+		return []
+
 	def _shellHook(self):
 		currentPath = Path.cwd().resolve()
 		condaPath, condaBinPath = self._getCondaPaths()
-		showConfig = ['echo "Mamba config sources:"', f'{self.condaBin} config sources'] #, f'{self.condaBin} config list'] unfortunately this would show the password
+		# showConfig = ['echo "Mamba config sources:"', f'{self.condaBinConfig} config sources'] #, f'{self.condaBin} config list'] unfortunately this would show the password
 		if platform.system() == 'Windows':
-			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"'] + showConfig
+			return [f'Set-Location -Path "{condaPath}"', f'$Env:MAMBA_ROOT_PREFIX="{condaPath}"', f'.\\{condaBinPath} shell hook -s powershell | Out-String | Invoke-Expression', f'Set-Location -Path "{currentPath}"']# + showConfig
 		else:
-			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"'] + showConfig
+			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"']# + showConfig
 	
 	def copyMicromambaDependencies(self, dependenciesFolder):
 		if not self._isWindows(): return
@@ -389,7 +393,7 @@ class EnvironmentManager:
 	
 	def install(self, environment:str, package:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} install {channel}{package} -y'], waitComplete=True)
+		self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBinConfig} install {channel}{package} -y'], waitComplete=True)
 		self.environments[environment].installedDependencies = {}
 	
 	def platformCondaFormat(self):
@@ -436,7 +440,7 @@ class EnvironmentManager:
 			pipNoDepsDependencies += self.formatDependencies('pip_no_deps', dependencies['optional'])
 		installDepsCommands = self.getProxyEnvironmentVariablesCommands()
 		installDepsCommands += [f'echo "Activating environment {environment}..."', f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
-		installDepsCommands += [f'echo "Installing conda dependencies..."', f'{self.condaBin} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
+		installDepsCommands += [f'echo "Installing conda dependencies..."', f'{self.condaBinConfig} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		proxyString = self.getProxyString()
 		proxyArgs = f'--proxy {proxyString}' if proxyString is not None else ''
 		installDepsCommands += [f'echo "Installing pip dependencies..."', f'pip install {proxyArgs} {" ".join(pipDependencies)}'] if len(pipDependencies)>0 else []
@@ -465,7 +469,7 @@ class EnvironmentManager:
 		if match and (int(match.group(1))<3 or int(match.group(2))<9):
 			raise Exception('Python version must be greater than 3.8')
 		pythonRequirement = ' python=' + (pythonVersion if len(pythonVersion)>0 else platform.python_version())
-		createEnvCommands = self._activateConda() + [f'{self.condaBin} create -n {environment}{pythonRequirement} -y']
+		createEnvCommands = self._activateConda() + [f'{self.condaBinConfig} create -n {environment}{pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
