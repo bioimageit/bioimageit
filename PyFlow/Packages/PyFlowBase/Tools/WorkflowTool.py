@@ -298,15 +298,16 @@ class WorkflowTool(DockTool):
             # Copy the Tools and Scripts folder
             for name in ['Tools', 'Scripts']:
                 if (path / name).exists():
-                    shutil.copytree(path / name, workflowFolder / name)
+                    shutil.copytree(path / name, workflowFolder / name, ignore=shutil.ignore_patterns('*.pyc', '__pycache__'))
             # Copy parameters.json and output_data_frame.csv files (PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH) in the "Data / nodeName" folders, but not the other data files
-            dataFolder = workflowFolder / 'Data'
-            dataFolder.mkdir()
-            if (path / 'Data').exists():
-                for folder in sorted(list((path / 'Data').iterdir())):
-                    (dataFolder / folder.name).mkdir()
+            if (path / 'Metadata').exists():
+                metadataFolder = workflowFolder / 'Metadata'
+                metadataFolder.mkdir()
+                for folder in sorted(list((path / 'Metadata').iterdir())):
+                    (metadataFolder / folder.name).mkdir()
                     for fileName in [PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH]:
-                        shutil.copyfile(folder / fileName, dataFolder / folder.name / fileName)
+                        if (folder / fileName).exists():
+                            shutil.copyfile(folder / fileName, metadataFolder / folder.name / fileName)
             shutil.copyfile(path / WorkflowTool.graphFileName, workflowFolder / WorkflowTool.graphFileName)
             shutil.make_archive(zipFilePath.with_suffix(''), 'zip', tmp)
         return
