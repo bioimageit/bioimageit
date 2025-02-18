@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - nodefaults
+channel_priority: flexible
+default_channels:
+  - conda-forge
