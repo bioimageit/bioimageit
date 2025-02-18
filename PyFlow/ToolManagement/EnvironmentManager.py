@@ -357,6 +357,8 @@ class EnvironmentManager:
 		condaPath.mkdir(exist_ok=True, parents=True)
 		commands = self.getProxyEnvironmentVariablesCommands()
 		proxyString = self.getProxyString()
+		if not (condaPath / '.mambarc').exists():
+			shutil.copyfile(Path(__file__).parent / '.mambarc', condaPath / '.mambarc')
 		if platform.system() == 'Windows':
 			if proxyString is not None:
 				match = re.search(r"^[a-zA-Z]+://(.*?):(.*?)@", proxyString)
