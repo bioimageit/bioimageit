@@ -10,6 +10,7 @@ Workflows/
 __pycache__/
 micromamba/
 micromamba_bckp/
+BioImage-IT.data/
 bioimageit-v*/
 PyFlow/Configs/
 *.ini
