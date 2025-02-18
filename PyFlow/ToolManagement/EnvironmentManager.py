@@ -12,6 +12,8 @@ from collections.abc import Callable
 from abc import abstractmethod
 from multiprocessing.connection import Client
 import sys
+
+import yaml
 if sys.version_info < (3, 11):
 	from typing_extensions import TypedDict, Required, NotRequired, Self
 else:
@@ -196,8 +198,11 @@ class DirectEnvironment(Environment):
 # class EnvironmentManager(metaclass=Singleton):
 class EnvironmentManager:
 
+	defaultCondaConfigPath = '.mambarc'
 	condaBin = 'micromamba'
 	condaBinConfig = "micromamba --rc-file micromamba/.mambarc"
+	defaultCondaConfig = dict(channels=['conda-forge', 'nodefaults'], channel_priority='flexible', default_channels=['conda-forge'])
+
 	host = 'localhost'
 	environments: dict[str, Environment] = {}
 	proxies = None
@@ -208,11 +213,11 @@ class EnvironmentManager:
 	def setCondaPath(self, condaPath:str|Path):
 		self.condaPath = Path(condaPath).resolve()
 		# Set proxy from condaPath
-		condaConfigPath = self.condaPath / '.mambarc'
-		self.condaBinConfig = f'{self.condaBin} --rc-file "{condaConfigPath}"'
+		self.condaConfigPath = self.condaPath / self.defaultCondaConfigPath
+		self.condaBinConfig = f'{self.condaBin} --rc-file "{self.condaConfigPath}"'
 		import yaml
-		if condaConfigPath.exists():
-			with open(condaConfigPath, 'r') as f:
+		if self.condaConfigPath.exists():
+			with open(self.condaConfigPath, 'r') as f:
 				condaConfig = yaml.safe_load(f)
 				if 'proxies' in condaConfig:
 					self.proxies = condaConfig['proxies']
@@ -258,17 +263,16 @@ class EnvironmentManager:
 	def setProxies(self, proxies):
 		self.proxies = proxies
 		condaPath, _ = self._getCondaPaths()
-		condaConfigPath = condaPath / '.mambarc'
 		condaConfig = dict()
 		import yaml
-		if condaConfigPath.exists():
-			with open(condaConfigPath, 'r') as f:
+		if self.condaConfigPath.exists():
+			with open(self.condaConfigPath, 'r') as f:
 				condaConfig = yaml.safe_load(f)
 			if proxies is not None:
 				condaConfig['proxy_servers'] = proxies
 			elif 'proxy_servers' in condaConfig:
 				del condaConfig['proxy_servers']
-			with open(condaConfigPath, 'w') as f:
+			with open(self.condaConfigPath, 'w') as f:
 				yaml.safe_dump(condaConfig, f)
 		
 	# If launchMessage is defined: execute until launchMessage is print
@@ -357,8 +361,9 @@ class EnvironmentManager:
 		condaPath.mkdir(exist_ok=True, parents=True)
 		commands = self.getProxyEnvironmentVariablesCommands()
 		proxyString = self.getProxyString()
-		if not (condaPath / '.mambarc').exists():
-			shutil.copyfile(Path(__file__).parent / '.mambarc', condaPath / '.mambarc')
+		if not self.condaConfigPath.exists():
+			with open(self.condaConfigPath, 'w') as f:
+				yaml.safe_dump(self.defaultCondaConfig, f)
 		if platform.system() == 'Windows':
 			if proxyString is not None:
 				match = re.search(r"^[a-zA-Z]+://(.*?):(.*?)@", proxyString)
