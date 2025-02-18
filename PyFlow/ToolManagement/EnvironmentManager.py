@@ -266,7 +266,7 @@ class EnvironmentManager:
 				condaConfig = yaml.safe_load(f)
 			if proxies is not None:
 				condaConfig['proxy_servers'] = proxies
-			else:
+			elif 'proxy_servers' in condaConfig:
 				del condaConfig['proxy_servers']
 			with open(condaConfigPath, 'w') as f:
 				yaml.safe_dump(condaConfig, f)

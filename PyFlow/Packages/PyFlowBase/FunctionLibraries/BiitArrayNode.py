@@ -393,7 +393,7 @@ class BiitArrayNodeBase(BiitNodeBase):
         if len(inputs) == 0: return None
         data = pandas.DataFrame()
         for inputName, input in self.parameters['inputs'].items():
-            data[self.getColumnName(inputName)] = [input['value']] if input['value'] is not None else []
+            data[self.getColumnName(inputName)] = [input['value']]
         ThumbnailGenerator.get().generateThumbnails(self.name, data)
         return data
 
