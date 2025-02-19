@@ -334,7 +334,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
             logging.warning(e)
             log(str(e))
             log('Error: Unable to check BioImageIT version. Please check your proxy settings.')
-            messagebox.showwarning("showwarning", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
+            messagebox.showwarning("Error while checking BioImageIT version", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
             return None
 
 def tryDownloadLatestVersionOrGetProxySettingsFromConda():
