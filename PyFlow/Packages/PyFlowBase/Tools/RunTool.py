@@ -267,11 +267,14 @@ class RunTool(ShelfTool):
         message.setWindowTitle('Error during execution')
         # exceptionString = str(exception)
         # exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
-        text = f'An error occured during the execution of the process:\n\n{exception}'
+        text = f'An error occured during the execution of the process:\n\n{str(exception)}'
         self.log(text, logging.ERROR)
 
-        detailedText = text + f'\n\nClass: {exception.__class__}\n\n'
+        classText = f'Class: {exception.__class__}'
+        detailedText = text + '\n\n' + classText
         detailedText += 'Traceback:\n\n'
+        self.log(classText, logging.ERROR)
+        self.log('Traceback:', logging.ERROR)
         for line in traceback.format_tb(exception.__traceback__):
             self.log(line, logging.ERROR)
             detailedText += line + '\n'
