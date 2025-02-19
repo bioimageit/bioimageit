@@ -23,11 +23,12 @@ class Tool:
         outputs_parser = parser.add_argument_group('outputs')
         outputs_parser.add_argument("-o", "--output", help="Output path for the deconvolved image.", default="{input.name}_deconvolved{input.exts}", type=Path)
         return parser, dict(input=dict(autoColumn=True))
+    
     def processData(self, args):
         print('Performing Richardson-Lucy deconvolution')
         import subprocess
 
-        if args.type == '3D' and args.psf is None or not args.psf.exists():
+        if args.type == '3D' and (args.psf is None or not args.psf.exists()):
             raise Exception(f'Error: the argument psf must point to an existing PSF image file, it is set to "{args.psf}" which does not exist.')
 
         commandArgs = [
