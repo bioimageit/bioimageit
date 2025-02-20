@@ -12,9 +12,9 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
+from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
 
-class UIBiitListFilesNode(UIBiitNodeBase):
+class UIBiitListFilesNode(UIBiitArrayNodeBase):
     def __init__(self, raw_node):
         super(UIBiitListFilesNode, self).__init__(raw_node)
         raw_node.dataFrameChanged.connect(self.dataFrameChanged)

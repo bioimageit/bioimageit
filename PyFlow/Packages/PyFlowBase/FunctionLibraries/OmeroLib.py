@@ -3,13 +3,13 @@ from munch import DefaultMunch
 from PyFlow.Core import FunctionLibraryBase
 from pathlib import Path
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 
 class OmeroLib(FunctionLibraryBase):
     """doc string for OmeroLib"""
     classes = {}
 
-class OmeroBase(BiitArrayNodeBase):
+class OmeroBase(BiitToolNode):
 
     omero: OmeroService = OmeroService()
 
@@ -29,10 +29,6 @@ class OmeroBase(BiitArrayNodeBase):
     def dataChanged(self, datasetName:str):
         self.dirty = True
         self.setExecuted(False)
-
-    # setOutputColumns does not apply for Omero nodes
-    def setOutputColumns(self, tool, data):
-        return
 
     def getDatasets(self, project=None):
         data = self.getDataFrame()
@@ -103,7 +99,7 @@ class OmeroDownload(OmeroBase):
         # ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
         self.setOutputAndClean(dataFrame)
         self.dirty = False
-        self.outputMessage = None
+        self.outputMessage = ''
 
     def execute(self):
         try:

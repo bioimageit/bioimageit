@@ -333,15 +333,6 @@ class EnvironmentManager:
 		else:
 			return [f'cd "{condaPath}"', f'export MAMBA_ROOT_PREFIX="{condaPath}"', f'eval "$({condaBinPath} shell hook -s posix)"', f'cd "{currentPath}"'] + showConfig
 	
-	def copyMicromambaDependencies(self, dependenciesFolder):
-		if not self._isWindows(): return
-		if not dependenciesFolder.is_dir():
-			raise Exception(f'The dependencies folder "{dependenciesFolder}" does not exist.')
-		condaPath, condaBinPath = self._getCondaPaths()
-		condaPath.mkdir(exist_ok=True, parents=True)
-		for dll in sorted(list(dependenciesFolder.glob('*.dll'))):
-			shutil.copyfile(dll, condaPath / condaBinPath.parent / dll.name)
-	
 	def _installCondaIfNecessary(self):
 		condaPath, condaBinPath = self._getCondaPaths()
 		if (condaPath / condaBinPath).exists(): return []

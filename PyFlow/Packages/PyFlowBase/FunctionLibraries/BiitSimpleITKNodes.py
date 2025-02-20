@@ -5,13 +5,13 @@ from munch import DefaultMunch
 import SimpleITK as sitk
 
 from PyFlow import getSourcesPath
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 from PyFlow.invoke_in_main import inmain
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
 # import re
 
-class SimpleITKBase(BiitArrayNodeBase):
+class SimpleITKBase(BiitToolNode):
 
     def __init__(self, name):
         super(SimpleITKBase, self).__init__(name)
@@ -25,17 +25,6 @@ class SimpleITKBase(BiitArrayNodeBase):
         outputName = keys[0]
         return self.getColumnName(outputName)
     
-    def setOutputColumns(self, tool, data):
-        for outputName, output in self.parameters['outputs'].items():
-            for index, row in data.iterrows():
-                # Guess output file extension: find the first input image format
-                suffixes = '.tiff'
-                for input in tool.inputs:
-                    if input['type'] == Path and 'image' in input['name'] and self.getParameter(input['name'], row) is not None:
-                        suffixes = ''.join(Path(self.getParameter(input['name'], row)).suffixes)
-                        break
-                data.at[index, self.getColumnName(outputName)] = self.getOutputDataFolderPath() / f'{outputName}_{index}{suffixes}'
-
     def execute(self):
         data: pandas.DataFrame|None = self.getDataFrame()
         if data is None:
@@ -422,7 +411,7 @@ class LabelStatistics(SimpleITKBase):
         return
 
     def execute(self):
-        self.outputMessage = None
+        self.outputMessage = ''
         data: pandas.DataFrame = self.getDataFrame()
         # outputData: pandas.DataFrame = self.outArray.currentData()
         records = []

@@ -8,7 +8,7 @@ from PyFlow.Core import FunctionLibraryBase
 from PyFlow.Core.Common import StructureType, PinOptions
 from PyFlow.Core import NodeBase
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from PyFlow.Packages.PyFlowBase.Nodes import FLOW_CONTROL_COLOR
@@ -18,14 +18,11 @@ class PandasLib(FunctionLibraryBase):
     """doc string for PandasLib"""
     classes = {}
 
-class PandasNodeBase(BiitArrayNodeBase):
+class PandasNodeBase(BiitToolNode):
 
     def __init__(self, name, pinStructureIn=StructureType.Single):
         super(PandasNodeBase, self).__init__(name, pinStructureIn)
 
-    def setOutputColumns(self, tool, data):
-        return
-    
     @staticmethod
     def category():
         return "DataFrames"

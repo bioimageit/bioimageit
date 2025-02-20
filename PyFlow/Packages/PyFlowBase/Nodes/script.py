@@ -1,10 +1,10 @@
 from types import MethodType
 from pathlib import Path
 from munch import DefaultMunch
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 from PyFlow.Core.PyCodeCompiler import Py3CodeCompiler
 
-class ScriptNode(BiitArrayNodeBase):
+class ScriptNode(BiitToolNode):
     # input.name, input.type, input.description, input.default_value
     tool = DefaultMunch.fromDict(dict(info=dict(inputs=[dict(name="ScriptPath", type="path", description="Script path", default_value="")], outputs=[])))
     def __init__(self, name):
@@ -21,7 +21,7 @@ class ScriptNode(BiitArrayNodeBase):
             self.scriptPathChanged(self.scriptPath)
 
     def serialize(self):
-        template = super(BiitArrayNodeBase, self).serialize()
+        template = super(BiitToolNode, self).serialize()
         template['scriptPath'] = str(self.scriptPath)
         return template
     

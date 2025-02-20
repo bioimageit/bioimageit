@@ -40,8 +40,7 @@ from PyFlow.UI.Widgets import BlueprintCanvas
 from PyFlow.Packages.PyFlowBase.Tools import RESOURCES_DIR
 from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
 from PyFlow.Packages.PyFlowBase.Tools.LoggerTool import LoggerTool
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitNodeBase import BiitNodeBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import SimpleITKBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import PandasLib, ListFiles
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroLib, OmeroDownload, OmeroUpload, OmeroBase
@@ -164,7 +163,7 @@ class RunTool(ShelfTool):
         self.logTool = None
         self.currentNode = None
         self.__class__.progressDialog = ProgressDialog(self)
-        BiitNodeBase.log.connect(self.log)
+        BiitToolNode.log.connect(self.log)
 
     @staticmethod
     def toolTip():
@@ -446,12 +445,12 @@ class ExportWorkflowTool(ShelfTool):
         return f'"{activate_path}" activate {name}' if is_windows else f'. "{activate_path}" && conda activate {name}'
 
     # def exportNextFlowNodeBckp(self, node, processes):
-    #     if not (isinstance(node, ListFiles) or isinstance(node, BiitArrayNodeBase)): return
+    #     if not (isinstance(node, ListFiles) or isinstance(node, BiitToolNode)): return
 
     #     # Get input files if any
     #     if isinstance(node, ListFiles):
     #         channel = f"def {node.name}_{node.columnNamePin.currentData()} = Channel.fromPath( '{node.pathPin.currentData()}' )"
-    #     if isinstance(node, BiitArrayNodeBase) and not node.inArray.hasConnections() and isinstance(node.getDataFrame(), pandas.DataFrame):
+    #     if isinstance(node, BiitToolNode) and not node.inArray.hasConnections() and isinstance(node.getDataFrame(), pandas.DataFrame):
     #         channel = f"def {node.name}_path = Channel.fromPath( '{node.dataFramePath}' )"
 
     #     # Create processes
@@ -626,7 +625,7 @@ class ExportWorkflowTool(ShelfTool):
             return
         
         # Todo: other nodes: Omero nodes, Pandas nodes (concat), Python node
-        if not isinstance(node, BiitArrayNodeBase): return
+        if not isinstance(node, BiitToolNode): return
 
 
         # Only export data frame if input inArray is not connected: in this case we must have the input source ; 
@@ -714,10 +713,10 @@ class ExportWorkflowTool(ShelfTool):
         graphManager = self.pyFlowInstance.graphManager.get()
         nodes = graphManager.getAllNodes()
         RunTool.createUuidToNodes(nodes)
-        assert(all(isinstance(n, BiitArrayNodeBase) or isinstance(n, ListFiles) or isinstance(n, OmeroBase) for n in nodes))
+        assert(all(isinstance(n, BiitToolNode) or isinstance(n, ListFiles) or isinstance(n, OmeroBase) for n in nodes))
         for node in nodes:
             node.processNode(True)
-        nodesToProcess = set([n for n in nodes if isinstance(n, BiitArrayNodeBase) or isinstance(n, ListFiles) or isinstance(n, OmeroBase)])
+        nodesToProcess = set([n for n in nodes if isinstance(n, BiitToolNode) or isinstance(n, ListFiles) or isinstance(n, OmeroBase)])
 
         biitConfigPath, _, _, _, condaPath = self.copyDependencies(graphManager)
 

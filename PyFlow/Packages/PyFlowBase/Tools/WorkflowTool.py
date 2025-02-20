@@ -277,7 +277,9 @@ class WorkflowTool(DockTool):
         with open(self.pyFlowInstance.currentFileName, 'r') as f:
             graph = json.load(f)
             for node in graph['nodes']:
-                node['folderDataFramePath'] = None
+                if 'folderDataFramePath' in node:
+                    node['folderDataFramePath'] = None
+                # Todo: check parameters
         with open(self.pyFlowInstance.currentFileName, 'w') as f:
             json.dump(graph, f)
         return

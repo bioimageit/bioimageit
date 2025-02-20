@@ -41,6 +41,9 @@ class GraphManager(object):
         self._activeGraph = GraphBase(ROOT_GRAPH_NAME, self)
         self._activeGraph.setIsRoot(True)
 
+    def getWorkflowPath(self):
+        return Path(self.workflowPath).resolve()
+    
     def findRootGraph(self):
         """Returns top level root graph
 

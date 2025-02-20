@@ -1,7 +1,7 @@
 from blinker import Signal
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 
-class DialogNode(BiitArrayNodeBase):
+class DialogNode(BiitToolNode):
 
     def __init__(self, name):
         super(DialogNode, self).__init__(name)

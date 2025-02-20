@@ -39,7 +39,7 @@ from PyFlow.Packages.PyFlowBase.Nodes.forLoopBegin import forLoopBegin
 from PyFlow.Packages.PyFlowBase.Nodes.whileLoopBegin import whileLoopBegin
 
 from PyFlow.Packages.PyFlowBase.Nodes.imageDisplay import imageDisplay
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitArrayNode import BiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroBase, OmeroDownload, OmeroUpload
 from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
 # from PyFlow.Packages.PyFlowBase.Nodes.dialog import DialogNode
@@ -139,7 +139,7 @@ def createUINode(raw_instance):
         return UIOmeroUpload(raw_instance)
     if isinstance(raw_instance, OmeroBase):
         return UIOmeroNode(raw_instance)
-    if isinstance(raw_instance, BiitArrayNodeBase):
+    if isinstance(raw_instance, BiitToolNode):
         return UIBiitArrayNodeBase(raw_instance)
     if isinstance(raw_instance, ListFiles):
         return UIBiitListFilesNode(raw_instance)

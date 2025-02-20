@@ -419,8 +419,6 @@ def launchBiit(sources):
     if platform.system() == 'Darwin' and getattr(sys, 'frozen', False):
         environmentManager.setCondaPath(getRootPath() / 'micromamba')
 
-    arch = 'arm64' if platform.processor().lower().startswith('arm') else 'x86_64'
-    environmentManager.copyMicromambaDependencies(getBundlePath() / 'data' / arch)
     environment = 'bioimageit'
     
     environmentManager.setProxies(proxies)

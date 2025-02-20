@@ -52,7 +52,8 @@ class Tool(ExoDeepFinderTool):
     ]
 
     def processDataFrame(self, dataFrame, argsList):
-        return dict(outputMessage='Output table will be computed on execution.', dataFrame=dataFrame)
+        self.outputMessage = 'Output table will be computed on execution.'
+        return dataFrame
 
     def processData(self, args):
         print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmentation} and {args.expert_annotation}')

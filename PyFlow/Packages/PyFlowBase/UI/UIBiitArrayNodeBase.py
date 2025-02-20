@@ -15,7 +15,7 @@
 import pandas
 from qtpy import QtGui
 from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
-from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
+from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 from PyFlow.UI.EditorHistory import EditorHistory
@@ -51,7 +51,6 @@ class ColumnValueWidget(QWidget):
         node.inArray.setClean()
         defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1]
         node.parameters['inputs'][self.name]['columnName'] = defaultColumnName
-        # self.columnNameInput = createInputWidget('StringPin', lambda value: self.updateNodeParameters(value, 'columnName'), defaultColumnName, DEFAULT_WIDGET_VARIANT)
         # self.layout.addWidget(self.columnNameInput)
         self.typeSelector.activated.connect(self.changeTypeValue)
         # self.columnNameInput.blockWidgetSignals(True)
@@ -90,19 +89,20 @@ class ColumnValueWidget(QWidget):
             w = QComboBox()
             for name in selectInfo.names:
                 w.addItem(name)
-            # for BiitToolNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
+            #TODO
+            # for BiitArrayNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
             # But values has a special meaning in dict, so it is a function instead of a list.
             # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
             selectInfoValues = selectInfo.values if isinstance(selectInfo.values, list) else selectInfo['values']
             w.setCurrentIndex(selectInfoValues.index(defaultValue) if defaultValue in selectInfoValues else 0)
-            w.activated.connect(lambda index: self.updateNodeParameters(selectInfoValues[index], 'value'))
+            w.activated.connect(lambda index: self.updateNodeParameterValue(selectInfoValues[index]))
             w.setToolTip(description)
             w.setObjectName(name)
             return w
         inputWidgetVariant = 'PathWidget' if type == 'path' else DEFAULT_WIDGET_VARIANT
         w = createInputWidget(
             self.getPinTypeFromIoType(type),
-            lambda value: self.updateNodeParameters(value, 'value'),
+            lambda value: self.updateNodeParameterValue(value),
             defaultValue,
             inputWidgetVariant
         )
@@ -115,11 +115,11 @@ class ColumnValueWidget(QWidget):
             w.setObjectName(name)
         return w
     
-    def updateNodeParameters(self, value, type):
+    def updateNodeParameterValue(self, value):
         parameter = self.node.parameters['inputs'][self.name]
-        parameter[type] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
+        parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
-        self.node.dataBeenSet()
+        self.node.setDirty()
         EditorHistory().saveState("Update parameter", modify=True)
     
     def changeTypeValue(self, index, sendChanged=True):
@@ -142,27 +142,25 @@ class ColumnValueWidget(QWidget):
             type = 'value'
         self.node.parameters['inputs'][self.name]['type'] = type
         if sendChanged:
-            self.node.dataBeenSet()
+            self.node.setDirty()
             EditorHistory().saveState("Update parameter type", modify=True)
         #     self.node.inArray.setData(None)
 
     def changeColumnValue(self, index):
         data = self.node.inArray.currentData()
         self.node.parameters['inputs'][self.name]['columnName'] = data.columns[index]
-        self.node.dataBeenSet()
+        self.node.dasetDirtytaBeenSet()
         EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
 
-class UIBiitArrayNodeBase(UIBiitNodeBase):
+class UIBiitArrayNodeBase(UINodeBase):
     def __init__(self, raw_node):
         super(UIBiitArrayNodeBase, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)
-        raw_node.parametersChanged.connect(self.parametersChanged)
+        raw_node.inArray.dataBeenSet.connect(self.dataBeenSet)
         self.dataFrameWidget = None
     
-    def parametersChanged(self, data):
-        # print('parametersChanged')
-        # self.canvasRef().pyFlowInstance.onRequestFillTable(self)
+    def dataBeenSet(self):
         if self.isSelected():
             self.canvasRef().tryFillTableView(self)         # Calls TableTool.updateTable()
         
@@ -178,7 +176,7 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
 
         self.dataFrameWidget = None
         if not self._rawNode.inArray.hasConnections():
-            defaultValue = self._rawNode.folderDataFramePath if self._rawNode.folderDataFramePath is not None else ''
+            defaultValue = '' # self._rawNode.folderDataFramePath if self._rawNode.folderDataFramePath is not None else ''
             inputFilesLayout = QHBoxLayout()
             inputFilesLabel = QLabel('Input files:')
             inputFilesLayout.addWidget(inputFilesLabel)
@@ -214,11 +212,7 @@ class UIBiitArrayNodeBase(UIBiitNodeBase):
 
     def updateOutput(self, output, value):
         output['value'] = value
-        self._rawNode.dataBeenSet()
-        # data: pandas.DataFrame = self._rawNode.outArray.currentData()
-        # self._rawNode.setOutputColumns(self._rawNode.__class__.tool, data)
-        # self._rawNode.setOutputAndClean(data)
-        # self.parametersChanged(data)
+        self._rawNode.setDirty()
         EditorHistory().saveState("Update parameter", modify=True)
 
     def createAdvancedCollapsibleFormWidget(self, propertiesWidget):

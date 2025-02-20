@@ -14,7 +14,6 @@
 
 from qtpy import QtGui
 from qtpy.QtWidgets import QComboBox
-from PyFlow.Packages.PyFlowBase.UI.UIBiitNodeBase import UIBiitNodeBase
 from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
