@@ -43,7 +43,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/3]] Load libraries and model {args.model_name}')
@@ -67,7 +67,7 @@ class Tool:
         if len(image.shape)==3:
             image = image[:,:,0]
         if len(image.shape)>3:
-            sys.exit(f'Error: input image {args.input_image} has too many dimension, should be 2 or 3 (in which case the channel 0 will be segmented).')
+            raise Exception(f'Error: input image {args.input_image} has too many dimension, should be 2 or 3 (in which case the channel 0 will be segmented).')
 
         print('[[2/3]] Compute segmentation', image.shape)
         labels, _ = self.model.predict_instances(normalize(image))

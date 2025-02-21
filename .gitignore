@@ -6,7 +6,7 @@
 **/.DS_Store
 **/test-data/
 **/Fiji.app/
-Workflows/
+Workflows
 BioImage-IT.data/
 __pycache__/
 micromamba/
@@ -22,4 +22,5 @@ PyFlow/Tests/validated_tools_*.json
 PyFlow/Tools/Convert image/bftools/
 PyFlow/Tools/Fiji/fiji.zip
 all-test-data.zip
+all-test-data/
 .aider*

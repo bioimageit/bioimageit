@@ -5,7 +5,6 @@ from importlib import import_module
 from PyFlow import getImportPath
 from PyFlow.Core import FunctionLibraryBase
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import createFunctionNodes
 
 class BiitLib(FunctionLibraryBase):
     """doc string for BiitLib"""
@@ -28,5 +27,3 @@ def loadTools(toolsPath):
     return tools
 
 loadTools(toolsPath)
-
-BiitLib.classes.update(createFunctionNodes())

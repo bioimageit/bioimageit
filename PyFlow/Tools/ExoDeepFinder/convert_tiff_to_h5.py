@@ -28,12 +28,9 @@ class Tool(ExoDeepFinderTool):
     def processData(self, args):
         print(f'Convert {args.tiff} to {args.output}')
         # Never use --make_subfolder in edf_convert_tiff_to_h5 since we do not want to modify the input folder
-        completedProcess = subprocess.run(['edf_convert_tiff_to_h5', '-t', args.tiff, '-o', args.output])
-        if completedProcess.returncode != 0: return completedProcess
+        subprocess.run(['edf_convert_tiff_to_h5', '-t', args.tiff, '-o', args.output], check=True)
         # Symlink the tiff folder
         tiffLink = (args.output.parent.resolve() / 'tiff')
         if tiffLink.exists():
             tiffLink.unlink()
         tiffLink.symlink_to(args.tiff, True)
-        return completedProcess
-

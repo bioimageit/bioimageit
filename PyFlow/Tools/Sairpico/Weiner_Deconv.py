@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import subprocess
 class Tool:
 
     categories = ['Deconvolution']
@@ -59,7 +59,7 @@ class Tool:
     
     def processData(self, args):
         print('Performing Wiener deconvolution')
-        import subprocess
+        
         commandArgs = [
             'simgwiener' + args.type.replace(' ', '').lower(), '-i', args.input, '-o', args.output,
             '-lambda', getattr(args, 'lambda'), '-padding', 'true' if args.padding else 'false'
@@ -68,6 +68,5 @@ class Tool:
             commandArgs += ['-sigma', args.sigma]
         else:
             commandArgs += ['-psf', args.psf]
-        return subprocess.run([str(ca) for ca in commandArgs])
-        
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 

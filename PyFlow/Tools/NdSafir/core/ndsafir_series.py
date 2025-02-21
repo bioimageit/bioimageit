@@ -94,7 +94,7 @@ def safir_sequence(idx, inputdir, output_dir, frames, args):
     args = [item.replace('outputfile', job_output_file) for item in args]    
 
     print('run args:', args)     
-    subprocess.run(args)
+    subprocess.run(args, check=True)
 
     os.remove(job_input_file) 
     os.remove(job_output_file) 
@@ -120,7 +120,7 @@ def ndsafir_series(inputfile, outputfile, noise, iter, nf, patch, tbatch):
             print('process a series')
             jifile, jofile = create_job_io_files(inputfile, outputfile)
             args = ['ndsafir', '-i', jifile, '-o', jofile, '-noise', noise, '-iter', iter, '-patch', patch, '-nf', nf]
-            subprocess.run(args)
+            subprocess.run(args, check=True)
             convert_job_output_file_to_outputfile(jofile, outputfile)
             # clean
             os.remove(jifile) 
@@ -134,8 +134,7 @@ def ndsafir_series(inputfile, outputfile, noise, iter, nf, patch, tbatch):
             print("process a single file:", )
             subprocess.run(args, shell=True, check=True)
     else:
-        print ("Error: input file does not exists")
-        sys.exit(1)    
+        raise Exception("Error: input file does not exists")
 
     print('Input file is "', inputfile)
     print('Output file is "', outputfile)
@@ -150,15 +149,15 @@ def main(argv):
     tbatch = ''
     try:
         opts, args = getopt.getopt(argv,"hi:o:n:t:p:f:b:",["ifile=","ofile=","noise=","iter=","patch=","nf=","tbatch="])
-    except getopt.GetoptError:
+    except getopt.GetoptError as e:
         print('ndsafir_series.py -i <inputfile> -o <outputfile>')
-        sys.exit(2)
+        raise e
     for opt, arg in opts:
         # print('opt=', opt)
         # print('arg=', arg)
         if opt == '-h':
             print('ndsafir_series.py -i <inputfile> -o <outputfile> -n <noise> -t <iter> -p <patch> -f <nf> -b <tbatch>')
-            sys.exit()
+            return
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):

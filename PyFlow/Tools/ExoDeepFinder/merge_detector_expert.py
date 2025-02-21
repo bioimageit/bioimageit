@@ -59,6 +59,4 @@ class Tool(ExoDeepFinderTool):
         print(f'Merge detector and expert data from {args.detector_segmentation}, {args.expert_segmentation} and {args.expert_annotation}')
         # expert_annotation = Path(args.expert_segmentation).parent / args.expert_annotation if not Path(args.expert_annotation).is_absolute() else args.expert_annotation
         commandArgs = ['edf_merge_detector_expert', '-ds', args.movie_folder / args.detector_segmentation, '-es', args.movie_folder / args.expert_segmentation, '-ea', args.movie_folder / args.expert_annotation, '-ms', args.merged_segmentation, '-ma', args.merged_annotation]
-        completedProcess =  subprocess.run([str(arg) for arg in commandArgs])
-        return completedProcess
-
+        subprocess.run([str(arg) for arg in commandArgs], check=True)

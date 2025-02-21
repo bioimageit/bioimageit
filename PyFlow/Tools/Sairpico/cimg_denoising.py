@@ -1,8 +1,6 @@
 import sys
-from importlib import import_module
-import json
 from pathlib import Path
-
+import subprocess
 class Tool:
 
     categories = ['Denoising']
@@ -123,11 +121,11 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         
         print(f'Process {args.input_image}')
-        import subprocess
-        return subprocess.run(["denoise",
+        
+        subprocess.run(["denoise",
                                 "-i", str(args.input_image),
                                 "-o", str(args.output_image),
                                 "-first", str(args.first),
@@ -145,6 +143,4 @@ class Tool:
                                 "-denoisep", str(args.denoisep),
                                 "-sparsep", str(args.sparsep),
                                 "-iter", str(args.iter)
-                                ])
-        
-
+                                ], check=True)

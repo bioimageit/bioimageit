@@ -40,5 +40,5 @@ class Tool(ExoDeepFinderTool):
         print(f'Annotate {args.segmentation}')
         klu = ['-klu'] if args.keep_labels_unchanged else []
         commandArgs = ['edf_generate_annotation', '-s', args.segmentation, '-cr', args.cluster_radius, '-a', args.annotation] + klu
-        return subprocess.run([str(arg) for arg in commandArgs])
+        subprocess.run([str(arg) for arg in commandArgs], check=True)
 

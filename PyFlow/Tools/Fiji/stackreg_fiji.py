@@ -55,7 +55,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Run Fiji macro')
         import subprocess
@@ -67,6 +67,6 @@ class Tool:
         pluginsArgs = ['--plugins', str(Path(__file__).parent.resolve() / 'Fiji.app/plugins/')] if platform.system() == 'Darwin' else []
         command = [fijiPath, '--headless', '--console'] + pluginsArgs + ['-macro', macroPath, f'[{args.input_image},{transformation},{args.output_image}]']
         print('Execute:', command)
-        return subprocess.run(command)
+        subprocess.run(command, check=True)
         
 

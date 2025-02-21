@@ -14,11 +14,11 @@
 
 from qtpy import QtGui
 from qtpy.QtWidgets import QComboBox
-from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
+from PyFlow.Packages.PyFlowBase.UI.UIBiitToolNode import UIBiitToolNode
 from PyFlow.UI.Canvas.UICommon import NodeDefaults
 from PyFlow.Core.Common import *
 
-class UIOmeroNode(UIBiitArrayNodeBase):
+class UIOmeroNode(UIBiitToolNode):
     def __init__(self, raw_node):
         super(UIOmeroNode, self).__init__(raw_node)
     #     raw_node.executedChanged.connect(self.executedChanged)

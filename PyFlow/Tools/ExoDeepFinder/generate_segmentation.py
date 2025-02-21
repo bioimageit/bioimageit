@@ -47,6 +47,5 @@ class Tool(ExoDeepFinderTool):
     def processData(self, args):
         print(f'Generate segmentation for {args.movie} with {args.annotation}')
         commandArgs = ['edf_generate_segmentation', '-m', args.movie_folder / args.movie, '-a', args.movie_folder / args.annotation, '-s', args.output_segmentation]
-        completedProcess = subprocess.run([str(arg) for arg in commandArgs])
-        return completedProcess
+        subprocess.run([str(arg) for arg in commandArgs], check=True)
 

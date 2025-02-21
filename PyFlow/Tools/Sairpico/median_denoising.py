@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 class Tool:
 
@@ -65,7 +66,7 @@ class Tool:
     
     def processData(self, args):
         print('Performing Median 4D filtering')
-        import subprocess
+
         command = 'simgmedian' + args.type.lower()
         commandArgs = [
             command, '-i', args.input_image, '-o', args.output,
@@ -76,5 +77,5 @@ class Tool:
             commandArgs += ['-rz', args.radius_z]
         if args.type == '4D':
             commandArgs += ['-rt', args.radius_t]
-        return subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 

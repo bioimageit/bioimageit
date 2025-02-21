@@ -29,7 +29,6 @@ import traceback
 import pandas
 
 from qtpy import QtGui, QtCore
-from qtpy.QtCore import QObject, QThread
 from qtpy.QtWidgets import *
 
 from PyFlow import PARAMETERS_PATH
@@ -38,13 +37,8 @@ from PyFlow.ErrorManager import ErrorManager
 from PyFlow.UI.Tool.Tool import ShelfTool
 from PyFlow.UI.Widgets import BlueprintCanvas
 from PyFlow.Packages.PyFlowBase.Tools import RESOURCES_DIR
-from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
 from PyFlow.Packages.PyFlowBase.Tools.LoggerTool import LoggerTool
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitSimpleITKNodes import SimpleITKBase
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import PandasLib, ListFiles
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroLib, OmeroDownload, OmeroUpload, OmeroBase
-from PyFlow.Core.OmeroService import OmeroService
 from PyFlow.invoke_in_main import inmain, inthread
 
 def dedent(message):
@@ -234,16 +228,8 @@ class RunTool(ShelfTool):
     def execute(node):
         if not RunTool.inputsWereExecuted(node): return False
         node.compute()
-
         
-        if node.__class__.__name__ in PandasLib.classes.keys():
-            node.executed = True
-            return True
-        if node.__class__.__name__ in OmeroLib.classes.keys() or isinstance(node, SimpleITKBase) or isinstance(node, ScriptNode):
-            node.execute()
-            return True
-        
-        node.execute(RunTool.req)
+        node.execute()
 
         return True
 
@@ -521,108 +507,108 @@ class ExportWorkflowTool(ShelfTool):
         outputFolder = node.getOutputDataFolderPath(node)
         outputFolder.mkdir(exist_ok=True, parents=True)
 
-        if node.__class__.__name__ in OmeroLib.classes.keys():
+        # if node.__class__.__name__ in OmeroLib.classes.keys():
 
-            if isinstance(node, OmeroDownload):
+        #     if isinstance(node, OmeroDownload):
 
-                # if name not in processes:
-                inputs = '''val dataset_name
-                [t]val node_name'''
-                outputs = 'path "output_data_frame.csv"\n'
-                host, port, username = OmeroService().getSettings()
-                omero_commands = f'--omero_host {host} --omero_port {port} --omero_user {username}'
-                scripts = '''source $params.conda_path/etc/profile.d/conda.sh
-                [t]conda activate bioimageit
-                [t]python $projectDir/nf_omero.py ''' + omero_commands + ''' download --dataset_name ${dataset_name} --node_name ${node_name}'''
-                processes[node.name] = dedent(f'''process {node.name} {{
-                [t]publishDir '{node.name}'
-                [t]
-                [t]input:
-                [t]{inputs}
-                [t]
-                [t]output:
-                [t]{outputs}
-                [t]
-                [t]script:
-                [t]"""
-                [t]{scripts}
-                [t]"""
-                }}
-                ''')
+        #         # if name not in processes:
+        #         inputs = '''val dataset_name
+        #         [t]val node_name'''
+        #         outputs = 'path "output_data_frame.csv"\n'
+        #         host, port, username = OmeroService().getSettings()
+        #         omero_commands = f'--omero_host {host} --omero_port {port} --omero_user {username}'
+        #         scripts = '''source $params.conda_path/etc/profile.d/conda.sh
+        #         [t]conda activate bioimageit
+        #         [t]python $projectDir/nf_omero.py ''' + omero_commands + ''' download --dataset_name ${dataset_name} --node_name ${node_name}'''
+        #         processes[node.name] = dedent(f'''process {node.name} {{
+        #         [t]publishDir '{node.name}'
+        #         [t]
+        #         [t]input:
+        #         [t]{inputs}
+        #         [t]
+        #         [t]output:
+        #         [t]{outputs}
+        #         [t]
+        #         [t]script:
+        #         [t]"""
+        #         [t]{scripts}
+        #         [t]"""
+        #         }}
+        #         ''')
 
-                inputPath = node.datasetPin.getData()
+        #         inputPath = node.datasetPin.getData()
 
-                # Launch them in order
-                execution = f'{node.name}_out_data_frame = {node.name}("{inputPath}", "{node.name}")'
-                executions.append(execution)
+        #         # Launch them in order
+        #         execution = f'{node.name}_out_data_frame = {node.name}("{inputPath}", "{node.name}")'
+        #         executions.append(execution)
 
-            elif isinstance(node, OmeroUpload):
+        #     elif isinstance(node, OmeroUpload):
 
-                # if name not in processes:
-                inputs = '''val dataset_name
-                [t]val project_name
-                [t]path input_data_frame
-                [t]val column_name
-                [t]val meta_data_columns'''
-                host, port, username = OmeroService().getSettings()
-                omero_commands = f'--omero_host {host} --omero_port {port} --omero_user {username}'
-                scripts = '''source $params.conda_path/etc/profile.d/conda.sh
-                [t]conda activate bioimageit
-                [t]python $projectDir/nf_omero.py ''' + omero_commands + ''' upload --dataset_name ${dataset_name} --project_name ${project_name} --data_frame ${input_data_frame} --column_name ${column_name} --meta_data_columns ${meta_data_columns}'''
-                processes[node.name] = dedent(f'''process {node.name} {{
-                [t]publishDir '{node.name}'
-                [t]
-                [t]input:
-                [t]{inputs}
-                [t]
-                [t]script:
-                [t]"""
-                [t]{scripts}
-                [t]"""
-                }}
-                ''')
+        #         # if name not in processes:
+        #         inputs = '''val dataset_name
+        #         [t]val project_name
+        #         [t]path input_data_frame
+        #         [t]val column_name
+        #         [t]val meta_data_columns'''
+        #         host, port, username = OmeroService().getSettings()
+        #         omero_commands = f'--omero_host {host} --omero_port {port} --omero_user {username}'
+        #         scripts = '''source $params.conda_path/etc/profile.d/conda.sh
+        #         [t]conda activate bioimageit
+        #         [t]python $projectDir/nf_omero.py ''' + omero_commands + ''' upload --dataset_name ${dataset_name} --project_name ${project_name} --data_frame ${input_data_frame} --column_name ${column_name} --meta_data_columns ${meta_data_columns}'''
+        #         processes[node.name] = dedent(f'''process {node.name} {{
+        #         [t]publishDir '{node.name}'
+        #         [t]
+        #         [t]input:
+        #         [t]{inputs}
+        #         [t]
+        #         [t]script:
+        #         [t]"""
+        #         [t]{scripts}
+        #         [t]"""
+        #         }}
+        #         ''')
                 
-                dataframePath = self.getPreviousDataFrame(node) # f'"$projectDir/{self.exportDataFrame(node, outputFolder, graphManager.workflowPath)}"'
-                datasetName = node.datasetPin.currentData()
-                projectName = node.projectPin.currentData()
-                metaDataColumns = [mdc for mdc in node.metaDataColumnsPin.currentData().split(',') if len(mdc)>0]
-                columnName = node.columnName if node.columnName is not None else node.getDataFrame().columns[-1] if node.getDataFrame() is not None else None
+        #         dataframePath = self.getPreviousDataFrame(node) # f'"$projectDir/{self.exportDataFrame(node, outputFolder, graphManager.workflowPath)}"'
+        #         datasetName = node.datasetPin.currentData()
+        #         projectName = node.projectPin.currentData()
+        #         metaDataColumns = [mdc for mdc in node.metaDataColumnsPin.currentData().split(',') if len(mdc)>0]
+        #         columnName = node.columnName if node.columnName is not None else node.getDataFrame().columns[-1] if node.getDataFrame() is not None else None
 
-                # Launch them in order
-                execution = f'{node.name}_out_data_frame = {node.name}("{datasetName}", "{projectName}", {dataframePath}, "{columnName}", "{metaDataColumns}")'
-                executions.append(execution)
-            return
+        #         # Launch them in order
+        #         execution = f'{node.name}_out_data_frame = {node.name}("{datasetName}", "{projectName}", {dataframePath}, "{columnName}", "{metaDataColumns}")'
+        #         executions.append(execution)
+        #     return
         
-        if isinstance(node, ListFiles):
+        # if isinstance(node, ListFiles):
             
-            # if name not in processes:
-            inputs = '''path input_path
-            [t]val column_name'''
-            outputs = 'path "output_data_frame.csv"'
-            scripts = 'python $projectDir/nf_list_files.py --input_path ${input_path} --column_name ${column_name} --output_path "output_data_frame.csv"'
-            processes[node.name] = dedent(f'''process {node.name} {{
-            [t]publishDir '{node.name}'
-            [t]
-            [t]input:
-            [t]{inputs}
-            [t]
-            [t]output:
-            [t]{outputs}
-            [t]
-            [t]script:
-            [t]"""
-            [t]{scripts}
-            [t]"""
-            }}
-            ''')
+        #     # if name not in processes:
+        #     inputs = '''path input_path
+        #     [t]val column_name'''
+        #     outputs = 'path "output_data_frame.csv"'
+        #     scripts = 'python $projectDir/nf_list_files.py --input_path ${input_path} --column_name ${column_name} --output_path "output_data_frame.csv"'
+        #     processes[node.name] = dedent(f'''process {node.name} {{
+        #     [t]publishDir '{node.name}'
+        #     [t]
+        #     [t]input:
+        #     [t]{inputs}
+        #     [t]
+        #     [t]output:
+        #     [t]{outputs}
+        #     [t]
+        #     [t]script:
+        #     [t]"""
+        #     [t]{scripts}
+        #     [t]"""
+        #     }}
+        #     ''')
 
-            inputPath = node.pathPin.getData()
-            columnName = node.columnNamePin.getData()
+        #     inputPath = node.pathPin.getData()
+        #     columnName = node.columnNamePin.getData()
 
-            # Launch them in order
-            execution = f'{node.name}_out_data_frame = {node.name}("{inputPath}", "{columnName}")'
-            executions.append(execution)
-            return
+        #     # Launch them in order
+        #     execution = f'{node.name}_out_data_frame = {node.name}("{inputPath}", "{columnName}")'
+        #     executions.append(execution)
+        #     return
         
         # Todo: other nodes: Omero nodes, Pandas nodes (concat), Python node
         if not isinstance(node, BiitToolNode): return
@@ -713,10 +699,10 @@ class ExportWorkflowTool(ShelfTool):
         graphManager = self.pyFlowInstance.graphManager.get()
         nodes = graphManager.getAllNodes()
         RunTool.createUuidToNodes(nodes)
-        assert(all(isinstance(n, BiitToolNode) or isinstance(n, ListFiles) or isinstance(n, OmeroBase) for n in nodes))
+
         for node in nodes:
             node.processNode(True)
-        nodesToProcess = set([n for n in nodes if isinstance(n, BiitToolNode) or isinstance(n, ListFiles) or isinstance(n, OmeroBase)])
+        nodesToProcess = set([n for n in nodes if isinstance(n, BiitToolNode)])
 
         biitConfigPath, _, _, _, condaPath = self.copyDependencies(graphManager)
 

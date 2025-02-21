@@ -153,9 +153,9 @@ class ColumnValueWidget(QWidget):
         EditorHistory().saveState("Update parameter column", modify=True)
         # self.node.inArray.setData(None)
 
-class UIBiitArrayNodeBase(UINodeBase):
+class UIBiitToolNode(UINodeBase):
     def __init__(self, raw_node):
-        super(UIBiitArrayNodeBase, self).__init__(raw_node)
+        super(UIBiitToolNode, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)
         raw_node.inArray.dataBeenSet.connect(self.dataBeenSet)
         self.dataFrameWidget = None
@@ -202,7 +202,7 @@ class UIBiitArrayNodeBase(UINodeBase):
         return
     
     def createInputWidgets(self, inputsCategory, inGroup=None, pins=True):
-        # super(UIBiitArrayNodeBase, self).createInputWidgets(inputsCategory, inGroup, False)
+        # super(UIBiitToolNode, self).createInputWidgets(inputsCategory, inGroup, False)
         tool = self._rawNode.__class__.tool
         
         for input in tool.inputs:

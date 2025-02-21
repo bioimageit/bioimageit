@@ -51,5 +51,5 @@ class Tool:
             'hotSpotDetection', '-i', str(args.input_image), '-o', str(args.output),
             '-m', str(args.patch_size), '-n', str(args.neighborhood_size), '-pv', str(args.p_value)
         ]
-        return subprocess.run(commandArgs)
+        subprocess.run(commandArgs, check=True)
 

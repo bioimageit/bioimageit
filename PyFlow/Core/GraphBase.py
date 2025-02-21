@@ -260,7 +260,7 @@ class GraphBase(ISerializable):
         #     node.executed = True
 
         # Now that the graph is built, the nodes can listen to dataBeenSet
-        # This could be moved to UIBiitArrayNodeBase? (since the UI is built after the graph)
+        # This could be moved to UIBiitToolNode? (since the UI is built after the graph)
         self.populating = False
         for node in nodes:
             node.setupConnections()

@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import subprocess
 class Tool:
 
     categories = ['Deconvolution']
@@ -76,7 +76,6 @@ class Tool:
     
     def processData(self, args):
         print('Performing MATIRF deconvolution')
-        import subprocess
 
         commandArgs = ['python', (Path(__file__).parent /'scripts' / 'matirf_sequence.py').resolve()] if args.input_image.suffix == '.txt' else ['matirf']
         commandArgs += [
@@ -84,5 +83,5 @@ class Tool:
             '-d', args.depth, '-n', args.nplanes, '-lambda', getattr(args, 'lambda'), '-gamma', args.gamma,
             '-iter', args.iterations, '-reg', args.reg_type, '-zmin', args.zmin
         ]
-        return subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 

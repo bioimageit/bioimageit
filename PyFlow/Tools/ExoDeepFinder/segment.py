@@ -46,5 +46,4 @@ class Tool(ExoDeepFinderTool):
         vizualisation = ['-v'] if args.visualization else []
         model_weights = ['-mw', args.model_weights] if args.model_weights is not None else []
         commandArgs = ['edf_segment', '-m', args.movie, '-ps', args.patch_size, '-s', args.segmentation] + model_weights + vizualisation
-        return subprocess.run([str(arg) for arg in commandArgs])
-
+        subprocess.run([str(arg) for arg in commandArgs], check=True)

@@ -40,11 +40,6 @@ from PyFlow.Packages.PyFlowBase.Nodes.whileLoopBegin import whileLoopBegin
 
 from PyFlow.Packages.PyFlowBase.Nodes.imageDisplay import imageDisplay
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import BiitToolNode
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.OmeroLib import OmeroBase, OmeroDownload, OmeroUpload
-from PyFlow.Packages.PyFlowBase.Nodes.script import ScriptNode
-# from PyFlow.Packages.PyFlowBase.Nodes.dialog import DialogNode
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import ListFiles
-from PyFlow.Packages.PyFlowBase.FunctionLibraries.PandasLib import ConcatDataFrames
 from PyFlow.Packages.PyFlowBase.UI.UIImageDisplayNode import UIImageDisplayNode
 
 from PyFlow.Packages.PyFlowBase.UI.UIStoreArgsNode import UIStoreArgs
@@ -69,13 +64,7 @@ from PyFlow.Packages.PyFlowBase.UI.UIMakeDictNode import UIMakeDictNode
 from PyFlow.Packages.PyFlowBase.UI.UIForLoopBeginNode import UIForLoopBeginNode
 from PyFlow.Packages.PyFlowBase.UI.UIWhileLoopBeginNode import UIWhileLoopBeginNode
 
-from PyFlow.Packages.PyFlowBase.UI.UIBiitArrayNodeBase import UIBiitArrayNodeBase
-from PyFlow.Packages.PyFlowBase.UI.UIOmeroNode import UIOmeroNode, UIOmeroDownload, UIOmeroUpload
-from PyFlow.Packages.PyFlowBase.UI.UIScriptNode import UIScriptNode
-# from PyFlow.Packages.PyFlowBase.UI.UIDialogNode import UIDialogNode
-
-from PyFlow.Packages.PyFlowBase.UI.UIBiitListFilesNode import UIBiitListFilesNode
-from PyFlow.Packages.PyFlowBase.UI.UIBiitConcatDataFramesNode import UIBiitConcatDataFramesNode
+from PyFlow.Packages.PyFlowBase.UI.UIBiitToolNode import UIBiitToolNode
 
 from PyFlow.UI.Canvas.UINodeBase import UINodeBase
 
@@ -127,22 +116,6 @@ def createUINode(raw_instance):
         return UIForLoopBeginNode(raw_instance)
     if isinstance(raw_instance, whileLoopBegin):
         return UIWhileLoopBeginNode(raw_instance)
-    
-    
-    if isinstance(raw_instance, ScriptNode):
-        return UIScriptNode(raw_instance)
-    # if isinstance(raw_instance, DialogNode):
-    #     return UIDialogNode(raw_instance)
-    if isinstance(raw_instance, OmeroDownload):
-        return UIOmeroDownload(raw_instance)
-    if isinstance(raw_instance, OmeroUpload):
-        return UIOmeroUpload(raw_instance)
-    if isinstance(raw_instance, OmeroBase):
-        return UIOmeroNode(raw_instance)
     if isinstance(raw_instance, BiitToolNode):
-        return UIBiitArrayNodeBase(raw_instance)
-    if isinstance(raw_instance, ListFiles):
-        return UIBiitListFilesNode(raw_instance)
-    if isinstance(raw_instance, ConcatDataFrames):
-        return UIBiitConcatDataFramesNode(raw_instance)
+        return UIBiitToolNode(raw_instance)
     return UINodeBase(raw_instance)

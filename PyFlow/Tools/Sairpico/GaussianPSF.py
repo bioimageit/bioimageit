@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import subprocess
 class Tool:
 
     categories = ['PSF']
@@ -51,8 +51,7 @@ class Tool:
     
     def processData(self, args):
         print('Generate PSF')
-        import subprocess
         commandArgs = ['simggaussian3dpsf', '-o', args.output, '-sigmaxy', args.sigmaxy, '-sigmaz', args.sigmaz, '-depth', args.depth, '-height', args.height, '-width', args.width]
-        return subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
         
 

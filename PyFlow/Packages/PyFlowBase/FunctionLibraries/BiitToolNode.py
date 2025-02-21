@@ -50,7 +50,7 @@ class BiitToolNode(NodeBase):
 		self.executedChanged = Signal(bool)
 		self.Tool = Tool
 		self.tool = Tool()
-		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if hasattr(Tool, 'acceptMultipleInputs') and Tool.acceptMultipleInputs else StructureType.Single, constraint="1")
+		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if hasattr(Tool, 'multipleInputs') and Tool.multipleInputs else StructureType.Single, constraint="1")
 		self.inArray.enableOptions(PinOptions.AllowAny)
 		self.outArray = self.createOutputPin("out", "AnyPin", structure=StructureType.Single, constraint="1")
 		self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
@@ -67,7 +67,6 @@ class BiitToolNode(NodeBase):
 	
 	# affectOthers is always true, except when loading node in BiitToolNode.postCreate()
 	def setOutputAndClean(self, data, affectOthers=True):
-		# Set dirty to False before calling outArray.setData(data) since this can recompute
 		self.dirty = False
 		if not hasattr(self, 'outArray'): return
 		self.outArray.setData(data, affectOthers)
@@ -300,17 +299,12 @@ class BiitToolNode(NodeBase):
 		# Remove duplicated columns
 		result = result.loc[:,~result.columns.duplicated()].copy()
 		return result
-	
-	def processDataFrames(self, dataFrames):
-		if hasattr(self.tool, 'processDataFrames') and callable(self.tool.processDataFrames):
-			return self.tool.processDataFrames(dataFrames, self.getArgs())
-		else:
-			return self.mergeDataFrames(dataFrames)
 
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
 		dataFrames = self.getDataFrames()
-		dataFrame = self.mergeDataFrames(dataFrames)
+		args, inDataFrame, outDataFrame = self.getArgs()
+		dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs()) if hasattr(self.tool, 'processDataFrames') and callable(self.tool.processDataFrames) else self.mergeDataFrames(dataFrames)
 		self.setParametersFromDataframe(dataFrame)
 		self.setOutputColumns(dataFrame)
 		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
@@ -370,15 +364,16 @@ class BiitToolNode(NodeBase):
 				self.setArg(args, parameterName, parameter, parameter['value'], None)
 			self.setOutputArgsFromDataFrame(args, outputData, 0)
 			argsList.append(args)
-			return argsList
-		for index, row in inputData.iterrows():
-			args = {}
-			for parameterName, parameter in self.parameters['inputs'].items():
-				if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs, row):
-					raise Exception(f'The parameter {parameterName} is undefined, but required.')
-				self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
-			self.setOutputArgsFromDataFrame(args, outputData, index)
-			argsList.append(args)
+		else:
+			for index, row in inputData.iterrows():
+				args = {}
+				for parameterName, parameter in self.parameters['inputs'].items():
+					if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs, row):
+						raise Exception(f'The parameter {parameterName} is undefined, but required.')
+					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
+				self.setOutputArgsFromDataFrame(args, outputData, index)
+				args['idf_row'] = row
+				argsList.append(args)
 		return [Munch.fromDict(args) for args in self.argsList]
 
 	@classmethod
@@ -396,7 +391,7 @@ class BiitToolNode(NodeBase):
 			print(f"Exception in thread: {e}")
 		return
 	
-	def execute(self, req):
+	def execute(self):
 		additionalInstallCommands = self.Tool.additionalInstallCommands if hasattr(self.Tool, 'additionalInstallCommands') else None
 		additionalActivateCommands = self.Tool.additionalActivateCommands if hasattr(self.Tool, 'additionalActivateCommands') else None
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
@@ -412,19 +407,21 @@ class BiitToolNode(NodeBase):
 		if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
 		if completedProcess is not None and completedProcess.returncode != 0:
 			raise Exception(completedProcess)
+		dataFrames = []
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			# args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
-			if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
-			if completedProcess is not None and completedProcess.returncode != 0:
-				raise Exception(completedProcess)
+			dataFrame = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
+			if dataFrame is not None: dataFrames.append(dataFrame)
+			if self.__class__.environment.stopEvent.is_set(): return False
+		if len(dataFrames)>0:
+			dataFrame = pandas.concat(dataFrames)
+			self.setOutputAndClean(dataFrame)
 		self.finishExecution(argsList)
 		return True
 	
-	def finishExecution(self, argsList=None):
-		argsList = self.getArgs() if argsList is None else argsList
+	def finishExecution(self, argsList):
 		outputFolder = self.getOutputMetadataFolderPath()
 		outputFolder.mkdir(exist_ok=True, parents=True)
 

@@ -83,15 +83,15 @@ def main(argv):
 
     try:
         opts, args = getopt.getopt(argv,"hi:o:p:d:n:l:g:t:r:z:",["ifile=","ofile=","params=", "depth=","nplanes=","lambda=","gamma=","iter=","reg=","zmin="])
-    except getopt.GetoptError:
+    except getopt.GetoptError as e:
         print('matirf_sequence.py -i <inputfile> -o <outputfile> ...')
-        sys.exit(2)
+        raise e
     for opt, arg in opts:
         # print('opt=', opt)
         # print('arg=', arg)
         if opt == '-h':
             print('matirf_sequence.py -i <inputfile> -o <outputfile> ...')
-            sys.exit()
+            return
         elif opt in ("-i", "--ifile"):
             inputfile = arg
         elif opt in ("-o", "--ofile"):
@@ -137,11 +137,10 @@ def main(argv):
                 output_frame = txt_movie_io.get_output_frame(index, prefix, outputfile)
                 args = ['matirf', '-i', input_frame, '-o', output_frame, '-p', p, '-d', str(d), '-n', str(n), '-lambda', str(lambda_), '-gamma', str(gamma), '-iter', str(iter), '-reg', str(reg), '-zmin', str(zmin)]
                 print("args=", args)
-                subprocess.run(args)
+                subprocess.run(args, check=True)
             txt_movie_io.write_output_movie(outputfile, prefix)
     else:
-        print ("Error: input file does not exists")
-        sys.exit(1)    
+        raise Exception("Error: input file does not exists")
 
     print('Input file is "', inputfile)
     print('Output file is "', outputfile)

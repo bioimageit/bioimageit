@@ -61,7 +61,7 @@ class Tool(ExoDeepFinderTool):
         output.parent.mkdir(exist_ok=True, parents=True)
         print(f'Train ExoDeepFinder from dataset {outputDataset}')
         commandArgs = ['edf_train', '-d', outputDataset, '-ps', args.patch_sizes, '-bs', args.batch_sizes, '-rs', args.random_shifts, '-ne', args.n_epochs, '-ns', args.n_steps, '-o', output]
-        return subprocess.run([str(arg) for arg in commandArgs])
+        subprocess.run([str(arg) for arg in commandArgs], check=True)
 
     def processData(self, args):
         return

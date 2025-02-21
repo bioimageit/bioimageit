@@ -55,18 +55,17 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         blobsFileExists = Path('blobs.txt').exists()
         nSteps = 1 if blobsFileExists else 2
         if not blobsFileExists:
             print(f'[[1/{nSteps}]] Run Blobsref')
-            completedProcess = subprocess.run(['blobsref'])
-            if completedProcess.returncode != 0: return completedProcess
+            subprocess.run(['blobsref'], check=True)
 
         print(f'[[{nSteps}/{nSteps}]] Run Atlas')
         verbose = ['-v'] if args.verbose else []
         command = ['atlas', '-i', args.input_image, '-o', args.output_image, '-rad', args.gaussian_std, '-pval', args.p_value] + verbose
 
-        return subprocess.run([str(c) for c in command])
+        subprocess.run([str(c) for c in command], check=True)
 

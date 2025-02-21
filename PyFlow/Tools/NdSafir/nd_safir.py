@@ -77,12 +77,12 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         noise = Tool.noiseChoices.index(args.noise)
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         if args.type == '4D':
             ndsafir_series.ndsafir_series(args.input_image, args.output_image, noise, args.n_iterations, args.noise_factor, args.patch, args.n_frames)
         else:
             command = ['ndsafir', '-i', args.input_image, '-o', args.output_image, '-noise', noise, '-iter', args.n_iterations, '-nf', args.noise_factor, '-2dt', 1 if args.time_series and args.type != '2D' else 0, '-patch', args.patch]
-            return subprocess.run([str(c) for c in command])
+            subprocess.run([str(c) for c in command], check=True)
 

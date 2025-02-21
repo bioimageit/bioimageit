@@ -70,7 +70,7 @@ class Tool:
     def processData(self, args):
 
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
         
         print(f'[[1/5]] Load libraries and model {args.model_type}')

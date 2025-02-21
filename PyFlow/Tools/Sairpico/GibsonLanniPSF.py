@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import subprocess
 class Tool:
 
     categories = ['PSF']
@@ -81,7 +81,7 @@ class Tool:
     
     def processData(self, args):
         print('Generate Gibson-Lanni PSF')
-        import subprocess
+        
         commandArgs = [
             'simggibsonlannipsf',
             '-o', args.output,
@@ -97,5 +97,5 @@ class Tool:
             '-ti', args.ti
         ]
         
-        return subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 

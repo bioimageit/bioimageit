@@ -119,7 +119,7 @@ class Tool:
     
     def processData(self, args):
         if not args.train_directory.exists():
-            sys.exit('Error: train directory {args.train_directory} does not exist.')
+            raise Exception('Error: train directory {args.train_directory} does not exist.')
 
         print(f'[[1/4]] Load data {args.train_directory}')
 

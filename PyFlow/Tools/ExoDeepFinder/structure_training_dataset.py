@@ -54,7 +54,7 @@ class Tool(ExoDeepFinderTool):
         output = args.output
         print(f'Structure training dataset from {inputDatasetPath} to {output}')
         commandArgs = ['edf_structure_training_dataset', '-i', inputDatasetPath, '-s', args.split, '-m', args.movie, '-ms', args.merged_segmentation, '-ma', args.merged_annotation, '-o', output]
-        return subprocess.run([str(arg) for arg in commandArgs])
+        subprocess.run([str(arg) for arg in commandArgs], check=True)
 
     def processData(self, args):
         return

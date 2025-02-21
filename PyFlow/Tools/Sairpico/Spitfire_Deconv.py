@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 class Tool:
 
@@ -82,5 +83,5 @@ class Tool:
             commandArgs += ['-sigma', args.sigma]
         else:
             commandArgs += ['-psf', args.psf]
-        return subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 

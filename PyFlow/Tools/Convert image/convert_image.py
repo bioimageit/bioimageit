@@ -256,7 +256,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Convert image {args.input_image}')
 
@@ -283,11 +283,10 @@ class Tool:
         
         # argumentList += [f'"{args.input_image}"', f'"{args.output_image}"']
         argumentList += [args.input_image, args.output_image]
-        # return subprocess.run([str(c) for c in argumentList])
         parent = Path(__file__).parent.resolve()
         command = [str(parent / 'bfconvert')] if platform.system() != 'Windows' else [str(parent / 'bftools/bftools/bfconvert.bat')]
         command += [str(c) for c in argumentList]
         print('command:')
         print(command)
-        return subprocess.run(command)
+        subprocess.run(command, check=True)
 

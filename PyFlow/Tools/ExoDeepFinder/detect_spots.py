@@ -43,6 +43,5 @@ class Tool:
     def processData(self, args):
         print(f'Detect spots in {args.movie_folder / args.tiff}')
         commandArgs = ['edf_detect_spots_with_atlas', '-m', args.movie_folder / args.tiff, '-o', args.output, '-aa', args.atlas_args]
-        completedProcess = subprocess.run([str(arg) for arg in commandArgs])
-        return completedProcess
+        subprocess.run([str(arg) for arg in commandArgs], check=True)
 

@@ -90,7 +90,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print('Performing MATIRF localization')
         commandArgs = [
@@ -99,5 +99,5 @@ class Tool:
             '-iter', args.iterations, '-reg', args.reg_type, '-zmin', args.zmin, '-mode', args.mode, '-s', args.object_size_nm
         ]
 
-        subprocess.run([str(ca) for ca in commandArgs])
+        subprocess.run([str(ca) for ca in commandArgs], check=True)
 
