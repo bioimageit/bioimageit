@@ -43,18 +43,21 @@ class BiitToolNode(NodeBase):
 	nInstanciatedNodes = 0
 	environment: Environment = None
 
-	def __init__(self, name, Tool):
-		super(NodeBase, self).__init__(name)
+	def __init__(self, name):
+		super().__init__(name)
 		self.outputMessage = None               # The message which will be displayed in the Table View
 		self.executed = None
 		self.executedChanged = Signal(bool)
-		self.Tool = Tool
-		self.tool = Tool()
-		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if hasattr(Tool, 'multipleInputs') and Tool.multipleInputs else StructureType.Single, constraint="1")
+		self.tool = self.Tool()
+		multipleInputs = hasattr(self.Tool, 'multipleInputs') and self.Tool.multipleInputs
+		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if multipleInputs else StructureType.Single, constraint="1")
 		self.inArray.enableOptions(PinOptions.AllowAny)
+		if multipleInputs:
+			self.inArray.enableOptions(PinOptions.AllowMultipleConnections)
 		self.outArray = self.createOutputPin("out", "AnyPin", structure=StructureType.Single, constraint="1")
 		self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
 		self.resetParameters = None
+		self.dataFrame = None
 		self.initializeParameters()
 		self.lib = 'BiitLib'
 		self.__class__.nInstanciatedNodes += 1
@@ -75,6 +78,7 @@ class BiitToolNode(NodeBase):
 	def setExecuted(self, executed=True, propagate=True, setDirty=True):
 		if not executed and setDirty:
 			self.dirty = True
+			self.dataFrame = None
 			if hasattr(self, 'outArray'):
 				self.outArray.setDirty()
 		if self.executed == executed: return
@@ -86,11 +90,12 @@ class BiitToolNode(NodeBase):
 				node.setExecuted(False, propagate=True, setDirty=setDirty)
 	
 	def setupConnections(self):
-		self.inArray.dataBeenSet.connect(self.setDirty)
+		self.inArray.dataBeenSet.connect(self.setNodeDirty)
 	
 	def initializeInput(self, input):
-		defaultValue = input['choices'][0] if 'choices' in input and len(input['choices']) > 0 and input['default'] is None else input['default']
-		return dict(type='column' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'], advanced=input['advanced'])
+		defaultValue = input.get('default')
+		defaultValue = input['choices'][0] if defaultValue is None and 'choices' in input and len(input['choices']) > 0 else defaultValue
+		return dict(type='column' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'], advanced=input.get('advanced'))
 
 	def initializeOutput(self, output):
 		return dict(value=output['default'], 
@@ -100,9 +105,8 @@ class BiitToolNode(NodeBase):
 					help=output['help'] if 'help' in output else None)
 
 	def initializeParameters(self):
-		tool = self.__class__.tool if hasattr(self.__class__, 'tool') else None
-		inputs = {} if tool is None else { input.name: self.initializeInput(input) for input in tool['inputs'] }
-		outputs = {} if tool is None else { output.name: self.initializeOutput(output) for output in tool['outputs'] }
+		inputs = { input['name']: self.initializeInput(input) for input in self.tool.inputs }
+		outputs = { output['name']: self.initializeOutput(output) for output in self.tool.outputs }
 		self.parameters = dict(inputs=inputs, outputs=outputs)
 	
 	def postCreate(self, jsonTemplate=None):
@@ -144,8 +148,7 @@ class BiitToolNode(NodeBase):
 	# for all inputs which are auto, set the corresponding parameter to the column name
 	def setParametersFromDataframe(self, data):
 		n = len(data.columns)-1 if isinstance(data, pandas.DataFrame) else -1
-		tool = self.__class__.tool
-		for input in tool.inputs:
+		for input in self.tool.inputs:
 			inputName = input['name']
 			parameter = self.parameters['inputs'][inputName]
 			if isinstance(data, pandas.DataFrame):
@@ -157,7 +160,7 @@ class BiitToolNode(NodeBase):
 					parameter['type'] = 'value'
 
 	# The input pin was plugged or parameters were changed in the properties GUI: set the node dirty & unexecuted
-	def setDirty(self):
+	def setNodeDirty(self, pin=None):
 		self.setExecuted(executed=False, propagate=True, setDirty=True)
 
 	def getInputPins(self):
@@ -265,7 +268,7 @@ class BiitToolNode(NodeBase):
 
 	def setOutputColumns(self, data):
 		for outputName, output in self.parameters['outputs'].items():
-			if output['type'] != 'path': continue
+			if output['type'] != Path: continue
 			
 			for index, row in data.iterrows():
 
@@ -294,24 +297,31 @@ class BiitToolNode(NodeBase):
 				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def mergeDataFrames(self, dataFrames):
-		assert(all([isinstance(d, pandas.DataFrame) for d in dataFrames]))
+		if len(dataFrames)==0: return None
 		result = pandas.concat(dataFrames, axis=1)
 		# Remove duplicated columns
 		result = result.loc[:,~result.columns.duplicated()].copy()
 		return result
 
+	def getDataFrame(self):
+		if self.dataFrame is not None: return self.dataFrame
+		dataFrames = self.getDataFrames()
+		hasProcessDataFrames = hasattr(self.tool, 'processDataFrames') and callable(self.tool.processDataFrames)
+		self.dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs(False)) if hasProcessDataFrames else self.mergeDataFrames(dataFrames)
+		self.setParametersFromDataframe(self.dataFrame)
+		return self.dataFrame
+
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
-		dataFrames = self.getDataFrames()
-		args, inDataFrame, outDataFrame = self.getArgs()
-		dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs()) if hasattr(self.tool, 'processDataFrames') and callable(self.tool.processDataFrames) else self.mergeDataFrames(dataFrames)
-		self.setParametersFromDataframe(dataFrame)
+		dataFrame = self.getDataFrame()
 		self.setOutputColumns(dataFrame)
 		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
-			dataFrame = self.tool.processDataFrame(dataFrame, self.getArgs())
+			dataFrame = self.tool.processDataFrame(dataFrame, self.getArgs(False))
 		if hasattr(self.tool, 'outputMessage'):
 			self.outputMessage = self.tool.outputMessage
 		self.setOutputAndClean(dataFrame)
+		if hasattr(self.tool, 'generateThumbnails') and self.tool.generateThumbnails:
+			ThumbnailGenerator.get().generateThumbnails(self.tool.name, dataFrame)
 		return dataFrame
 
 	def setOutputArgsFromDataFrame(self, args, outputData, index):
@@ -340,26 +350,27 @@ class BiitToolNode(NodeBase):
 	
 	def setArg(self, args, parameterName, parameter, parameterValue, index):
 		if parameterValue is None: return
-		arg = str( parameterValue )
-		if parameter['dataType'] == 'path':
+		arg = parameterValue
+		if parameter['dataType'] == Path:
+			arg = str(parameterValue)
 			arg = arg.replace('[index]', str(index)) if index is not None else arg
 			arg = arg.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
 			arg = arg.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
+			arg = Path(arg)
 		args[parameterName] = arg
 		return
 	
 	def parameterIsUndefinedAndRequired(self, parameterName, inputs, row=None):
-		return any([toolInput['required'] and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput['name'] == parameterName])
+		return any([toolInput.get('required') and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput['name'] == parameterName])
 	
-	def getArgs(self):
-		tool = self.__class__.tool
+	def getArgs(self, raiseRequiredException=True):
 		argsList = []
 		inputData: pandas.DataFrame = self.inArray.currentData()
 		outputData: pandas.DataFrame = self.outArray.currentData()
 		if inputData is None:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
-				if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs):
+				if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs) and raiseRequiredException:
 					raise Exception(f'The parameter {parameterName} is undefined, but required.')
 				self.setArg(args, parameterName, parameter, parameter['value'], None)
 			self.setOutputArgsFromDataFrame(args, outputData, 0)
@@ -368,13 +379,13 @@ class BiitToolNode(NodeBase):
 			for index, row in inputData.iterrows():
 				args = {}
 				for parameterName, parameter in self.parameters['inputs'].items():
-					if self.parameterIsUndefinedAndRequired(parameterName, tool.inputs, row):
+					if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs, row) and raiseRequiredException:
 						raise Exception(f'The parameter {parameterName} is undefined, but required.')
 					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
 				self.setOutputArgsFromDataFrame(args, outputData, index)
 				args['idf_row'] = row
 				argsList.append(args)
-		return [Munch.fromDict(args) for args in self.argsList]
+		return [Munch.fromDict(args) for args in argsList]
 
 	@classmethod
 	def logLine(cls, line):

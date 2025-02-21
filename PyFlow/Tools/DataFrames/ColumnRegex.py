@@ -1,22 +1,22 @@
 import pandas
 import re
 
-class ColumnRegex:
+class Tool:
 
     name = "Column regex"
     description = "Create columns from a regex."
-    multipleInputs = True
+    categories = ['Data']
 
     inputs = [
             dict(
             required = True,
-            names = ['--columnName'],
+            name = 'columnName',
             help = 'Column name',
             type = str,
             static = True,
         ),
         dict(
-            names = ['--regex'],
+            name = 'regex',
             help = 'Regex',
             type = str,
             default = r'(?P<column1>\w+)_(?P<column2>\w+)',

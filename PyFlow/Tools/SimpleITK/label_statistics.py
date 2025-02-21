@@ -2,33 +2,34 @@ from pathlib import Path
 import SimpleITK as sitk
 import pandas
 
-class LabelStatistics:
+class Tool:
     
-    name = "label_statistics"
+    name = "Label statistics"
     description = "Compute label statistics from a label image."
+    categories = ['SimpleITK', 'Custom']
     inputs = [
             dict(
-            names = ['--image'],
+            name = 'image',
             help = 'Input image',
             type = Path,
             required = True,
             autoColumn = True,
         ),
         dict(
-            names = ['--label'],
+            name = 'label',
             help = 'Input label',
             type = Path,
             required = True,
             autoColumn = True,
         ),
         dict(
-            names = ['--minSize'],
+            name = 'minSize',
             help = 'Min size of the labels',
             type = int,
             default = 100,
         ),
         dict(
-            names = ['--maxSize'],
+            name = 'maxSize',
             help = 'Max size of the labels',
             type = int,
             default = 600,
@@ -36,7 +37,7 @@ class LabelStatistics:
     ]
     outputs = [
         dict(
-            names = ['--connected_component'],
+            name = 'connected_component',
             help = 'Output connected component',
             type = Path,
         ),

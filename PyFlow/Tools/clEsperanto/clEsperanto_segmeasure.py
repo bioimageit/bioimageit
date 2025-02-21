@@ -10,14 +10,14 @@ class Tool(ClEsperantoTool):
     description = "Detect hot spots / local maxima / beads in an image and how to measure their FWHM. To make the algorithm work, the beads should be sufficiently sparse. ."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--scalar'],
+                name = 'scalar',
                 help = 'scalar for threshold',
                 default = 1,
                 type = float,
@@ -25,7 +25,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'output csv file path',
                 default = '{input_image.stem}_segmeasure.csv',
                 type = Path,
@@ -42,7 +42,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         
 
         input_image = args.input_image

@@ -10,39 +10,39 @@ class Tool:
     description = "Wiener deconvolution"
     inputs = [
             dict(
-                names = ['--input'],
+                name = 'input',
                 help = 'Input Image',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--type'],
+                name = 'type',
                 help = 'Perform 2D, 2D Slice or 3D deconvolution.',
                 default = '2D',
                 choices = ['2D', '2D Slice', '3D'],
                 type = str,
             ),
             dict(
-                names = ['--sigma'],
+                name = 'sigma',
                 help = 'Gaussian PSF width (for 2D and 2D Slice only)',
                 default = 1.5,
                 type = float,
             ),
             dict(
-                names = ['--psf'],
+                name = 'psf',
                 help = 'PSF Image (for 3D only)',
                 default = None,
                 type = Path,
             ),
             dict(
-                names = ['--lambda'],
+                name = 'lambda',
                 help = 'Regularization parameter',
                 default = 0.01,
                 type = float,
             ),
             dict(
-                names = ['--padding'],
+                name = 'padding',
                 help = 'Add padding to process border pixels',
                 default = False,
                 type = bool,
@@ -50,7 +50,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the denoised image.',
                 default = '{input.name}_deconvolved{input.exts}',
                 type = Path,

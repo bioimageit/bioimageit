@@ -1,13 +1,14 @@
 from pathlib import Path
 import SimpleITK as sitk
 
-class ConnectedComponents:
+class Tool:
 
-    name = "connected_components"
+    name = "Connected components"
     description = "Compute connected components in the given binary image."
+    categories = ['SimpleITK', 'Custom']
     inputs = [
             dict(
-            names = ['--image'],
+            name = 'image',
             help = 'Input image path',
             type = Path,
             required = True,
@@ -16,12 +17,12 @@ class ConnectedComponents:
     ]
     outputs = [
         dict(
-            names = ['--labeled_image'],
+            name = 'labeled_image',
             help = 'Output image',
             type = Path,
         ),
         dict(
-            names = ['--labeled_image_rgb'],
+            name = 'labeled_image_rgb',
             help = 'Output rgb image',
             type = Path,
         ),

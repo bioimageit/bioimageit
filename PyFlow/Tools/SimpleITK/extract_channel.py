@@ -1,20 +1,21 @@
 from pathlib import Path
 import SimpleITK as sitk
 
-class ExtractChannel:
+class Tool:
 
-    name = "extract_channel"
+    name = "Extract channel"
     description = "Extract an image channel."
+    categories = ['SimpleITK', 'Custom']
     inputs = [
             dict(
-            names = ['--image'],
+            name = 'image',
             help = 'Input image',
             type = Path,
             required = True,
             autoColumn = True,
         ),
         dict(
-            names = ['--channel'],
+            name = 'channel',
             help = 'Channel to extract',
             type = int,
             default = 0,
@@ -22,7 +23,7 @@ class ExtractChannel:
     ]
     outputs = [
         dict(
-            names = ['--out'],
+            name = 'out',
             help = 'Output image',
             type = Path,
         ),

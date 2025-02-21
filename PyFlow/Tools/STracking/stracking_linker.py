@@ -10,20 +10,20 @@ class Tool:
     description = "Linking of particles detected in stracking."
     inputs = [
             dict(
-                names = ['--input_csv'],
+                name = 'input_csv',
                 help = 'Input csv from a stracking detector',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--max_connection_cost'],
+                name = 'max_connection_cost',
                 help = 'Maximum connection cost (squared maximum Euclidean distance that a particle can move between two consecutive frames)',
                 default = 3000,
                 type = float,
             ),
             dict(
-                names = ['--gap'],
+                name = 'gap',
                 help = 'For example if gap=2, particles 2 frames apart can be connected',
                 default = 2,
                 type = int,
@@ -31,7 +31,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the tracks (the extension can be .st.json or .csv and defines the output format).',
                 default = '{input_csv.stem}_tracks.st.json',
                 type = Path,

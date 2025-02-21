@@ -16,59 +16,68 @@ class Tool:
     description = "Denoising method dedicated to microscopy image and sequence analysis."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-t', '--type'],
+                name = 'type',
+                shortname = 't',
                 help = 'Perform 2D, 3D or 3D + time denoising.',
                 default = '2D',
                 choices = ['2D', '3D', '4D'],
                 type = str,
             ),
             dict(
-                names = ['-n', '--noise'],
+                name = 'noise',
+                shortname = 'n',
                 help = 'Model used to evaluate the noise variance.',
                 default = 'Gauss',
                 choices = ['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss'],
                 type = str,
             ),
             dict(
-                names = ['-p', '--patch'],
+                name = 'patch',
+                shortname = 'p',
                 help = 'Patch radius. Must be of the form AxB (for 2D) or AxBxC (for 3D) where A, B and C are the patch radius in each dimension.',
                 default = '7x7x1',
                 type = str,
             ),
             dict(
-                names = ['-nf', '--noise_factor'],
+                name = 'noise_factor',
+                shortname = 'nf',
                 help = 'Noise factor.',
                 default = 1,
                 type = float,
             ),
             dict(
-                names = ['-nit', '--n_iterations'],
+                name = 'n_iterations',
+                shortname = 'nit',
                 help = 'Number of iterations.',
                 default = 5,
                 type = int,
             ),
             dict(
-                names = ['-ts', '--time_series'],
+                name = 'time_series',
+                shortname = 'ts',
                 help = 'Consider the image as a sequence (for 3D only).',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-nfr', '--n_frames'],
+                name = 'n_frames',
+                shortname = 'nfr',
                 help = 'Number of frames to process in a batch. Use 0 to process everything at once (for 4D only).',
                 default = 0,
             ),
     ]
     outputs = [
             dict(
-                names = ['-o', '--output_image'],
+                name = 'output_image',
+                shortname = 'o',
                 help = 'The output image.',
                 default = '{input_image.stem}_denoised{input_image.exts}',
                 type = Path,
@@ -77,7 +86,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         noise = Tool.noiseChoices.index(args.noise)
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         if args.type == '4D':

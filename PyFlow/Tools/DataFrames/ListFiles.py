@@ -1,33 +1,36 @@
 from pathlib import Path
+from matplotlib.image import thumbnail
 import pandas
 
-class ListFiles:
+class Tool:
     
-    name = "list_files"
+    name = "List Files"
     description = "Reads a folder and create a pandas DataFrame from the file list."
     environment = 'bioimageit'
     categories = ['Data']
+    generateThumbnails = True
 
     inputs = [
             dict(
-            names = ['--folderPath'],
+            name = 'folderPath',
             help = 'Folder path',
             type = Path,
             required = True,
         ),
         dict(
-            names = ['--filter'],
+            name = 'filter',
             help = 'Filter',
             type = str,
             default = '*',
         ),
-    ]
-    outputs = [
         dict(
-            names = ['--columnName'],
+            name = 'columnName',
             help = 'Column name',
             type = str,
+            default = 'path',
         ),
+    ]
+    outputs = [
     ]
 
     def processDataFrame(self, dataFrame, argsList):
@@ -42,6 +45,4 @@ class ListFiles:
             if files is None:
                 files = sorted(list(args.folderPath.iterdir()))
             allFiles += [f for f in files if f.name != '.DS_Store']
-        dataFrame = pandas.DataFrame(data={self.parameters['outputs']['columnName']['value']:allFiles})
-        # ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
-        return dict(dataFrame=dataFrame)
+        return pandas.DataFrame(data={args.columnName:allFiles})

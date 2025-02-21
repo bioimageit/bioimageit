@@ -10,20 +10,20 @@ class Tool(ClEsperantoTool):
     description = "Voronoi otsu labeling with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--sigma_spot_detection'],
+                name = 'sigma_spot_detection',
                 help = 'sigma_spot_detection',
                 default = 5,
                 type = float,
             ),
             dict(
-                names = ['--sigma_outline'],
+                name = 'sigma_outline',
                 help = 'sigma_outline',
                 default = 1,
                 type = float,
@@ -31,7 +31,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'output image path',
                 default = '{input_image.stem}_voronoi_otsu{input_image.exts}',
                 type = Path,
@@ -48,7 +48,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
 
         input_image = args.input_image

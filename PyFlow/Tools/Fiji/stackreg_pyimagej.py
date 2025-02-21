@@ -14,14 +14,16 @@ class Tool:
     description = "Stack registration with the StackReg Fiji plugin."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-t', '--transformation'],
+                name = 'transformation',
+                shortname = 't',
                 help = 'The transformation applied on each slice.',
                 default = 'Rigid Body',
                 choices = ['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'],
@@ -30,7 +32,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output_image'],
+                name = 'output_image',
+                shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
                 type = Path,
@@ -50,7 +53,7 @@ class Tool:
         print(f"ImageJ version: {self.ij.getVersion()}")
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/3]] Load image {input_image}')

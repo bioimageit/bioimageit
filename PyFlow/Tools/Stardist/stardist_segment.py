@@ -18,14 +18,16 @@ class Tool:
     description = "Segment cells with stardist."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-m', '--model_name'],
+                name = 'model_name',
+                shortname = 'm',
                 help = 'The model to use.',
                 required = True,
                 choices = ['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo', '3D_demo'],
@@ -34,7 +36,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--out'],
+                name = 'out',
+                shortname = 'o',
                 help = 'The output mask path.',
                 default = '{input_image.stem}_segmentation{input_image.exts}',
                 type = Path,
@@ -43,7 +46,7 @@ class Tool:
 
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/3]] Load libraries and model {args.model_name}')
@@ -67,7 +70,7 @@ class Tool:
         if len(image.shape)==3:
             image = image[:,:,0]
         if len(image.shape)>3:
-            raise Exception(f'Error: input image {args.input_image} has too many dimension, should be 2 or 3 (in which case the channel 0 will be segmented).')
+            sys.exit(f'Error: input image {args.input_image} has too many dimension, should be 2 or 3 (in which case the channel 0 will be segmented).')
 
         print('[[2/3]] Compute segmentation', image.shape)
         labels, _ = self.model.predict_instances(normalize(image))

@@ -4,43 +4,44 @@ from pathlib import Path
 from PyFlow.Core.OmeroService import DoesNotExistException
 from .base import OmeroBase
 
-class OmeroUpload(OmeroBase):
+class Tool(OmeroBase):
 
-    name = "omero_upload"
+    name = "Omero Upload"
     description = "Upload data to an Omero database."
+    categories = ['Omero']
     inputs = [
             dict(
-            names = ['--image'],
+            name = 'image',
             help = 'Image to upload',
             type = Path,
             required = True,
         ),
         dict(
-            names = ['--metadata_columns'],
+            name = 'metadata_columns',
             help = 'Metadata columns (for example ["column 1", "column 2"])',
             type = str,
             default = None,
         ),
         dict(
-            names = ['--dataset_id'],
+            name = 'dataset_id',
             help = 'Dataset ID (ignored if negative)',
             type = int,
             default = None,
         ),
         dict(
-            names = ['--dataset_name'],
+            name = 'dataset_name',
             help = 'Dataset name',
             type = str,
             default = None,
         ),
         dict(
-            names = ['--project_id'],
+            name = 'project_id',
             help = 'Project ID (optional, ignored if negative)',
             type = int,
             default = None,
         ),
         dict(
-            names = ['--project_name'],
+            name = 'project_name',
             help = 'Project name (optional)',
             type = str,
             default = None,

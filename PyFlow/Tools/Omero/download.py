@@ -3,19 +3,20 @@ from pathlib import Path
 from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
 from .base import OmeroBase
     
-class OmeroDownload(OmeroBase):
+class Tool(OmeroBase):
 
-    name = "omero_download"
+    name = "Omero Download"
     description = "Download files from Omero: either enter the dataset name or id to download. Negative ids will be ignored."
+    categories = ['Omero']
     inputs = [
             dict(
-            names = ['--dataset_id'],
+            name = 'dataset_id',
             help = 'Dataset ID (ignored if negative)',
             type = int,
             default = None,
         ),
         dict(
-            names = ['--dataset_name'],
+            name = 'dataset_name',
             help = 'Dataset name',
             type = str,
             default = None,
@@ -23,7 +24,7 @@ class OmeroDownload(OmeroBase):
     ]
     outputs = [
         dict(
-            names = ['--out'],
+            name = 'out',
             help = 'Output data',
             type = Path,
         ),

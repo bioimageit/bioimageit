@@ -11,26 +11,26 @@ class Tool:
     description = "Hotspot detection in microscopy images."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input Image',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--patch_size'],
+                name = 'patch_size',
                 help = 'Patch size (radius)',
                 default = 3,
                 type = int,
             ),
             dict(
-                names = ['--neighborhood_size'],
+                name = 'neighborhood_size',
                 help = 'Neighborhood size (radius)',
                 default = 5,
                 type = int,
             ),
             dict(
-                names = ['--p_value'],
+                name = 'p_value',
                 help = 'p-value for false alarm',
                 default = 0.2,
                 type = float,
@@ -38,7 +38,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the detected hotspots image.',
                 default = '{input_image.stem}_hotspot{input_image.exts}',
                 type = Path,

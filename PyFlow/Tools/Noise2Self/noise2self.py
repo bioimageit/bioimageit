@@ -11,33 +11,35 @@ class Tool:
     description = "Noise2Self - Learning Denoising from Single Noisy Images."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-m', '--model_name'],
+                name = 'model_name',
+                shortname = 'm',
                 help = 'The model to use.',
                 default = 'Unet',
                 choices = ['BabyUnet', 'DnCNN', 'SingleConvolution', 'Unet'],
                 type = str,
             ),
             dict(
-                names = ['--num_of_layers'],
+                name = 'num_of_layers',
                 help = 'Number of layers in the convolutional network',
                 default = None,
                 type = int,
             ),
             dict(
-                names = ['--masker_width'],
+                name = 'masker_width',
                 help = 'Width of the mask',
                 default = None,
                 type = int,
             ),
             dict(
-                names = ['--iterations'],
+                name = 'iterations',
                 help = 'Number of iterations during training',
                 default = None,
                 type = int,
@@ -45,7 +47,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--out'],
+                name = 'out',
+                shortname = 'o',
                 help = 'The output denoised image path.',
                 default = '{input_image.stem}_denoised{input_image.exts}',
                 type = Path,
@@ -53,7 +56,7 @@ class Tool:
     ]
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/4]] Load libraries and image {input_image}')
 

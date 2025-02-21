@@ -10,20 +10,20 @@ class Tool(ClEsperantoTool):
     description = "Count objects with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--sigma_x'],
+                name = 'sigma_x',
                 help = 'sigma_x',
                 default = 0,
                 type = float,
             ),
             dict(
-                names = ['--sigma_y'],
+                name = 'sigma_y',
                 help = 'sigma_y',
                 default = 0,
                 type = float,
@@ -31,7 +31,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'output file path',
                 default = '{input_image.stem}_count.csv',
                 type = Path,
@@ -48,7 +48,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         
 
         input_image = args.input_image

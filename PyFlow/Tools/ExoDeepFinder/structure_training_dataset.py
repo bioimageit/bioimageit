@@ -8,32 +8,37 @@ class Tool(ExoDeepFinderTool):
     description = "Convert the default dataset structure to the training file structure."
     inputs = [
             dict(
-                names = ['-mf', '--movies_folder'],
+                name = 'movies_folder',
+                shortname = 'mf',
                 help = 'Input movies folder',
                 default = '[workflow_folder]/dataset',
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-s', '--split'],
+                name = 'split',
+                shortname = 's',
                 help = 'Splits the dataset in two random sets for training and validation, with --split %% of the movies in the training set, and the rest in the validation set (creates train/ and valid/ folders). Does not split if 0.',
                 default = 70,
                 type = float,
             ),
             dict(
-                names = ['-m', '--movie'],
+                name = 'movie',
+                shortname = 'm',
                 help = 'Path to the movie (relative to the movie folder).',
                 default = 'movie.h5',
                 type = Path,
             ),
             dict(
-                names = ['-ms', '--merged_segmentation'],
+                name = 'merged_segmentation',
+                shortname = 'ms',
                 help = 'Path to the merged segmentation (relative to the movie folder).',
                 default = 'merged_segmentation.h5',
                 type = Path,
             ),
             dict(
-                names = ['-ma', '--merged_annotation'],
+                name = 'merged_annotation',
+                shortname = 'ma',
                 help = 'Path to the merged annotation (relative to the movie folder).',
                 default = 'merged_annotation.xml',
                 type = Path,
@@ -41,7 +46,8 @@ class Tool(ExoDeepFinderTool):
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output folder',
                 default = '[workflow_folder]/train_valid',
                 type = Path,

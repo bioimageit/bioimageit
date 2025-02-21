@@ -12,57 +12,57 @@ class Tool:
     description = "Scientific library track particles in 2D+t and 3D+t images. Detection using Difference of Hessians, Laplacian of Gaussian and Difference of Gaussians."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input Image',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--detector_type'],
+                name = 'detector_type',
                 help = 'Type of Stracking detection, using DoH (Difference of Hessians), LoG (Laplacian of Gaussian) or DoG (Difference of Gaussians)',
                 default = 'DoH',
                 choices = ['DoH', 'LoG', 'DoG'],
                 type = str,
             ),
             dict(
-                names = ['--min_sigma'],
+                name = 'min_sigma',
                 help = 'Minimal sigma value',
                 default = 1,
                 type = float,
             ),
             dict(
-                names = ['--max_sigma'],
+                name = 'max_sigma',
                 help = 'Maximal sigma value',
                 default = 5,
                 type = float,
             ),
             dict(
-                names = ['--n_sigmas'],
+                name = 'n_sigmas',
                 help = 'Number of sigmas (for DoH and LoG)',
                 default = 10,
                 type = int,
             ),
             dict(
-                names = ['--threshold'],
+                name = 'threshold',
                 help = 'Threshold',
                 default = 0.2,
                 type = float,
             ),
             dict(
-                names = ['--ratio'],
+                name = 'ratio',
                 help = 'Sigma ratio (for DoG)',
                 default = 1.6,
                 type = float,
             ),
             dict(
-                names = ['--overlap'],
+                name = 'overlap',
                 help = 'Overlap',
                 default = 0.5,
                 type = float,
             ),
             dict(
-                names = ['--log_scale'],
+                name = 'log_scale',
                 help = 'Log scale (for DoH and LoG)',
                 default = False,
                 type = bool,
@@ -70,7 +70,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the result table.',
                 required = True,
                 type = Path,

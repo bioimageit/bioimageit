@@ -14,39 +14,45 @@ class Tool:
     description = "Segment cells with cellpose."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-m', '--model_type'],
+                name = 'model_type',
+                shortname = 'm',
                 help = 'Model type. “cyto”=cytoplasm model; “nuclei”=nucleus model; “cyto2”=cytoplasm model with additional user images; “cyto3”=super-generalist model.',
                 default = 'cyto',
                 choices = ['cyto', 'nuclei', 'cyto2', 'cyto3'],
                 type = str,
             ),
             dict(
-                names = ['-g', '--use_gpu'],
+                name = 'use_gpu',
+                shortname = 'g',
                 help = 'Use GPU (default is CPU).',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-a', '--auto_diameter'],
+                name = 'auto_diameter',
+                shortname = 'a',
                 help = 'Automatically estimate cell diameters, see https://cellpose.readthedocs.io/en/latest/settings.html.',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-d', '--diameter'],
+                name = 'diameter',
+                shortname = 'd',
                 help = 'Estimate of the cell diameters (in pixels).',
                 default = 30,
                 type = int,
             ),
             dict(
-                names = ['-c', '--channels'],
+                name = 'channels',
+                shortname = 'c',
                 help = 'Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.',
                 default = '[0,0]',
                 type = str,
@@ -54,13 +60,15 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-s', '--segmentation'],
+                name = 'segmentation',
+                shortname = 's',
                 help = 'The output segmentation path.',
                 default = '{input_image.stem}_segmentation.png',
                 type = Path,
             ),
             dict(
-                names = ['-v', '--visualization'],
+                name = 'visualization',
+                shortname = 'v',
                 help = 'The output visualisation path.',
                 default = '{input_image.stem}_visualization.npy',
                 type = Path,
@@ -70,7 +78,7 @@ class Tool:
     def processData(self, args):
 
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
         
         print(f'[[1/5]] Load libraries and model {args.model_type}')

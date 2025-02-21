@@ -11,45 +11,45 @@ class Tool:
     description = "Median filtering."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input Image',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--type'],
+                name = 'type',
                 help = 'Perform 2D, 3D or 3D + time denoising.',
                 default = '2D',
                 choices = ['2D', '3D', '4D'],
                 type = str,
             ),
             dict(
-                names = ['--radius_x'],
+                name = 'radius_x',
                 help = 'Radius of the filter in the X direction',
                 default = 2,
                 type = int,
             ),
             dict(
-                names = ['--radius_y'],
+                name = 'radius_y',
                 help = 'Radius of the filter in the Y direction',
                 default = 2,
                 type = int,
             ),
             dict(
-                names = ['--radius_z'],
+                name = 'radius_z',
                 help = 'Radius of the filter in the Z direction (for 3D and 3D + time only)',
                 default = 1,
                 type = int,
             ),
             dict(
-                names = ['--radius_t'],
+                name = 'radius_t',
                 help = 'Radius of the filter in the time direction (for 3D + time only)',
                 default = 1,
                 type = int,
             ),
             dict(
-                names = ['--padding'],
+                name = 'padding',
                 help = 'Add padding to process border pixels',
                 default = False,
                 type = bool,
@@ -57,7 +57,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the filtered image.',
                 default = '{input.name}_filtered{input.exts}',
                 type = Path,

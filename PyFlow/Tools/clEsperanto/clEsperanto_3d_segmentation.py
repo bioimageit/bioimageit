@@ -10,56 +10,56 @@ class Tool(ClEsperantoTool):
     description = "Segment with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--sigma_spot_detection'],
+                name = 'sigma_spot_detection',
                 help = 'sigma_spot_detection',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--sigma_outline'],
+                name = 'sigma_outline',
                 help = 'sigma_outline',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_x'],
+                name = 'voxel_size_x',
                 help = 'voxel_size_x',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_y'],
+                name = 'voxel_size_y',
                 help = 'voxel_size_y',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_z'],
+                name = 'voxel_size_z',
                 help = 'voxel_size_z',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--radius_x'],
+                name = 'radius_x',
                 help = 'radius_x',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--radius_y'],
+                name = 'radius_y',
                 help = 'radius_y',
                 default = None,
                 type = float,
             ),
             dict(
-                names = ['--radius_z'],
+                name = 'radius_z',
                 help = 'radius_z',
                 default = None,
                 type = float,
@@ -67,7 +67,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'Output image path',
                 default = '{input_image.stem}_segmentation{input_image.exts}',
                 type = Path,
@@ -85,7 +85,7 @@ class Tool(ClEsperantoTool):
     
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/4]] Load image {args.input_image}')
                 

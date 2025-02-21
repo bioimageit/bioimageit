@@ -8,7 +8,8 @@ class Tool(ExoDeepFinderTool):
     description = "Merge detector detections with expert annotations."
     inputs = [
             dict(
-                names = ['-mf', '--movie_folder'],
+                name = 'movie_folder',
+                shortname = 'mf',
                 help = 'Movie folder.',
                 required = True,
                 type = Path,
@@ -16,19 +17,22 @@ class Tool(ExoDeepFinderTool):
                 autoIncrement = False,
             ),
             dict(
-                names = ['-ds', '--detector_segmentation'],
+                name = 'detector_segmentation',
+                shortname = 'ds',
                 help = 'Detector segmentation (in .h5 format).',
                 default = 'detector_segmentation.h5',
                 type = Path,
             ),
             dict(
-                names = ['-es', '--expert_segmentation'],
+                name = 'expert_segmentation',
+                shortname = 'es',
                 help = 'Expert segmentation (in .h5 format).',
                 default = 'expert_segmentation.h5',
                 type = Path,
             ),
             dict(
-                names = ['-ea', '--expert_annotation'],
+                name = 'expert_annotation',
+                shortname = 'ea',
                 help = 'Expert annotation (in .xml format).',
                 default = 'expert_annotation.xml',
                 type = Path,
@@ -36,14 +40,16 @@ class Tool(ExoDeepFinderTool):
     ]
     outputs = [
             dict(
-                names = ['-ms', '--merged_segmentation'],
+                name = 'merged_segmentation',
+                shortname = 'ms',
                 help = 'Output merged segmentation (in .h5 format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/merged_segmentation.h5',
                 type = Path,
                 autoIncrement = False,
             ),
             dict(
-                names = ['-ma', '--merged_annotation'],
+                name = 'merged_annotation',
+                shortname = 'ma',
                 help = 'Output merged annotation (in .xml format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/merged_annotation.xml',
                 type = Path,

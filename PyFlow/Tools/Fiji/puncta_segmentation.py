@@ -14,7 +14,8 @@ class Tool:
     description = "Segment puncta from an image using the “Analyze Particles” ImageJ plugin."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
@@ -23,7 +24,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output_path'],
+                name = 'output_path',
+                shortname = 'o',
                 help = 'The output dataFrame path.',
                 default = '{input_image.stem}_puncta.csv',
                 type = Path,
@@ -47,7 +49,7 @@ class Tool:
         self.ParticleAnalyzer = sj.jimport('ij.plugin.filter.ParticleAnalyzer')
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/4]] Load image {input_image}')

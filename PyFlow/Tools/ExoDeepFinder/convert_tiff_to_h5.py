@@ -8,7 +8,8 @@ class Tool(ExoDeepFinderTool):
     description = "Convert tiff frames to h5 movie."
     inputs = [
             dict(
-                names = ['-t', '--tiff'],
+                name = 'tiff',
+                shortname = 't',
                 help = 'Path to the input movie folder. It must contain one tiff file per frame, their names must end with the frame number.',
                 default = None,
                 type = Path,
@@ -17,7 +18,8 @@ class Tool(ExoDeepFinderTool):
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path to the h5 file.',
                 default = '[workflow_folder]/dataset/{tiff.name}/movie.h5',
                 type = Path,

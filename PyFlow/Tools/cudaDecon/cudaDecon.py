@@ -12,20 +12,23 @@ class Tool:
     description = "CUDA/C++ implementation of an accelerated Richardson Lucy Deconvolution algorithm."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-p', '--psf'],
+                name = 'psf',
+                shortname = 'p',
                 help = 'Path to the PSF or OTF file.',
                 required = True,
                 type = Path,
             ),
             dict(
-                names = ['-b', '--background'],
+                name = 'background',
+                shortname = 'b',
                 help = 'User-supplied background to subtract. If "auto", the median value of the last Z plane will be used as background.',
                 default = '80',
                 type = str,
@@ -33,7 +36,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output_image'],
+                name = 'output_image',
+                shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
                 type = Path,
@@ -49,12 +53,12 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
         try:
             background = int(args.background) if args.background != 'auto' else args.background
         except ValueError as e:
-            raise Exception('Error: the background argument must be an integer or "auto"; but it is "{args.background}".')
+            sys.exit('Error: the background argument must be an integer or "auto"; but it is "{args.background}".')
         
         print(f'[[1/3]] Load image {input_image}')
         im = self.io.imread(input_image)

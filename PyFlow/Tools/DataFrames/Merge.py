@@ -1,69 +1,70 @@
 
-class MergeDataFrames:
+class Tool:
 
     name = "Merge DataFrames"
     description = "Merge DataFrames."
     multipleInputs = True
+    categories = ['Data']
 
     inputs = [
             dict(
-            names = ['--how'],
+            name = 'how',
             help = 'How',
             type = str,
             default = None,
             static=True
         ),
         dict(
-            names = ['--on'],
+            name = 'on',
             help = 'On',
             type = str,
             default = None,
             static=True
         ),
         dict(
-            names = ['--left_on'],
+            name = 'left_on',
             help = 'Left on',
             type = str,
             default = None,
             static=True
         ),
         dict(
-            names = ['--right_on'],
+            name = 'right_on',
             help = 'Right on',
             type = str,
             default = None,
             static=True
         ),
         dict(
-            names = ['--left_index'],
+            name = 'left_index',
             help = 'Left index',
             type = bool,
             default = None,
             static=True
         ),
         dict(
-            names = ['--right_index'],
+            name = 'right_index',
             help = 'Right index',
             type = bool,
             default = None,
             static=True
         ),
         dict(
-            names = ['--sort'],
+            name = 'sort',
             help = 'Sort',
             type = bool,
             default = None,
             static=True
         ),
         dict(
-            names = ['--left_suffix'],
+            name = 'left_suffix',
             help = 'Left suffix',
             type = str,
             default = '_x',
             static=True
         ),
         dict(
-            names = ['--right_suffix'],
+            name = 'right_suffix',
             help = 'Right suffix',
             type = str,
             default = '_y',

@@ -10,61 +10,61 @@ class Tool:
     description = "3D Gibson-Lanni PSF."
     inputs = [
             dict(
-                names = ['--width'],
+                name = 'width',
                 help = 'Image width',
                 default = 256,
                 type = int,
             ),
             dict(
-                names = ['--height'],
+                name = 'height',
                 help = 'Image height',
                 default = 256,
                 type = int,
             ),
             dict(
-                names = ['--depth'],
+                name = 'depth',
                 help = 'Image depth',
                 default = 20,
                 type = int,
             ),
             dict(
-                names = ['--wavelength'],
+                name = 'wavelength',
                 help = 'Excitation wavelength (nm)',
                 default = 610,
                 type = float,
             ),
             dict(
-                names = ['--psxy'],
+                name = 'psxy',
                 help = 'Pixel size in XY (nm)',
                 default = 100,
                 type = float,
             ),
             dict(
-                names = ['--psz'],
+                name = 'psz',
                 help = 'Pixel size in Z (nm)',
                 default = 250,
                 type = float,
             ),
             dict(
-                names = ['--na'],
+                name = 'na',
                 help = 'Numerical Aperture',
                 default = 1.4,
                 type = float,
             ),
             dict(
-                names = ['--ni'],
+                name = 'ni',
                 help = 'Refractive index immersion',
                 default = 1.5,
                 type = float,
             ),
             dict(
-                names = ['--ns'],
+                name = 'ns',
                 help = 'Refractive index sample',
                 default = 1.3,
                 type = float,
             ),
             dict(
-                names = ['--ti'],
+                name = 'ti',
                 help = 'Working distance (mum)',
                 default = 150,
                 type = float,
@@ -72,7 +72,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'The output Gibson-Lanni PSF image path.',
                 default = 'psf_gibsonlanni.tiff',
                 type = Path,

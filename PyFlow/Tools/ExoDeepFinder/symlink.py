@@ -9,14 +9,16 @@ class Tool(ExoDeepFinderTool):
     description = "Symlink files to the workflow folder."
     inputs = [
             dict(
-                names = ['-imf', '--input_movie_folder'],
+                name = 'input_movie_folder',
+                shortname = 'imf',
                 help = 'Path to the input movie folder.',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-m', '--movie'],
+                name = 'movie',
+                shortname = 'm',
                 help = 'Input movie.',
                 default = 'movie.h5',
                 type = Path,
@@ -24,14 +26,16 @@ class Tool(ExoDeepFinderTool):
     ]
     outputs = [
             dict(
-                names = ['-omf', '--output_movie_folder'],
+                name = 'output_movie_folder',
+                shortname = 'omf',
                 help = 'Path to the output movie folder.',
                 default = '[workflow_folder]/dataset/{input_movie_folder.name}',
                 type = Path,
                 autoIncrement = False,
             ),
             dict(
-                names = ['-om', '--output_movie'],
+                name = 'output_movie',
+                shortname = 'om',
                 help = 'Path to the symlinked movie.',
                 default = '[workflow_folder]/dataset/{input_movie_folder.name}/movie.h5',
                 type = Path,

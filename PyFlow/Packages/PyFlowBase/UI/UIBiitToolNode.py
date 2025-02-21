@@ -13,6 +13,7 @@
 ## limitations under the License.
 
 import pandas
+from pathlib import Path
 from qtpy import QtGui
 from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
 from PyFlow.UI.Canvas.UINodeBase import UINodeBase
@@ -35,7 +36,7 @@ class ColumnValueWidget(QWidget):
     def __init__(self, input, node, parent=None):
         super(ColumnValueWidget, self).__init__(parent=parent)
         self.name = input['name']
-        self.inputWidget = self.createInput(self.name, input['type'], input['help'], input['default'], input['choices'] if 'choices' in input else None)
+        self.inputWidget = self.createInput(self.name, input['type'], input['help'], input.get('default'), input.get('choices'))
         self.node = node
         self.setContentsMargins(0, 0, 0, 0)
         self.layout = QHBoxLayout(self)
@@ -99,7 +100,7 @@ class ColumnValueWidget(QWidget):
             w.setToolTip(description)
             w.setObjectName(name)
             return w
-        inputWidgetVariant = 'PathWidget' if type == 'path' else DEFAULT_WIDGET_VARIANT
+        inputWidgetVariant = 'PathWidget' if type == Path else DEFAULT_WIDGET_VARIANT
         w = createInputWidget(
             self.getPinTypeFromIoType(type),
             lambda value: self.updateNodeParameterValue(value),
@@ -119,7 +120,7 @@ class ColumnValueWidget(QWidget):
         parameter = self.node.parameters['inputs'][self.name]
         parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
         # self.node.inArray.setData(None)
-        self.node.setDirty()
+        self.node.setNodeDirty()
         EditorHistory().saveState("Update parameter", modify=True)
     
     def changeTypeValue(self, index, sendChanged=True):
@@ -142,7 +143,7 @@ class ColumnValueWidget(QWidget):
             type = 'value'
         self.node.parameters['inputs'][self.name]['type'] = type
         if sendChanged:
-            self.node.setDirty()
+            self.node.setNodeDirty()
             EditorHistory().saveState("Update parameter type", modify=True)
         #     self.node.inArray.setData(None)
 
@@ -160,7 +161,7 @@ class UIBiitToolNode(UINodeBase):
         raw_node.inArray.dataBeenSet.connect(self.dataBeenSet)
         self.dataFrameWidget = None
     
-    def dataBeenSet(self):
+    def dataBeenSet(self, pin=None):
         if self.isSelected():
             self.canvasRef().tryFillTableView(self)         # Calls TableTool.updateTable()
         
@@ -203,24 +204,24 @@ class UIBiitToolNode(UINodeBase):
     
     def createInputWidgets(self, inputsCategory, inGroup=None, pins=True):
         # super(UIBiitToolNode, self).createInputWidgets(inputsCategory, inGroup, False)
-        tool = self._rawNode.__class__.tool
+        tool = self._rawNode.tool
         
         for input in tool.inputs:
-            if input['advanced']: continue
+            if input.get('advanced'): continue
             iw = ColumnValueWidget(input, self._rawNode, inputsCategory)
             inputsCategory.addWidget(input['name'], iw, group=inGroup)
 
     def updateOutput(self, output, value):
         output['value'] = value
-        self._rawNode.setDirty()
+        self._rawNode.setNodeDirty()
         EditorHistory().saveState("Update parameter", modify=True)
 
     def createAdvancedCollapsibleFormWidget(self, propertiesWidget):
         advancedInputsCategory = CollapsibleFormWidget(headName="Advanced inputs")
 
-        tool = self._rawNode.__class__.tool
+        tool = self._rawNode.tool
         for input in tool.inputs:
-            if not input['advanced']: continue
+            if not input.get('advanced'): continue
             iw = ColumnValueWidget(input, self._rawNode, advancedInputsCategory)
             advancedInputsCategory.addWidget(input['name'], iw)
         if advancedInputsCategory.Layout.count() > 0:
@@ -229,8 +230,6 @@ class UIBiitToolNode(UINodeBase):
 
     def createOutputCollapsibleFormWidget(self, propertiesWidget):
         outputsCategory = CollapsibleFormWidget(headName="Outputs")
-        
-        # tool = self._rawNode.__class__.tool
         
         for outputName, output in self._rawNode.parameters['outputs'].items():
 

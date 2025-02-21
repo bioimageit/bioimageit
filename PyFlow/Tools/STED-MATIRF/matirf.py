@@ -10,56 +10,56 @@ class Tool:
     description = "3D multi-angle TIRF image deconvolution."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Path to the input image, or input text file for image sequence.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--microscope_params'],
+                name = 'microscope_params',
                 help = 'Microscope parameters (json format)',
                 required = True,
                 type = Path,
             ),
             dict(
-                names = ['--depth'],
+                name = 'depth',
                 help = 'Depth',
                 default = 500,
                 type = float,
             ),
             dict(
-                names = ['--nplanes'],
+                name = 'nplanes',
                 help = 'Number of planes',
                 default = 20,
                 type = int,
             ),
             dict(
-                names = ['--lambda'],
+                name = 'lambda',
                 help = 'Regularization (XY,Z)',
                 default = '0.001,0.001',
                 type = str,
             ),
             dict(
-                names = ['--gamma'],
+                name = 'gamma',
                 help = 'Gamma / time step',
                 default = 10,
                 type = float,
             ),
             dict(
-                names = ['--iterations'],
+                name = 'iterations',
                 help = 'Number of iterations',
                 default = 1000,
                 type = int,
             ),
             dict(
-                names = ['--reg_type'],
+                name = 'reg_type',
                 help = 'Regularization type',
                 default = 1,
                 type = int,
             ),
             dict(
-                names = ['--zmin'],
+                name = 'zmin',
                 help = 'Z0',
                 default = 0,
                 type = int,
@@ -67,7 +67,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'Output path for the denoised image.',
                 default = '{input_image.name}_denoised{input_image.exts}',
                 type = Path,

@@ -10,32 +10,32 @@ class Tool(ClEsperantoTool):
     description = "Deskew with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--angle'],
+                name = 'angle',
                 help = 'Deskewing angle in degrees',
                 default = 30,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_x'],
+                name = 'voxel_size_x',
                 help = 'voxel_size_x_in_microns',
                 default = 0.202,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_y'],
+                name = 'voxel_size_y',
                 help = 'voxel_size_y_in_microns',
                 default = 0.202,
                 type = float,
             ),
             dict(
-                names = ['--voxel_size_z'],
+                name = 'voxel_size_z',
                 help = 'voxel_size_z_in_microns',
                 default = 1,
                 type = float,
@@ -43,7 +43,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'output image path',
                 default = '{input_image.stem}_deskewed{input_image.exts}',
                 type = Path,
@@ -60,7 +60,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         
 
         input_image = args.input_image

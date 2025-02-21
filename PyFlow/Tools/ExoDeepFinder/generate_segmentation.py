@@ -8,20 +8,23 @@ class Tool(ExoDeepFinderTool):
     description = "Generate segmentation from an annotation file."
     inputs = [
             dict(
-                names = ['-mf', '--movie_folder'],
+                name = 'movie_folder',
+                shortname = 'mf',
                 help = 'Input folder containing the movie files (a least a movie in h5 format, and an expert annotation file).',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-m', '--movie'],
+                name = 'movie',
+                shortname = 'm',
                 help = 'Input movie.',
                 default = 'movie.h5',
                 type = Path,
             ),
             dict(
-                names = ['-a', '--annotation'],
+                name = 'annotation',
+                shortname = 'a',
                 help = 'Corresponding annotation (.xml generated with napari-exodeepfinder or equivalent, can also be a .csv file).',
                 default = 'expert_annotation.xml',
                 type = Path,
@@ -29,14 +32,16 @@ class Tool(ExoDeepFinderTool):
     ]
     outputs = [
             dict(
-                names = ['-oa', '--output_annotation'],
+                name = 'output_annotation',
+                shortname = 'oa',
                 help = 'Output annotation (a symlink to the annotation input).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/expert_annotation.xml',
                 type = Path,
                 autoIncrement = False,
             ),
             dict(
-                names = ['-os', '--output_segmentation'],
+                name = 'output_segmentation',
+                shortname = 'os',
                 help = 'Output segmentation (in .h5 format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/expert_segmentation.h5',
                 type = Path,

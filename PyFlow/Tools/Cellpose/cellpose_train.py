@@ -12,92 +12,107 @@ class Tool:
     description = "Segment cells with cellpose."
     inputs = [
             dict(
-                names = ['-tr', '--train_directory'],
+                name = 'train_directory',
+                shortname = 'tr',
                 help = 'The directory path containing the training data.',
                 required = True,
                 type = Path,
             ),
             dict(
-                names = ['-te', '--test_directory'],
+                name = 'test_directory',
+                shortname = 'te',
                 help = 'The directory path containing the testing data.',
                 default = None,
                 type = Path,
             ),
             dict(
-                names = ['-if', '--image_filter'],
+                name = 'image_filter',
+                shortname = 'if',
                 help = 'The filter for selecting image files.',
                 default = '_img',
                 type = str,
             ),
             dict(
-                names = ['-mf', '--mask_filter'],
+                name = 'mask_filter',
+                shortname = 'mf',
                 help = 'The filter for selecting mask files.',
                 default = None,
                 type = str,
             ),
             dict(
-                names = ['-lold', '--look_one_level_down'],
+                name = 'look_one_level_down',
+                shortname = 'lold',
                 help = 'Whether to look for data in subdirectories of train_dir and test_dir.',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-m', '--model_type'],
+                name = 'model_type',
+                shortname = 'm',
                 help = 'Model type. Full built-in models: cyto="cytoplasm model", nuclei="nucleus model", cyto2="cytoplasm model with additional user images", cyto3="super-generalist model". For other built-in models, see https://cellpose.readthedocs.io/en/latest/models.html',
                 default = 'cyto3',
                 choices = ['cyto', 'cyto2', 'cyto3', 'nuclei', 'tissuenet_cp3', 'tissuenet_cp3', 'livecell_cp3', 'yeast_PhC_cp3', 'yeast_BF_cp3', 'bact_phase_cp3', 'bact_fluor_cp3', 'deepbacs_cp3', 'cyto2_cp3', 'CP', 'CPx', 'TN1', 'TN2', 'TN3', 'LC1', 'LC2', 'LC3', 'LC4'],
                 type = str,
             ),
             dict(
-                names = ['-c', '--channels'],
+                name = 'channels',
+                shortname = 'c',
                 help = 'Channels to run segementation on. For example: "[0,0]" for grayscale, "[2,3]" for G=cytoplasm and B=nucleus, "[2,1]" for G=cytoplasm and R=nucleus.',
                 default = '[0,0]',
                 type = str,
             ),
             dict(
-                names = ['-g', '--use_gpu'],
+                name = 'use_gpu',
+                shortname = 'g',
                 help = 'Use GPU (default is CPU).',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-sn', '--skip_normalizaton'],
+                name = 'skip_normalizaton',
+                shortname = 'sn',
                 help = 'Whether to sktip the data normalization.',
                 default = True,
                 type = bool
             ),
             dict(
-                names = ['-wd', '--weight_decay'],
+                name = 'weight_decay',
+                shortname = 'wd',
                 help = 'Weight decay for the optimizer.',
                 default = 1e-05,
                 type = float,
             ),
             dict(
-                names = ['-sdg', '--SDG'],
+                name = 'SDG',
+                shortname = 'sdg',
                 help = 'Whether to use SGD as optimization instead of RAdam.',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['-lr', '--learning_rate'],
+                name = 'learning_rate',
+                shortname = 'lr',
                 help = 'Learning rate for the training.',
                 default = 0.005,
                 type = float,
             ),
             dict(
-                names = ['-ne', '--n_epochs'],
+                name = 'n_epochs',
+                shortname = 'ne',
                 help = 'Number of times to go through the whole training set during training.',
                 default = 2000,
                 type = int,
             ),
             dict(
-                names = ['-mn', '--model_name'],
+                name = 'model_name',
+                shortname = 'mn',
                 help = 'Name of the new network.',
                 default = None,
                 type = str,
             ),
             dict(
-                names = ['-e', '--evaluate'],
+                name = 'evaluate',
+                shortname = 'e',
                 help = 'Whether to evaluate the model after training.',
                 default = False,
                 type = bool,
@@ -105,7 +120,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--out'],
+                name = 'out',
+                shortname = 'o',
                 help = 'The output path.',
                 default = '[node_folder]/model/',
                 type = Path,
@@ -119,7 +135,7 @@ class Tool:
     
     def processData(self, args):
         if not args.train_directory.exists():
-            raise Exception('Error: train directory {args.train_directory} does not exist.')
+            sys.exit('Error: train directory {args.train_directory} does not exist.')
 
         print(f'[[1/4]] Load data {args.train_directory}')
 

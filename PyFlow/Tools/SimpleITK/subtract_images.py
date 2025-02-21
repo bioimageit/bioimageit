@@ -1,20 +1,21 @@
 from pathlib import Path
 import SimpleITK as sitk
 
-class SubtractImages:
+class Tool:
 
-    name = "subtract_images"
+    name = "Subtract images"
     description = "Subtract images."
+    categories = ['SimpleITK', 'Custom']
     inputs = [
             dict(
-            names = ['--image1'],
+            name = 'image1',
             help = 'Input image 1',
             type = Path,
             required = True,
             autoColumn = True,
         ),
         dict(
-            names = ['--image2'],
+            name = 'image2',
             help = 'Input image 2',
             type = Path,
             required = True,
@@ -23,7 +24,7 @@ class SubtractImages:
     ]
     outputs = [
         dict(
-            names = ['--out'],
+            name = 'out',
             help = 'Output image',
             type = Path,
         ),

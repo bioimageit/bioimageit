@@ -10,31 +10,31 @@ class Tool:
     description = "3D Gaussian PSF."
     inputs = [
             dict(
-                names = ['--width'],
+                name = 'width',
                 help = 'Image width',
                 default = 256,
                 type = int,
             ),
             dict(
-                names = ['--height'],
+                name = 'height',
                 help = 'Image height',
                 default = 256,
                 type = int,
             ),
             dict(
-                names = ['--depth'],
+                name = 'depth',
                 help = 'Image depth',
                 default = 20,
                 type = int,
             ),
             dict(
-                names = ['--sigmaxy'],
+                name = 'sigmaxy',
                 help = 'PSF width and height',
                 default = 1.0,
                 type = float,
             ),
             dict(
-                names = ['--sigmaz'],
+                name = 'sigmaz',
                 help = 'PSF depth',
                 default = 1.0,
                 type = float,
@@ -42,7 +42,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output'],
+                name = 'output',
+                shortname = 'o',
                 help = 'The output 3D Gaussian PSF path.',
                 default = 'psf.tiff',
                 type = Path,

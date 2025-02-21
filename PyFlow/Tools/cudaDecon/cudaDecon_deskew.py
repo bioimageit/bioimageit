@@ -12,44 +12,51 @@ class Tool:
     description = "CUDA/C++ implementation of an accelerated Richardson Lucy Deconvolution algorithm."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['-dx', '--dxdata'],
+                name = 'dxdata',
+                shortname = 'dx',
                 help = 'XY Pixel size of image volume.',
                 default = 0.1,
                 type = float,
             ),
             dict(
-                names = ['-dz', '--dzdata'],
+                name = 'dzdata',
+                shortname = 'dz',
                 help = 'Z-step size in image volume. In a typical light sheet stage-scanning acquisition, this corresponds to the step size that the stage takes between planes, NOT the final Z-step size between planeds after deskewing along the optical axis of the detection objective.',
                 default = 0.5,
                 type = float,
             ),
             dict(
-                names = ['-a', '--angle'],
+                name = 'angle',
+                shortname = 'a',
                 help = 'Deskew angle (usually, angle between sheet and axis of stage motion).',
                 default = 31.5,
                 type = float,
             ),
             dict(
-                names = ['-w', '--width'],
+                name = 'width',
+                shortname = 'w',
                 help = 'If not 0, crop output image to specified width',
                 default = 0,
                 type = int,
             ),
             dict(
-                names = ['-s', '--shift'],
+                name = 'shift',
+                shortname = 's',
                 help = 'If not 0, shift image center by this value',
                 default = 0,
                 type = int,
             ),
             dict(
-                names = ['-pv', '--pad_val'],
+                name = 'pad_val',
+                shortname = 'pv',
                 help = 'Value to pad image with when deskewing. If None the median value of the last Z plane will be used.',
                 default = None,
                 type = int,
@@ -57,7 +64,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--output_image'],
+                name = 'output_image',
+                shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
                 type = Path,
@@ -72,7 +80,7 @@ class Tool:
         self.io = io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/3]] Load image {input_image}')

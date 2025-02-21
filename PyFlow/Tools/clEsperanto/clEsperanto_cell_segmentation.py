@@ -10,26 +10,26 @@ class Tool(ClEsperantoTool):
     description = "Cell segmentation with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--corrected_binary'],
+                name = 'corrected_binary',
                 help = 'if non corrected is not good',
                 default = False,
                 type = bool,
             ),
             dict(
-                names = ['--radius_x'],
+                name = 'radius_x',
                 help = 'radius_x',
                 default = 10,
                 type = float,
             ),
             dict(
-                names = ['--radius_y'],
+                name = 'radius_y',
                 help = 'radius_y',
                 default = 10,
                 type = float,
@@ -37,7 +37,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'Output image path',
                 default = '{input_image.stem}_segmentation{input_image.exts}',
                 type = Path,
@@ -54,7 +54,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
 
 
         input_image = args.input_image

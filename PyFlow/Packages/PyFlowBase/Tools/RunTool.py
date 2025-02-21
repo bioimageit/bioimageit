@@ -440,7 +440,7 @@ class ExportWorkflowTool(ShelfTool):
     #         channel = f"def {node.name}_path = Channel.fromPath( '{node.dataFramePath}' )"
 
     #     # Create processes
-    #     tool = node.__class__.tool
+    #     tool = node.tool
     #     name = tool.info.id if tool is not None else node.name
     #     if name not in processes:
     #         activate_command = self.getActivateCommand(self, name)
@@ -500,7 +500,7 @@ class ExportWorkflowTool(ShelfTool):
         
         graphManager = self.pyFlowInstance.graphManager.get()
 
-        tool = node.__class__.tool if hasattr(node.__class__, 'tool') else None
+        tool = node.tool
         # name = tool.info.id if tool is not None else node.name
 
         # Create processes

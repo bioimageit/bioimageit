@@ -10,14 +10,14 @@ class Tool(ClEsperantoTool):
     description = "Intensity stats with clEsperanto."
     inputs = [
             dict(
-                names = ['--input_image'],
+                name = 'input_image',
                 help = 'Input image path',
                 default = None,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--spot_sigma'],
+                name = 'spot_sigma',
                 help = 'Spot sigma',
                 default = 20,
                 type = str,
@@ -25,7 +25,7 @@ class Tool(ClEsperantoTool):
     ]
     outputs = [
             dict(
-                names = ['--out'],
+                name = 'out',
                 help = 'output csv file path',
                 default = '{input_image.stem}_beads.csv',
                 type = Path,
@@ -42,7 +42,7 @@ class Tool(ClEsperantoTool):
         self.io = skimage.io
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         
 
         input_image = args.input_image

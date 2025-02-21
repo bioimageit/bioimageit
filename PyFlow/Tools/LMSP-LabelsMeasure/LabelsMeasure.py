@@ -12,26 +12,27 @@ class Tool:
     description = "LabelsMeasure provides the tools to generate the regions of interest from label images."
     inputs = [
             dict(
-                names = ['-i', '--input_image'],
+                name = 'input_image',
+                shortname = 'i',
                 help = 'The input image path.',
                 required = True,
                 type = Path,
                 autoColumn = True,
             ),
             dict(
-                names = ['--label'],
+                name = 'label',
                 help = 'Label image path, from cellpose for instance.',
                 required = True,
                 type = Path,
             ),
             dict(
-                names = ['--pixel'],
+                name = 'pixel',
                 help = 'Size of the pixel erosion',
                 required = True,
                 type = int,
             ),
             dict(
-                names = ['--binary_map'],
+                name = 'binary_map',
                 help = 'If false, labels in your black & white image',
                 default = False,
                 type = bool,
@@ -39,7 +40,8 @@ class Tool:
     ]
     outputs = [
             dict(
-                names = ['-o', '--out'],
+                name = 'out',
+                shortname = 'o',
                 help = 'The output csv path.',
                 default = '{input_image.stem}_measurements.csv',
                 type = Path,
@@ -48,7 +50,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            raise Exception(f'Error: input image {args.input_image} does not exist.')
+            sys.exit(f'Error: input image {args.input_image} does not exist.')
         input_image = str(args.input_image)
 
         print(f'[[1/3]] Load image {input_image} and libraries')

@@ -1,44 +1,45 @@
 from pathlib import Path
 import SimpleITK as sitk
 
-class BinaryThreshold:
+class Tool:
 
     name = "Binary threshold"
     description = "SimpleITK Binary threshold."
+    categories = ['SimpleITK', 'Custom']
     inputs = [
             dict(
-            names = ['--image'],
+            name = 'image',
             help = 'Input image path',
             type = Path,
             required = True,
             autoColumn = True,
         ),
         dict(
-            names = ['--channel'],
+            name = 'channel',
             help = 'Channel to threshold',
             type = int,
             default = 0,
         ),
         dict(
-            names = ['--lowerThreshold'],
+            name = 'lowerThreshold',
             help = 'Lower threshold',
             type = float,
             default = 0,
         ),
         dict(
-            names = ['--upperThreshold'],
+            name = 'upperThreshold',
             help = 'Upper threshold',
             type = float,
             default = 255,
         ),
         dict(
-            names = ['--insideValue'],
+            name = 'insideValue',
             help = 'Inside value',
             type = int,
             default = 1,
         ),
         dict(
-            names = ['--outsideValue'],
+            name = 'outsideValue',
             help = 'Outside value',
             type = int,
             default = 0,
@@ -46,7 +47,7 @@ class BinaryThreshold:
     ]
     outputs = [
         dict(
-            names = ['--thresholded_image'],
+            name = 'thresholded_image',
             help = 'Output image path',
             type = Path,
         ),
