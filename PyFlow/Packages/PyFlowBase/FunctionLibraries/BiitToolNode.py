@@ -5,6 +5,7 @@ import pandas
 from munch import Munch
 import logging
 import subprocess
+from pydoc import locate
 
 from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH, getRootPath
 from PyFlow.invoke_in_main import inthread, inmain
@@ -95,14 +96,14 @@ class BiitToolNode(NodeBase):
 	def initializeInput(self, input):
 		defaultValue = input.get('default')
 		defaultValue = input['choices'][0] if defaultValue is None and 'choices' in input and len(input['choices']) > 0 else defaultValue
-		return dict(type='column' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'], advanced=input.get('advanced'))
+		return dict(type='columnName' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'].__name__, advanced=input.get('advanced'))
 
 	def initializeOutput(self, output):
-		return dict(value=output['default'], 
-					defaultValue=output['default'], 
-					type=output['type'] if 'type' in output else None, 
-					extension=output['extension'] if 'extension' in output else None,
-					help=output['help'] if 'help' in output else None)
+		return dict(value=output.get('default'), 
+					defaultValue=output.get('default'), 
+					dataType=output['type'].__name__, 
+					extension=output.get('extension'),
+					help=output.get('help'))
 
 	def initializeParameters(self):
 		inputs = { input['name']: self.initializeInput(input) for input in self.tool.inputs }
@@ -129,7 +130,10 @@ class BiitToolNode(NodeBase):
 						print(f'Warning: parameter "{parameterName}" does not exist in node "{self.name}". This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
 						continue
 					for key, value in parameter.items():
-						self.parameters[io][parameterName][key] = value
+						if parameter['dataType'] == 'Path' and key == 'value':
+							self.parameters[io][parameterName][key] = locate(value)
+						else:
+							self.parameters[io][parameterName][key] = value
 
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
@@ -151,17 +155,17 @@ class BiitToolNode(NodeBase):
 		for input in self.tool.inputs:
 			inputName = input['name']
 			parameter = self.parameters['inputs'][inputName]
-			if isinstance(data, pandas.DataFrame):
+			if isinstance(data, pandas.DataFrame) and len(data)>0:
 				if parameter['type'] == 'columnName' and parameter['columnName'] not in data.columns:
 					parameter['columnName'] = data.columns[max(0, n)]
 					n -= 1
-			else:
-				if parameter['type'] == 'columnName':
-					parameter['type'] = 'value'
+			elif parameter['type'] == 'columnName':
+				parameter['type'] = 'value'
 
 	# The input pin was plugged or parameters were changed in the properties GUI: set the node dirty & unexecuted
 	def setNodeDirty(self, pin=None):
 		self.setExecuted(executed=False, propagate=True, setDirty=True)
+		self.compute()
 
 	def getInputPins(self):
 		return sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
@@ -203,6 +207,7 @@ class BiitToolNode(NodeBase):
 		template = super().serialize()
 		template['executed'] = self.executed
 		template['parameters'] = self.parameters.copy()
+		
 		# template['folderDataFramePath'] = self.folderDataFramePath
 		outputFolder = self.getOutputMetadataFolderPath()
 		if Path(outputFolder / OUTPUT_DATAFRAME_PATH).exists():
@@ -268,7 +273,7 @@ class BiitToolNode(NodeBase):
 
 	def setOutputColumns(self, data):
 		for outputName, output in self.parameters['outputs'].items():
-			if output['type'] != Path: continue
+			if output['dataType'] != Path: continue
 			
 			for index, row in data.iterrows():
 
@@ -297,10 +302,13 @@ class BiitToolNode(NodeBase):
 				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
 	def mergeDataFrames(self, dataFrames):
-		if len(dataFrames)==0: return None
+		if len(dataFrames)==0: return pandas.DataFrame()
 		result = pandas.concat(dataFrames, axis=1)
 		# Remove duplicated columns
 		result = result.loc[:,~result.columns.duplicated()].copy()
+		# Replace every NaN with the first non-NaN value in the same column above it.
+		# propagate[s] last valid observation forward to next valid
+		result = result.ffill()
 		return result
 
 	def getDataFrame(self):
@@ -313,6 +321,7 @@ class BiitToolNode(NodeBase):
 
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
+		print('------------compute:', self.name)
 		dataFrame = self.getDataFrame()
 		self.setOutputColumns(dataFrame)
 		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
@@ -349,9 +358,8 @@ class BiitToolNode(NodeBase):
 		return self.getWorkflowPath() / 'Tools'
 	
 	def setArg(self, args, parameterName, parameter, parameterValue, index):
-		if parameterValue is None: return
 		arg = parameterValue
-		if parameter['dataType'] == Path:
+		if parameter['dataType'] == 'Path' and arg is not None:
 			arg = str(parameterValue)
 			arg = arg.replace('[index]', str(index)) if index is not None else arg
 			arg = arg.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))

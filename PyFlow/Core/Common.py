@@ -664,6 +664,7 @@ def disconnectPins(src, dst):
         dst.affected_by.remove(src)
         src.pinDisconnected(dst)
         dst.pinDisconnected(src)
+        dst.setData(None)
         push(dst)
         if src.isExec() and dst.isExec():
             src.onExecute.disconnect(dst.call)

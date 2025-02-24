@@ -55,7 +55,7 @@ class OmeroService(object):
             with open(versionPath, 'r') as f:
                 versionInfo = json.load(f)
                 for protocol in ['https', 'http']:
-                    if protocol in versionInfo['proxies']:
+                    if versionInfo is not None and 'proxies' in versionInfo and protocol in versionInfo['proxies']:
                         # http://1:1@127.0.0.1:8888
                         hostPort = versionInfo['proxies'][protocol].split('@')[1] if '@' in versionInfo['proxies'][protocol] else versionInfo['proxies'][protocol]
                         proxyHost, proxyPort = hostPort.split(':')

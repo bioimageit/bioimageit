@@ -13,7 +13,7 @@ class Tool:
             name = 'columnName',
             help = 'Column name',
             type = str,
-            static = True,
+            autoColumn = True,
         ),
         dict(
             name = 'regex',
@@ -31,13 +31,8 @@ class Tool:
         df: pandas.DataFrame = dataFrame.copy()
         regex = args.regex
         columnName = args.columnName
-        columnIndex = None
-        try:
-            columnIndex = int(columnName)
-        except ValueError as e:
-            pass
         for index, row in dataFrame.iterrows():
-            m = re.search(regex, str(row[columnName] if columnIndex is None else row.iloc[columnIndex]))
+            m = re.search(regex, str(row[columnName]))
             if m is None: continue
             for key, value in m.groupdict().items():
                 df.at[index, key] = value

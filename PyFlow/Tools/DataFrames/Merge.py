@@ -78,7 +78,7 @@ class Tool:
         df = dataFrames[0]
         args = argsList[0]
         mergeArgs = vars(args)
-        del mergeArgs['last_suffix']
+        del mergeArgs['left_suffix']
         del mergeArgs['right_suffix']
         mergeArgs['suffixes'] = (args.left_suffix, args.right_suffix)
         for i in range(len(dataFrames)-1):

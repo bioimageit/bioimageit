@@ -15,6 +15,7 @@ class Tool:
             name = 'folderPath',
             help = 'Folder path',
             type = Path,
+            autoColumn = True,
             required = True,
         ),
         dict(
@@ -28,6 +29,7 @@ class Tool:
             help = 'Column name',
             type = str,
             default = 'path',
+            static = True,
         ),
     ]
     outputs = [
@@ -36,8 +38,7 @@ class Tool:
     def processDataFrame(self, dataFrame, argsList):
         allFiles = []
         for args in argsList:
-            if args.folderPath is None: continue
-            if not args.folderPath.exists(): continue
+            if args.folderPath is None or not args.folderPath.is_dir(): continue
             try:
                 files = sorted(list(args.folderPath.glob(args.filter))) if args.filter is not None and len(args.filter)>0 else None
             except ValueError as e:
@@ -45,4 +46,4 @@ class Tool:
             if files is None:
                 files = sorted(list(args.folderPath.iterdir()))
             allFiles += [f for f in files if f.name != '.DS_Store']
-        return pandas.DataFrame(data={args.columnName:allFiles})
+        return pandas.DataFrame(data={argsList[0].columnName:allFiles} if len(argsList)>0 else {})

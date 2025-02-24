@@ -50,7 +50,7 @@ class ColumnValueWidget(QWidget):
         data = node.getDataFrame()
         isDataframe = isinstance(data, pandas.DataFrame)
         node.inArray.setClean()
-        defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1]
+        defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1] if len(data.columns)>0 else None
         node.parameters['inputs'][self.name]['columnName'] = defaultColumnName
         # self.layout.addWidget(self.columnNameInput)
         self.typeSelector.activated.connect(self.changeTypeValue)
@@ -67,8 +67,8 @@ class ColumnValueWidget(QWidget):
             self.inputWidget.setCurrentText(node.parameters['inputs'][self.name]['value'])
             self.inputWidget.blockSignals(False)
         self.columnSelector = None
-        index = 0 if type == 'columnName' and isDataframe else 1
-        if isDataframe and not ('static' in input and input['static']):
+        index = 0 if type == 'columnName' and isDataframe and defaultColumnName is not None else 1
+        if isDataframe and not ('static' in input and input['static']) and defaultColumnName is not None:
             # self.columnNameInput.hide()
             self.columnSelector = QComboBox()
             for column in data.columns:
@@ -158,7 +158,7 @@ class UIBiitToolNode(UINodeBase):
     def __init__(self, raw_node):
         super(UIBiitToolNode, self).__init__(raw_node)
         raw_node.executedChanged.connect(self.executedChanged)
-        raw_node.inArray.dataBeenSet.connect(self.dataBeenSet)
+        raw_node.outArray.dataBeenSet.connect(self.dataBeenSet)
         self.dataFrameWidget = None
     
     def dataBeenSet(self, pin=None):
