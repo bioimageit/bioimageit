@@ -1,14 +1,12 @@
 from pathlib import Path
 import json
 import re
-from sqlite3 import paramstyle
 import pandas
 from munch import Munch
 import logging
 import subprocess
-from pydoc import locate
 
-from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH, getRootPath
+from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
 from PyFlow.invoke_in_main import inthread, inmain
 from PyFlow.Core import NodeBase
 from PyFlow.Core.EvaluationEngine import EvaluationEngine
@@ -97,12 +95,12 @@ class BiitToolNode(NodeBase):
 	def initializeInput(self, input):
 		defaultValue = input.get('default')
 		defaultValue = input['choices'][0] if defaultValue is None and 'choices' in input and len(input['choices']) > 0 else defaultValue
-		return dict(type='columnName' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'].__name__, advanced=input.get('advanced'))
+		return dict(type='columnName' if input.get('autoColumn', False) else 'value', columnName=None, value=defaultValue, defaultValue=defaultValue, dataType=input['type'], advanced=input.get('advanced'))
 
 	def initializeOutput(self, output):
 		return dict(value=output.get('default'), 
 					defaultValue=output.get('default'), 
-					dataType=output['type'].__name__, 
+					dataType=output['type'], 
 					extension=output.get('extension'),
 					editable=output.get('editable'),
 					help=output.get('help'))
@@ -450,6 +448,11 @@ class BiitToolNode(NodeBase):
 		self.finishExecution(argsList)
 		return True
 	
+	def saveArgsList(self, argsList, outputFolder):
+		if argsList is None: return
+		with open(outputFolder / PARAMETERS_PATH, 'w') as f:
+			json.dump(argsList, f, default=lambda value: value.to_json(default_handler=str) if hasattr(value, 'to_json') and callable(value.to_json) else str(value))
+
 	def finishExecution(self, argsList):
 		outputFolder = self.getOutputMetadataFolderPath()
 		outputFolder.mkdir(exist_ok=True, parents=True)
@@ -460,10 +463,7 @@ class BiitToolNode(NodeBase):
 		if isinstance(outputData, pandas.DataFrame):
 			outputData.to_csv(outputFolder / OUTPUT_DATAFRAME_PATH)
 		
-		if argsList is not None:
-			with open(outputFolder / PARAMETERS_PATH, 'w') as f:
-				json.dump(argsList, f)
-
+		self.saveArgsList(argsList, outputFolder)
 		self.setExecuted(True)
 
 	def clear(self):

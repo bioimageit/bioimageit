@@ -18,7 +18,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
     ]
@@ -28,7 +28,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output dataFrame path.',
                 default = '{input_image.stem}_puncta.csv',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

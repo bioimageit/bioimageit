@@ -14,7 +14,7 @@ class Tool:
                 name = 'input',
                 help = 'Input Image',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -22,44 +22,44 @@ class Tool:
                 help = 'Perform 2D, 2D Slice or 3D deconvolution.',
                 default = '2D',
                 choices = ['2D', '2D Slice', '3D'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'sigma',
                 help = 'Gaussian PSF width (for 2D and 2D Slice only)',
                 default = 1.5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'psf',
                 help = 'PSF Image (for 3D only)',
                 default = None,
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'regularization',
                 help = 'Regularization parameter pow(2,-x)',
                 default = 12,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'weighting',
                 help = 'Weighting',
                 default = 0.6,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'method',
                 help = 'Method for regularization',
                 default = 'HV',
                 choices = ['HV', 'SV'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'padding',
                 help = 'Add padding to process border pixels',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -68,7 +68,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output path for the deconvolved image.',
                 default = '{input.name}_deconvolved{input.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

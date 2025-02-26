@@ -17,7 +17,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path. The width and height of the image should be even for best results.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -25,28 +25,28 @@ class Tool:
                 shortname = 'rad',
                 help = 'Standard deviation of the Gaussian window (0 for global threshold).',
                 default = 60,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'p_value',
                 shortname = 'pval',
                 help = 'P-value to account for the probability of false detection.',
                 default = 0.001,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'area_lim',
                 shortname = 'arealim',
                 help = 'Remove detections smaller than this area.',
                 default = 0,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'verbose',
                 shortname = 'v',
                 help = 'Verbose mode.',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -55,7 +55,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image.',
                 default = '{input_image.stem}_detections{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

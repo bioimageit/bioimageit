@@ -10,7 +10,7 @@ class Tool:
             dict(
             name = 'image',
             help = 'Input image path',
-            type = Path,
+            type = 'Path',
             required = True,
             autoColumn = True,
         ),
@@ -20,13 +20,13 @@ class Tool:
             name = 'labeled_image',
             help = 'Output image',
             default = '{image.stem}_labeled{image.exts}',
-            type = Path,
+            type = 'Path',
         ),
         dict(
             name = 'labeled_image_rgb',
             help = 'Output rgb image',
             default = '{image.stem}_labeled_rgb{image.exts}',
-            type = Path,
+            type = 'Path',
         ),
     ]
 

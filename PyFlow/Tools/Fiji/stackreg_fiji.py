@@ -34,7 +34,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -43,7 +43,7 @@ class Tool:
                 help = 'The transformation applied on each slice.',
                 default = 'Rigid Body',
                 choices = ['Translation', 'Rigid Body', 'Scaled rotation', 'Affine'],
-                type = str,
+                type = 'str',
             ),
     ]
     outputs = [
@@ -52,7 +52,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

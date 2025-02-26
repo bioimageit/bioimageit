@@ -10,14 +10,14 @@ class Tool:
             dict(
             name = 'image',
             help = 'Input image',
-            type = Path,
+            type = 'Path',
             required = True,
             autoColumn = True,
         ),
         dict(
             name = 'channel',
             help = 'Channel to extract',
-            type = int,
+            type = 'int',
             default = 0,
         ),
     ]
@@ -26,7 +26,7 @@ class Tool:
             name = 'out',
             help = 'Output image',
             default = '{image.stem}_channel{channel}{image.exts}',
-            type = Path,
+            type = 'Path',
         ),
     ]
 

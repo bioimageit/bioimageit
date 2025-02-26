@@ -13,37 +13,37 @@ class Tool(OmeroBase):
             dict(
             name = 'image',
             help = 'Image to upload',
-            type = Path,
+            type = 'Path',
             required = True,
         ),
         dict(
             name = 'metadata_columns',
             help = 'Metadata columns (for example ["column 1", "column 2"])',
-            type = str,
+            type = 'str',
             default = None,
         ),
         dict(
             name = 'dataset_id',
             help = 'Dataset ID (ignored if negative)',
-            type = int,
+            type = 'int',
             default = None,
         ),
         dict(
             name = 'dataset_name',
             help = 'Dataset name',
-            type = str,
+            type = 'str',
             default = None,
         ),
         dict(
             name = 'project_id',
             help = 'Project ID (optional, ignored if negative)',
-            type = int,
+            type = 'int',
             default = None,
         ),
         dict(
             name = 'project_name',
             help = 'Project name (optional)',
-            type = str,
+            type = 'str',
             default = None,
         ),
     ]

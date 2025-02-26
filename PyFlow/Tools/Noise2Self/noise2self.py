@@ -15,7 +15,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -24,25 +24,25 @@ class Tool:
                 help = 'The model to use.',
                 default = 'Unet',
                 choices = ['BabyUnet', 'DnCNN', 'SingleConvolution', 'Unet'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'num_of_layers',
                 help = 'Number of layers in the convolutional network',
                 default = None,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'masker_width',
                 help = 'Width of the mask',
                 default = None,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'iterations',
                 help = 'Number of iterations during training',
                 default = None,
-                type = int,
+                type = 'int',
             ),
     ]
     outputs = [
@@ -51,7 +51,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output denoised image path.',
                 default = '{input_image.stem}_denoised{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     def processData(self, args):

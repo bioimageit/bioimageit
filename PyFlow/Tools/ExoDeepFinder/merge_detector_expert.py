@@ -12,7 +12,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'mf',
                 help = 'Movie folder.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
                 autoIncrement = False,
             ),
@@ -21,21 +21,21 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'ds',
                 help = 'Detector segmentation (in .h5 format).',
                 default = 'detector_segmentation.h5',
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'expert_segmentation',
                 shortname = 'es',
                 help = 'Expert segmentation (in .h5 format).',
                 default = 'expert_segmentation.h5',
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'expert_annotation',
                 shortname = 'ea',
                 help = 'Expert annotation (in .xml format).',
                 default = 'expert_annotation.xml',
-                type = Path,
+                type = 'Path',
             ),
     ]
     outputs = [
@@ -44,7 +44,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'ms',
                 help = 'Output merged segmentation (in .h5 format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/merged_segmentation.h5',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
             dict(
@@ -52,7 +52,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'ma',
                 help = 'Output merged annotation (in .xml format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/merged_annotation.xml',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
     ]

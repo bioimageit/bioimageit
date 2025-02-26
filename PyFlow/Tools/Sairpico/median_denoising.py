@@ -14,7 +14,7 @@ class Tool:
                 name = 'input_image',
                 help = 'Input Image',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -22,37 +22,37 @@ class Tool:
                 help = 'Perform 2D, 3D or 3D + time denoising.',
                 default = '2D',
                 choices = ['2D', '3D', '4D'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'radius_x',
                 help = 'Radius of the filter in the X direction',
                 default = 2,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'radius_y',
                 help = 'Radius of the filter in the Y direction',
                 default = 2,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'radius_z',
                 help = 'Radius of the filter in the Z direction (for 3D and 3D + time only)',
                 default = 1,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'radius_t',
                 help = 'Radius of the filter in the time direction (for 3D + time only)',
                 default = 1,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'padding',
                 help = 'Add padding to process border pixels',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -61,7 +61,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output path for the filtered image.',
                 default = '{input.name}_filtered{input.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

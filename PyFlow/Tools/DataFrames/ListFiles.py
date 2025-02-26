@@ -13,20 +13,20 @@ class Tool:
             dict(
             name = 'folderPath',
             help = 'Folder path',
-            type = Path,
+            type = 'Path',
             autoColumn = True,
             required = True,
         ),
         dict(
             name = 'filter',
             help = 'Filter',
-            type = str,
+            type = 'str',
             default = '*',
         ),
         dict(
             name = 'columnName',
             help = 'Column name',
-            type = str,
+            type = 'str',
             default = 'path',
             static = True,
         ),

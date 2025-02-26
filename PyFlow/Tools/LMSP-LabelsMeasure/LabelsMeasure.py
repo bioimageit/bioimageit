@@ -16,26 +16,26 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'label',
                 help = 'Label image path, from cellpose for instance.',
                 required = True,
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'pixel',
                 help = 'Size of the pixel erosion',
                 required = True,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'binary_map',
                 help = 'If false, labels in your black & white image',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -44,7 +44,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output csv path.',
                 default = '{input_image.stem}_measurements.csv',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

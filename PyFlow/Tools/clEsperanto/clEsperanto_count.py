@@ -13,20 +13,20 @@ class Tool(ClEsperantoTool):
                 name = 'input_image',
                 help = 'Input image path',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'sigma_x',
                 help = 'sigma_x',
                 default = 0,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'sigma_y',
                 help = 'sigma_y',
                 default = 0,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -34,7 +34,7 @@ class Tool(ClEsperantoTool):
                 name = 'out',
                 help = 'output file path',
                 default = '{input_image.stem}_count.csv',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

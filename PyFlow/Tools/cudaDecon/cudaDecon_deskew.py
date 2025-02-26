@@ -16,7 +16,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -24,42 +24,42 @@ class Tool:
                 shortname = 'dx',
                 help = 'XY Pixel size of image volume.',
                 default = 0.1,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'dzdata',
                 shortname = 'dz',
                 help = 'Z-step size in image volume. In a typical light sheet stage-scanning acquisition, this corresponds to the step size that the stage takes between planes, NOT the final Z-step size between planeds after deskewing along the optical axis of the detection objective.',
                 default = 0.5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'angle',
                 shortname = 'a',
                 help = 'Deskew angle (usually, angle between sheet and axis of stage motion).',
                 default = 31.5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'width',
                 shortname = 'w',
                 help = 'If not 0, crop output image to specified width',
                 default = 0,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'shift',
                 shortname = 's',
                 help = 'If not 0, shift image center by this value',
                 default = 0,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'pad_val',
                 shortname = 'pv',
                 help = 'Value to pad image with when deskewing. If None the median value of the last Z plane will be used.',
                 default = None,
-                type = int,
+                type = 'int',
             ),
     ]
     outputs = [
@@ -68,7 +68,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

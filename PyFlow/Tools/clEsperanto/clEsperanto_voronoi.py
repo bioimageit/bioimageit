@@ -13,20 +13,20 @@ class Tool(ClEsperantoTool):
                 name = 'input_image',
                 help = 'Input image path',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'sigma_spot_detection',
                 help = 'sigma_spot_detection',
                 default = 5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'sigma_outline',
                 help = 'sigma_outline',
                 default = 1,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -34,7 +34,7 @@ class Tool(ClEsperantoTool):
                 name = 'out',
                 help = 'output image path',
                 default = '{input_image.stem}_voronoi_otsu{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

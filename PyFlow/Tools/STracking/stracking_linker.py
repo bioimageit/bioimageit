@@ -13,20 +13,20 @@ class Tool:
                 name = 'input_csv',
                 help = 'Input csv from a stracking detector',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'max_connection_cost',
                 help = 'Maximum connection cost (squared maximum Euclidean distance that a particle can move between two consecutive frames)',
                 default = 3000,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'gap',
                 help = 'For example if gap=2, particles 2 frames apart can be connected',
                 default = 2,
-                type = int,
+                type = 'int',
             ),
     ]
     outputs = [
@@ -35,7 +35,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output path for the tracks (the extension can be .st.json or .csv and defines the output format).',
                 default = '{input_csv.stem}_tracks.st.json',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

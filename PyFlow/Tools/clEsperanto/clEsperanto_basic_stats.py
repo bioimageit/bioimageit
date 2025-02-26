@@ -13,14 +13,14 @@ class Tool(ClEsperantoTool):
                 name = 'input_image',
                 help = 'Input image path',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'spot_sigma',
                 help = 'spot_sigma',
                 default = 3.5,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -28,7 +28,7 @@ class Tool(ClEsperantoTool):
                 name = 'out',
                 help = 'output csv file path',
                 default = '{input_image.stem}_stats.csv',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

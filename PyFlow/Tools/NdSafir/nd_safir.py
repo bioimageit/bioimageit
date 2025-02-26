@@ -20,7 +20,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -29,7 +29,7 @@ class Tool:
                 help = 'Perform 2D, 3D or 3D + time denoising.',
                 default = '2D',
                 choices = ['2D', '3D', '4D'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'noise',
@@ -37,35 +37,35 @@ class Tool:
                 help = 'Model used to evaluate the noise variance.',
                 default = 'Gauss',
                 choices = ['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'patch',
                 shortname = 'p',
                 help = 'Patch radius. Must be of the form AxB (for 2D) or AxBxC (for 3D) where A, B and C are the patch radius in each dimension.',
                 default = '7x7x1',
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'noise_factor',
                 shortname = 'nf',
                 help = 'Noise factor.',
                 default = 1,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'n_iterations',
                 shortname = 'nit',
                 help = 'Number of iterations.',
                 default = 5,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'time_series',
                 shortname = 'ts',
                 help = 'Consider the image as a sequence (for 3D only).',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
             dict(
                 name = 'n_frames',
@@ -80,7 +80,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image.',
                 default = '{input_image.stem}_denoised{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

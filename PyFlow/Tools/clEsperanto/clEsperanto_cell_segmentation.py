@@ -13,26 +13,26 @@ class Tool(ClEsperantoTool):
                 name = 'input_image',
                 help = 'Input image path',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'corrected_binary',
                 help = 'if non corrected is not good',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
             dict(
                 name = 'radius_x',
                 help = 'radius_x',
                 default = 10,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'radius_y',
                 help = 'radius_y',
                 default = 10,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -40,7 +40,7 @@ class Tool(ClEsperantoTool):
                 name = 'out',
                 help = 'Output image path',
                 default = '{input_image.stem}_segmentation{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

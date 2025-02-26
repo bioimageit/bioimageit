@@ -12,7 +12,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'mf',
                 help = 'Input folder containing the movie files (a least a movie in h5 format, and an expert annotation file).',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -20,14 +20,14 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'm',
                 help = 'Input movie.',
                 default = 'movie.h5',
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'annotation',
                 shortname = 'a',
                 help = 'Corresponding annotation (.xml generated with napari-exodeepfinder or equivalent, can also be a .csv file).',
                 default = 'expert_annotation.xml',
-                type = Path,
+                type = 'Path',
             ),
     ]
     outputs = [
@@ -36,7 +36,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'oa',
                 help = 'Output annotation (a symlink to the annotation input).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/expert_annotation.xml',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
             dict(
@@ -44,7 +44,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'os',
                 help = 'Output segmentation (in .h5 format).',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/expert_segmentation.h5',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
     ]

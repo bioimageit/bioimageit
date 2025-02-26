@@ -91,6 +91,7 @@ class ThumbnailGenerator:
 		while True:
 			taskData = self.queue.get()
 			results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [taskData])
+			if results is None: continue
 			inmain(self._finishGenerateThumbnails, results)
 			self.queue.task_done()
 	

@@ -12,13 +12,13 @@ class Tool(OmeroBase):
             dict(
             name = 'dataset_id',
             help = 'Dataset ID (ignored if negative)',
-            type = int,
+            type = 'int',
             default = None,
         ),
         dict(
             name = 'dataset_name',
             help = 'Dataset name',
-            type = str,
+            type = 'str',
             default = None,
         ),
     ]
@@ -26,7 +26,7 @@ class Tool(OmeroBase):
         dict(
             name = 'out',
             help = 'Output data',
-            type = Path,
+            type = 'Path',
             default = '(path)',
             # editable = False,
         ),

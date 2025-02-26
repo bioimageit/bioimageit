@@ -10,63 +10,63 @@ class Tool:
             dict(
             name = 'how',
             help = 'How',
-            type = str,
+            type = 'str',
             default = None,
             static=True
         ),
         dict(
             name = 'on',
             help = 'On',
-            type = str,
+            type = 'str',
             default = None,
             static=True
         ),
         dict(
             name = 'left_on',
             help = 'Left on',
-            type = str,
+            type = 'str',
             default = None,
             static=True
         ),
         dict(
             name = 'right_on',
             help = 'Right on',
-            type = str,
+            type = 'str',
             default = None,
             static=True
         ),
         dict(
             name = 'left_index',
             help = 'Left index',
-            type = bool,
+            type = 'bool',
             default = None,
             static=True
         ),
         dict(
             name = 'right_index',
             help = 'Right index',
-            type = bool,
+            type = 'bool',
             default = None,
             static=True
         ),
         dict(
             name = 'sort',
             help = 'Sort',
-            type = bool,
+            type = 'bool',
             default = None,
             static=True
         ),
         dict(
             name = 'left_suffix',
             help = 'Left suffix',
-            type = str,
+            type = 'str',
             default = '_x',
             static=True
         ),
         dict(
             name = 'right_suffix',
             help = 'Right suffix',
-            type = str,
+            type = 'str',
             default = '_y',
             static=True
         ),

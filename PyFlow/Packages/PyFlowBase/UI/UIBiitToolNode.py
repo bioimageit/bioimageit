@@ -30,7 +30,10 @@ class ColumnValueWidget(QWidget):
         float='FloatPin',
         integer='IntPin',
         boolean='BoolPin',
-        select='StringPin'
+        select='StringPin',
+        str='StringPin',
+        int='IntPin',
+        bool='BoolPin',
     )
 
     def __init__(self, input, node, parent=None):
@@ -118,7 +121,7 @@ class ColumnValueWidget(QWidget):
     
     def updateNodeParameterValue(self, value):
         parameter = self.node.parameters['inputs'][self.name]
-        parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'integer' else value
+        parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'int' else value
         # self.node.inArray.setData(None)
         self.node.setNodeDirty()
         EditorHistory().saveState("Update parameter", modify=True)

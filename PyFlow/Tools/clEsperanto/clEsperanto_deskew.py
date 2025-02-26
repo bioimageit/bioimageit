@@ -13,32 +13,32 @@ class Tool(ClEsperantoTool):
                 name = 'input_image',
                 help = 'Input image path',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'angle',
                 help = 'Deskewing angle in degrees',
                 default = 30,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'voxel_size_x',
                 help = 'voxel_size_x_in_microns',
                 default = 0.202,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'voxel_size_y',
                 help = 'voxel_size_y_in_microns',
                 default = 0.202,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'voxel_size_z',
                 help = 'voxel_size_z_in_microns',
                 default = 1,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -46,7 +46,7 @@ class Tool(ClEsperantoTool):
                 name = 'out',
                 help = 'output image path',
                 default = '{input_image.stem}_deskewed{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

@@ -10,38 +10,38 @@ class Tool:
             dict(
             name = 'image',
             help = 'Input image path',
-            type = Path,
+            type = 'Path',
             required = True,
             autoColumn = True,
         ),
         dict(
             name = 'channel',
             help = 'Channel to threshold',
-            type = int,
+            type = 'int',
             default = 0,
         ),
         dict(
             name = 'lowerThreshold',
             help = 'Lower threshold',
-            type = float,
+            type = 'float',
             default = 0,
         ),
         dict(
             name = 'upperThreshold',
             help = 'Upper threshold',
-            type = float,
+            type = 'float',
             default = 255,
         ),
         dict(
             name = 'insideValue',
             help = 'Inside value',
-            type = int,
+            type = 'int',
             default = 1,
         ),
         dict(
             name = 'outsideValue',
             help = 'Outside value',
-            type = int,
+            type = 'int',
             default = 0,
         ),
     ]
@@ -50,7 +50,7 @@ class Tool:
             name = 'thresholded_image',
             help = 'Output image path',
             default = '{image.stem}_thresholded{image.exts}',
-            type = Path,
+            type = 'Path',
         ),
     ]
 
@@ -61,5 +61,5 @@ class Tool:
         if 'vector' in inputImage.GetPixelIDTypeAsString():
             inputImage = inputImage.ToScalarImage()[args.channel, :, :]
         thresholdedImage = sitk.BinaryThreshold(inputImage, args.lowerThreshold, args.upperThreshold, args.insideValue, args.outsideValue)
-        sitk.WriteImage(thresholdedImage, args.threshold_image)
+        sitk.WriteImage(thresholdedImage, args.thresholded_image)
         return

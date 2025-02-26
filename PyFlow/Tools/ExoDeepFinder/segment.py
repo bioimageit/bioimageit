@@ -12,7 +12,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'm',
                 help = 'Exocytosis movie (in .h5 format).',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -20,21 +20,21 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'mw',
                 help = 'Model weigths (in .h5 format).',
                 default = None,
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'patch_size',
                 shortname = 'ps',
                 help = 'Patch size (the movie is split in cubes of --patch_size before being processed). Must be a multiple of 4.',
                 default = 160,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'visualization',
                 shortname = 'v',
                 help = 'Generate visualization images.',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -43,7 +43,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 's',
                 help = 'Output segmentation (in .h5 format).',
                 default = '[workflow_folder]/dataset/{movie.parent.name}/segmentation.h5',
-                type = Path,
+                type = 'Path',
             ),
     ]
     def processData(self, args):

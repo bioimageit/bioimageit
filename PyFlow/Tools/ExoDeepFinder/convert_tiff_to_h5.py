@@ -12,7 +12,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 't',
                 help = 'Path to the input movie folder. It must contain one tiff file per frame, their names must end with the frame number.',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
     ]
@@ -22,7 +22,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'o',
                 help = 'Output path to the h5 file.',
                 default = '[workflow_folder]/dataset/{tiff.name}/movie.h5',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
     ]

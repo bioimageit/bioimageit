@@ -12,7 +12,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 's',
                 help = 'Input segmentation (in .h5 format).',
                 default = None,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -20,14 +20,14 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'cr',
                 help = 'Approximate size in voxel of the objects to cluster. 5 is a good value for events of 400nm on films with a pixel size of 160nm.',
                 default = 5,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'keep_labels_unchanged',
                 shortname = 'klu',
                 help = 'By default, bright spots are removed (labels 1 are set to 0) and exocytose events (labels 2) are set to 1. This option skip this step, so labels are kept unchanged.',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -36,7 +36,7 @@ class Tool(ExoDeepFinderTool):
                 shortname = 'a',
                 help = 'Output annotation file (in .xml format).',
                 default = '[workflow_folder]/dataset/{segmentation.parent.name}/annotation.xml',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

@@ -14,26 +14,26 @@ class Tool:
                 name = 'input_image',
                 help = 'Input Image',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
                 name = 'patch_size',
                 help = 'Patch size (radius)',
                 default = 3,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'neighborhood_size',
                 help = 'Neighborhood size (radius)',
                 default = 5,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'p_value',
                 help = 'p-value for false alarm',
                 default = 0.2,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -42,7 +42,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output path for the detected hotspots image.',
                 default = '{input_image.stem}_hotspot{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

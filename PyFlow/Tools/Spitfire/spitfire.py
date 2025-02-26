@@ -17,7 +17,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path. The dimensions (width, height, depth) of the image should be even for best results.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -25,21 +25,21 @@ class Tool:
                 help = 'Perform 2D, 3D or 4D deconvolution.',
                 default = '2D',
                 choices = ['2D', '3D', '4D'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'regularization',
                 shortname = 'r',
                 help = 'Regularization parameter pow(2,-x).',
                 default = 2,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'weighting',
                 shortname = 'w',
                 help = 'Weighting. Regularization parameter pow(2,-x). Must be in range [0.0, 1.0].',
                 default = 0.6,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'method',
@@ -47,14 +47,14 @@ class Tool:
                 help = 'Method.',
                 default = 'Hessian variation',
                 choices = ['Sparse variation', 'Hessian variation'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'padding',
                 shortname = 'p',
                 help = 'Add a padding to process pixels in borders.',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -63,7 +63,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image.',
                 default = '{input_image.stem}_denoised{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

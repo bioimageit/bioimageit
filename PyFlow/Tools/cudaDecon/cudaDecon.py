@@ -16,7 +16,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -24,14 +24,14 @@ class Tool:
                 shortname = 'p',
                 help = 'Path to the PSF or OTF file.',
                 required = True,
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'background',
                 shortname = 'b',
                 help = 'User-supplied background to subtract. If "auto", the median value of the last Z plane will be used as background.',
                 default = '80',
-                type = str,
+                type = 'str',
             ),
     ]
     outputs = [
@@ -40,7 +40,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output image path.',
                 default = '{input_image.stem}_stackreg{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 

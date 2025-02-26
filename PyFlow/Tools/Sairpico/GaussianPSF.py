@@ -13,31 +13,31 @@ class Tool:
                 name = 'width',
                 help = 'Image width',
                 default = 256,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'height',
                 help = 'Image height',
                 default = 256,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'depth',
                 help = 'Image depth',
                 default = 20,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'sigmaxy',
                 help = 'PSF width and height',
                 default = 1.0,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'sigmaz',
                 help = 'PSF depth',
                 default = 1.0,
-                type = float,
+                type = 'float',
             ),
     ]
     outputs = [
@@ -46,7 +46,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output 3D Gaussian PSF path.',
                 default = 'psf.tiff',
-                type = Path,
+                type = 'Path',
             ),
     ]
     

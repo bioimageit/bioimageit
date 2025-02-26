@@ -10,14 +10,14 @@ class Tool:
             dict(
             name = 'image1',
             help = 'Input image 1',
-            type = Path,
+            type = 'Path',
             required = True,
             autoColumn = True,
         ),
         dict(
             name = 'image2',
             help = 'Input image 2',
-            type = Path,
+            type = 'Path',
             required = True,
             autoColumn = True,
         ),
@@ -27,7 +27,7 @@ class Tool:
             name = 'out',
             help = 'Output image',
             default = '{image1.stem}-{image2.stem}{image1.exts}',
-            type = Path,
+            type = 'Path',
         ),
     ]
 

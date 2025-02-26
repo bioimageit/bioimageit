@@ -15,7 +15,7 @@ class Tool:
                 name = 'input_image',
                 help = 'Input Image',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -23,49 +23,49 @@ class Tool:
                 help = 'Type of Stracking detection, using DoH (Difference of Hessians), LoG (Laplacian of Gaussian) or DoG (Difference of Gaussians)',
                 default = 'DoH',
                 choices = ['DoH', 'LoG', 'DoG'],
-                type = str,
+                type = 'str',
             ),
             dict(
                 name = 'min_sigma',
                 help = 'Minimal sigma value',
                 default = 1,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'max_sigma',
                 help = 'Maximal sigma value',
                 default = 5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'n_sigmas',
                 help = 'Number of sigmas (for DoH and LoG)',
                 default = 10,
-                type = int,
+                type = 'int',
             ),
             dict(
                 name = 'threshold',
                 help = 'Threshold',
                 default = 0.2,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'ratio',
                 help = 'Sigma ratio (for DoG)',
                 default = 1.6,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'overlap',
                 help = 'Overlap',
                 default = 0.5,
-                type = float,
+                type = 'float',
             ),
             dict(
                 name = 'log_scale',
                 help = 'Log scale (for DoH and LoG)',
                 default = False,
-                type = bool,
+                type = 'bool',
             ),
     ]
     outputs = [
@@ -74,7 +74,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output path for the result table.',
                 required = True,
-                type = Path,
+                type = 'Path',
             ),
     ]
 

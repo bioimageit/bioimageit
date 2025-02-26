@@ -15,7 +15,7 @@ class Tool:
                 shortname = 'mf',
                 help = 'Input folder containing the movie files (a least a tiff folder containing the movie frames).',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -23,14 +23,14 @@ class Tool:
                 shortname = 't',
                 help = 'Path to the folder containing the tiff frames, relative to --movie_folder.',
                 default = 'tiff/',
-                type = Path,
+                type = 'Path',
             ),
             dict(
                 name = 'atlas_args',
                 shortname = 'aa',
                 help = 'Additional atlas arguments.',
                 default = '-rad 21 -pval 0.001 -arealim 3',
-                type = str,
+                type = 'str',
             ),
     ]
     outputs = [
@@ -39,7 +39,7 @@ class Tool:
                 shortname = 'o',
                 help = 'Output segmentation.',
                 default = '[workflow_folder]/dataset/{movie_folder.name}/detector_segmentation.h5',
-                type = Path,
+                type = 'Path',
                 autoIncrement = False,
             ),
     ]

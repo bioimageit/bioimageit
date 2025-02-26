@@ -22,7 +22,7 @@ class Tool:
                 shortname = 'i',
                 help = 'The input image path.',
                 required = True,
-                type = Path,
+                type = 'Path',
                 autoColumn = True,
             ),
             dict(
@@ -31,7 +31,7 @@ class Tool:
                 help = 'The model to use.',
                 required = True,
                 choices = ['2D_versatile_fluo', '2D_versatile_he', '2D_paper_dsb2018', '2D_demo', '3D_demo'],
-                type = str,
+                type = 'str',
             ),
     ]
     outputs = [
@@ -40,7 +40,7 @@ class Tool:
                 shortname = 'o',
                 help = 'The output mask path.',
                 default = '{input_image.stem}_segmentation{input_image.exts}',
-                type = Path,
+                type = 'Path',
             ),
     ]
 
