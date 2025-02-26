@@ -19,11 +19,13 @@ class Tool:
         dict(
             name = 'labeled_image',
             help = 'Output image',
+            default = '{image.stem}_labeled{image.exts}',
             type = Path,
         ),
         dict(
             name = 'labeled_image_rgb',
             help = 'Output rgb image',
+            default = '{image.stem}_labeled_rgb{image.exts}',
             type = Path,
         ),
     ]

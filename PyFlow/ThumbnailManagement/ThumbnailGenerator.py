@@ -3,6 +3,7 @@ from pathlib import Path
 import queue
 import pandas
 import shutil
+import threading
 from PyFlow.invoke_in_main import inmain, inthread
 from blinker import Signal
 # import threading
@@ -10,6 +11,7 @@ from PyFlow.ToolManagement.EnvironmentManager import environmentManager
 # Warning: we cannot import generate_thumbnails.generateThumbnails directly here, otherwise the multiprocessing will initialize the entire BioImageIT app for each parallel process!
 # from PyFlow.ThumbnailManagement.generate_thumbnails import generateThumbnails
 import sys
+
 if sys.version_info < (3, 11):
 	from typing_extensions import TypedDict
 else:
@@ -18,6 +20,10 @@ else:
 class PathInfo(TypedDict):
 	nodes: list[str]
 	path: str
+
+# Lock is not mandatory since all is in main thread. 
+# Keep in case API changes, to show that ThumbnailGenerator.lowPath and ThumbnailGenerator.imageToThumbnail must be "thread safe".
+lock = threading.Lock()
 
 class ThumbnailGenerator:
 	
@@ -39,85 +45,69 @@ class ThumbnailGenerator:
 				print(line)
 		return
 	
-	# @staticmethod
-	# def thumbnail(inputPath, outputPath, size=(128,128)): 
-	# 	try:
-	# 		# Load just once, then successively scale down
-	# 		im = Image.open(inputPath)
-	# 		if im.mode[0] in ['I', 'F']:
-	# 			data = np.asarray(im)
-	# 			dmax, dmin = data.max(), data.min()
-	# 			data = 255.0 * ( data - dmin ) / (dmax - dmin) if abs(dmax - dmin) > 0 else data
-	# 			im = Image.fromarray(data.astype(np.uint8))
-	# 		im.thumbnail(size)
-	# 		im.save(outputPath)
-	# 		return (inputPath, outputPath)
-	# 	except Exception as e:
-	# 		return e 
-
-	def setWorkflowPathAndLoadImageToThumbnail(self, workflowPath):
-		self.workflowPath = workflowPath
-		imageToThumbnailPath = self.getThumbnailsPath() / 'imageToThumbnail.json'
+	# Main thread
+	def loadImageToThumbnail(self, workflowPath=None):
+		imageToThumbnailPath = self.getThumbnailsPath(workflowPath or self.workflowPath) / 'imageToThumbnail.json'
+		imageToThumbnail = {}
 		if imageToThumbnailPath.exists():
 			with open(imageToThumbnailPath, 'r') as f:
 				try:
-					self.imageToThumbnail = json.load(f)
+					imageToThumbnail = json.load(f)
 				except json.JSONDecodeError:
-					self.imageToThumbnail = {}
-		else:
-			self.imageToThumbnail = {}
+					pass
+		return imageToThumbnail
+	
+	# Main thread
+	def setWorkflowPathAndLoadImageToThumbnail(self, workflowPath):
+		with lock:
+			self.workflowPath = workflowPath
+			self.imageToThumbnail = self.loadImageToThumbnail()
 		
-	def getThumbnailsPath(self):
-		thumbnailsPath = Path(self.workflowPath) / 'Thumbnails'
+	# Main thread
+	def getThumbnailsPath(self, workflowPath=None):
+		thumbnailsPath = Path(workflowPath or self.workflowPath) / 'Thumbnails'
 		thumbnailsPath.mkdir(exist_ok=True, parents=True)
 		return thumbnailsPath
 
+	# Main thread
 	def getNodeThumbnailsPath(self, nodeName):
 		return self.getThumbnailsPath() / nodeName
 	
+	# Main thread
 	def getThumbnailPath(self, imagePath):
 		imagePath = str(imagePath) if isinstance(imagePath, Path) else imagePath
 		if imagePath is None or not isinstance(imagePath, str): return None
 		return Path(self.imageToThumbnail[imagePath]['path']) if imagePath in self.imageToThumbnail and self.imageToThumbnail[imagePath]['path'] is not None else None
 
+	# Main thread
 	# Generate a unique name for each item from the row and col indices ; since 2 images in 2 different folders could have the same stem.
 	# The same image (full path) gets a unique thumbnail stored in self.imageToThumbnail
 	def generateThumbnailPath(self, nodeName, path, rowIndex, colIndex, thumbnailsPath=None):
 		thumbnailsPath = self.getNodeThumbnailsPath(nodeName) if thumbnailsPath is None else thumbnailsPath
 		return thumbnailsPath / f'{Path(path).stem}_{rowIndex}-{colIndex}.png'
 
+	# ThumbnailGenerator thread
 	def _generateThumbnailsThread(self):
 		while True:
-			images = self.queue.get()
-			results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [images])
+			taskData = self.queue.get()
+			results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [taskData])
 			inmain(self._finishGenerateThumbnails, results)
 			self.queue.task_done()
-
-	def _generateThumbnails(self, images):
-		# multiprocessing.set_start_method('spawn')
-		# pool = multiprocessing.Pool(8)
-		# print(f'generate {len(images)} thumbnails')
-		# results = pool.starmap(self.thumbnail, images)
-
-		# results = [self.thumbnail(inputPath, outputPath) for inputPath, outputPath in images]
-		# # self._finishGenerateThumbnails(results)
-
-		# results = generateThumbnails(images)
-		# inmain(self._finishGenerateThumbnails, results)
-		results = self.environment.execute('PyFlow.ThumbnailManagement.generate_thumbnails', 'generateThumbnails', [images])
-		inmain(self._finishGenerateThumbnails, results)
-		return
 	
+	# Main thread
 	def _finishGenerateThumbnails(self, results):
-		for result in results:
-			if not isinstance(result, Exception):
-				self.imageToThumbnail[result[0]]['path'] = result[1]
-		with open(self.getThumbnailsPath() / 'imageToThumbnail.json', 'w') as f:
-			json.dump(self.imageToThumbnail, f)
-		print(f'generated {len(results)} thumbnails')
-		self.finished.send(results)
+		with lock:
+			imageToThumbnail = self.imageToThumbnail if self.workflowPath == results['workflowPath'] else self.loadImageToThumbnail(results['workflowPath'])
+			for path in results['paths']:
+				if not isinstance(path, Exception):
+					imageToThumbnail[path[0]]['path'] = path[1]
+			with open(self.getThumbnailsPath(results['workflowPath']) / 'imageToThumbnail.json', 'w') as f:
+				json.dump(imageToThumbnail, f)
+			print(f'generated {len(results)} thumbnails')
+			self.finished.send(results)
 		return
 	
+	# Main thread
 	def generateThumbnails(self, nodeName, dataFrame: pandas.DataFrame):
 		if dataFrame is None: return
 		thumbnailsPath = self.getNodeThumbnailsPath(nodeName)
@@ -139,17 +129,10 @@ class ThumbnailGenerator:
 				images.append((item, str(thumbnailPath)))
 
 		if len(images)>0:
-
-			# thread = threading.Thread(target=self._generateThumbnails, args=images)
-			# thread.daemon = True
-			# thread.start()
-			
-			# inthread(self._generateThumbnails, images)
-			self.queue.put(images)
-
-			# self._generateThumbnails(images)
+			self.queue.put(dict(images=images, workflowPath=self.workflowPath))
 		return 
 
+	# Main thread
 	def deleteThumbnails(self, nodeName):
 		for path, pathInfo in list(self.imageToThumbnail.items()):
 			if nodeName in pathInfo['nodes']:
@@ -162,6 +145,7 @@ class ThumbnailGenerator:
 		if folder.exists() and len(list(folder.iterdir()))==0:
 			folder.rmdir()
 	
+	# Main thread
 	@classmethod
 	def get(cls):
 		if cls.instance is None:

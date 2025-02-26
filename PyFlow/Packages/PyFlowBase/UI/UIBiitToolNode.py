@@ -100,7 +100,7 @@ class ColumnValueWidget(QWidget):
             w.setToolTip(description)
             w.setObjectName(name)
             return w
-        inputWidgetVariant = 'PathWidget' if type == Path else DEFAULT_WIDGET_VARIANT
+        inputWidgetVariant = 'PathWidget' if type == 'Path' else DEFAULT_WIDGET_VARIANT
         w = createInputWidget(
             self.getPinTypeFromIoType(type),
             lambda value: self.updateNodeParameterValue(value),
@@ -242,6 +242,10 @@ class UIBiitToolNode(UINodeBase):
                 w.blockWidgetSignals(False)
                 w.setObjectName(outputName)
                 
+                # if output is not editable: disable widget
+                if not output.get('editable', True):
+                    w.setDisabled(True)
+
                 outputsCategory.addWidget(outputName, w)
 
         if outputsCategory.Layout.count() > 0:

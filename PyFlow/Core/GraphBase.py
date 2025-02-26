@@ -250,20 +250,22 @@ class GraphBase(ISerializable):
                         if not connected:
                             print("Failed to restore connection", lhsPin, rhsPin)
                             connectPins(lhsPin, rhsPin)
-        
-        # Now that the graph is built, the nodes can be computed and reset to executed
-        nodes = list(self._nodes.values())
-        for node in nodes:
-            node.processNode()
-        # executedNodes = [n for n in nodes if hasattr(n, 'executed') and n.executed]
-        # for node in executedNodes:
-        #     node.executed = True
 
+        nodes = list(self._nodes.values())
+        
         # Now that the graph is built, the nodes can listen to dataBeenSet
         # This could be moved to UIBiitToolNode? (since the UI is built after the graph)
         self.populating = False
         for node in nodes:
             node.setupConnections()
+
+        # Now that the graph is built, the nodes can be computed
+        for node in nodes:
+            node.processNode()
+        
+        # executedNodes = [n for n in nodes if hasattr(n, 'executed') and n.executed]
+        # for node in executedNodes:
+        #     node.executed = True
 
     def remove(self):
         """Removes this graph as well as child graphs. Deepest graphs will be removed first

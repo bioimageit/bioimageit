@@ -502,8 +502,7 @@ class PinBase(IPin):
         return EvaluationEngine().getPinData(self)
 
     def getCachedDataOrEvaluatdData(self):
-        data = self.currentData()
-        return data if data is not None else self.getData()
+        return self._data if not self.dirty else self.getData()
     
     def clearError(self):
         """Clears any last error on this pin and fires event

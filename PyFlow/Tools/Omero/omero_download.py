@@ -27,6 +27,8 @@ class Tool(OmeroBase):
             name = 'out',
             help = 'Output data',
             type = Path,
+            default = '(path)',
+            # editable = False,
         ),
     ]
     
@@ -42,8 +44,7 @@ class Tool(OmeroBase):
         for dataset in datasets:
             for image in dataset.listChildren():
                 image = self.omero.getImage(uid=image.id)
-                path = self.getOutputDataFolderPath()(self.name) / image.getName()
-                records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=path))
+                records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=image.getName()))
         self.outputMessage = ''
         return pandas.DataFrame.from_records(records)
 

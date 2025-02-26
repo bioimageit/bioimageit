@@ -24,6 +24,7 @@ import pkgutil
 import collections.abc
 from copy import copy
 import os
+import logging
 import json
 from pathlib import Path
 
@@ -150,6 +151,8 @@ def getRawNodeInstance(nodeClassName, packageName=None, libName=None, **kwargs):
     nodes = package.GetNodeClasses()
     if nodeClassName in nodes:
         return nodes[nodeClassName](nodeClassName, **kwargs)
+
+    logging.error(f'Node {nodeClassName} was not found in the installed nodes: {nodes}.')
 
     # try find exported py nodes
     packagePath = GET_PACKAGE_PATH(packageName)

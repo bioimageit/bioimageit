@@ -3,6 +3,8 @@ import argparse
 
 class Tool():
 
+    name = "Tool name"
+    description = "Tool description."
     categories = ['Workflow']
     environment = 'environmentName'
     # List your tool dependencies:
@@ -10,9 +12,6 @@ class Tool():
     # - the conda packages which will be installed with 'conda install packageName'
     # - the pip packages which will be installed with 'pip install packageName'
     dependencies = dict(python='==3.10', conda=[], pip=[])
-
-    name = "Tool name"
-    description = "Tool description."
     inputs = [
             dict(
                 names = ['-i', '--input_image'],

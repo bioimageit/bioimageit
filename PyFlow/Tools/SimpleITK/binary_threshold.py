@@ -49,6 +49,7 @@ class Tool:
         dict(
             name = 'thresholded_image',
             help = 'Output image path',
+            default = '{image.stem}_thresholded{image.exts}',
             type = Path,
         ),
     ]

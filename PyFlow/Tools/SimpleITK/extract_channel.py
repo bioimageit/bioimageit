@@ -25,6 +25,7 @@ class Tool:
         dict(
             name = 'out',
             help = 'Output image',
+            default = '{image.stem}_channel{channel}{image.exts}',
             type = Path,
         ),
     ]

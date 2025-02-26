@@ -39,6 +39,7 @@ class Tool:
         dict(
             name = 'connected_component',
             help = 'Output connected component',
+            default = '{image.stem}_connected_component_<i>{image.exts}',
             type = Path,
         ),
     ]
@@ -70,12 +71,7 @@ class Tool:
             if bb[0] == bb[1] or bb[2] == bb[3]: continue
             if numPixels < args.minSize or numPixels > args.maxSize: continue
             cc = image[bb[0]:bb[1], bb[2]:bb[3]]
-            # dataImage = sitk.GetArrayFromImage(label)
-            # cc = dataImage[bb[2]:bb[3], bb[0]:bb[1]]
-            # cc = sitk.GetImageFromArray(cc)
-            # cc = image[bb[0]:bb[1], bb[2]:bb[3]]
-            # cc = image[bb[0]:bb[0]+bb[2]+1, bb[1]:bb[1]+bb[3]+1]
-            # cc = image[bb[1]:bb[1]+bb[3], bb[0]:bb[0]+bb[2]]
-            sitk.WriteImage(cc, args.connected_component)
-            records.append(dict(image=args.image, label=args.label, connected_component=args.connected_component, label_index=i, minimum=minimum, maximum=maximum, median=median, mean=mean, numPixels=numPixels, bb=str(bb)))
+            ccName = str(args.connected_component).replace('<i>', i)
+            sitk.WriteImage(cc, ccName)
+            records.append(dict(image=args.image, label=args.label, connected_component=ccName, label_index=i, minimum=minimum, maximum=maximum, median=median, mean=mean, numPixels=numPixels, bb=str(bb)))
         return pandas.DataFrame.from_records(records)

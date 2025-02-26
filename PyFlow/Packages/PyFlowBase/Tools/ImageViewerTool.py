@@ -12,50 +12,50 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
-from pathlib import Path
-import sys
-sys.path.append('napari_main')
-import napari
+# from pathlib import Path
+# import sys
+# sys.path.append('napari_main')
+# import napari
 
-from qtpy import QtCore
+# from qtpy import QtCore
 
-from PyFlow.UI.Tool.Tool import DockTool
+# from PyFlow.UI.Tool.Tool import DockTool
 
-class ImageViewerTool(DockTool):
-    """docstring for ImageViewer tool."""
+# class ImageViewerTool(DockTool):
+#     """docstring for ImageViewer tool."""
 
-    def __init__(self):
-        super(ImageViewerTool, self).__init__()
-        self.content = None
+#     def __init__(self):
+#         super(ImageViewerTool, self).__init__()
+#         self.content = None
 
-    def onShow(self):
-        super(ImageViewerTool, self).onShow()
-        self.setMinimumSize(QtCore.QSize(200, 50))
-        self.viewer = napari.Viewer(show=False)
-        self.content = self.viewer.window._qt_window
-        self.content.menuBar().deleteLater()
-        self.content.setObjectName("ImageViewerToolContent")
-        self.setWidget(self.content)
+#     def onShow(self):
+#         super(ImageViewerTool, self).onShow()
+#         self.setMinimumSize(QtCore.QSize(200, 50))
+#         self.viewer = napari.Viewer(show=False)
+#         self.content = self.viewer.window._qt_window
+#         self.content.menuBar().deleteLater()
+#         self.content.setObjectName("ImageViewerToolContent")
+#         self.setWidget(self.content)
 
-    def open(self, path):
-        if isinstance(path, Path):
-            self.viewer.open(path)
+#     def open(self, path):
+#         if isinstance(path, Path):
+#             self.viewer.open(path)
 
-    def clear(self):
-        self.viewer.layers.clear()
+#     def clear(self):
+#         self.viewer.layers.clear()
     
-    @staticmethod
-    def isSingleton():
-        return True
+#     @staticmethod
+#     def isSingleton():
+#         return True
 
-    @staticmethod
-    def defaultDockArea():
-        return QtCore.Qt.RightDockWidgetArea
+#     @staticmethod
+#     def defaultDockArea():
+#         return QtCore.Qt.RightDockWidgetArea
 
-    @staticmethod
-    def toolTip():
-        return "Image viewer"
+#     @staticmethod
+#     def toolTip():
+#         return "Image viewer"
 
-    @staticmethod
-    def name():
-        return "Image viewer"
+#     @staticmethod
+#     def name():
+#         return "Image viewer"

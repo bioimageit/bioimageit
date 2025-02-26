@@ -76,6 +76,7 @@ class Environment():
 	def __init__(self, name) -> None:
 		self.name = name
 		self.process = None
+		self.stopEvent = threading.Event()
 		self.installedDependencies = {}
 
 	@abstractmethod
@@ -94,7 +95,6 @@ class ClientEnvironment(Environment):
 		super().__init__(name)
 		self.port = port
 		self.process = process
-		self.stopEvent = threading.Event()
 		self.connection = None
 		# self.nTries = 0
 	

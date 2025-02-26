@@ -51,7 +51,7 @@ class DefaultEvaluationEngine_Impl(IEvaluationEngine):
         if not pin.dirty:
             return pin.currentData()
         
-        order = DefaultEvaluationEngine_Impl.getEvaluationOrderIterative(pin.owningNode())
+        order = DefaultEvaluationEngine_Impl.getEvaluationOrderIterative(pin.owningNode()) + [pin.owningNode()]
         [node.processNode() for node in order]
 
         #if pin.dirty:

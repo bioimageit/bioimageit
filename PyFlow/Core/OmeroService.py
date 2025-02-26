@@ -1,5 +1,6 @@
 from pathlib import Path
 import locale
+from sys import version
 import keyring
 import numpy as np
 import platform
@@ -50,24 +51,46 @@ class OmeroService(object):
         # self.connection = BlitzGateway(username, password, host=host, port=port, secure=True)
         
         proxies = []
+        proxyHost, proxyPort = None, None
         versionPath = getRootPath() / 'version.json'
         if versionPath.exists():
             with open(versionPath, 'r') as f:
                 versionInfo = json.load(f)
                 for protocol in ['https', 'http']:
-                    if versionInfo is not None and 'proxies' in versionInfo and protocol in versionInfo['proxies']:
-                        # http://1:1@127.0.0.1:8888
-                        hostPort = versionInfo['proxies'][protocol].split('@')[1] if '@' in versionInfo['proxies'][protocol] else versionInfo['proxies'][protocol]
-                        proxyHost, proxyPort = hostPort.split(':')
-                        proxies = [f'--Ice.HTTPProxyHost={proxyHost}', f'--Ice.HTTPProxyPort={proxyPort}']
-                        break
+                    if versionInfo is None or 'proxies' not in versionInfo: continue
+                    if versionInfo['proxies'] is None or protocol not in versionInfo['proxies']: continue
+                    # http://1:1@127.0.0.1:8888
+                    hostPort = versionInfo['proxies'][protocol].split('@')[1] if '@' in versionInfo['proxies'][protocol] else versionInfo['proxies'][protocol]
+                    proxyHost, proxyPort = hostPort.split(':')
+                    proxies = [f'--Ice.HTTPProxyHost={proxyHost}', f'--Ice.HTTPProxyPort={proxyPort}']
+                    break
 
-        client = client([f'--omero.host={host}', f'--omero.port={port}', f'--omero.user={username}', f'--omero.pass={password}'] + proxies)
+        # c = omero.client([f'--omero.host={host}', f'--omero.port={port}', f'--omero.user={username}', f'--omero.pass={password}'] + proxies)
 
-        client.createSession()
-        self.connection = BlitzGateway(client_obj=client, secure=True)
+        # c.createSession()
+        # self.connection = BlitzGateway(client_obj=c, secure=True)
+
+        # Path to the config file
+        config_path = getRootPath() / "Configs" / "omero_proxy.config"
+
+        # Create the Ice config file with the proxy settings
+        with open(config_path, "w") as config_file:
+            config_file.write(f"Ice.Default.Router=IceGrid/Locator:ssl -h {proxyHost} -p {proxyPort}\n")
+            config_file.write(f"Ice.Default.Locator=IceGrid/Locator:ssl -h {proxyHost} -p {proxyPort}\n")
+
+        self.client = omero.client(host, port)
+
+        # self.omeroService = OmeroMetadataService(host, port, username, password)
+
+        self.client.createSession(username, password)
+        self.connection = BlitzGateway(username, password, host=host, port=port, client_obj=self.client, secure=True)
+
+        # self.connection = BlitzGateway(username, password, host=host, port=port, secure=True)#, extra_config=config_path)
         self.client = self.connection.c
-        self.connection.connect()
+        if self.connection.connect():
+            print('Connected successfully!')
+        else:
+            raise Exception('Connection failed')
     
     def getConnection(self):
         if self.connection is None or not self.connection.isConnected():

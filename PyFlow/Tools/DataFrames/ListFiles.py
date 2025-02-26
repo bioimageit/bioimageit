@@ -8,7 +8,6 @@ class Tool:
     description = "Reads a folder and create a pandas DataFrame from the file list."
     environment = 'bioimageit'
     categories = ['Data']
-    generateThumbnails = True
 
     inputs = [
             dict(

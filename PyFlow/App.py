@@ -490,10 +490,10 @@ class PyFlow(QMainWindow):
 			self.currentFileName += ".pygraph"
 
 		if not self.currentFileName == "":
-			# Compute nodes to make sure dataFrames are up to dates, and thus parameters (especially because dataFrames will be exported)
-			nodes = [node for node in self.graphManager.get().getAllNodes()]
-			for node in nodes:
-				node.compute()
+			# # Compute nodes to make sure dataFrames are up to dates, and thus parameters (especially because dataFrames will be exported)
+			# nodes = [node for node in self.graphManager.get().getAllNodes()]
+			# for node in nodes:
+			# 	node.compute()
 
 			if deleteData and not self.manageUnexecutedNodesData(): return False
 				

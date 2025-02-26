@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import re
+from sqlite3 import paramstyle
 import pandas
 from munch import Munch
 import logging
@@ -103,6 +104,7 @@ class BiitToolNode(NodeBase):
 					defaultValue=output.get('default'), 
 					dataType=output['type'].__name__, 
 					extension=output.get('extension'),
+					editable=output.get('editable'),
 					help=output.get('help'))
 
 	def initializeParameters(self):
@@ -125,15 +127,22 @@ class BiitToolNode(NodeBase):
 				
 				# Instead of overwriting parameters by doing self.parameters = jsonTemplate['parameters']
 				# set the values one by one to avoid troubles with the out-of-date workflows which do not have all the parameters for the node
-				for parameterName, parameter in jsonTemplate['parameters'][io].items():
-					if parameterName not in self.parameters[io]:
+				for parameterName, serializedParameter in jsonTemplate['parameters'][io].items():
+					parameters = self.parameters[io]
+					if parameterName not in parameters:
 						print(f'Warning: parameter "{parameterName}" does not exist in node "{self.name}". This means the saved file is out of date and does not correspond to the new inputs outputs definition.')
 						continue
-					for key, value in parameter.items():
-						if parameter['dataType'] == 'Path' and key == 'value':
-							self.parameters[io][parameterName][key] = locate(value)
-						else:
-							self.parameters[io][parameterName][key] = value
+					parameter = parameters[parameterName]
+					for key, value in serializedParameter.items():
+						parameter[key] = value
+					# 	if key == 'dataType' and value is not None:
+					# 		parameter[key] = Path if serializedParameter.get('dataType') == 'Path' else locate(value)
+					# 	else:
+					# 		parameter[key] = value
+					
+					# # Convert serialized value to real type
+					# if 'dataType' in parameter 	and parameter['value'] is not None:
+					# 	parameter['value'] = parameter['dataType'](parameter['value'])
 
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
@@ -156,7 +165,10 @@ class BiitToolNode(NodeBase):
 			inputName = input['name']
 			parameter = self.parameters['inputs'][inputName]
 			if isinstance(data, pandas.DataFrame) and len(data)>0:
-				if parameter['type'] == 'columnName' and parameter['columnName'] not in data.columns:
+				paramIsAbsentColumn = parameter['type'] == 'columnName' and parameter['columnName'] not in data.columns
+				paramIsUndefinedValue = parameter['type'] == 'value' and parameter.get('value', '') == ''
+				if paramIsAbsentColumn or paramIsUndefinedValue:
+					parameter['type'] = 'columnName'
 					parameter['columnName'] = data.columns[max(0, n)]
 					n -= 1
 			elif parameter['type'] == 'columnName':
@@ -244,6 +256,7 @@ class BiitToolNode(NodeBase):
 	def getSuffixes(self, filename):
 		return filename[filename.index('.'):] if '.' in filename else ''
 
+	# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
 	def replaceInputArgs(self, outputValue, inputGetter):
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', outputValue):
 			input = inputGetter(name)
@@ -273,12 +286,12 @@ class BiitToolNode(NodeBase):
 
 	def setOutputColumns(self, data):
 		for outputName, output in self.parameters['outputs'].items():
-			if output['dataType'] != Path: continue
+			if output['dataType'] != 'Path': continue
 			
 			for index, row in data.iterrows():
 
-				if 'value' not in output or output['value'] is None:
-					extension = output['extension'] if 'extension' in extension else ''
+				if output.get('value') is None:
+					extension = output.get('extension', '') or ''
 					finalValue = self.getWorkflowDataPath() / self.name / f'{outputName}_{index}{extension}'
 				else:
 					outputValue = str(output['value'])
@@ -292,12 +305,19 @@ class BiitToolNode(NodeBase):
 					if ('[workflow_folder]' not in outputValue) and ('[node_folder]' not in outputValue) and (not Path(outputValue).is_absolute()):
 						outputValue = '[node_folder]/' + outputValue
 					
+					# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
 					finalValue = self.replaceInputArgs(outputValue, (lambda name, row=row: self.getParameter(name, row)) )
-					# finalStem, finalSuffix = self.getStem(finalValue), self.getSuffixes(finalValue)
 					
+					# Check for (columnName) and replace by the row value at this column
+					for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', outputValue):
+						if columnName in row:
+							outputValue = outputValue.replace(f'({name})', str(row[columnName]))
+
 					finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
 					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
 					finalValue = finalValue.replace('[index]', str(index))
+					if output.get('extension') is not None:
+						finalValue = finalValue.replace('[ext]', output.get('extension'))
 
 				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
 
@@ -329,8 +349,7 @@ class BiitToolNode(NodeBase):
 		if hasattr(self.tool, 'outputMessage'):
 			self.outputMessage = self.tool.outputMessage
 		self.setOutputAndClean(dataFrame)
-		if hasattr(self.tool, 'generateThumbnails') and self.tool.generateThumbnails:
-			ThumbnailGenerator.get().generateThumbnails(self.tool.name, dataFrame)
+		ThumbnailGenerator.get().generateThumbnails(self.tool.name, dataFrame)
 		return dataFrame
 
 	def setOutputArgsFromDataFrame(self, args, outputData, index):
@@ -416,24 +435,15 @@ class BiitToolNode(NodeBase):
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
 			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
-		# self.worker = Worker(lambda progress_callback: self.logOutput(self.__class__.environment.process, logTool))
-		# QThreadPool.globalInstance().start(self.worker)
 		argsList = self.getArgs()
-		# for i, args in enumerate(argsList):
-		# 	argsList[i] = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
 		outputFolderPath = self.getOutputDataFolderPath()
-		completedProcess: subprocess.CompletedProcess = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.toolImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
-		if completedProcess is None and self.__class__.environment.stopEvent.is_set(): return False
-		if completedProcess is not None and completedProcess.returncode != 0:
-			raise Exception(completedProcess)
-		dataFrames = []
+		dataframes = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
-			# args = [item for items in [(f'--{key}',) if isinstance(value, bool) and value else (f'--{key}', f'{value}') for key, value in args.items()] for item in items]
-			dataFrame = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.toolImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
-			if dataFrame is not None: dataFrames.append(dataFrame)
+			dataFrames[i] = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.Tool.moduleImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
 			if self.__class__.environment.stopEvent.is_set(): return False
+		dataFrames = [df for df in dataFrames if df is not None]
 		if len(dataFrames)>0:
 			dataFrame = pandas.concat(dataFrames)
 			self.setOutputAndClean(dataFrame)
@@ -501,6 +511,13 @@ def createNode(modulePath, moduleImportPath, module):
 	# toolId = f'{tool.info.id}_v{tool.info.version}'
 	if not hasattr(module, 'Tool'): return None
 	module.Tool.moduleImportPath = moduleImportPath
+	if not hasattr(module.Tool, 'environment'):
+		module.Tool.environment = 'bioimageit'
+	if not hasattr(module.Tool, 'dependencies'):
+		module.Tool.dependencies = dict()
+	for attr in ['name', 'description']:
+		if not hasattr(module.Tool, attr):
+			raise Exception(f'Tool {moduleImportPath} has no attribute {attr}.')
 	# Creates a new class type named {modulePath.stem} which inherits BiitToolNode and have a Tool attribute
 	toolClass = type(modulePath.stem, (BiitToolNode, ), dict(Tool=module.Tool))
 	return toolClass

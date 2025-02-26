@@ -42,8 +42,8 @@ def thumbnail(inputPath, outputPath, size=(128,128)):
 	except Exception as e:
 		return None
 
-def generateThumbnails(images):
+def generateThumbnails(taskData):
 	pool = multiprocessing.Pool(8)
-	logger.info(f'generate {len(images)} thumbnails')
-	results = pool.starmap(thumbnail, images)
-	return [r for r in results if r is not None]
+	logger.info(f'generate {len(taskData["images"])} thumbnails')
+	results = pool.starmap(thumbnail, taskData['images'])
+	return dict(paths=[r for r in results if r is not None], workflowPath=taskData['workflowPath'])
