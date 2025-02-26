@@ -26,6 +26,7 @@ class Tool:
         dict(
             name = 'out',
             help = 'Output image',
+            default = '{image1.stem}-{image2.stem}{image1.exts}',
             type = Path,
         ),
     ]

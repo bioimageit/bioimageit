@@ -437,7 +437,7 @@ class BiitToolNode(NodeBase):
 			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
 		argsList = self.getArgs()
 		outputFolderPath = self.getOutputDataFolderPath()
-		dataframes = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
+		dataFrames = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')

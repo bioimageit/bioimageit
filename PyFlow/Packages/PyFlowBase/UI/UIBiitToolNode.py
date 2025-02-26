@@ -243,7 +243,7 @@ class UIBiitToolNode(UINodeBase):
                 w.setObjectName(outputName)
                 
                 # if output is not editable: disable widget
-                if not output.get('editable', True):
+                if output.get('editable') is False: # use "is False" since output.editable can be None, thus "not output.editable" would be True.
                     w.setDisabled(True)
 
                 outputsCategory.addWidget(outputName, w)
