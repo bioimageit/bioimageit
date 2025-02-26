@@ -1,6 +1,4 @@
-import sys
 import subprocess
-from pathlib import Path
 
 class Tool:
 
@@ -70,8 +68,8 @@ class Tool:
     def processData(self, args):
         print('Performing Richardson-Lucy deconvolution')
 
-        if args.type == '3D' and args.psf is None or not args.psf.exists():
-            sys.exit('Error: the argument psf must point to an existing PSF image file, it is set to "{args.psf}" which does not exist.')
+        if args.type == '3D' and (args.psf is None or not args.psf.exists()):
+            raise Exception(f'Error: the argument psf must point to an existing PSF image file, it is set to "{args.psf}" which does not exist.')
 
         commandArgs = [
             'simgrichardsonlucy' + args.type.replace(' ', '').lower(),
@@ -81,7 +79,13 @@ class Tool:
             '-padding', 'true' if args.padding else 'false'
         ]
         if  args.type != '3D':
-            commandArgs += ['-sigma', args.sigma]
+            commandArgs += ['-sigma', args.sigma, '-lambda', getattr(args, 'lambda')]
         else:
-            commandArgs += ['-psf', args.psf, '-lambda', getattr(args, 'lambda')]
-        subprocess.run([str(ca) for ca in commandArgs], check=True)
+            commandArgs += ['-psf', args.psf]
+        return subprocess.run([str(ca) for ca in commandArgs], check=True)
+
+if __name__ == '__main__':
+    tool = Tool()
+    parser, _ = tool.getArgumentParser()
+    args = parser.parse_args()
+    tool.processData(args)

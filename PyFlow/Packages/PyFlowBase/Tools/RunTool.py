@@ -45,6 +45,7 @@ def dedent(message):
     return linesep.join(line.lstrip().replace('[t]', '\t') for line in message.splitlines())
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 class ProgressDialog(QWidget):
 
@@ -246,25 +247,36 @@ class RunTool(ShelfTool):
             node.planned = False
         return
     
-    def displayError(self, exception, traceback):
+    def displayError(self, exception):
         message = QMessageBox(self.pyFlowInstance)
         message.setWindowTitle('Error during execution')
-        exceptionString = str(exception)
+        # exceptionString = str(exception)
         # exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
-        text = f'An error occured during the execution of the process: {exceptionString}'
+        text = f'An error occured during the execution of the process:\n\n{str(exception)}'
+        self.log(text, logging.ERROR)
+
+        classText = f'Class: {exception.__class__}'
+        detailedText = text + '\n\n' + classText
+        detailedText += 'Traceback:\n\n'
+        self.log(classText, logging.ERROR)
+        self.log('Traceback:', logging.ERROR)
+        for line in traceback.format_tb(exception.__traceback__):
+            self.log(line, logging.ERROR)
+            detailedText += line + '\n'
+        
         message.setText(text)
-        message.setDetailedText(f'{exception.__class__}\n\n{traceback}')
+        message.setDetailedText(detailedText)
         message.exec()
-        # text += f'(Class: {exception.__class__})'
-        self.log(text)
+
         ErrorManager.report(text)
+        # text += f'(Class: {exception.__class__})'
 
     def initializeLog(self):
         logTools = [tool for tool in self.pyFlowInstance._tools if isinstance(tool, LoggerTool)]
         self.logTool = logTools[0] if len(logTools)>0 else None
     
-    def log(self, message:str):
-        logger.info(message)
+    def log(self, message:str, level=logging.INFO):
+        logger.log(level, message)
         self.progressDialog.log(message)
         if self.logTool is None: return
         inmain(lambda: self.logTool.logPython(message))
@@ -276,7 +288,7 @@ class RunTool(ShelfTool):
         try:
             if not self.pyFlowInstance.manageUnexecutedNodesData(): return False
         except Exception as e:
-            self.displayError(e, traceback.format_tb(e.__traceback__))
+            self.displayError(e)
             return
 
         self.cancelExecution = threading.Event()
@@ -330,7 +342,7 @@ class RunTool(ShelfTool):
             print(e.exception)
             for line in e.traceback:
                 print(line)
-            inmain(lambda: self.displayError(e.exception, e.traceback))
+            inmain(lambda: self.displayError(e))
 
         except Exception as e:
 
@@ -339,7 +351,7 @@ class RunTool(ShelfTool):
             for line in traceback.format_tb(e.__traceback__):
                 logger.error(line)
             
-            inmain(lambda: self.displayError(e, e.__traceback__))
+            inmain(lambda: self.displayError(e))
         
         self.executing = False
         self.cancelExecution.clear()

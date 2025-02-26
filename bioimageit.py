@@ -5,6 +5,7 @@ import json
 import time
 import webbrowser
 import threading
+import traceback
 from pathlib import Path
 import logging
 from importlib import import_module
@@ -110,12 +111,12 @@ def logMainThread(message):
     gui.window.update_idletasks()
 
 def log(message):
-    if gui is None: return
+    if not guiCreated.is_set(): return
     gui.window.after(0, lambda: logMainThread(message + '\n'))
     
 def updateLabel(message):
     logging.info(message)
-    if gui is None: return
+    if not guiCreated.is_set(): return
     gui.window.after(0, lambda: gui.labelText.set(message))
     log(message)
 
@@ -181,7 +182,6 @@ def downloadSources(versionName):
 def waitGui():
     if gui is None:
         createGui.set()
-    
     while not guiCreated.is_set():
         time.sleep(0.01)
 
@@ -334,7 +334,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
             logging.warning(e)
             log(str(e))
             log('Error: Unable to check BioImageIT version. Please check your proxy settings.')
-            messagebox.showwarning("showwarning", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
+            messagebox.showwarning("Error while checking BioImageIT version", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
             return None
 
 def tryDownloadLatestVersionOrGetProxySettingsFromConda():
@@ -349,7 +349,7 @@ def tryDownloadLatestVersionOrGetProxySettingsFromConda():
 
 def createEnvironment(sources, environmentManager, environment):
     import tomllib
-    if gui is not None:
+    if guiCreated.is_set():
         gui.window.after(0, lambda: gui.progressBar.step(3))
     updateLabel('Creating BioImageIT environment...')
     with open(sources / "pyproject.toml", "rb") as f:
@@ -395,6 +395,14 @@ def environmentError(condaPath, environment, title, message):
     waitGui()
     gui.window.after(0, lambda: environmentErrorDialog(condaPath, environment, title, message))
 
+def logError(message, exception):
+    logger.error(message)
+    logger.error(exception)
+    logger.error(exception.args)
+    # logger.error(traceback.format_exc())
+    for line in traceback.format_tb(exception.__traceback__):
+        logger.error(line)
+
 def launchBiit(sources):
 
     if sources is None or not sources.resolve().is_dir():
@@ -429,10 +437,11 @@ def launchBiit(sources):
         try:
             createEnvironment(sources, environmentManager, environment)
         except Exception as e:
+            logError('An error occured when creating the BioImageIT environment', e)
             environmentError(condaPath, environment, title='Error while creating environment', message=f"An error occured when creating the BioImageIT environment:\n{e}\n\nCheck the logs in the environment.log file for more information.\nWould you like to remove the existing environment so that it will be recreated the next time you launch BioImageIT?")
             return
 
-    if gui is not None:
+    if guiCreated.is_set():
         gui.window.after(0, lambda: gui.progressBar.step(4))
     updateLabel('Launching BioImageIT...')
 
@@ -455,6 +464,7 @@ def launchBiit(sources):
                 initialized = True
                 loading.clear()
                 if gui is not None:
+                    waitGui()
                     gui.window.after(0, close_window)
     if not initialized:
         environmentError(condaPath, environment, title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
@@ -480,9 +490,9 @@ def updateVersionAndLaunchBiit():
         sources = updateVersion()
         launchBiit(sources)
     except Exception as e:
-        from tkinter import messagebox
-        logger.error(f'An error occured while launching BioImageIT:\n{e}')
+        logError('An error occured while launching BioImageIT', e)
         waitGui()
+        from tkinter import messagebox
         gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files (in {str(getRootPath())}) for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive

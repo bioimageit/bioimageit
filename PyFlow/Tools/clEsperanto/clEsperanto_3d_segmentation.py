@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 from .clEsperanto_tool import ClEsperantoTool
 
 class Tool(ClEsperantoTool):
@@ -85,7 +83,7 @@ class Tool(ClEsperantoTool):
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/4]] Load image {args.input_image}')
                 

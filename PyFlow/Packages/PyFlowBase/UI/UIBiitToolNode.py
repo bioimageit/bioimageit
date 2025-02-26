@@ -83,6 +83,7 @@ class ColumnValueWidget(QWidget):
             self.typeSelector.hide()
         self.typeSelector.setCurrentIndex(index)
         self.changeTypeValue(index, False)
+        self.setToolTip(input.description)
     
     def getPinTypeFromIoType(self, ioType):
         return self.ioTypeToPinType[ioType] if ioType in self.ioTypeToPinType else 'StringPin'

@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 class Tool:
@@ -58,7 +57,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print(f'[[1/1]] Run Fiji macro')
         import subprocess

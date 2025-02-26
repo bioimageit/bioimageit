@@ -1,5 +1,4 @@
 import subprocess
-import sys
 from pathlib import Path
 
 class Tool:
@@ -61,7 +60,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         blobsFileExists = Path('blobs.txt').exists()
         nSteps = 1 if blobsFileExists else 2

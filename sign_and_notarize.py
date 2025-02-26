@@ -62,32 +62,13 @@ def mac_os_sign():
     if not args.skip_upload:
         # upload files to the server
         for file_to_upload in ['entitlements.plist', os.environ['UNSIGNED_TARFILE']]:
-            result = client.upload(file_to_upload)
+            client.upload(file_to_upload)
     
-    # client.sign([client.software + '.app/Contents/MacOS/Plugins/*'],
-    #             '--deep --force --verbose 2')
-    # client.sign([client.software + '.app'],
-    #             f'--options=runtime --entitlements entitlements.plist --verbose 2')
-
-    # client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --deep --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/lib-dynload/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/charset_normalizer/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/psutil/*'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/Frameworks/yaml/*'], f'--options=runtime --force --verbose 2')
-    # client.sign([f'{client.software}.app/Contents/Frameworks/*'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libffi.8.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libncurses.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libtcl8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libpython3.12.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libbz2.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libssl.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libcrypto.3.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/liblzma.5.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libtk8.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libtinfo.6.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libexpat.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libz.1.dylib'], f'--options=runtime --force --verbose 2')
-    client.sign([f'{client.software}.app/Contents/Frameworks/libreadline.8.dylib'], f'--options=runtime --force --verbose 2')
+    client.sign([f'{client.software}.app/Contents/Frameworks/*.dylib'], f'--options=runtime --force --verbose 2')
     client.sign([f'{client.software}.app/Contents/MacOS/bioimageit'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
     client.sign([f'{client.software}.app'], f'--options=runtime --entitlements entitlements.plist --force --verbose 2')
 

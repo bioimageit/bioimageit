@@ -1,5 +1,4 @@
 import subprocess
-import sys
 from pathlib import Path
 from .core import ndsafir_series
 
@@ -86,7 +85,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
         noise = Tool.noiseChoices.index(args.noise)
         print(f'[[1/1]] Run ND-Safir on image {args.input_image}')
         if args.type == '4D':

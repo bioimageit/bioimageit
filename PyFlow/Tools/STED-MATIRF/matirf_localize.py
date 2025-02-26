@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 import subprocess
 
 class Tool:
@@ -91,7 +89,7 @@ class Tool:
     
     def processData(self, args):
         if not args.input_image.exists():
-            sys.exit(f'Error: input image {args.input_image} does not exist.')
+            raise Exception(f'Error: input image {args.input_image} does not exist.')
 
         print('Performing MATIRF localization')
         commandArgs = [
