@@ -13,7 +13,7 @@
 ## limitations under the License.
 
 import pandas
-from pathlib import Path
+import logging
 from qtpy import QtGui
 from qtpy.QtWidgets import QWidget, QComboBox, QHBoxLayout, QLabel
 from PyFlow.UI.Canvas.UINodeBase import UINodeBase
@@ -83,7 +83,12 @@ class ColumnValueWidget(QWidget):
             self.typeSelector.hide()
         self.typeSelector.setCurrentIndex(index)
         self.changeTypeValue(index, False)
-        self.setToolTip(input.description)
+        if 'help' in input:
+            self.setToolTip(input['help'])
+        else:
+            print(input)
+            print(node)
+            logging.warning(f'Input {input["name"]} of node {node.name} has no help')
     
     def getPinTypeFromIoType(self, ioType):
         return self.ioTypeToPinType[ioType] if ioType in self.ioTypeToPinType else 'StringPin'

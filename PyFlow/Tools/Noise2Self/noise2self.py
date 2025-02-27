@@ -1,7 +1,7 @@
 
 class Tool:
 
-    categories = ['Segmentation']
+    categories = ['Denoising']
     dependencies = dict(conda=['pytorch::pytorch', 'pytorch::torchvision'], pip=['matplotlib', 'noise2self'])
     environment = 'noise2self'
     

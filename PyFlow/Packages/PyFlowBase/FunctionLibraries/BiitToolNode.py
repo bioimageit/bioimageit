@@ -72,6 +72,10 @@ class BiitToolNode(NodeBase):
 	def setOutputAndClean(self, data, affectOthers=True):
 		self.dirty = False
 		if not hasattr(self, 'outArray'): return
+		# Set next nodes to dirty before computing one of them ; otherwise they might consider them having clean data and provide it to next node
+		self.outArray.setDirty()
+		for op in self.getNextPins():
+			op.owningNode().setExecuted(executed=False, propagate=True, setDirty=True)
 		self.outArray.setData(data, affectOthers)
 		self.outArray.setClean()
 
@@ -164,7 +168,7 @@ class BiitToolNode(NodeBase):
 			parameter = self.parameters['inputs'][inputName]
 			if isinstance(data, pandas.DataFrame) and len(data)>0:
 				paramIsAbsentColumn = parameter['type'] == 'columnName' and parameter['columnName'] not in data.columns
-				paramIsUndefinedValue = parameter['type'] == 'value' and parameter.get('value', '') == ''
+				paramIsUndefinedValue = parameter['type'] == 'value' and parameter.get('value') in [None, '']
 				if paramIsAbsentColumn or paramIsUndefinedValue:
 					parameter['type'] = 'columnName'
 					parameter['columnName'] = data.columns[max(0, n)]
@@ -177,14 +181,17 @@ class BiitToolNode(NodeBase):
 		self.setExecuted(executed=False, propagate=True, setDirty=True)
 		self.compute()
 
-	def getInputPins(self):
+	def getPreviousPins(self):
 		return sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
+	
+	def getNextPins(self):
+		return sorted( self.outArray.affects, key=lambda pin: pin.owningNode().y )
 	
 	def removeNones(self, items):
 		return [i for i in items if i is not None]
 	
 	def getDataFrames(self):
-		return self.removeNones([p.getCachedDataOrEvaluatdData() for p in self.getInputPins()])
+		return self.removeNones([p.getCachedDataOrEvaluatdData() for p in self.getPreviousPins()])
 
 	def getPreviousNodes(self):
 		if not self.inArray.hasConnections(): return None
@@ -482,13 +489,14 @@ class BiitToolNode(NodeBase):
 		
 	@classmethod
 	def nodeDeteleted(cls):
+		if cls.environment is None or cls.environment.name == 'bioimageit': return
 		cls.nInstanciatedNodes = max(cls.nInstanciatedNodes-1, 0)
 		if cls.nInstanciatedNodes == 0:
 			cls.exitTool()
 
 	@classmethod
 	def exitTool(cls):
-		if cls.environment is not None:
+		if cls.environment is not None and cls.environment.name != 'bioimageit':
 			return environmentManager.exit(cls.environment)
 
 	def getName(self):
