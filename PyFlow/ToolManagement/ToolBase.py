@@ -31,11 +31,12 @@ def processData(moduleImportPath: str, args: list[str], nodeOutputPath:Path, too
 def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:Path, toolsPath:Path):
     # Initialize with the args of the first row, convert them to a list of string before use
     # args0 = argToList(argsList[0])
+    result = None
+    if len(argsList) == 0: return result
     args0 = argsList[0]
     tool, _ = initialize(moduleImportPath, args0, toolsPath)
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     currentDirectory = os.getcwd()
-    result = None
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
         os.chdir(nodeOutputPath)
         result = tool.processAllData(argsList)

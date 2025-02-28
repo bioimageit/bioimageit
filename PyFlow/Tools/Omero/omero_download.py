@@ -1,6 +1,5 @@
 import pandas
-from pathlib import Path
-from PyFlow.Core.OmeroService import OmeroService, DoesNotExistException
+from PyFlow.Core.OmeroService import DoesNotExistException
 from .base import OmeroBase
     
 class Tool(OmeroBase):
@@ -44,7 +43,7 @@ class Tool(OmeroBase):
         for dataset in datasets:
             for image in dataset.listChildren():
                 image = self.omero.getImage(uid=image.id)
-                records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, project=image.getProject(), id=image.getId(), path=image.getName()))
+                records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, dataset_id=dataset.getId(), project_id=image.getProject().getId(), image_id=image.getId(), path=image.getName()))
         self.outputMessage = ''
         return pandas.DataFrame.from_records(records)
 

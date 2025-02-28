@@ -75,4 +75,5 @@ class Tool:
             ccName = str(args.connected_component).replace('<i>', str(i))
             sitk.WriteImage(cc, ccName)
             records.append(dict(image=args.image, label=args.label, connected_component=ccName, label_index=i, minimum=minimum, maximum=maximum, median=median, mean=mean, numPixels=numPixels, bb=str(bb)))
+        self.outputMessage = ''
         return pandas.DataFrame.from_records(records)

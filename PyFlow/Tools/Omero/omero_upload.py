@@ -68,7 +68,7 @@ class Tool(OmeroBase):
             else:
                 dataset = self.omero.createDataset(DefaultMunch.fromDict(dict(md_uri=project.id)), args.dataset_name)
 
-        metaDataColumns = [mdc for mdc in args.metadata_columns.split(',') if len(mdc)>0]
+        metaDataColumns = [mdc for mdc in args.metadata_columns.split(',') if len(mdc)>0] if args.metadata_columns is not None else []
         for metaDataName in metaDataColumns:
             if metaDataName not in args.idf_row.index:
                 raise Exception(f'The column "{metaDataName}" does not exist in the input dataframe. The columns are: {args.idf_row.index}.')

@@ -26,15 +26,16 @@ from blinker import Signal
 # Node is computed when:
 # - users clicks on the node
 # - node is dirty and a downstream node is computed
-# - parameters are changed ( dataBeenSet -> table view computes node)
+# - parameters are changed and node is selected ( dataBeenSet -> table view computes node)
 # - user executes ( RunTool.execute(node) )
-# - user export workflow: TODO!
+# - user export workflow
 
 # Parameters are initialized when node is computed
 
 # getDataFrame() returns the cached dataFrame when not dirty, computes otherwise.
 
 # PyFlow does not allow dependency cycles (upstream node whose input comes from a downstream node), see PyFlow.Core.Common.connectPins, canConnectPins & cycleCheck
+
 
 class BiitToolNode(NodeBase):
 	_packageName = "PyFlowBase"
@@ -137,14 +138,6 @@ class BiitToolNode(NodeBase):
 					parameter = parameters[parameterName]
 					for key, value in serializedParameter.items():
 						parameter[key] = value
-					# 	if key == 'dataType' and value is not None:
-					# 		parameter[key] = Path if serializedParameter.get('dataType') == 'Path' else locate(value)
-					# 	else:
-					# 		parameter[key] = value
-					
-					# # Convert serialized value to real type
-					# if 'dataType' in parameter 	and parameter['value'] is not None:
-					# 	parameter['value'] = parameter['dataType'](parameter['value'])
 
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
@@ -166,6 +159,7 @@ class BiitToolNode(NodeBase):
 		for input in self.tool.inputs:
 			inputName = input['name']
 			parameter = self.parameters['inputs'][inputName]
+			if not input.get('autoColumn'): continue
 			if isinstance(data, pandas.DataFrame) and len(data)>0:
 				paramIsAbsentColumn = parameter['type'] == 'columnName' and parameter['columnName'] not in data.columns
 				paramIsUndefinedValue = parameter['type'] == 'value' and parameter.get('value') in [None, '']
@@ -179,7 +173,7 @@ class BiitToolNode(NodeBase):
 	# The input pin was plugged or parameters were changed in the properties GUI: set the node dirty & unexecuted
 	def setNodeDirty(self, pin=None):
 		self.setExecuted(executed=False, propagate=True, setDirty=True)
-		self.compute()
+		# self.compute()
 
 	def getPreviousPins(self):
 		return sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
@@ -290,6 +284,7 @@ class BiitToolNode(NodeBase):
 		return outputValue
 
 	def setOutputColumns(self, data):
+		if data is None: return
 		for outputName, output in self.parameters['outputs'].items():
 			if output['dataType'] != 'Path': continue
 			
@@ -314,9 +309,9 @@ class BiitToolNode(NodeBase):
 					finalValue = self.replaceInputArgs(outputValue, (lambda name, row=row: self.getParameter(name, row)) )
 					
 					# Check for (columnName) and replace by the row value at this column
-					for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', outputValue):
+					for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', finalValue):
 						if columnName in row:
-							outputValue = outputValue.replace(f'({name})', str(row[columnName]))
+							finalValue = finalValue.replace(f'({columnName})', str(row[columnName]))
 
 					finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
 					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
@@ -344,15 +339,18 @@ class BiitToolNode(NodeBase):
 		self.setParametersFromDataframe(self.dataFrame)
 		return self.dataFrame
 
+	def setOutputMessage(self):
+		if hasattr(self.tool, 'outputMessage'):
+			self.outputMessage = self.tool.outputMessage
+
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
 		print('------------compute:', self.name)
 		dataFrame = self.getDataFrame()
-		self.setOutputColumns(dataFrame)
 		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
 			dataFrame = self.tool.processDataFrame(dataFrame, self.getArgs(False))
-		if hasattr(self.tool, 'outputMessage'):
-			self.outputMessage = self.tool.outputMessage
+		self.setOutputColumns(dataFrame)
+		self.setOutputMessage()
 		self.setOutputAndClean(dataFrame)
 		ThumbnailGenerator.get().generateThumbnails(self.tool.name, dataFrame)
 		return dataFrame
@@ -362,9 +360,10 @@ class BiitToolNode(NodeBase):
 		for outputName, output in self.parameters['outputs'].items():
 			if self.getColumnName(outputName) not in outputData.columns: continue # sometimes the output column is not defined, as in LabelStatistics ; since it is only used for the image format, and compute() is not called
 			outputPath = outputData.at[index, self.getColumnName(outputName)]
-			if isinstance(outputPath, Path):
+			if output['dataType'] == 'Path':
+				outputPath = Path(outputPath)
 				outputPath.parent.mkdir(exist_ok=True, parents=True)    
-			args[outputName] = str(outputPath)
+			args[outputName] = outputPath
 	
 	def getParameter(self, name, row):
 		if name not in self.parameters['inputs']: return None
@@ -397,24 +396,23 @@ class BiitToolNode(NodeBase):
 	
 	def getArgs(self, raiseRequiredException=True):
 		argsList = []
-		inputData: pandas.DataFrame = self.inArray.currentData()
-		outputData: pandas.DataFrame = self.outArray.currentData()
-		if inputData is None:
+		dataFrame: pandas.DataFrame = self.outArray.currentData()
+		if dataFrame is None:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
 				if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs) and raiseRequiredException:
 					raise Exception(f'The parameter {parameterName} is undefined, but required.')
 				self.setArg(args, parameterName, parameter, parameter['value'], None)
-			self.setOutputArgsFromDataFrame(args, outputData, 0)
+			self.setOutputArgsFromDataFrame(args, dataFrame, 0)
 			argsList.append(args)
 		else:
-			for index, row in inputData.iterrows():
+			for index, row in dataFrame.iterrows():
 				args = {}
 				for parameterName, parameter in self.parameters['inputs'].items():
 					if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs, row) and raiseRequiredException:
 						raise Exception(f'The parameter {parameterName} is undefined, but required.')
 					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
-				self.setOutputArgsFromDataFrame(args, outputData, index)
+				self.setOutputArgsFromDataFrame(args, dataFrame, index)
 				args['idf_row'] = row
 				argsList.append(args)
 		return [Munch.fromDict(args) for args in argsList]
@@ -448,6 +446,7 @@ class BiitToolNode(NodeBase):
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
 			dataFrames[i] = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.Tool.moduleImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
 			if self.__class__.environment.stopEvent.is_set(): return False
+		self.setOutputMessage()
 		dataFrames = [df for df in dataFrames if df is not None]
 		if len(dataFrames)>0:
 			dataFrame = pandas.concat(dataFrames)
