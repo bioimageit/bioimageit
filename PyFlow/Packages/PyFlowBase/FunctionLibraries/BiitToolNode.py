@@ -200,6 +200,7 @@ class BiitToolNode(NodeBase):
 		if data is None: return
 		columns = {}
 		for column in data.columns:
+			if ':' not in column: continue
 			nodeName = column.split(':')[0]
 			if nodeName == oldName:
 				columns[column] = newName + ':' + column.split(':')[1]
@@ -210,6 +211,7 @@ class BiitToolNode(NodeBase):
 		# update column names in all downstream dataFrames
 		self.updateColumnNames(self.inArray, oldName, newName)
 		self.updateColumnNames(self.outArray, oldName, newName)
+		assert(self.dataFrame == self.outArray.getData())
 		nextNodes = EvaluationEngine()._impl.getForwardNextLayerNodes(self)
 		for node in nextNodes:
 			node.updateName(oldName, newName)
@@ -294,32 +296,32 @@ class BiitToolNode(NodeBase):
 					extension = output.get('extension', '') or ''
 					finalValue = self.getWorkflowDataPath() / self.name / f'{outputName}_{index}{extension}'
 				else:
-					outputValue = str(output['value'])
+					finalValue = str(output['value'])
 					
-					# Check that [workflow_folder] and [node_folder] are used at the beginning of the outputValue (if used at all)
+					# Check that [workflow_folder] and [node_folder] are used at the beginning of the finalValue (if used at all)
 					for name in ['[workflow_folder]', '[node_folder]']:
-						if name in outputValue and not outputValue.startswith(name):
+						if name in finalValue and not finalValue.startswith(name):
 							raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {outputName}.')
 					
-					# If outputValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
-					if ('[workflow_folder]' not in outputValue) and ('[node_folder]' not in outputValue) and (not Path(outputValue).is_absolute()):
-						outputValue = '[node_folder]/' + outputValue
-					
 					# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
-					finalValue = self.replaceInputArgs(outputValue, (lambda name, row=row: self.getParameter(name, row)) )
+					finalValue = self.replaceInputArgs(finalValue, (lambda name, row=row: self.getParameter(name, row)) )
 					
 					# Check for (columnName) and replace by the row value at this column
 					for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', finalValue):
 						if columnName in row:
 							finalValue = finalValue.replace(f'({columnName})', str(row[columnName]))
 
+					# If finalValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
+					if ('[workflow_folder]' not in finalValue) and ('[node_folder]' not in finalValue) and (not Path(finalValue).is_absolute()):
+						finalValue = '[node_folder]/' + finalValue
+					
 					finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
 					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
 					finalValue = finalValue.replace('[index]', str(index))
 					if output.get('extension') is not None:
 						finalValue = finalValue.replace('[ext]', output.get('extension'))
 
-				data.at[index, self.getColumnName(outputName)] = finalValue # self.getWorkflowDataPath() / self.name / f'{finalStem}{indexString}{finalSuffix}'
+				data.at[index, self.getColumnName(outputName)] = finalValue
 
 	def mergeDataFrames(self, dataFrames):
 		if len(dataFrames)==0: return pandas.DataFrame()

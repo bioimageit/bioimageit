@@ -1,6 +1,8 @@
 import argparse
+from pathlib import Path
+from pydoc import locate
 
-specialKeys = ['names', 'autoColumn', 'autoIncrement']
+specialKeys = ['name', 'autoColumn', 'autoIncrement']
 
 def add_argument(parser: argparse._ArgumentGroup, arg: dict):
     if 'type' in arg and arg['type'] == bool:
@@ -8,7 +10,10 @@ def add_argument(parser: argparse._ArgumentGroup, arg: dict):
         arg['action'] = 'store_true' if arg['default'] else 'store_false'
         del arg['type']
         del arg['default']
-    parser.add_argument(*arg["names"], **{k: v for k, v in arg.items() if k not in specialKeys})
+    kwargs = {k: v for k, v in arg.items() if k not in specialKeys}
+    if 'type' in kwargs:
+        kwargs['type'] = locate(kwargs['type']) if kwargs['type'] != 'Path' else Path
+    parser.add_argument('--' + arg["name"], **kwargs)
 
 def create_parser(config):
     parser = argparse.ArgumentParser(

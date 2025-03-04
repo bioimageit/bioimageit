@@ -75,6 +75,7 @@ class ColumnValueWidget(QWidget):
             # self.columnNameInput.hide()
             self.columnSelector = QComboBox()
             for column in data.columns:
+                if ':' in column and column.split(':')[0] == node.name: continue
                 self.columnSelector.addItem(column)
             self.columnSelector.setCurrentIndex(list(data.columns).index(defaultColumnName))
             self.columnSelector.activated.connect(self.changeColumnValue)

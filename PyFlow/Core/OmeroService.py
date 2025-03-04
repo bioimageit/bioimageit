@@ -1,5 +1,7 @@
+from http import client
 from pathlib import Path
 import locale
+from pydoc import cli
 from sys import version
 import keyring
 import numpy as np
@@ -82,7 +84,7 @@ class OmeroService(object):
 
         # self.omeroService = OmeroMetadataService(host, port, username, password)
 
-        self.client.createSession(username, password)
+        # self.client.createSession(username, password)
         self.connection = BlitzGateway(username, password, host=host, port=port, client_obj=self.client, secure=True)
 
         # self.connection = BlitzGateway(username, password, host=host, port=port, secure=True)#, extra_config=config_path)
@@ -95,11 +97,19 @@ class OmeroService(object):
     def getConnection(self):
         if self.connection is None or not self.connection.isConnected():
             self.initializeOmero()
+        # try:
+        #     self.client.getSession()
+        # except omero.ClientError:
+        #     # _, _, username = self.getSettings()
+        #     # password = keyring.get_password("bioif-omero", username)
+        #     # self.client.createSession(username, password)
+        #     self.initializeOmero()
         return self.connection
     
     def reset(self):
         if self.connection is not None:
             self.connection.close()
+            self.connection = None
         return self.getConnection()
     
     # project = conn.getObject("Project", attributes={"name": project_name})
@@ -205,7 +215,7 @@ class OmeroService(object):
             return new_dataset
         finally:
             pass
-            #self._omero_close()
+            # self._omero_close()
     
     def createSettings(self):
         """Create ImportSettings and set some values."""
@@ -303,6 +313,8 @@ class OmeroService(object):
         assert len(rsp.pixels) > 0
         return rsp
     
+    # Code comes from https://gitlab.com/openmicroscopy/incubator/omero-python-importer/-/blob/master/import.py
+
     def fullImport(self, fs_path, wait=-1):
         """Re-usable method for a basic import."""
         mrepo = self.client.getManagedRepository()
@@ -341,7 +353,8 @@ class OmeroService(object):
     def imageInDataset(self, dataset, imagePath):
         # if dataset was just created (returned by createDataset()), _oid is not set: there are no images in the dataset
         if not hasattr(dataset, '_oid'): return False
-        for image in dataset.listChildren():
+        images = list(dataset.listChildren())
+        for image in images:
             omero_image = self.getImage(uid=image.id)
             if omero_image.getName() == imagePath.name:
                 return True

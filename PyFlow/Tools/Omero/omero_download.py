@@ -1,23 +1,20 @@
 import pandas
-from PyFlow.Core.OmeroService import DoesNotExistException
-from .base import OmeroBase
-    
+# from PyFlow.Core.OmeroService import DoesNotExistException
+from omero.gateway import BlitzGateway
+from .base import OmeroBase, DoesNotExistException
+from PIL import Image
+import numpy as np
+
 class Tool(OmeroBase):
 
     name = "Omero Download"
-    description = "Download files from Omero: either enter the dataset name or id to download. Negative ids will be ignored."
+    description = "Download files from Omero."
     categories = ['Omero']
     inputs = [
             dict(
             name = 'dataset_id',
-            help = 'Dataset ID (ignored if negative)',
+            help = 'Dataset ID',
             type = 'int',
-            default = None,
-        ),
-        dict(
-            name = 'dataset_name',
-            help = 'Dataset name',
-            type = 'str',
             default = None,
         ),
     ]
@@ -31,24 +28,83 @@ class Tool(OmeroBase):
         ),
     ]
     
+    # def processDataFrame2(self, dataFrame, argsList):
+    #     try:
+    #         datasets = self.getDatasets(argsList)
+    #     except DoesNotExistException as e: # Pass if dataset does not exist
+    #         self.outputMessage = str(e)
+    #         return
+    #     if datasets is None or len(datasets)==0: return
+    #     # dataset = omero.get_dataset(datasetName)
+    #     records = []
+    #     for dataset in datasets:
+    #         images = list(dataset.listChildren())
+    #         for image in images:
+    #             image = self.omero.getImage(uid=image.id)
+    #             records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, dataset_id=dataset.getId(), project_id=image.getProject().getId(), image_id=image.getId(), path=image.getName()))
+    #     self.outputMessage = ''
+    #     return pandas.DataFrame.from_records(records)
+
     def processDataFrame(self, dataFrame, argsList):
-        try:
-            datasets = self.getDatasets(argsList)
-        except DoesNotExistException as e: # Pass if dataset does not exist
-            self.outputMessage = str(e)
-            return
-        if datasets is None or len(datasets)==0: return
-        # dataset = omero.get_dataset(datasetName)
+
+        host, port, username, password = self.getSettings()
         records = []
-        for dataset in datasets:
-            for image in dataset.listChildren():
-                image = self.omero.getImage(uid=image.id)
-                records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, dataset_id=dataset.getId(), project_id=image.getProject().getId(), image_id=image.getId(), path=image.getName()))
+        with BlitzGateway(username, password, host=host, port=port, secure=True) as connection:
+            for args in argsList:
+                dataset = connection.getObject('Dataset', args.dataset_id)
+                if dataset is None:
+                    raise Exception(f'Error: Dataset {args.dataset_id} does not exist.')
+                
+                images = list(dataset.listChildren())
+                for image in images:
+                    image = connection.getObject('Image', image.id)
+                    records.append(dict(name=image.getName(), author=image.getAuthor(), description=image.getDescription(), dataset=dataset.name, dataset_id=dataset.getId(), project_id=image.getProject().getId(), image_id=image.getId(), path=image.getName()))
         self.outputMessage = ''
         return pandas.DataFrame.from_records(records)
 
-    def processData(self, args):
-        dataset = self.getDataset(args)
-        for image in dataset.listChildren():
-            omero_image = self.omero.getImage(uid=image.id)
-            self.omero.downloadImage(args.out, omero_image=omero_image)
+    def downloadImageData(self, img, c=0, t=0):
+        """Get one channel and one time point of a data
+        
+        Parameters
+        ----------
+        img: omero.gateway.ImageWrapper
+            Omero image wrapper
+        c: int
+            Channel index
+        t: int
+            Time point index    
+
+        """
+        size_z = img.getSizeZ()
+        # get all planes we need in a single generator
+        zct_list = [(z, c, t) for z in range(size_z)]
+        pixels = img.getPrimaryPixels()
+        plane_gen = pixels.getPlanes(zct_list)
+
+        if size_z == 1:
+            return np.array(next(plane_gen))
+        else:
+            z_stack = []
+            for z in range(size_z):
+                # print("plane c:%s, t:%s, z:%s" % (c, t, z))
+                z_stack.append(next(plane_gen))
+            return np.array(z_stack)
+
+    def downloadImage(self, destination_file_path, omero_image):
+        if destination_file_path is None:
+            raise Exception('Output file must be valid')
+        image_data = self.downloadImageData(omero_image)
+        Image.fromarray(image_data).save(destination_file_path)
+        return omero_image
+    
+    def processAllData(self, argsList):
+        host, port, username, password = self.getSettings()
+        with BlitzGateway(username, password, host=host, port=port, secure=True) as connection:
+            for args in argsList:
+                dataset = connection.getObject('Dataset', args.dataset_id)
+                if dataset is None:
+                    raise Exception(f'Error: Dataset {args.dataset_id} does not exist.')
+                images = list(dataset.listChildren())
+                for image in images:
+                    omero_image = image = connection.getObject('Image', image.id)
+                    self.downloadImage(args.out, omero_image)

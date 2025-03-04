@@ -616,7 +616,7 @@ class NodesBox(QFrame):
                 self.systemWatcher.addPath(str(file))
         for file in [Path(file) for file in self.systemWatcher.files()]:
             if not file.exists():
-                print('remove node', file)
+                print('remove node', file.resolve())
                 self.treeWidget.removeNodeClass(file.stem)
 
     def directoryChanged(self, path):

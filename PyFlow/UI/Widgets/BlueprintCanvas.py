@@ -1397,7 +1397,7 @@ class BlueprintCanvas(CanvasBase):
                 for node in selectedNodes:
                     node.translate(scaledDelta.x(), scaledDelta.y())
 
-            if node.isReroute() and modifiers == QtCore.Qt.AltModifier:
+            if node is not None and node.isReroute() and modifiers == QtCore.Qt.AltModifier:
                 mouseRect = QtCore.QRect(
                     QtCore.QPoint(event.pos().x() - 1, event.pos().y() - 1),
                     QtCore.QPoint(event.pos().x() + 1, event.pos().y() + 1),
