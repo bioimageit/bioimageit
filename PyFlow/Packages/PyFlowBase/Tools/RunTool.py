@@ -270,10 +270,6 @@ class RunTool(ShelfTool):
 
         ErrorManager.report(text)
         # text += f'(Class: {exception.__class__})'
-
-    def initializeLog(self):
-        logTools = [tool for tool in self.pyFlowInstance._tools if isinstance(tool, LoggerTool)]
-        self.logTool = logTools[0] if len(logTools)>0 else None
     
     def log(self, message:str, level=logging.INFO):
         logger.log(level, message)
@@ -302,7 +298,7 @@ class RunTool(ShelfTool):
         nodes = graphManager.getAllNodes()
         nodesToExecute = set(self.getNodesToExecute(nodes))
         
-        self.initializeLog()
+        self.logTool = self.pyFlowInstance.getToolByClassName('Logger')
         self.createUuidToNodes(nodes)
 
         self.resetPlanned(nodesToExecute)

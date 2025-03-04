@@ -96,6 +96,9 @@ def getOrCreateMenu(menuBar, title):
 	menu.setTitle(title)
 	return menu
 
+class LoggerDockWidget(QtAds.CDockWidget):
+    def sizeHint(self):
+        return QtCore.QSize(600, 50)  # Default width & height
 
 # App itself
 class PyFlow(QMainWindow):
@@ -649,7 +652,7 @@ class PyFlow(QMainWindow):
 			#     self.dockManager.addDockWidget(qtToAdsAreas[ToolInstance.defaultDockArea()], dockWidget)
 			ToolInstance.setAppInstance(self)
 			ToolInstance.onShow()
-			dockWidget = QtAds.CDockWidget(name)
+			dockWidget = QtAds.CDockWidget(name) if name != 'Logger' else LoggerDockWidget(name)
 			dockWidget.setWidget(ToolInstance.widget())
 			qtToAdsAreas = {}
 			qtToAdsAreas[QtCore.Qt.BottomDockWidgetArea] = QtAds.BottomDockWidgetArea
@@ -661,7 +664,7 @@ class PyFlow(QMainWindow):
 			dockWidget.setFeature(QtAds.CDockWidget.DockWidgetClosable, ToolInstance.isClosable())
 			dockWidget.setFeature(QtAds.CDockWidget.DockWidgetMovable, ToolInstance.isMovable())
 			dockWidget.setFeature(QtAds.CDockWidget.DockWidgetFloatable, ToolInstance.isMovable())
-			
+
 			if type(subArea) is str:
 				sas = subArea.split(':')
 				if sas[0] == 'Tab':
@@ -671,6 +674,7 @@ class PyFlow(QMainWindow):
 			else:
 				self.dockAreas[area] = self.dockManager.addDockWidget(area if area not in self.dockAreas else subArea, dockWidget, self.dockAreas[area] if area in self.dockAreas else None)
 				self.dockAreasByToolName[name] = self.dockAreas[area]
+			
 			ToolInstance.dockWidget = dockWidget
 			# dockWidget.closed.connect(lambda: )
 		return ToolInstance
@@ -852,7 +856,7 @@ class PyFlow(QMainWindow):
 		PyFlow.appInstance = instance
 
 		# for toolName in ['Workflow', 'Tools', 'Properties', 'Table viewer', 'Logger']:
-		for toolName in ['Tools', 'Workflow', 'Execution', 'Properties', 'Data frame']:
+		for toolName in ['Tools', 'Workflow', 'Execution', 'Properties', 'Data frame', 'Logger']:
 			tool = instance.getToolByClassName(toolName)
 			if tool is None or toolName == 'Logger':
 				instance.invokeDockToolByName("PyFlowBase", toolName)

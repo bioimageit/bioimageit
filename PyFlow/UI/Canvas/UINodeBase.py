@@ -741,10 +741,17 @@ class UINodeBase(QGraphicsWidget, IPropertiesViewSupport, IUINode):
                 % (self._rawNode.name, error)
             )
             logging.error(errorLink)
+            self.log(errorLink)
         else:
             logging.error(errorString)
+            self.log(errorString)
         self.setToolTip(errorString)
         self.update()
+
+    def log(self, message):
+        logTool = self.canvasRef().pyFlowInstance.getToolByClassName('Logger')
+        if logTool is not None:
+            logTool.logPython(message)
 
     def onNodeErrorCleared(self, *args, **kwargs):
         # restore node ui to clean

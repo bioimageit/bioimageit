@@ -173,7 +173,11 @@ class BiitToolNode(NodeBase):
 	# The input pin was plugged or parameters were changed in the properties GUI: set the node dirty & unexecuted
 	def setNodeDirty(self, pin=None):
 		self.setExecuted(executed=False, propagate=True, setDirty=True)
-		# self.compute()
+	
+	# Called from UIBiitToolNode when updating parameters
+	def setNodeDirtyAndProcess(self):
+		self.setNodeDirty()
+		self.processNode()
 
 	def getPreviousPins(self):
 		return sorted( self.inArray.affected_by, key=lambda pin: pin.owningNode().y )
@@ -398,23 +402,23 @@ class BiitToolNode(NodeBase):
 	
 	def getArgs(self, raiseRequiredException=True):
 		argsList = []
-		dataFrame: pandas.DataFrame = self.outArray.currentData()
-		if dataFrame is None:
+		# dataFrame: pandas.DataFrame = self.outArray.currentData()
+		if self.dataFrame is None or len(self.dataFrame) == 0:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
 				if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs) and raiseRequiredException:
 					raise Exception(f'The parameter {parameterName} is undefined, but required.')
 				self.setArg(args, parameterName, parameter, parameter['value'], None)
-			self.setOutputArgsFromDataFrame(args, dataFrame, 0)
+			self.setOutputArgsFromDataFrame(args, self.dataFrame, 0)
 			argsList.append(args)
 		else:
-			for index, row in dataFrame.iterrows():
+			for index, row in self.dataFrame.iterrows():
 				args = {}
 				for parameterName, parameter in self.parameters['inputs'].items():
 					if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs, row) and raiseRequiredException:
 						raise Exception(f'The parameter {parameterName} is undefined, but required.')
 					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
-				self.setOutputArgsFromDataFrame(args, dataFrame, index)
+				self.setOutputArgsFromDataFrame(args, self.dataFrame, index)
 				args['idf_row'] = row
 				argsList.append(args)
 		return [Munch.fromDict(args) for args in argsList]

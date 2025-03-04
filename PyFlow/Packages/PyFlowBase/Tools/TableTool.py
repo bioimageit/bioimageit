@@ -179,10 +179,9 @@ class TableTool(DockTool):
 				imageViewer[0].open(path)
 	
 	def updateTable(self, node):
+		node._rawNode.processNode()
 		data = None
 		if hasattr(node._rawNode, 'outArray'):
-			node._rawNode.compute()
-			node._rawNode.afterCompute()
 			data = node._rawNode.outArray.currentData()
 		elif hasattr(node._rawNode, 'inArray'):
 			data = node._rawNode.inArray.currentData()
@@ -190,13 +189,11 @@ class TableTool(DockTool):
 		if hasattr(node._rawNode, 'outputMessage') and node._rawNode.outputMessage is not None:
 			self.label.setText(node._rawNode.outputMessage)
 			self.label.show()
-		if data is not None:
-			if self.content is not None and isinstance(data, pandas.DataFrame):
-				self.setData(data)
-		else:
-			self.setData()
+		self.setData(data)
 
 	def setData(self, data=None):
+		if self.content is None: return
+		if (data is not None) and not isinstance(data, pandas.DataFrame): return
 		self.content.setModel(PandasModel(data))
 		# self.content.setItemDelegate(ImageDelegate(self))
 		self.content.resizeRowsToContents()

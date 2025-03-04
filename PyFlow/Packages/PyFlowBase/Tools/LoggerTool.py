@@ -14,16 +14,15 @@
 
 
 from qtpy import QtCore
-from qtpy import QtGui
+# from qtpy import QtGui
 from qtpy.QtWidgets import QAction, QTextBrowser
 from PyFlow.UI.Tool.Tool import DockTool
-from PyFlow.UI.Utils.stylesheet import editableStyleSheet
-from PyFlow.Core.Common import SingletonDecorator
-from PyFlow.ConfigManager import ConfigManager
-import sys
+# from PyFlow.UI.Utils.stylesheet import editableStyleSheet
+# from PyFlow.Core.Common import SingletonDecorator
+# from PyFlow.ConfigManager import ConfigManager
+# import sys
 import logging
 import os
-import subprocess
 
 
 # REDIRECT = ConfigManager().shouldRedirectOutput()
@@ -182,7 +181,7 @@ class LoggerTool(DockTool):
         #         lambda value: self.logPython(value, 2)
         #     )
         #     self.handler.messageHolder.flushSig.connect(self.flushPython)
-
+    
     #####################################################
     # Logger
     #####################################################
