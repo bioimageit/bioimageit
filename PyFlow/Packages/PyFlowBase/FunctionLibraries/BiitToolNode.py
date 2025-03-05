@@ -32,7 +32,7 @@ from blinker import Signal
 
 # Parameters are initialized when node is computed
 
-# getDataFrame() returns the cached dataFrame when not dirty, computes otherwise.
+# getInputDataFrame() returns the cached inputDataFrame (the result of the merging of all input dataFrames) when not dirty, computes otherwise.
 
 # PyFlow does not allow dependency cycles (upstream node whose input comes from a downstream node), see PyFlow.Core.Common.connectPins, canConnectPins & cycleCheck
 
@@ -58,7 +58,7 @@ class BiitToolNode(NodeBase):
 		self.outArray = self.createOutputPin("out", "AnyPin", structure=StructureType.Single, constraint="1")
 		self.outArray.disableOptions(PinOptions.ChangeTypeOnConnection)
 		self.resetParameters = None
-		self.dataFrame = None
+		self.inputDataFrame = None # this is the merged data frames (the result of self.mergeDataFrames(inputs dataframe)), before being processed by self.tool.processDataFrame()
 		self.initializeParameters()
 		self.lib = 'BiitLib'
 		self.__class__.nInstanciatedNodes += 1
@@ -83,7 +83,8 @@ class BiitToolNode(NodeBase):
 	def setExecuted(self, executed=True, propagate=True, setDirty=True):
 		if not executed and setDirty:
 			self.dirty = True
-			self.dataFrame = None
+			self.inputDataFrame = None
+			self.processedDataFrame = None
 			if hasattr(self, 'outArray'):
 				self.outArray.setDirty()
 		if self.executed == executed: return
@@ -188,7 +189,7 @@ class BiitToolNode(NodeBase):
 	def removeNones(self, items):
 		return [i for i in items if i is not None]
 	
-	def getDataFrames(self):
+	def getInputDataFrames(self):
 		return self.removeNones([p.getCachedDataOrEvaluatdData() for p in self.getPreviousPins()])
 
 	def getPreviousNodes(self):
@@ -199,8 +200,7 @@ class BiitToolNode(NodeBase):
 		if not self.inArray.hasConnections(): return None
 		return self.getPreviousNodes()[0]
 	
-	def updateColumnNames(self, pin, oldName, newName):
-		data = pin.getData()
+	def updateColumnNames(self, data, oldName, newName):
 		if data is None: return
 		columns = {}
 		for column in data.columns:
@@ -209,13 +209,18 @@ class BiitToolNode(NodeBase):
 			if nodeName == oldName:
 				columns[column] = newName + ':' + column.split(':')[1]
 		data.rename(columns=columns)
-		pin.setData(data)
+		return data
+
+	def updateColumnNamesInPin(self, pin, oldName, newName):
+		pin.setData(self.updateColumnNames(pin.getData(), oldName, newName))
 
 	def updateName(self, oldName, newName):
 		# update column names in all downstream dataFrames
-		self.updateColumnNames(self.inArray, oldName, newName)
-		self.updateColumnNames(self.outArray, oldName, newName)
-		assert(self.dataFrame == self.outArray.getData())
+		self.updateColumnNamesInPin(self.inArray, oldName, newName)
+		self.updateColumnNamesInPin(self.outArray, oldName, newName)
+		self.updateColumnNames(self.inputDataFrame, oldName, newName)
+		self.updateColumnNames(self.processedDataFrame, oldName, newName)
+
 		nextNodes = EvaluationEngine()._impl.getForwardNextLayerNodes(self)
 		for node in nextNodes:
 			node.updateName(oldName, newName)
@@ -337,13 +342,13 @@ class BiitToolNode(NodeBase):
 		result = result.ffill()
 		return result
 
-	def getDataFrame(self):
-		if self.dataFrame is not None: return self.dataFrame
-		dataFrames = self.getDataFrames()
-		hasProcessDataFrames = callable(getattr(self.tool, 'processDataFrames', None))
-		self.dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs(objectify=True, raiseRequiredException=False)) if hasProcessDataFrames else self.mergeDataFrames(dataFrames)
-		self.setParametersFromDataframe(self.dataFrame)
-		return self.dataFrame
+	def getInputDataFrame(self):
+		if self.inputDataFrame is not None: return self.inputDataFrame
+		dataFrames = self.getInputDataFrames()
+		hasMergeDataFrames = callable(getattr(self.tool, 'mergeDataFrames', None))
+		self.inputDataFrame = self.tool.mergeDataFrames(dataFrames, self.getArgs(dataFrame=None, objectify=True, raiseRequiredException=False)) if hasMergeDataFrames else self.mergeDataFrames(dataFrames)
+		self.setParametersFromDataframe(self.inputDataFrame)
+		return self.inputDataFrame
 
 	def setOutputMessage(self):
 		if hasattr(self.tool, 'outputMessage'):
@@ -352,14 +357,14 @@ class BiitToolNode(NodeBase):
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
 		print('------------compute:', self.name)
-		self.dataFrame = self.getDataFrame()
+		self.inputDataFrame = self.getInputDataFrame()
 		if callable(getattr(self.tool, 'processDataFrame', None)):
-			self.dataFrame = self.tool.processDataFrame(self.dataFrame, self.getArgs(objectify=True, raiseRequiredException=False))
-		self.setOutputColumns(self.dataFrame)
+			self.processedDataFrame = self.tool.processDataFrame(self.inputDataFrame, self.getArgs(self.inputDataFrame, objectify=True, raiseRequiredException=False))
+		self.setOutputColumns(self.processedDataFrame)
 		self.setOutputMessage()
-		self.setOutputAndClean(self.dataFrame)
-		ThumbnailGenerator.get().generateThumbnails(self.tool.name, self.dataFrame)
-		return self.dataFrame
+		self.setOutputAndClean(self.processedDataFrame)
+		ThumbnailGenerator.get().generateThumbnails(self.tool.name, self.processedDataFrame)
+		return self.processedDataFrame
 
 	def setOutputArgsFromDataFrame(self, args, outputData, index):
 		if outputData is None: return
@@ -400,9 +405,8 @@ class BiitToolNode(NodeBase):
 	def parameterIsUndefinedAndRequired(self, parameterName, inputs, row=None):
 		return any([toolInput.get('required') and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput['name'] == parameterName])
 	
-	def getArgs(self, objectify=False, raiseRequiredException=True):
+	def getArgs(self, dataFrame: pandas.DataFrame, objectify=False, raiseRequiredException=True):
 		argsList = []
-		dataFrame: pandas.DataFrame = self.dataFrame
 		if dataFrame is None or len(dataFrame) == 0:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
@@ -445,7 +449,7 @@ class BiitToolNode(NodeBase):
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
 			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
-		argsList = self.getArgs(objectify=False, raiseRequiredException=True)
+		argsList = self.getArgs(self.processedDataFrame, objectify=False, raiseRequiredException=True)
 		outputFolderPath = self.getOutputDataFolderPath()
 		dataFrames = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
 		for i, args in enumerate(argsList):

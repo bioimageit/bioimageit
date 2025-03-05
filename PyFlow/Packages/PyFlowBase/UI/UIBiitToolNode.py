@@ -49,9 +49,9 @@ class ColumnValueWidget(QWidget):
         self.typeSelector.addItem('Value')
         self.layout.addWidget(self.typeSelector)
         self.layout.addWidget(self.inputWidget)
-        data = node.getDataFrame()
+        data = node.getInputDataFrame()
         type = node.parameters['inputs'][self.name]['type']
-        isDataframe = isinstance(data, pandas.DataFrame)
+        isDataframe = isinstance(data, pandas.DataFrame) and len(data)>0
         node.inArray.setClean()
         defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1] if len(data.columns)>0 else None
         node.parameters['inputs'][self.name]['columnName'] = defaultColumnName

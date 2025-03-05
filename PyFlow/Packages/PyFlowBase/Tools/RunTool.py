@@ -488,7 +488,7 @@ class ExportWorkflowTool(ShelfTool):
 
     def exportDataFrame(self, node, outputFolder, workflowPath):
         dataFramePath = outputFolder / 'input_data_frame.csv'
-        dataFrame = node.getDataFrame()
+        dataFrame = node.processedDataFrame # node.getProcessedDataFrame()
         if isinstance(dataFrame, pandas.DataFrame):
             dataFrame.to_csv(dataFramePath)
             return dataFramePath.relative_to(workflowPath)

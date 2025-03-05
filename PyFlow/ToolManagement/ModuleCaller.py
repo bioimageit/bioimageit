@@ -4,7 +4,6 @@ import threading
 import traceback
 from importlib import import_module
 from multiprocessing.connection import Listener
-import munch
 
 sys.path.append('./') # Necessary to be able to import when running independently from PyFlow
 # from PyFlow.ToolManagement import host

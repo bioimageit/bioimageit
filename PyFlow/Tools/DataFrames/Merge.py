@@ -74,7 +74,7 @@ class Tool:
     outputs = [
     ]
 
-    def processDataFrames(self, dataFrames, argsList):
+    def mergeDataFrames(self, dataFrames, argsList):
         df = dataFrames[0]
         args = argsList[0]
         mergeArgs = vars(args)
