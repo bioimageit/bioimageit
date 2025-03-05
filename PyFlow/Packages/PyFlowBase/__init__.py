@@ -22,6 +22,7 @@ from PyFlow.Packages.PyFlowBase.Nodes.stickyNote import stickyNote
 from PyFlow.Packages.PyFlowBase.Tools.ScreenshotTool import ScreenshotTool
 from PyFlow.Packages.PyFlowBase.Tools.NodeBoxTool import NodeBoxTool
 from PyFlow.Packages.PyFlowBase.Tools.TableTool import TableTool
+from PyFlow.Packages.PyFlowBase.Tools.WebViewTool import WebViewTool
 from PyFlow.Packages.PyFlowBase.Tools.WorkflowTool import WorkflowTool
 from PyFlow.Packages.PyFlowBase.Tools.ExecutionTool import ExecutionTool
 from PyFlow.Packages.PyFlowBase.Tools.HistoryTool import HistoryTool
@@ -75,6 +76,7 @@ _TOOLS[LoggerTool.__name__] = LoggerTool
 _TOOLS[HistoryTool.__name__] = HistoryTool
 _TOOLS[NodeBoxTool.__name__] = NodeBoxTool
 _TOOLS[TableTool.__name__] = TableTool
+_TOOLS[WebViewTool.__name__] = WebViewTool
 _TOOLS[WorkflowTool.__name__] = WorkflowTool
 _TOOLS[ExecutionTool.__name__] = ExecutionTool
 try:

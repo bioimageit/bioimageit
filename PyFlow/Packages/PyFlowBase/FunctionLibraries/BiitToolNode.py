@@ -50,7 +50,7 @@ class BiitToolNode(NodeBase):
 		self.executed = None
 		self.executedChanged = Signal(bool)
 		self.tool = self.Tool()
-		multipleInputs = hasattr(self.Tool, 'multipleInputs') and self.Tool.multipleInputs
+		multipleInputs = getattr(self.Tool, 'multipleInputs', False)
 		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if multipleInputs else StructureType.Single, constraint="1")
 		self.inArray.enableOptions(PinOptions.AllowAny)
 		if multipleInputs:
@@ -340,8 +340,8 @@ class BiitToolNode(NodeBase):
 	def getDataFrame(self):
 		if self.dataFrame is not None: return self.dataFrame
 		dataFrames = self.getDataFrames()
-		hasProcessDataFrames = hasattr(self.tool, 'processDataFrames') and callable(self.tool.processDataFrames)
-		self.dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs(False)) if hasProcessDataFrames else self.mergeDataFrames(dataFrames)
+		hasProcessDataFrames = callable(getattr(self.tool, 'processDataFrames', None))
+		self.dataFrame = self.tool.processDataFrames(dataFrames, self.getArgs(objectify=True, raiseRequiredException=False)) if hasProcessDataFrames else self.mergeDataFrames(dataFrames)
 		self.setParametersFromDataframe(self.dataFrame)
 		return self.dataFrame
 
@@ -352,14 +352,14 @@ class BiitToolNode(NodeBase):
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
 		print('------------compute:', self.name)
-		dataFrame = self.getDataFrame()
-		if hasattr(self.tool, 'processDataFrame') and callable(self.tool.processDataFrame):
-			dataFrame = self.tool.processDataFrame(dataFrame, self.getArgs(False))
-		self.setOutputColumns(dataFrame)
+		self.dataFrame = self.getDataFrame()
+		if callable(getattr(self.tool, 'processDataFrame', None)):
+			self.dataFrame = self.tool.processDataFrame(self.dataFrame, self.getArgs(objectify=True, raiseRequiredException=False))
+		self.setOutputColumns(self.dataFrame)
 		self.setOutputMessage()
-		self.setOutputAndClean(dataFrame)
-		ThumbnailGenerator.get().generateThumbnails(self.tool.name, dataFrame)
-		return dataFrame
+		self.setOutputAndClean(self.dataFrame)
+		ThumbnailGenerator.get().generateThumbnails(self.tool.name, self.dataFrame)
+		return self.dataFrame
 
 	def setOutputArgsFromDataFrame(self, args, outputData, index):
 		if outputData is None: return
@@ -400,9 +400,9 @@ class BiitToolNode(NodeBase):
 	def parameterIsUndefinedAndRequired(self, parameterName, inputs, row=None):
 		return any([toolInput.get('required') and self.getParameter(parameterName, row) is None for toolInput in inputs if toolInput['name'] == parameterName])
 	
-	def getArgs(self, raiseRequiredException=True):
+	def getArgs(self, objectify=False, raiseRequiredException=True):
 		argsList = []
-		dataFrame: pandas.DataFrame = self.outArray.currentData()
+		dataFrame: pandas.DataFrame = self.dataFrame
 		if dataFrame is None or len(dataFrame) == 0:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
@@ -419,9 +419,10 @@ class BiitToolNode(NodeBase):
 						raise Exception(f'The parameter {parameterName} is undefined, but required.')
 					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
 				self.setOutputArgsFromDataFrame(args, dataFrame, index)
-				args['idf_row'] = row
+				if getattr(self.tool, 'setRowInArgs', False):
+					args['idf_row'] = row
 				argsList.append(args)
-		return [Munch.fromDict(args) for args in argsList]
+		return [Munch.fromDict(args) for args in argsList] if objectify else argsList
 
 	@classmethod
 	def logLine(cls, line):
@@ -439,12 +440,12 @@ class BiitToolNode(NodeBase):
 		return
 	
 	def execute(self):
-		additionalInstallCommands = self.Tool.additionalInstallCommands if hasattr(self.Tool, 'additionalInstallCommands') else None
-		additionalActivateCommands = self.Tool.additionalActivateCommands if hasattr(self.Tool, 'additionalActivateCommands') else None
+		additionalInstallCommands = getattr(self.tool, 'additionalInstallCommands', None)
+		additionalActivateCommands = getattr(self.tool, 'additionalActivateCommands', None)
 		self.__class__.environment = environmentManager.createAndLaunch(self.Tool.environment, self.Tool.dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment='bioimageit')
 		if self.__class__.environment.process is not None:
 			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
-		argsList = self.getArgs()
+		argsList = self.getArgs(objectify=False, raiseRequiredException=True)
 		outputFolderPath = self.getOutputDataFolderPath()
 		dataFrames = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
 		for i, args in enumerate(argsList):
@@ -463,7 +464,7 @@ class BiitToolNode(NodeBase):
 	def saveArgsList(self, argsList, outputFolder):
 		if argsList is None: return
 		with open(outputFolder / PARAMETERS_PATH, 'w') as f:
-			json.dump(argsList, f, default=lambda value: value.to_json(default_handler=str) if hasattr(value, 'to_json') and callable(value.to_json) else str(value))
+			json.dump(argsList, f, default=lambda value: value.to_json(default_handler=str) if callable(getattr(value, 'to_json', None)) else str(value))
 
 	def finishExecution(self, argsList):
 		outputFolder = self.getOutputMetadataFolderPath()

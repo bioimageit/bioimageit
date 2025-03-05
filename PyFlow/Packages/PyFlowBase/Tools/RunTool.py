@@ -183,11 +183,11 @@ class RunTool(ShelfTool):
     
     @staticmethod
     def wasExecuted(node):
-        return hasattr(node, 'executed') and node.executed
+        return getattr(node, 'executed', False)
     
     @staticmethod
     def isPlanned(node):
-        return hasattr(node, 'planned') and node.planned
+        return getattr(node, 'planned', False)
 
     @staticmethod
     def mustExecute(node):

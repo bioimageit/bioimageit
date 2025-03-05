@@ -5,6 +5,13 @@ from contextlib import contextmanager
 
 tool = None
 moduleImportPath = None
+class DictToObject(object):
+    def __init__(self, d):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                setattr(self, key, DictToObject(value))
+            else:
+                setattr(self, key, value)
 
 @contextmanager
 def safe_chdir(path):
@@ -15,7 +22,7 @@ def safe_chdir(path):
     finally:
         os.chdir(currentPath)
 
-def initialize(newModuleImportPath: str, args: list[str], toolsPath:Path):
+def initialize(newModuleImportPath: str, args: dict, toolsPath:Path):
     global tool, moduleImportPath
     toolMustBeImported = moduleImportPath != newModuleImportPath
     if toolMustBeImported:
@@ -28,7 +35,8 @@ def initialize(newModuleImportPath: str, args: list[str], toolsPath:Path):
         tool.initialize(args)
     return tool, args
 
-def processData(moduleImportPath: str, args: list[str], nodeOutputPath:Path, toolsPath:Path):
+def processData(moduleImportPath: str, args: dict, nodeOutputPath:Path, toolsPath:Path):
+    args = DictToObject(args)
     tool, args = initialize(moduleImportPath, args, toolsPath)
     result = None
     if hasattr(tool, 'processData') and callable(tool.processData):
@@ -38,11 +46,10 @@ def processData(moduleImportPath: str, args: list[str], nodeOutputPath:Path, too
 
 def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:Path, toolsPath:Path):
     # Initialize with the args of the first row, convert them to a list of string before use
-    # args0 = argToList(argsList[0])
     result = None
     if len(argsList) == 0: return result
-    args0 = argsList[0]
-    tool, _ = initialize(moduleImportPath, args0, toolsPath)
+    argsList = [DictToObject(args) for args in argsList]
+    tool, _ = initialize(moduleImportPath, argsList[0], toolsPath)
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
         with safe_chdir(nodeOutputPath):

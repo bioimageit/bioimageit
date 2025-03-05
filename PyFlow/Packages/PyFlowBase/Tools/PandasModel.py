@@ -1,9 +1,8 @@
 from PySide6.QtCore import QPersistentModelIndex
 import pandas as pd
 from pathlib import Path
-from qtpy.QtGui import QPixmap, QIcon
-from qtpy.QtCore import QAbstractTableModel, Qt, QModelIndex, QSize
-from qtpy import QtCore, QtWidgets
+from qtpy.QtGui import QPixmap
+from qtpy.QtCore import QAbstractTableModel, Qt, QModelIndex
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 
