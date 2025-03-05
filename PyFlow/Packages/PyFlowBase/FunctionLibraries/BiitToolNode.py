@@ -402,23 +402,23 @@ class BiitToolNode(NodeBase):
 	
 	def getArgs(self, raiseRequiredException=True):
 		argsList = []
-		# dataFrame: pandas.DataFrame = self.outArray.currentData()
-		if self.dataFrame is None or len(self.dataFrame) == 0:
+		dataFrame: pandas.DataFrame = self.outArray.currentData()
+		if dataFrame is None or len(dataFrame) == 0:
 			args = {}
 			for parameterName, parameter in self.parameters['inputs'].items():
 				if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs) and raiseRequiredException:
 					raise Exception(f'The parameter {parameterName} is undefined, but required.')
 				self.setArg(args, parameterName, parameter, parameter['value'], None)
-			self.setOutputArgsFromDataFrame(args, self.dataFrame, 0)
+			self.setOutputArgsFromDataFrame(args, dataFrame, 0)
 			argsList.append(args)
 		else:
-			for index, row in self.dataFrame.iterrows():
+			for index, row in dataFrame.iterrows():
 				args = {}
 				for parameterName, parameter in self.parameters['inputs'].items():
 					if self.parameterIsUndefinedAndRequired(parameterName, self.tool.inputs, row) and raiseRequiredException:
 						raise Exception(f'The parameter {parameterName} is undefined, but required.')
 					self.setArg(args, parameterName, parameter, self.getParameter(parameterName, row), index)
-				self.setOutputArgsFromDataFrame(args, self.dataFrame, index)
+				self.setOutputArgsFromDataFrame(args, dataFrame, index)
 				args['idf_row'] = row
 				argsList.append(args)
 		return [Munch.fromDict(args) for args in argsList]

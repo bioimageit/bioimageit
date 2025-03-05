@@ -29,10 +29,8 @@ class Tool:
     def processDataFrame(self, dataFrame: pandas.DataFrame, argsList):
         args = argsList[0]
         df: pandas.DataFrame = dataFrame.copy()
-        regex = args.regex
-        columnName = args.columnName
         for index, row in dataFrame.iterrows():
-            m = re.search(regex, str(row[columnName]))
+            m = re.search(args.regex, str(row[args.columnName]))
             if m is None: continue
             for key, value in m.groupdict().items():
                 df.at[index, key] = value

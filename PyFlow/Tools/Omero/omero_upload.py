@@ -190,6 +190,19 @@ class Tool(OmeroBase):
     #         else:
     #             raise Exception(f'OMERO service can only import tiff images (format={format_})')  
 
+    def addAnnotations(self, connection, key_value_pairs, image_ids):
+        if key_value_pairs is None: return
+        keys_value_list = [ [key, str(value)] for key, value in key_value_pairs.items() ]
+        if len(keys_value_list) > 0:
+            map_ann = omero.gateway.MapAnnotationWrapper(connection)
+            namespace = omero.constants.metadata.NSCLIENTMAPANNOTATION
+            map_ann.setNs(namespace)
+            map_ann.setValue(keys_value_list)
+            map_ann.save()
+            for image_id in image_ids:
+                image = connection.getObject("Image", image_id)
+                image.linkAnnotation(map_ann)
+
     def importImage(self, connection, args, key_value_pairs):
 
         dataset = connection.getObject('Dataset', args.dataset_id)
@@ -206,30 +219,20 @@ class Tool(OmeroBase):
         rsp = full_import(connection.c, args.image, -1)
 
         if rsp:
+            image_ids = [p.image.id.val for p in rsp.pixels]
             links = []
             for p in rsp.pixels:
                 print ('Imported Image ID: %d' % p.image.id.val)
                 if args.dataset_id:
                     link = omero.model.DatasetImageLinkI()
-                    link.parent = omero.model.DatasetI(args.dataset_id, False)
-                    link.child = omero.model.ImageI(p.image.id.val, False)
-
-                    # add key value pairs
-                    keys_value_list = []
-                    if len(key_value_pairs)!=0:
-                        for key, value in key_value_pairs.items():
-                            keys_value_list.append([key, value])
-                        if len(keys_value_list) > 0:
-                            map_ann = omero.gateway.MapAnnotationWrapper(connection)
-                            namespace = omero.constants.metadata.NSCLIENTMAPANNOTATION
-                            map_ann.setNs(namespace)
-                            map_ann.setValue(keys_value_list)
-                            map_ann.save()
-                            p.image.linkAnnotation(map_ann)
-                            # image = connection.getObject("Image", image_id)
-                            # image.linkAnnotation(map_ann)
+                    # link.parent = omero.model.DatasetI(args.dataset_id, False)
+                    # link.child = omero.model.ImageI(p.image.id.val, False)
+                    link.setChild(omero.model.ImageI(p.image.id.val, False))
+                    link.setParent(omero.model.DatasetI(args.dataset_id, False))
                     links.append(link)
             connection.getUpdateService().saveArray(links, connection.SERVICE_OPTS)
+
+            self.addAnnotations(connection, key_value_pairs, image_ids)
 
     def processAllData(self, argsList):
         
