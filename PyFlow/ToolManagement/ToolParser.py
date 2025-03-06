@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 from pydoc import locate
 
-specialKeys = ['name', 'autoColumn', 'autoIncrement', 'shortname', 'advanced']
+specialKeys = ['name', 'autoColumn', 'autoIncrement', 'shortname', 'advanced', 'decimals']
 
 def add_argument(parser: argparse._ArgumentGroup, arg: dict):
     if 'type' in arg and arg['type'] == 'bool':

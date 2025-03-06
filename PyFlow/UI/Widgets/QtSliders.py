@@ -412,7 +412,7 @@ class valueBox(QtWidgets.QDoubleSpinBox):
         labelText="",
         type="float",
         buttons=False,
-        decimals=3,
+        decimals=6,
         draggerSteps=FLOAT_SLIDER_DRAG_STEPS,
         *args,
         **kwargs,

@@ -39,7 +39,7 @@ class ColumnValueWidget(QWidget):
     def __init__(self, input, node, parent=None):
         super(ColumnValueWidget, self).__init__(parent=parent)
         self.name = input['name']
-        self.inputWidget = self.createInput(self.name, input['type'], input['help'], input.get('default'), input.get('choices'))
+        self.inputWidget = self.createInput(self.name, input['type'], input['help'], input.get('default'), input.get('choices'), input.get('decimals'))
         self.node = node
         self.setContentsMargins(0, 0, 0, 0)
         self.layout = QHBoxLayout(self)
@@ -95,18 +95,14 @@ class ColumnValueWidget(QWidget):
         return self.ioTypeToPinType[ioType] if ioType in self.ioTypeToPinType else 'StringPin'
 
     # inputWidgetVariant: PathWidget, FilePathWidget, FolderPathWidget, ObjectPathWidth, EnumWidget
-    def createInput(self, name, type, description, defaultValue, selectInfo):
-        if type == 'select':
+    def createInput(self, name, type, description, defaultValue, choices, decimals=3):
+        if choices is not None and len(choices)>0:
             w = QComboBox()
-            for name in selectInfo.names:
+            for name in choices:
                 w.addItem(name)
             #TODO
-            # for BiitArrayNodes, selectInfo.values is built with Munch with Munch(dict(names=names, values=values)), so it should be a list. 
-            # But values has a special meaning in dict, so it is a function instead of a list.
-            # So if selectInfo.values is a function: use selectInfo['values'] instead (which is indeed the value list we want)
-            selectInfoValues = selectInfo.values if isinstance(selectInfo.values, list) else selectInfo['values']
-            w.setCurrentIndex(selectInfoValues.index(defaultValue) if defaultValue in selectInfoValues else 0)
-            w.activated.connect(lambda index: self.updateNodeParameterValue(selectInfoValues[index]))
+            w.setCurrentIndex(choices.index(defaultValue) if defaultValue in choices else 0)
+            w.activated.connect(lambda index: self.updateNodeParameterValue(choices[index]))
             w.setToolTip(description)
             w.setObjectName(name)
             return w
@@ -117,6 +113,8 @@ class ColumnValueWidget(QWidget):
             defaultValue,
             inputWidgetVariant
         )
+        if type == 'float':
+            w.sb.setDecimals(decimals)
         if w:
             w.setToolTip(description)
             if defaultValue is not None and defaultValue != '':

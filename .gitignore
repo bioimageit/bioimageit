@@ -5,6 +5,7 @@
 *.pyc
 **/.DS_Store
 **/test-data/
+PyFlow/Tools/*/data/
 **/Fiji.app/
 Workflows
 BioImage-IT.data/

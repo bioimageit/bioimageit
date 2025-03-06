@@ -31,6 +31,7 @@ class Tool:
                 shortname = 'pval',
                 help = 'P-value to account for the probability of false detection.',
                 default = 0.001,
+                decimals = 6,
                 type = 'float',
             ),
             dict(
@@ -38,6 +39,7 @@ class Tool:
                 shortname = 'arealim',
                 help = 'Remove detections smaller than this area.',
                 default = 0,
+                decimals = 2,
                 type = 'float',
             ),
             dict(
@@ -62,15 +64,17 @@ class Tool:
         if not args.input_image.exists():
             raise Exception(f'Error: input image {args.input_image} does not exist.')
 
-        blobsFileExists = Path('blobs.txt').exists()
+        blobsFile = Path(__file__).resolve() / 'data' / 'blobs.txt'
+        blobsFile.parent.mkdir(exist_ok=True)
+        blobsFileExists = blobsFile.exists()
         nSteps = 1 if blobsFileExists else 2
         if not blobsFileExists:
             print(f'[[1/{nSteps}]] Run Blobsref')
-            subprocess.run(['blobsref'], check=True)
+            subprocess.run(['blobsref', '-o', blobsFile], check=True)
 
         print(f'[[{nSteps}/{nSteps}]] Run Atlas')
         verbose = ['-v'] if args.verbose else []
-        command = ['atlas', '-i', args.input_image, '-o', args.output_image, '-rad', args.gaussian_std, '-pval', args.p_value] + verbose
+        command = ['atlas', '-ref', blobsFile, '-i', args.input_image, '-o', args.output_image, '-rad', args.gaussian_std, '-pval', args.p_value] + verbose
 
         subprocess.run([str(c) for c in command], check=True)
 
