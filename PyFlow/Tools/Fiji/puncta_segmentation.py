@@ -45,6 +45,7 @@ class Tool:
         self.Overlay = sj.jimport('ij.gui.Overlay')
         self.Table = sj.jimport('org.scijava.table.Table')
         self.ParticleAnalyzer = sj.jimport('ij.plugin.filter.ParticleAnalyzer')
+    
     def processData(self, args):
         if not args.input_image.exists():
             raise Exception(f'Error: input image {args.input_image} does not exist.')

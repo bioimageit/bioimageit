@@ -98,7 +98,7 @@ class ProgressDialog(QWidget):
 
     def getProgressPercentage(self):
         if self.nNodes is None or self.nNodes == 0: return 0
-        nodePercentage = 100.0 / self.nNodes
+        nodePercentage = 100.0 / (self.nNodes+1)
         percentage = self.currentNode * nodePercentage
         if self.nRows is None: return percentage
         percentage += self.currentRow * nodePercentage / self.nRows
@@ -248,11 +248,12 @@ class RunTool(ShelfTool):
         return
     
     def displayError(self, exception):
-        message = QMessageBox(self.pyFlowInstance)
-        message.setWindowTitle('Error during execution')
+        dialog = QMessageBox(self.pyFlowInstance)
+        dialog.setWindowTitle('Error during execution')
         # exceptionString = str(exception)
         # exceptionString = exceptionString if len(exceptionString) < 40 else f'{exceptionString[:15]} ... {exceptionString[-15:]}'
-        text = f'An error occured during the execution of the process:\n\n{str(exception)}'
+        message = exception.exception if hasattr(exception, 'exception') else str(exception)
+        text = f'An error occured during the execution of the process:\n\n{message}'
         self.log(text, logging.ERROR)
 
         classText = f'Class: {exception.__class__}'
@@ -264,9 +265,9 @@ class RunTool(ShelfTool):
             self.log(line, logging.ERROR)
             detailedText += line + '\n'
         
-        message.setText(text)
-        message.setDetailedText(detailedText)
-        message.exec()
+        dialog.setText(text)
+        dialog.setDetailedText(detailedText)
+        dialog.exec()
 
         ErrorManager.report(text)
         # text += f'(Class: {exception.__class__})'
@@ -321,6 +322,8 @@ class RunTool(ShelfTool):
         self.executing = True
         try:
             for n, node in enumerate(plannedNodes):
+                self.log(f'\n==============================')
+                self.log(f'==============================')
                 self.log(f'Process node [[{n}/{len(plannedNodes)}]]: {node.name}')
                 self.currentNode = node
                 self.execute(node)
@@ -341,12 +344,9 @@ class RunTool(ShelfTool):
             inmain(lambda: self.displayError(e))
 
         except Exception as e:
-
             print(e)
-
             for line in traceback.format_tb(e.__traceback__):
                 logger.error(line)
-            
             inmain(lambda: self.displayError(e))
         
         self.executing = False

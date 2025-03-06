@@ -90,7 +90,6 @@ def convert_script(script_path, tool_description):
     
     print()
     print(script_path)
-    import ipdb ; ipdb.set_trace()
 
     # Extract the content before the getArgumentParser function
     before_gap_match = re.search(r'(.*?)(?=def getArgumentParser\(.*?\):)', content, re.DOTALL)

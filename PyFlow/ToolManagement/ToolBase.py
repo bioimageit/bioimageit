@@ -22,7 +22,7 @@ def safe_chdir(path):
     finally:
         os.chdir(currentPath)
 
-def initialize(newModuleImportPath: str, args: dict, toolsPath:Path):
+def initialize(newModuleImportPath: str, args: dict, nodeOutputPath:Path, toolsPath:Path):
     global tool, moduleImportPath
     toolMustBeImported = moduleImportPath != newModuleImportPath
     if toolMustBeImported:
@@ -32,15 +32,19 @@ def initialize(newModuleImportPath: str, args: dict, toolsPath:Path):
         tool = module.Tool()
         moduleImportPath = newModuleImportPath
     if toolMustBeImported and hasattr(tool, 'initialize') and callable(tool.initialize):
-        tool.initialize(args)
+        with safe_chdir(nodeOutputPath):
+            tool.initialize(args)
     return tool, args
 
 def processData(moduleImportPath: str, args: dict, nodeOutputPath:Path, toolsPath:Path):
     args = DictToObject(args)
-    tool, args = initialize(moduleImportPath, args, toolsPath)
+    tool, args = initialize(moduleImportPath, args, nodeOutputPath, toolsPath)
     result = None
     if hasattr(tool, 'processData') and callable(tool.processData):
+        print(os.getcwd())
+        print('nodeOutputPath', nodeOutputPath)
         with safe_chdir(nodeOutputPath):
+            print(os.getcwd())
             result = tool.processData(args)
     return result
 
@@ -49,7 +53,7 @@ def processAllData(moduleImportPath: str, argsList: list[dict], nodeOutputPath:P
     result = None
     if len(argsList) == 0: return result
     argsList = [DictToObject(args) for args in argsList]
-    tool, _ = initialize(moduleImportPath, argsList[0], toolsPath)
+    tool, _ = initialize(moduleImportPath, argsList[0], nodeOutputPath, toolsPath)
     nodeOutputPath.mkdir(exist_ok=True, parents=True)
     if hasattr(tool, 'processAllData') and callable(tool.processAllData):
         with safe_chdir(nodeOutputPath):

@@ -58,7 +58,9 @@ class Tool(ExoDeepFinderTool):
         args = argsList[0]
         inputDatasetPath = Path(args.movies_folder)
         output = args.output
-        print(f'Structure training dataset from {inputDatasetPath} to {output}')
+        if output.is_dir() and len(list(output.iterdir()))>0:
+            raise Exception(f'The output folder "{output}" is not empty. Please empty it before structuring the training dataset.')
+        print(f'Structure training dataset from "{inputDatasetPath}" to "{output}"')
         commandArgs = ['edf_structure_training_dataset', '-i', inputDatasetPath, '-s', args.split, '-m', args.movie, '-ms', args.merged_segmentation, '-ma', args.merged_annotation, '-o', output]
         subprocess.run([str(arg) for arg in commandArgs], check=True)
 

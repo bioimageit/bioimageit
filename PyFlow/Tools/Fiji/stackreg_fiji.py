@@ -22,6 +22,8 @@ class Tool:
                                             'unzip -o fiji-2.14.0-macosx.zip',
                                             'rm fiji-2.14.0-macosx.zip',
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'])
+    # additionalActivateCommands = dict(all=[], mac=['export JAVA_HOME="$CONDA_PREFIX/lib/jvm/"', 'export DYLD_LIBRARY_PATH="/usr/local/lib/"'], windows=['$env:JAVA_HOME = "$env:CONDA_PREFIX\Library\lib\jvm"'])
+
     environment = 'fiji'
     test = ['--input_image', 'celegans_stack.tif', '--output_image', 'stackreg.tif']
         
@@ -67,7 +69,7 @@ class Tool:
         macroPath = str(Path(__file__).parent.resolve() / 'StackReg' / 'stackreg.ijm')
         transformation = args.transformation.replace(' ', '_')
         pluginsArgs = ['--plugins', str(Path(__file__).parent.resolve() / 'Fiji.app/plugins/')] if platform.system() == 'Darwin' else []
-        command = [fijiPath, '--headless', '--console'] + pluginsArgs + ['-macro', macroPath, f'[{args.input_image},{transformation},{args.output_image}]']
+        command = [fijiPath, '--headless', '--console'] + pluginsArgs + ['-macro', macroPath, f'[{args.input_image.resolve()},{transformation},{args.output_image}]']
         print('Execute:', command)
         subprocess.run(command, check=True)
         

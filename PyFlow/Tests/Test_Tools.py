@@ -5,9 +5,9 @@ import logging
 import shutil
 from importlib import import_module
 from pathlib import Path
-from munch import Munch
+from PyFlow.ToolManagement.ToolParser import create_parser
 from PyFlow import getImportPath, getRootPath
-from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException, DirectEnvironment
+from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler, IncompatibilityException
 
 environmentManager.setCondaPath(getRootPath() / 'micromamba')
 # environmentManager.environments['bioimageit'] = DirectEnvironment('bioimageit')  # Initialize default installed dependencies for the bioimageit env
@@ -65,6 +65,10 @@ class TestGeneral(unittest.TestCase):
             if moduleImportPath in validated_tools: continue
             module = import_module(moduleImportPath)
             if not hasattr(module, 'Tool'): continue
+            print(f'\n==============================')
+            print(f'==============================')
+            print(f'Test {moduleImportPath}')
+            print(f'Path: {toolPath}')
             if hasattr(module.Tool, 'test'):
                 
                 additionalInstallCommands = module.Tool.additionalInstallCommands if hasattr(module.Tool, 'additionalInstallCommands') else None
@@ -84,16 +88,18 @@ class TestGeneral(unittest.TestCase):
                 
                 print(f'executing processData')
 
-                outputFolderPath = (toolPath.parent / 'test-data').resolve()
+                nodeOutputPath = (toolPath.parent / 'test-data').resolve()
 
-                args = module.Tool.test
-                args = [arg if arg.startswith('--') else str((outputFolderPath / arg).resolve()) if (outputFolderPath / arg).exists() else arg for arg in args]
-                environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, args, outputFolderPath, toolPath])
-
-                validated_tools.append(moduleImportPath)
-                
-                with open(toolValidationPath, 'w') as f:
-                    json.dump(dict(git_revision_hash=get_git_revision_hash(), validated_tools=validated_tools), f)
+                try:
+                    parser = create_parser(module.Tool)
+                    args = vars(parser.parse_args(module.Tool.test))
+                    environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [moduleImportPath, args, nodeOutputPath, toolPath])
+                    
+                    validated_tools.append(moduleImportPath)
+                    with open(toolValidationPath, 'w') as f:
+                        json.dump(dict(git_revision_hash=get_git_revision_hash(), validated_tools=validated_tools), f)
+                except Exception as e:
+                    raise e
 
 
 # testTools(toolsPath)

@@ -54,7 +54,6 @@ def workflow():
     initializeNode(extractChannel0)
     initializeNode(extractChannel1)
 
-
     concatDataFrames = ConcatDataFrames('Concat DataFrames')
     initializeNode(concatDataFrames)
 

@@ -20,7 +20,7 @@ tool = module.Tool()
 
 parser = create_parser(tool)
 
-args = parser.parse_args(sys.argv[2:])
+args = vars(parser.parse_args(sys.argv[2:]))
 if hasattr(tool, 'initialize') and callable(tool.initialize):
     tool.initialize(args)
 

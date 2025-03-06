@@ -61,7 +61,8 @@ It is possible to run and debug the project with Visual Studio Code by selecting
 
 ## Tests
 
-Run `python -m unittest PyFlow/Tests/Test_Tools.py` in the default env (run `pixi shell` to activate the default env) to execute the Tools tests.
+Run `python -m unittest PyFlow/Tests/Test_Tools.py` in the defaut env (run `pixi shell` to activate the default env) to execute the Tools tests.
+Or use `ipython -m unittest --pdb PyFlow/Tests/Test_Tools.py` in the dev env (`pixi shell -e dev`) but ipython will not exactly break on exception when running unit tests.
 
 ## Packaging
 
