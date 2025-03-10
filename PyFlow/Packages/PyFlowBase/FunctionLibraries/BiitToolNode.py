@@ -2,9 +2,7 @@ from pathlib import Path
 import json
 import re
 import pandas
-from munch import Munch
 import logging
-import subprocess
 
 from PyFlow import PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH
 from PyFlow.invoke_in_main import inthread, inmain
@@ -13,6 +11,7 @@ from PyFlow.Core.EvaluationEngine import EvaluationEngine
 from PyFlow.Core.NodeBase import NodePinsSuggestionsHelper
 from PyFlow.Core.GraphManager import GraphManagerSingleton
 from PyFlow.Core.Common import StructureType, PinOptions
+from PyFlow.ToolManagement.ToolBase import DictToObject
 from PyFlow.ToolManagement.EnvironmentManager import environmentManager, Environment, attachLogHandler
 from PyFlow.ThumbnailManagement.ThumbnailGenerator import ThumbnailGenerator
 from send2trash import send2trash
@@ -294,43 +293,60 @@ class BiitToolNode(NodeBase):
 				outputValue = outputValue.replace(f'{{{name}.exts}}', ''.join(Path(input).suffixes))
 		return outputValue
 
+	def replaceOutputKeywords(self, value, outputName, output, row, index):
+		finalValue = str(value)
+		
+		# Check that [workflow_folder] and [node_folder] are used at the beginning of the finalValue (if used at all)
+		for name in ['[workflow_folder]', '[node_folder]']:
+			if name in finalValue and not finalValue.startswith(name):
+				raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {outputName}.')
+		
+		# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
+		finalValue = self.replaceInputArgs(finalValue, (lambda name, row=row: self.getParameter(name, row)) )
+		
+		# Check for (columnName) and replace by the row value at this column
+		for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', finalValue):
+			if columnName in row:
+				finalValue = finalValue.replace(f'({columnName})', str(row[columnName]))
+
+		# If finalValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
+		if ('[workflow_folder]' not in finalValue) and ('[node_folder]' not in finalValue) and (not Path(finalValue).is_absolute()):
+			finalValue = '[node_folder]/' + finalValue
+		
+		finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
+		finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
+		finalValue = finalValue.replace('[index]', str(index))
+		if output.get('extension') is not None:
+			finalValue = finalValue.replace('[ext]', output.get('extension'))
+		return finalValue
+
+	def prefixExtensionsWithIndex(s):
+		pattern = r"(\{\w+\.(exts|ext)\})$"
+		result = re.sub(pattern, r"[index]\1", s.replace('[ext]', '[index][ext]'))
+		return result if '[index]' in result else result.replace(Path(result).suffix, '[index]' + Path(result).suffix)
+
 	def setOutputColumns(self, data):
 		if data is None: return
 		for outputName, output in self.parameters['outputs'].items():
 			if output['dataType'] != 'Path': continue
-			
+			columnName = self.getColumnName(outputName)
+			series = pandas.Series(data={}, index=data.index)
 			for index, row in data.iterrows():
 
 				if output.get('value') is None:
 					extension = output.get('extension', '') or ''
-					finalValue = self.getWorkflowDataPath() / self.name / f'{outputName}_{index}{extension}'
+					series.at[index] = self.getWorkflowDataPath() / self.name / f'{outputName}_{index}{extension}'
 				else:
-					finalValue = str(output['value'])
-					
-					# Check that [workflow_folder] and [node_folder] are used at the beginning of the finalValue (if used at all)
-					for name in ['[workflow_folder]', '[node_folder]']:
-						if name in finalValue and not finalValue.startswith(name):
-							raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {outputName}.')
-					
-					# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
-					finalValue = self.replaceInputArgs(finalValue, (lambda name, row=row: self.getParameter(name, row)) )
-					
-					# Check for (columnName) and replace by the row value at this column
-					for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', finalValue):
-						if columnName in row:
-							finalValue = finalValue.replace(f'({columnName})', str(row[columnName]))
-
-					# If finalValue is relative but does not contain [workflow_folder] nor [node_folder]: make it relative to the node_folder
-					if ('[workflow_folder]' not in finalValue) and ('[node_folder]' not in finalValue) and (not Path(finalValue).is_absolute()):
-						finalValue = '[node_folder]/' + finalValue
-					
-					finalValue = finalValue.replace('[workflow_folder]', str(self.getWorkflowDataPath()))
-					finalValue = finalValue.replace('[node_folder]', str(self.getWorkflowDataPath() / self.name))
-					finalValue = finalValue.replace('[index]', str(index))
-					if output.get('extension') is not None:
-						finalValue = finalValue.replace('[ext]', output.get('extension'))
-
-				data.at[index, self.getColumnName(outputName)] = finalValue
+					series.at[index] = self.replaceOutputKeywords(output['value'], outputName, output, row, index)
+				
+			# Remove duplicates by adding [index] before the file extension
+			for index, row in data.iterrows():
+				value = series.at[index]
+				# If the value appears more than once in the row: suffix it with index
+				if series.value_counts()[value] > 1:
+					data.at[index, columnName] = self.replaceOutputKeywords(self.prefixExtensionsWithIndex(output['value']), outputName, output, row, index)
+				else:
+					data.at[index, columnName] = value
 
 	def mergeDataFrames(self, dataFrames):
 		if len(dataFrames)==0: return pandas.DataFrame()
@@ -425,7 +441,7 @@ class BiitToolNode(NodeBase):
 				if getattr(self.tool, 'setRowInArgs', False):
 					args['idf_row'] = row
 				argsList.append(args)
-		return [Munch.fromDict(args) for args in argsList] if objectify else argsList
+		return [DictToObject(args) for args in argsList] if objectify else argsList
 
 	@classmethod
 	def logLine(cls, line):

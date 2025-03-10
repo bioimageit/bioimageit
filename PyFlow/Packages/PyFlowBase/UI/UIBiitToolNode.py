@@ -114,7 +114,7 @@ class ColumnValueWidget(QWidget):
             inputWidgetVariant
         )
         if type == 'float':
-            w.sb.setDecimals(decimals)
+            w.sb.setDecimals(decimals if decimals is not None else 3)
         if w:
             w.setToolTip(description)
             if defaultValue is not None and defaultValue != '':

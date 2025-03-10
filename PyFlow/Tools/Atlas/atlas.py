@@ -64,7 +64,7 @@ class Tool:
         if not args.input_image.exists():
             raise Exception(f'Error: input image {args.input_image} does not exist.')
 
-        blobsFile = Path(__file__).resolve() / 'data' / 'blobs.txt'
+        blobsFile = Path(__file__).parent.resolve() / 'data' / 'blobs.txt'
         blobsFile.parent.mkdir(exist_ok=True)
         blobsFileExists = blobsFile.exists()
         nSteps = 1 if blobsFileExists else 2

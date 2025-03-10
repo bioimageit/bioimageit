@@ -41,10 +41,7 @@ def processData(moduleImportPath: str, args: dict, nodeOutputPath:Path, toolsPat
     tool, args = initialize(moduleImportPath, args, nodeOutputPath, toolsPath)
     result = None
     if hasattr(tool, 'processData') and callable(tool.processData):
-        print(os.getcwd())
-        print('nodeOutputPath', nodeOutputPath)
         with safe_chdir(nodeOutputPath):
-            print(os.getcwd())
             result = tool.processData(args)
     return result
 

@@ -35,6 +35,8 @@ class Tool:
             raise Exception(f'Error: input image {args.image} does not exist.')
         inputImage = sitk.ReadImage(args.image)
         if 'vector' in inputImage.GetPixelIDTypeAsString():
-            nChannels = inputImage.ToScalarImage().GetSize()[0]-1
-            inputImage = inputImage[min(args.channel, nChannels), :, :]
-        sitk.WriteImage(inputImage, args.out)
+            nChannels = inputImage.ToScalarImage().GetSize()[0]
+            outputImage = inputImage[min(args.channel, nChannels), :, :]
+        else:
+            outputImage = inputImage[:,:, min(args.channel, inputImage.GetSize()[-1])]
+        sitk.WriteImage(outputImage, args.out)

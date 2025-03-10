@@ -1,3 +1,4 @@
+import pandas
 
 class Tool:
 
@@ -10,8 +11,9 @@ class Tool:
             dict(
             name = 'how',
             help = 'How',
+            choices = ['left', 'right', 'outer', 'inner', 'cross'],
             type = 'str',
-            default = None,
+            default = 'inner',
             static=True
         ),
         dict(
@@ -75,12 +77,12 @@ class Tool:
     ]
 
     def mergeDataFrames(self, dataFrames, argsList):
+        if len(dataFrames)==0 or len(argsList)==0: return pandas.DataFrame()
         df = dataFrames[0]
         args = argsList[0]
         mergeArgs = vars(args)
-        del mergeArgs['left_suffix']
-        del mergeArgs['right_suffix']
         mergeArgs['suffixes'] = (args.left_suffix, args.right_suffix)
+        mergeArgs = {key: value for key, value in mergeArgs.items() if value is not None and key not in ['left_suffix', 'right_suffix']}
         for i in range(len(dataFrames)-1):
             df = df.merge(dataFrames[i+1], **mergeArgs)
         return df
