@@ -2,23 +2,28 @@ import subprocess
 import platform
 from pathlib import Path
 
+dataPath = Path(__file__).parent.resolve() / 'path'
+dataPath.mkdir(exist_ok=True)
+
 class Tool:
 
     categories = ['Format conversion']
     # dependencies = dict(conda=['bioconda::bftools'], pip=[])
     dependencies = dict(conda=['conda-forge::openjdk=11'], pip=[])
     additionalInstallCommands = dict(all=[], 
-                                     windows=[f'Set-Location -Path "{Path(__file__).parent.resolve()}"',
+                                     windows=[f'Set-Location -Path "{dataPath}"',
                                               f'Invoke-WebRequest -URI https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip -OutFile bftools.zip',
                                               f'Expand-Archive -Force bftools.zip',
                                               f'Remove-Item bftools.zip'],
-                                     linux=[f'cd {Path(__file__).parent.resolve()}',
+                                     linux=[f'cd {dataPath}',
                                             'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
                                             'unzip -o bftools.zip',
+                                            'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'], 
-                                     mac=[f'cd {Path(__file__).parent.resolve()}',
+                                     mac=[f'cd {dataPath}',
                                             'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
                                             'unzip -o bftools.zip',
+                                            'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'])
     environment = 'bftools'
     test = ['--input_image', 'img02.png', '--overwrite', '--output_image', 'img02.tif']
@@ -269,7 +274,7 @@ class Tool:
         
         # Set options which must be passed as is
         for option in ['compression', 'series', 'cache_dir', 'map', 'crop', 'channel', 'z', 'timepoint', 'tilex', 'tiley', 'pyramid_scale', 'pyramid_resolutions']:
-            value = getattr(args, option)
+            value = getattr(args, option, None)
             if option == 'compression' and value == '': continue
             if value is not None:
                 # argumentList += [f'-{option}'.replace('_', '-'), value if option not in ['cache_dir', 'map'] else f'"{value}"']
@@ -284,8 +289,8 @@ class Tool:
         
         # argumentList += [f'"{args.input_image}"', f'"{args.output_image}"']
         argumentList += [args.input_image, args.output_image]
-        parent = Path(__file__).parent.resolve()
-        command = [str(parent / 'bfconvert')] if platform.system() != 'Windows' else [str(parent / 'bftools/bftools/bfconvert.bat')]
+        bftools = Path(__file__).parent.resolve() / 'data' / 'bftools'
+        command = [str(bftools / 'bfconvert')] if platform.system() != 'Windows' else [str(bftools / 'bfconvert.bat')]
         command += [str(c) for c in argumentList]
         print('command:')
         print(command)

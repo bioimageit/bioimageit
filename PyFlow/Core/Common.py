@@ -737,7 +737,7 @@ def getUniqNameFromList(existingNames, name):
     ids = set()
     for existingName in existingNames:
         digits = extractDigitsFromEndOfString(existingName)
-        if digits is not None:
+        if digits is not None and existingName.replace(str(digits), '').strip() == name.strip():
             ids.add(digits)
     idx = findGoodId(ids)
     nameNoDigits = removeDigitsFromEndOfString(name)

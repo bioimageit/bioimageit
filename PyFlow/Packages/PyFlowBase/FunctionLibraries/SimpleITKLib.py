@@ -10,11 +10,10 @@ class SitkTool:
         for key, value in vars(args).items():
             if inputNameToType.get(key) == 'Path':
                 setattr(args, key, sitk.ReadTransform(value) if str(value).endswith('.tfm') else sitk.ReadImage(value))
-
-        outputNames = set([output['name'] for output in self.outputs])
-        inputs = { key: value for key, value in vars(args).items() if key not in outputNames}
         
-        result = getattr(sitk, self.function_name)(**inputs)
+        inputs = [getattr(args, input['name']) for input in self.inputs]
+        
+        result = getattr(sitk, self.function_name)(*inputs)
         outputPath = getattr(args, self.outputs[0]['name'])
         if outputPath.suffix == '.tfm':
             sitk.WriteTransform(result, outputPath)
@@ -42,6 +41,11 @@ def createSimpleITKNodes():
         tool['moduleImportPath'] = ''
         for i in tool['inputs'] + tool['outputs']:
             i['help'] = ''
+        
+        inputNames = set([input['name'] for input in tool['inputs']])
+        for output in tool['outputs']:
+            if output['name'] in inputNames:
+                output['name'] = 'out_' + output['name']
 
         if hasattr(sitk, functionName):
             Tool = type('Tool_'+name, (SitkTool, ), tool)

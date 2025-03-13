@@ -48,6 +48,7 @@ class BiitToolNode(NodeBase):
 		self.outputMessage = None               # The message which will be displayed in the Table View
 		self.executed = None
 		self.executedChanged = Signal(bool)
+		self.validateTool()
 		self.tool = self.Tool()
 		multipleInputs = getattr(self.Tool, 'multipleInputs', False)
 		self.inArray = self.createInputPin("in", "AnyPin", structure=StructureType.Multi if multipleInputs else StructureType.Single, constraint="1")
@@ -61,6 +62,11 @@ class BiitToolNode(NodeBase):
 		self.initializeParameters()
 		self.lib = 'BiitLib'
 		self.__class__.nInstanciatedNodes += 1
+	
+	def validateTool(self):
+		inputOutputNames = set([input['name'] for input in self.Tool.inputs] + [output['name'] for output in self.Tool.outputs])
+		if len(inputOutputNames) < len(self.Tool.inputs) + len(self.Tool.outputs):
+			raise Exception(f'Two inputs / outputs in tool {self.Tool.name} have the same name')
 	
 	def getOutputDataFolderPath(self):
 		return GraphManagerSingleton().get().getWorkflowPath() / 'Data' / self.name
@@ -320,7 +326,7 @@ class BiitToolNode(NodeBase):
 			finalValue = finalValue.replace('[ext]', output.get('extension'))
 		return finalValue
 
-	def prefixExtensionsWithIndex(s):
+	def prefixExtensionsWithIndex(self, s):
 		pattern = r"(\{\w+\.(exts|ext)\})$"
 		result = re.sub(pattern, r"[index]\1", s.replace('[ext]', '[index][ext]'))
 		return result if '[index]' in result else result.replace(Path(result).suffix, '[index]' + Path(result).suffix)
