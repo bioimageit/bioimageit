@@ -18,7 +18,7 @@ import os
 import uuid
 import subprocess
 from pathlib import Path
-from importlib import import_module, reload
+from importlib import import_module, invalidate_caches, reload
 from inspect import getfullargspec
 
 from qtpy import QtCore, QtWidgets
@@ -132,19 +132,24 @@ class NodeBoxTreeWidget(QTreeWidget):
 
     def addNodeClass(self, nodeName, nodePath:Path, moduleImportPath:str):
         from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitToolNode import createNode
-        # If you are dynamically importing a module that was created since the interpreter began execution (e.g., created a Python source file),
-        #  you may need to call invalidate_caches() in order for the new module to be noticed by the import system.
-        # invalidate_caches()
+        nodeClass = None
         if nodeName in self.nodeClasses:
-            node = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
+            # If you are dynamically importing a module that was created since the interpreter began execution (e.g., created a Python source file),
+            #  you may need to call invalidate_caches() in order for the new module to be noticed by the import system.
+            invalidate_caches()
+            nodes = [n for n in self.canvas.getApp().graphManager.get().getAllNodes() if n.__class__.name() == nodeName]
+            nodeClass = createNode(nodePath, moduleImportPath, reload(sys.modules[moduleImportPath]))
+            for node in nodes:
+                node.__class__ = nodeClass
+                node.Tool = nodeClass.Tool
         else:
-            node = createNode(nodePath, moduleImportPath, import_module(moduleImportPath))
-        if node is not None:
-            self.nodeClasses[nodeName] = node
-            ADD_CLASS('PyFlowBase', nodeName, node)
+            nodeClass = createNode(nodePath, moduleImportPath, import_module(moduleImportPath))
+        if nodeClass is not None:
+            self.nodeClasses[nodeName] = nodeClass
+            ADD_CLASS('PyFlowBase', nodeName, nodeClass)
             # packages = GET_PACKAGES()
             # packages["PyFlowBase"].addClass(nodeName, node)
-        return node
+        return nodeClass
     
     def removeNodeClass(self, nodeName):
         if nodeName in self.nodeClasses:
@@ -597,9 +602,9 @@ class NodesBox(QFrame):
         filePath = Path(filePath).resolve()
         if filePath.exists():
             if filePath.resolve().is_relative_to(getSourcesPath()):
-                nodeClass = self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getSourcesPath())).replace('.py', '').replace('/', '.'))
+                self.treeWidget.addNodeClass(filePath.stem, filePath, str(filePath.relative_to(getSourcesPath())).replace('.py', '').replace('/', '.'))
             else:
-                nodeClass = self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
+                self.treeWidget.addCustomNodeClass(self.pyFlowInstance.graphManager.get().workflowPath, filePath.stem, filePath)
             # graphManager = self.pyFlowInstance.graphManager.get()
             # for node in graphManager.getAllNodes():
             #     if node.toolName == filePath.stem and node.process:

@@ -52,14 +52,9 @@ class ColumnValueWidget(QWidget):
         data = node.getInputDataFrame()
         type = node.parameters['inputs'][self.name]['type']
         isDataframe = isinstance(data, pandas.DataFrame) and len(data)>0
-        node.inArray.setClean()
         defaultColumnName = node.parameters['inputs'][self.name]['columnName'] if not isDataframe or node.parameters['inputs'][self.name]['columnName'] in data.columns else data.columns[-1] if len(data.columns)>0 else None
         node.parameters['inputs'][self.name]['columnName'] = defaultColumnName
-        # self.layout.addWidget(self.columnNameInput)
         self.typeSelector.activated.connect(self.changeTypeValue)
-        # self.columnNameInput.blockWidgetSignals(True)
-        # self.columnNameInput.setWidgetValue(defaultColumnName)
-        # self.columnNameInput.blockWidgetSignals(False)
         if isinstance(self.inputWidget, InputWidgetRaw):
             if node.parameters['inputs'][self.name]['value'] is not None:
                 self.inputWidget.blockWidgetSignals(True)
@@ -72,7 +67,6 @@ class ColumnValueWidget(QWidget):
         self.columnSelector = None
         index = 0 if type == 'columnName' and isDataframe and defaultColumnName is not None else 1
         if isDataframe and not ('static' in input and input['static']) and defaultColumnName is not None:
-            # self.columnNameInput.hide()
             self.columnSelector = QComboBox()
             for column in data.columns:
                 if ':' in column and column.split(':')[0] == node.name: continue
@@ -127,22 +121,15 @@ class ColumnValueWidget(QWidget):
     def updateNodeParameterValue(self, value):
         parameter = self.node.parameters['inputs'][self.name]
         parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'int' else value
-        # self.node.inArray.setData(None)
         self.node.setNodeDirtyAndProcess()
         EditorHistory().saveState("Update parameter", modify=True)
     
     def changeTypeValue(self, index, sendChanged=True):
         type = None
-        data = self.node.inArray.currentData()
-        # self.columnNameInput.hide()
         if self.columnSelector is not None:
             self.columnSelector.hide()
         self.inputWidget.hide()
         if index==0:
-            # if isinstance(data, pandas.DataFrame):
-            #     self.columnSelector.show()
-            # else:
-            #     self.columnNameInput.show()
             if self.columnSelector is not None:
                 self.columnSelector.show()
             type = 'columnName'
@@ -153,14 +140,12 @@ class ColumnValueWidget(QWidget):
         if sendChanged:
             self.node.setNodeDirtyAndProcess()
             EditorHistory().saveState("Update parameter type", modify=True)
-        #     self.node.inArray.setData(None)
 
     def changeColumnValue(self, index):
-        data = self.node.inArray.currentData()
+        data = self.node.getInputDataFrame()
         self.node.parameters['inputs'][self.name]['columnName'] = data.columns[index]
         self.node.setNodeDirtyAndProcess()
         EditorHistory().saveState("Update parameter column", modify=True)
-        # self.node.inArray.setData(None)
 
 class UIBiitToolNode(UINodeBase):
     def __init__(self, raw_node):

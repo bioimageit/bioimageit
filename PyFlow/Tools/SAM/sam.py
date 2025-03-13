@@ -18,6 +18,30 @@ class Tool:
             type = 'Path',
             autoColumn = True,
         ),
+        dict(
+            name = 'points_per_side',
+            help = ' The number of points to be sampled along one side of the image. The total number of points is points_per_side**2.',
+            default = 32,
+            type = 'int',
+        ),
+        dict(
+            name = 'pred_iou_thresh',
+            help = "A fitering threshold in [0,1], using the model's predicted mask quality.",
+            default = 0.8,
+            type = 'float',
+        ),
+        dict(
+            name = 'stability_score_thresh',
+            help = "A filtering threshold in [0,1], using the stability of the mask under changes to the cutoff used to binarize the model's mask predictions.",
+            default = 0.95,
+            type = 'float',
+        ),
+        dict(
+            name = 'stability_score_offset',
+            help = "The amount to shift the cutoff when calculated the stability score.",
+            default = 1.0,
+            type = 'float',
+        ),
     ]
     outputs = [
         dict(
@@ -45,7 +69,11 @@ class Tool:
         predictor = build_sam2_hf("facebook/sam2.1-hiera-large", device=torch.device('cpu'), apply_postprocessing=False)
 
         with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
-            mask_generator = SAM2AutomaticMaskGenerator(predictor)
+            mask_generator = SAM2AutomaticMaskGenerator(predictor, 
+                points_per_side=args.points_per_side,
+                pred_iou_thresh=args.pred_iou_thresh,
+                stability_score_thresh=args.stability_score_thresh,
+                stability_score_offset=args.stability_score_offset)
             image = Image.open(args.image)
             image = np.array(image.convert("RGB"))
             masks = mask_generator.generate(image)

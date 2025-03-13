@@ -378,7 +378,7 @@ class BiitToolNode(NodeBase):
 		self.setOutputColumns(self.processedDataFrame)
 		self.setOutputMessage()
 		self.setOutputAndClean(self.processedDataFrame)
-		ThumbnailGenerator.get().generateThumbnails(self.tool.name, self.processedDataFrame)
+		self.regenerateThumbnails(self.processedDataFrame)
 		return self.processedDataFrame
 
 	def setOutputArgsFromDataFrame(self, args, outputData, index):
@@ -466,11 +466,20 @@ class BiitToolNode(NodeBase):
 			inthread(self.logOutput, self.__class__.environment.process, self.__class__.environment.stopEvent)
 		argsList = self.getArgs(self.processedDataFrame, objectify=False, raiseRequiredException=True)
 		outputFolderPath = self.getOutputDataFolderPath()
-		dataFrames = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()]) or [None] * len(argsList)
+		dataFrames = None
+		if self.Tool.environment != 'bioimageit':
+			dataFrames = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processAllData', [self.Tool.moduleImportPath, argsList, outputFolderPath, self.getWorkflowToolsPath()])
+		elif self.tool is not None and hasattr(self.tool, 'processAllData') and callable(self.tool.processAllData):
+			dataFrames = self.tool.processAllData(DictToObject(argsList))
+		if dataFrames is None:
+			dataFrames = [None] * len(argsList)
 		for i, args in enumerate(argsList):
 			# The following log will also update the progress bar
 			self.__class__.log.send(f'Process row [[{i+1}/{len(argsList)}]]')
-			dataFrames[i] = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.Tool.moduleImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
+			if self.Tool.environment != 'bioimageit':
+				dataFrames[i] = self.__class__.environment.execute('PyFlow.ToolManagement.ToolBase', 'processData', [self.Tool.moduleImportPath, args, outputFolderPath, self.getWorkflowToolsPath()])
+			elif self.tool is not None and hasattr(self.tool, 'processData') and callable(self.tool.processData):
+				dataFrames[i] = self.tool.processData(DictToObject(args))
 			if self.__class__.environment.stopEvent.is_set(): return False
 		self.setOutputMessage()
 		dataFrames = [df for df in dataFrames if df is not None]
@@ -490,7 +499,7 @@ class BiitToolNode(NodeBase):
 		outputFolder.mkdir(exist_ok=True, parents=True)
 
 		outputData: pandas.DataFrame = self.outArray.currentData()
-		ThumbnailGenerator.get().generateThumbnails(self.name, outputData)
+		self.regenerateThumbnails(outputData)
 
 		if isinstance(outputData, pandas.DataFrame):
 			outputData.to_csv(outputFolder / OUTPUT_DATAFRAME_PATH)
@@ -500,10 +509,17 @@ class BiitToolNode(NodeBase):
 
 	def clear(self):
 		self.deleteFiles()
-		self.setExecuted(False, propagate=False, setDirty=False)
+		self.setExecuted(False, propagate=False, setDirty=True)
+	
+	def regenerateThumbnails(self, dataFrame):
+		self.deleteThumbnails()
+		ThumbnailGenerator.get().generateThumbnails(self.name, dataFrame)
+
+	def deleteThumbnails(self):
+		ThumbnailGenerator.get().deleteThumbnails(self.name)
 	
 	def deleteFiles(self):
-		ThumbnailGenerator.get().deleteThumbnails(self.name)
+		self.deleteThumbnails()
 		for outputFolder in [self.getOutputDataFolderPath(), self.getOutputMetadataFolderPath()]:
 			if outputFolder.exists():
 				send2trash(outputFolder)

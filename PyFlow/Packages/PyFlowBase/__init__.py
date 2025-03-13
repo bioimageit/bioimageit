@@ -15,6 +15,7 @@ from PyFlow.Packages.PyFlowBase.Pins.StringPin import StringPin
 
 # Function based nodes
 from PyFlow.Packages.PyFlowBase.FunctionLibraries.BiitLib import BiitLib
+from PyFlow.Packages.PyFlowBase.FunctionLibraries.SimpleITKLib import createSimpleITKNodes
 
 from PyFlow.Packages.PyFlowBase.Nodes.commentNode import commentNode
 from PyFlow.Packages.PyFlowBase.Nodes.stickyNote import stickyNote
@@ -57,6 +58,8 @@ _NODES = {
 
 for biitClass in BiitLib.classes.values():
     _NODES[biitClass.name()] = biitClass
+
+_NODES.update(createSimpleITKNodes())
 
 _PINS = {
     AnyPin.__name__: AnyPin,

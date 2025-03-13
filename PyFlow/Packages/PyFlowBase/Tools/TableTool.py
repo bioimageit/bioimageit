@@ -146,6 +146,7 @@ class TableTool(DockTool):
 		imageViewer = self.pyFlowInstance.getRegisteredTools(classNameFilters=["ImageViewerTool"])
 		
 		path = item.data(QtCore.Qt.UserRole)
+		if path is None: return
 		if not imageViewerOpened:
 			
 			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier

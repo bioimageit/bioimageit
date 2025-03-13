@@ -44,6 +44,9 @@ class Tool:
         for i in range(label1Data.max()):
             uniques, counts = np.unique(label2Data[label1Data == i], return_counts=True)
             for u, c in zip(uniques, counts):
-                records.append(dict(label1=i, label2=u, overlap=c))
+                if u>0:
+                    records.append(dict(label1=i, label2=u, overlap=c))
+            # counts = np.count_nonzero(label2Data[label1Data == i])
+            # records.append(dict(label1=i, label2_counts=counts))
         self.outputMessage = ''
         return pandas.DataFrame.from_records(records)
