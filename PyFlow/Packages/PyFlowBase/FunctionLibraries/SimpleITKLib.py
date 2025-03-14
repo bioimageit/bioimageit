@@ -43,9 +43,16 @@ def createSimpleITKNodes():
             i['help'] = ''
         
         inputNames = set([input['name'] for input in tool['inputs']])
+        firstInputPath = next((input for input in tool['inputs'] if input['type'] == 'Path'), None)
+        if firstInputPath is not None:
+            firstInputPath['autoColumn'] = True
+        firstInputPathName = firstInputPath['name'] if firstInputPath else None
         for output in tool['outputs']:
             if output['name'] in inputNames:
                 output['name'] = 'out_' + output['name']
+            if ('default' not in output):
+                output['default'] = '{' + firstInputPathName + '.stem}_[index]{' + firstInputPathName + '.exts}' if firstInputPathName else ''
+                # output['default'] = f'{{{firstInputPathName}.stem}_[index]{{{firstInputPathName}.exts}}'
 
         if hasattr(sitk, functionName):
             Tool = type('Tool_'+name, (SitkTool, ), tool)

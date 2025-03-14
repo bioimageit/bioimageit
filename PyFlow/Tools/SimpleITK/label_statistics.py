@@ -7,6 +7,7 @@ class Tool:
     name = "Label statistics"
     description = "Compute label statistics from a label image."
     categories = ['SimpleITK', 'Custom']
+    multipleInputs = True
     inputs = [
             dict(
             name = 'image',

@@ -478,20 +478,19 @@ class BlueprintCanvas(CanvasBase):
             answer = None
             for node in selectedNodes:
                 
-                # Warning: also delete thumbnails!
-
-                # If Data and Metadata folders are not empty: ask if user wants to send them to trash, and obey
-                folders = [f for f in [node._rawNode.getOutputDataFolderPath(), node._rawNode.getOutputMetadataFolderPath()] if f.exists() and len(list(f.iterdir()))>0]
-                if len(folders) > 0 and answer is None:
-                    answer = QMessageBox.warning(self.pyFlowInstance, "Delete data?", f'There are data files associated with the selected nodes. Would you like to move them to the trash?', QMessageBox.No | QMessageBox.Cancel | QMessageBox.Yes)
-                    if answer == QMessageBox.Cancel:
-                        return
-                if answer == QMessageBox.Yes:
-                    if hasattr(node._rawNode, 'clear') and callable(node._rawNode.clear):
-                        node._rawNode.clear()
-                    for folder in folders:
-                        if folder.exists():
-                            send2trash(folder)
+                if hasattr(node._rawNode, 'getOutputDataFolderPath'):
+                    # If Data and Metadata folders are not empty: ask if user wants to send them to trash, and obey
+                    folders = [f for f in [node._rawNode.getOutputDataFolderPath(), node._rawNode.getOutputMetadataFolderPath()] if f.exists() and len(list(f.iterdir()))>0]
+                    if len(folders) > 0 and answer is None:
+                        answer = QMessageBox.warning(self.pyFlowInstance, "Delete data?", f'There are data files associated with the selected nodes. Would you like to move them to the trash?', QMessageBox.No | QMessageBox.Cancel | QMessageBox.Yes)
+                        if answer == QMessageBox.Cancel:
+                            return
+                    if answer == QMessageBox.Yes:
+                        if hasattr(node._rawNode, 'clear') and callable(node._rawNode.clear):
+                            node._rawNode.clear()
+                        for folder in folders:
+                            if folder.exists():
+                                send2trash(folder)
                 node._rawNode.kill()
             self.requestClearProperties.emit()
             self.requestClearTable.emit()

@@ -149,7 +149,7 @@ class TableTool(DockTool):
 		if path is None: return
 		if not imageViewerOpened:
 			
-			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier
+			removeExistingImages = not QtGui.QGuiApplication.keyboardModifiers() & (QtCore.Qt.ShiftModifier or QtCore.Qt.ControlModifier)
 			
 			self.openImageProgressDialog = QProgressDialog(labelText='Opening image...', cancelButtonText='Cancel', minimum=0, maximum=0, parent=self.pyFlowInstance)
 			self.openImageProgressDialog.setWindowModality(QtCore.Qt.WindowModal)
@@ -161,7 +161,7 @@ class TableTool(DockTool):
 
 		elif len(imageViewer)>0:
 			if isinstance(path, Path):
-				if not QtGui.QGuiApplication.keyboardModifiers() & QtCore.Qt.ShiftModifier:
+				if not QtGui.QGuiApplication.keyboardModifiers() & (QtCore.Qt.ShiftModifier or QtCore.Qt.ControlModifier):
 					imageViewer[0].clear()
 				imageViewer[0].open(path)
 	

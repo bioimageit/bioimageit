@@ -737,10 +737,11 @@ def getUniqNameFromList(existingNames, name):
     ids = set()
     for existingName in existingNames:
         digits = extractDigitsFromEndOfString(existingName)
-        if digits is not None and existingName.replace(str(digits), '').strip() == name.strip():
+        nameDigits = extractDigitsFromEndOfString(name)
+        if digits is not None and existingName.replace(str(digits), '').strip() == name.replace(str(nameDigits), '').strip():
             ids.add(digits)
     idx = findGoodId(ids)
-    nameNoDigits = removeDigitsFromEndOfString(name)
+    nameNoDigits = removeDigitsFromEndOfString(name).strip()
     return nameNoDigits + ' ' + str(idx)
 
 

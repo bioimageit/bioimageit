@@ -61,5 +61,6 @@ class Tool:
         if 'vector' in inputImage.GetPixelIDTypeAsString():
             inputImage = inputImage.ToScalarImage()[args.channel, :, :]
         thresholdedImage = sitk.BinaryThreshold(inputImage, args.lowerThreshold, args.upperThreshold, args.insideValue, args.outsideValue)
-        sitk.WriteImage(thresholdedImage, args.thresholded_image)
+        
+        sitk.WriteImage(sitk.Cast(thresholdedImage, sitk.sitkUInt8), args.thresholded_image)
         return

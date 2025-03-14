@@ -92,7 +92,6 @@ class BiitToolNode(NodeBase):
 			self.processedDataFrame = None
 			if hasattr(self, 'outArray'):
 				self.outArray.setDirty()
-		if self.executed == executed: return
 		self.executed = executed
 		# Propagate to following nodes is execution was unset
 		if propagate and not executed:
@@ -336,7 +335,7 @@ class BiitToolNode(NodeBase):
 		for outputName, output in self.parameters['outputs'].items():
 			if output['dataType'] != 'Path': continue
 			columnName = self.getColumnName(outputName)
-			series = pandas.Series(data={}, index=data.index)
+			series = pandas.Series(data={}, index=data.index, dtype=str)
 			for index, row in data.iterrows():
 
 				if output.get('value') is None:

@@ -255,7 +255,7 @@ class Tool:
                 name = 'output_image',
                 shortname = 'o',
                 help = 'The output image.',
-                default = '{input_image.stem}.ome.tiff',
+                default = '{input_image.stem}_ome.tiff',
                 type = 'Path',
             ),
     ]

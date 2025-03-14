@@ -45,7 +45,7 @@ class Tool:
             uniques, counts = np.unique(label2Data[label1Data == i], return_counts=True)
             for u, c in zip(uniques, counts):
                 if u>0:
-                    records.append(dict(label1=i, label2=u, overlap=c))
+                    records.append(dict(image1=args.label1, image2=args.label2, label1=i, label2=u, overlap=c))
             # counts = np.count_nonzero(label2Data[label1Data == i])
             # records.append(dict(label1=i, label2_counts=counts))
         self.outputMessage = ''
