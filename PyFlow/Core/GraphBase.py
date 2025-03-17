@@ -474,7 +474,7 @@ class GraphBase(ISerializable):
         """
         from PyFlow.Core.PathsRegistry import PathsRegistry
 
-        assert node is not None, f"failed to add node {node.name}, None is passed"
+        assert node is not None, f"failed to add node {jsonTemplate['type']}, None is passed"
         if node.uid in self._nodes:
             return False
 
