@@ -382,8 +382,7 @@ class EnvironmentManager:
 			machine = '64' if machine == 'x86_64' else machine
 			proxyArgs = f'--proxy "{proxyString}"' if proxyString is not None else ''
 			commands += [f'cd "{condaPath}"', f'echo "Installing micromamba..."', f'curl {proxyArgs} -Ls https://micro.mamba.pm/api/micromamba/{system}-{machine}/latest | tar -xvj bin/micromamba']
-		commands += self._shellHook()
-		return commands + self._setupCondaChannels()
+		return commands
 
 	def _activateConda(self):
 		# activatePath = Path(self.condaPath) / 'condabin' / 'conda.bat' if self._isWindows() else Path(self.condaPath) / 'etc' / 'profile.d' / 'conda.sh'
