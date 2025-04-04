@@ -492,10 +492,12 @@ class EnvironmentManager:
 	# 	commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] + commands
 	# 	return self.executeCommands(commands, env=environmentVariables)
 
-	def launch(self, environment:str, customCommand:str|None=None, environmentVariables:dict[str, str]|None=None, condaEnvironment=True, additionalActivateCommands:dict[str, list[str]]={}) -> Environment:
+	def launch(self, environment:str, customCommand:str|None=None, environmentVariables:dict[str, str]|None=None, condaEnvironment=True, additionalActivateCommands:dict[str, list[str]]={}, direct=False) -> Environment:
 		if self.environmentIsLaunched(environment):
 			return self.environments[environment]
-
+		if direct:
+			self.environments[environment] = DirectEnvironment(environment)
+			return self.environments[environment]
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
 		commands = self._activateConda() + self._activateEnvironment(environment) if condaEnvironment else []
 		commands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)

@@ -155,7 +155,7 @@ class PyFlow(QMainWindow):
 		environmentManager.setCondaPath(getRootPath() / 'micromamba')
 		
 		# Launch or get the bioimageit env, so that we can cache its installed dependencies
-		self.environment = environmentManager.launch('bioimageit')
+		self.environment = environmentManager.launch('bioimageit', direct=True)
 
 		if 'proxies' in versionInfo:
 			environmentManager.setProxies(versionInfo['proxies'])

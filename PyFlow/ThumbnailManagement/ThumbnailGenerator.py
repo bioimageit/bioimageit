@@ -33,7 +33,7 @@ class ThumbnailGenerator:
 
 	def __init__(self) -> None:
 		self.imageToThumbnail: dict[str, PathInfo] = {}
-		self.environment = environmentManager.launch('bioimageit')
+		self.environment = environmentManager.launch('bioimageit', direct=True)
 		if self.environment.process is not None:
 			inthread(self.logOutput, self.environment.process)
 		inthread(self._generateThumbnailsThread)
