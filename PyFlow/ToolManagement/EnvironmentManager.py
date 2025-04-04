@@ -308,14 +308,14 @@ class EnvironmentManager:
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
-				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
+				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + self._activateEnvironment(environment) + [f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
 		
 		if 'pip' not in installedDependencies:
 			if environment is not None:
-				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'], waitComplete=True, log=False) # type: ignore
+				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + self._activateEnvironment(environment) + [f'pip freeze'], waitComplete=True, log=False) # type: ignore
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 
@@ -390,13 +390,17 @@ class EnvironmentManager:
 		commands = self._installCondaIfNecessary()
 		return commands + self._shellHook()
 
+	def _activateEnvironment(self, environment: str):
+		environment = str(self.condaPath.resolve() / 'envs' / environment)
+		return [f'{self.condaBin} activate {environment}']
+	
 	def environmentExists(self, environment:str):
 		condaMeta = Path(self.condaPath) / 'envs' / environment / 'conda-meta'
 		return condaMeta.is_dir() # we could also check for the condaMeta / history file.
 	
 	def install(self, environment:str, package:str, channel=None):
 		channel = channel + '::' if channel is not None else ''
-		self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBinConfig} install {channel}{package} -y'], waitComplete=True)
+		self.executeCommands(self._activateConda() + self._activateEnvironment(environment) + [f'{self.condaBinConfig} install {channel}{package} -y'], waitComplete=True)
 		self.environments[environment].installedDependencies = {}
 	
 	def platformCondaFormat(self):
@@ -442,7 +446,7 @@ class EnvironmentManager:
 			pipDependencies += self.formatDependencies('pip', dependencies['optional'])
 			pipNoDepsDependencies += self.formatDependencies('pip_no_deps', dependencies['optional'])
 		installDepsCommands = self.getProxyEnvironmentVariablesCommands()
-		installDepsCommands += [f'echo "Activating environment {environment}..."', f'{self.condaBin} activate {environment}'] if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
+		installDepsCommands += [f'echo "Activating environment {environment}..."'] + self._activateEnvironment(environment) if len(condaDependencies) > 0 or len(pipDependencies) > 0 else []
 		installDepsCommands += [f'echo "Installing conda dependencies..."', f'{self.condaBinConfig} install {" ".join(condaDependencies)} -y'] if len(condaDependencies)>0 else []
 		proxyString = self.getProxyString()
 		proxyArgs = f'--proxy {proxyString}' if proxyString is not None else ''
@@ -472,7 +476,8 @@ class EnvironmentManager:
 		if match and (int(match.group(1))<3 or int(match.group(2))<9):
 			raise Exception('Python version must be greater than 3.8')
 		pythonRequirement = ' python=' + (pythonVersion if len(pythonVersion)>0 else platform.python_version())
-		createEnvCommands = self._activateConda() + [f'{self.condaBinConfig} create -n {environment}{pythonRequirement} -y']
+		environmentPath = str(self.condaPath.resolve() / 'envs' / environment)
+		createEnvCommands = self._activateConda() + [f'{self.condaBinConfig} create -p {environmentPath}{pythonRequirement} -y']
 		createEnvCommands += self.installDependencies(environment, dependencies, raiseIncompatibilityException)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalInstallCommands)
 		createEnvCommands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
@@ -492,7 +497,7 @@ class EnvironmentManager:
 			return self.environments[environment]
 
 		moduleCallerPath = Path(__file__).parent / 'ModuleCaller.py'
-		commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] if condaEnvironment else []
+		commands = self._activateConda() + self._activateEnvironment(environment) if condaEnvironment else []
 		commands += self._getCommandsForCurrentPlatfrom(additionalActivateCommands)
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
 		debug = False # environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
