@@ -16,6 +16,8 @@ concatDataFrames = workflowManager.initializeNode('Concat')
 
 subtractImages = workflowManager.initializeNode('subtract_images')
 
+atlas = workflowManager.initializeNode('atlas')
+
 workflowManager.setupConnections()
 
 workflowManager.connect(listFiles, binaryThreshold)
@@ -29,6 +31,7 @@ workflowManager.connect(extractChannel0, concatDataFrames)
 workflowManager.connect(extractChannel1, concatDataFrames)
 
 workflowManager.connect(concatDataFrames, subtractImages)
+workflowManager.connect(subtractImages, atlas)
 
 listFiles.parameters['inputs']['folderPath']['value'] = '/Users/amasson/Documents/DemoData/CellPose/CellPoseExamples'
 listFiles.parameters['inputs']['columnName']['value'] = 'CellPoseExamples'

@@ -306,16 +306,18 @@ class EnvironmentManager:
 	
 	def dependenciesAreInstalled(self, environment:str, dependencies: Dependencies):
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
+		activateEnvironment = isinstance(self.environments[environment], ClientEnvironment)
+		activateEnvironmentCommands = self._activateConda() + self._activateEnvironment(environment) if activateEnvironment else []
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
-				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + self._activateEnvironment(environment) + [f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
+				installedDependencies['conda'], _ = self.executeCommands(activateEnvironmentCommands + [f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
 		
 		if 'pip' not in installedDependencies:
 			if environment is not None:
-				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + self._activateEnvironment(environment) + [f'pip freeze'], waitComplete=True, log=False) # type: ignore
+				installedDependencies['pip'], _ = self.executeCommands(activateEnvironmentCommands + [f'pip freeze'], waitComplete=True, log=False) # type: ignore
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 
