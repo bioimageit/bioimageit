@@ -307,7 +307,7 @@ class EnvironmentManager:
 	def dependenciesAreInstalled(self, environment:str, dependencies: Dependencies):
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		activateEnvironment = isinstance(self.environments[environment], ClientEnvironment)
-		activateEnvironmentCommands = self._activateConda() + self._activateEnvironment(environment) if activateEnvironment else []
+		activateEnvironmentCommands = self._activateConda() + (self._activateEnvironment(environment) if activateEnvironment else [])
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
 				installedDependencies['conda'], _ = self.executeCommands(activateEnvironmentCommands + [f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
