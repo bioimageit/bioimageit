@@ -7,7 +7,6 @@ class Tool(OmeroBase):
 
     name = "Omero Upload"
     description = "Upload data to an Omero database."
-    categories = ['Omero']
     setRowInArgs = True
     inputs = [
             dict(

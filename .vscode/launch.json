@@ -29,6 +29,7 @@
         {
             "name": "workflow",
             "type": "debugpy",
+            "python": ".pixi/envs/dev/bin/python",
             "request": "launch",
             "program": "${workspaceFolder}/workflow.py",
             "console": "integratedTerminal",

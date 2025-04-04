@@ -4,7 +4,6 @@ import platform
 import tempfile
 import threading
 import subprocess
-import shutil
 from importlib import metadata
 from importlib import import_module
 from pathlib import Path
@@ -12,12 +11,13 @@ from collections.abc import Callable
 from abc import abstractmethod
 from multiprocessing.connection import Client
 import sys
+from typing import Any, cast
 
 import yaml
 if sys.version_info < (3, 11):
-	from typing_extensions import TypedDict, Required, NotRequired, Self
+	from typing_extensions import TypedDict, NotRequired
 else:
-	from typing import TypedDict, Required, NotRequired, Self
+	from typing import TypedDict, NotRequired
 
 import psutil
 
@@ -52,7 +52,8 @@ class CustomHandler(logging.Handler):
 
 	def emit(self, record: logging.LogRecord) -> None:
 		formatter = self.formatter if self.formatter is not None else logger.handlers[0].formatter if len(logger.handlers)>0 and logger.handlers[0].formatter is not None else logging.root.handlers[0].formatter
-		self.log(formatter.format(record))
+		if formatter is not None:
+			self.log(formatter.format(record))
 
 def attachLogHandler(log:Callable[[str], None], logLevel=logging.INFO) -> None:
 	logger.setLevel(logLevel)
@@ -67,7 +68,7 @@ class OptionalDependencies(TypedDict):
 	pip_no_deps: NotRequired[list[str]]
 
 class Dependencies(TypedDict):
-	python: str
+	python: NotRequired[str]
 	conda: NotRequired[list[str]]
 	pip: NotRequired[list[str]]
 	pip_no_deps: NotRequired[list[str]]
@@ -89,7 +90,7 @@ class Environment():
 	def _exit(self):
 		return
 
-	def launched(self):
+	def launched(self)-> bool:
 		return True
 		
 class ClientEnvironment(Environment):
@@ -104,6 +105,7 @@ class ClientEnvironment(Environment):
 		self.connection = Client((EnvironmentManager.host, self.port))
 	
 	def execute(self, module:str, function: str, args: list):
+		if self.connection is None: return
 		if self.connection.closed:
 			logger.warning(f'Connection not ready. Skipping execute {module}.{function}({args})')
 			return
@@ -244,20 +246,21 @@ class EnvironmentManager:
 
 	def _getOutput(self, process:subprocess.Popen, commands:list[str], log=True, strip=True):
 		prefix = '[...] ' if len(str(commands)) > 150 else ''
-		commands = prefix + str(commands)[-150:] if commands is not None and len(commands)>0 else ''
+		commandsString = prefix + str(commands)[-150:] if commands is not None and len(commands)>0 else ''
 		outputs = []
-		for line in process.stdout:
-			if strip: 
-				line = line.strip()
-			if log:
-				logger.info(line)
-			if 'CondaSystemExit' in line:
-				process.kill()
-				raise Exception(f'The execution of the commands "{commands}" failed.')
-			outputs.append(line)
+		if process.stdout:
+			for line in process.stdout:
+				if strip: 
+					line = line.strip()
+				if log:
+					logger.info(line)
+				if 'CondaSystemExit' in line:
+					process.kill()
+					raise Exception(f'The execution of the commands "{commandsString}" failed.')
+				outputs.append(line)
 		process.wait()
 		if process.returncode != 0:
-			raise Exception(f'The execution of the commands "{commands}" failed.')
+			raise Exception(f'The execution of the commands "{commandsString}" failed.')
 		return (outputs, process.returncode)
 
 	def setProxies(self, proxies):
@@ -277,7 +280,7 @@ class EnvironmentManager:
 		
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
-	def executeCommands(self, commands: list[str], launchedMessage:str=None, env:dict[str, str]=None, exitIfCommandError=True, waitComplete=False, log=True):
+	def executeCommands(self, commands: list[str], launchedMessage:str|None=None, env:dict[str, str]|None=None, exitIfCommandError=True, waitComplete=False, log=True):
 		print('executeCommands', commands, launchedMessage)
 		rawCommands = commands.copy()
 		with tempfile.NamedTemporaryFile(suffix='.ps1' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
@@ -305,14 +308,14 @@ class EnvironmentManager:
 		installedDependencies = self.environments[environment].installedDependencies if environment in self.environments else {}
 		if 'conda' in dependencies and len(dependencies['conda'])>0:
 			if 'conda' not in installedDependencies:
-				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'], waitComplete=True, log=False)
+				installedDependencies['conda'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'{self.condaBin} list -y'], waitComplete=True, log=False) # type: ignore
 			if not all([self._removeChannel(d) in installedDependencies['conda'] for d in dependencies['conda']]):
 				return False
 		if ('pip' not in dependencies) and ('pip_no_deps' not in dependencies): return True
 		
 		if 'pip' not in installedDependencies:
 			if environment is not None:
-				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'], waitComplete=True, log=False)
+				installedDependencies['pip'], _ = self.executeCommands(self._activateConda() + [f'{self.condaBin} activate {environment}', f'pip freeze'], waitComplete=True, log=False) # type: ignore
 			else:
 				installedDependencies['pip'] = [f'{dist.metadata["Name"]}=={dist.version}' for dist in metadata.distributions()]
 
@@ -356,9 +359,9 @@ class EnvironmentManager:
 			with open(self.condaConfigPath, 'w') as f:
 				yaml.safe_dump(self.defaultCondaConfig, f)
 		if platform.system() == 'Windows':
+			proxyCredentials = ''
 			if proxyString is not None:
 				match = re.search(r"^[a-zA-Z]+://(.*?):(.*?)@", proxyString)
-				proxyCredentials = ''
 				if match:
 					username, password = match.groups()
 					commands += [f'$proxyUsername = "{username}"', 
@@ -403,11 +406,11 @@ class EnvironmentManager:
 		machine = '64' if machine == 'x86_64' or machine == 'AMD64' else machine
 		return dict(Darwin='osx', Windows='win', Linux='linux')[platform.system()] + '-' + machine
 
-	def formatDependencies(self, package_manager:str, dependencies: list[str], raiseIncompatibilityException=False):
-		dependencies = dependencies[package_manager] if package_manager in dependencies else []
+	def formatDependencies(self, package_manager:str, dependencies: dict[str, list[str]], raiseIncompatibilityException=False):
+		dependencyList = dependencies[package_manager] if package_manager in dependencies else []
 		# If there is a "|" in the dependency: check that this platform support this dependency, otherwise ignore it
 		finalDependencies = []
-		for dependency in dependencies:
+		for dependency in dependencyList:
 			if '|' in dependency:
 				dependencyParts = dependency.split('|')
 				platforms = [p for p in dependencyParts[-1].split(',')]  # will be a list like ['win-64', 'osx-arm64', 'linux-arm64']
@@ -429,8 +432,8 @@ class EnvironmentManager:
 		if self.proxies is None: return None
 		return self.proxies['https'] if 'https' in self.proxies else self.proxies['http'] if 'http' in self.proxies else None
 	
-	def installDependencies(self, environment:str, dependencies: Dependencies={}, raiseIncompatibilityException=True):
-		if any(['::' in d for d in dependencies['pip']]):
+	def installDependencies(self, environment:str, dependencies: Any={}, raiseIncompatibilityException=True):
+		if 'pip' in dependencies and any(['::' in d for d in dependencies['pip']]):
 			raise Exception(f'One pip dependency has a channel specifier "::" ({dependencies["pip"]}), is it a conda dependency?')
 		condaDependencies = self.formatDependencies('conda', dependencies, raiseIncompatibilityException)
 		pipDependencies = self.formatDependencies('pip', dependencies, raiseIncompatibilityException)
@@ -458,7 +461,7 @@ class EnvironmentManager:
 			commands += additionalCommands[self._getPlatformCommonName()]
 		return commands
 	
-	def create(self, environment:str, dependencies:Dependencies={}, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, errorIfExists=False, raiseIncompatibilityException=True) -> bool:
+	def create(self, environment:str, dependencies:Any={}, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str|None=None, errorIfExists=False, raiseIncompatibilityException=True) -> bool:
 		if mainEnvironment is not None and self.dependenciesAreInstalled(mainEnvironment, dependencies): return False
 		if self.environmentExists(environment):
 			if errorIfExists:
@@ -485,7 +488,7 @@ class EnvironmentManager:
 	# 	commands = self._activateConda() + [f'{self.condaBin} activate {environment}'] + commands
 	# 	return self.executeCommands(commands, env=environmentVariables)
 
-	def launch(self, environment:str, customCommand:str=None, environmentVariables:dict[str, str]=None, condaEnvironment=True, additionalActivateCommands:dict[str, list[str]]={}) -> Environment:
+	def launch(self, environment:str, customCommand:str|None=None, environmentVariables:dict[str, str]|None=None, condaEnvironment=True, additionalActivateCommands:dict[str, list[str]]={}) -> Environment:
 		if self.environmentIsLaunched(environment):
 			return self.environments[environment]
 
@@ -495,30 +498,32 @@ class EnvironmentManager:
 		commands += [f'python -u "{moduleCallerPath}"' if customCommand is None else customCommand]
 		debug = False # environment == 'napari' # customCommand is not None and 'NapariManager' in customCommand
 		port = -1 if not debug else 60873 # Replace port number by the one you get when you debug ModuleCaller.py ; see PyFlow/ToolManagement/.vscode/launch.json
-		process = self.executeCommands(commands, env=environmentVariables) if not debug else None
+		process = cast(subprocess.Popen, self.executeCommands(commands, env=environmentVariables)) if not debug else None
+		if process is None: raise Exception('Error while launching environment')
 		# The python command is called with the -u (unbuffered) option, we can wait for a specific print before letting the process run by itself
 		# if the unbuffered option is not set, the following can wait for the whole python process to finish
-		if not debug:
-			try:
-				for line in process.stdout:
-					logger.info(line)
-					if line.strip().startswith('Listening port '):
-						port = int(line.strip().replace('Listening port ', ''))
-						break
-			except Exception as e:
-				process.stdout.close()
-				raise e
-			# If process is finished: check if error
-			if process.poll() is not None:
-				process.stdout.close()
-				raise Exception(f'Process exited with return code {process.returncode}.')
+		if not debug and process.stdout is not None:
+			if process.stdout is not None:
+				try:
+					for line in process.stdout:
+						logger.info(line)
+						if line.strip().startswith('Listening port '):
+							port = int(line.strip().replace('Listening port ', ''))
+							break
+				except Exception as e:
+					process.stdout.close()
+					raise e
+				# If process is finished: check if error
+				if process.poll() is not None:
+					process.stdout.close()
+					raise Exception(f'Process exited with return code {process.returncode}.')
 		ce = ClientEnvironment(environment, port, process)
 		self.environments[environment] = ce
 		ce.initialize()
 		return ce
 	
 	# @contextmanager
-	def createAndLaunch(self, environment:str, dependencies:Dependencies={}, customCommand:str=None, environmentVariables:dict[str, str]=None, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str=None, raiseIncompatibilityException=True) -> Environment:
+	def createAndLaunch(self, environment:str, dependencies:Any={}, customCommand:str|None=None, environmentVariables:dict[str, str]|None=None, additionalInstallCommands:dict[str, list[str]]={}, additionalActivateCommands:dict[str, list[str]]={}, mainEnvironment:str|None=None, raiseIncompatibilityException=True) -> Environment:
 		environmentIsRequired = self.create(environment, dependencies, additionalInstallCommands=additionalInstallCommands, additionalActivateCommands=additionalActivateCommands, mainEnvironment=mainEnvironment, raiseIncompatibilityException=raiseIncompatibilityException)
 		if environmentIsRequired:
 			return self.launch(environment, customCommand, environmentVariables=environmentVariables, additionalActivateCommands=additionalActivateCommands)

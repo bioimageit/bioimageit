@@ -8,7 +8,6 @@ class Tool(OmeroBase):
 
     name = "Omero Download"
     description = "Download files from Omero."
-    categories = ['Omero']
     inputs = [
             dict(
             name = 'dataset_id',
