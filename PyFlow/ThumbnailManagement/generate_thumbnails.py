@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import numpy as np
 from PIL import Image
-import h5py
+import h5py # type: ignore
 
 
 if __name__ == '__main__':
