@@ -142,7 +142,7 @@ class BiitToolNode(NodeBase):
 						continue
 					parameter = parameters[parameterName]
 					for key, value in serializedParameter.items():
-						parameter[key] = value
+						parameter[key] = value if parameter["dataType"] != "Path" or value is None else Path(value)
 
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
@@ -327,7 +327,7 @@ class BiitToolNode(NodeBase):
 
 	def prefixExtensionsWithIndex(self, s):
 		pattern = r"(\{\w+\.(exts|ext)\})$"
-		result = re.sub(pattern, r"[index]\1", s.replace('[ext]', '[index][ext]'))
+		result = re.sub(pattern, r"[index]\1", str(s).replace('[ext]', '[index][ext]'))
 		return result if '[index]' in result else result.replace(Path(result).suffix, '[index]' + Path(result).suffix)
 
 	def setOutputColumns(self, data):
