@@ -377,7 +377,7 @@ class BiitToolNode(NodeBase):
 
 	def compute(self, *args, **kwargs):
 		if not self.dirty: return
-		print('------------compute:', self.name)
+		print(f'------------compute: {self.name}')
 		self.inputDataFrame = self.getInputDataFrame()
 		self.processedDataFrame = self.tool.processDataFrame(self.inputDataFrame, self.getArgs(self.inputDataFrame, objectify=True, raiseRequiredException=False)) if callable(getattr(self.tool, 'processDataFrame', None)) else self.inputDataFrame.copy()
 		self.setOutputColumns(self.processedDataFrame)
