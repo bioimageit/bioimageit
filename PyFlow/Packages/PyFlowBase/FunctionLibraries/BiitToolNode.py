@@ -142,7 +142,7 @@ class BiitToolNode(NodeBase):
 						continue
 					parameter = parameters[parameterName]
 					for key, value in serializedParameter.items():
-						parameter[key] = value if parameter["dataType"] != "Path" or value is None else Path(value)
+						parameter[key] = value if key != 'value' or (parameter["dataType"] != "Path" or value is None) else Path(value)
 
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
@@ -232,7 +232,12 @@ class BiitToolNode(NodeBase):
 	def serialize(self):
 		template = super().serialize()
 		template['executed'] = self.executed
-		template['parameters'] = self.parameters.copy()
+		parameters = self.parameters.copy()
+		for io in ['inputs', 'outputs']:
+			for name, parameter in parameters[io].items():
+				if parameter['dataType'] == 'Path' and isinstance(parameter['value'], Path):
+					parameter['value'] = str(parameter['value'])
+		template['parameters'] = parameters
 		
 		# template['folderDataFramePath'] = self.folderDataFramePath
 		outputFolder = self.getOutputMetadataFolderPath()
@@ -272,28 +277,29 @@ class BiitToolNode(NodeBase):
 
 	# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
 	def replaceInputArgs(self, outputValue, inputGetter):
+		inputGetterStr = lambda name: str(inputGetter(name))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+)\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}}}', str(input))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).stem\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.stem}}', self.getStem(input))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.name}}', str(Path(input).name))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).parent.name\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.parent.name}}', str(Path(input).parent.name))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).ext\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.ext}}', Path(input).suffix)
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).exts\}', outputValue):
-			input = inputGetter(name)
+			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.exts}}', ''.join(Path(input).suffixes))
 		return outputValue
@@ -363,6 +369,10 @@ class BiitToolNode(NodeBase):
 		result = result.ffill()
 		return result
 
+	# Create a dataFrame from the parameters
+	def createDataFrameFromParameters(self):
+		return pandas.DataFrame({key: [value['value']] for key, value in self.parameters['inputs'].items()})
+	
 	def getInputDataFrame(self):
 		if self.inputDataFrame is not None: return self.inputDataFrame
 		dataFrames = self.getInputDataFrames()
@@ -380,6 +390,8 @@ class BiitToolNode(NodeBase):
 		print(f'------------compute: {self.name}')
 		self.inputDataFrame = self.getInputDataFrame()
 		self.processedDataFrame = self.tool.processDataFrame(self.inputDataFrame, self.getArgs(self.inputDataFrame, objectify=True, raiseRequiredException=False)) if callable(getattr(self.tool, 'processDataFrame', None)) else self.inputDataFrame.copy()
+		if self.processedDataFrame.empty:
+			self.processedDataFrame = self.createDataFrameFromParameters()
 		self.setOutputColumns(self.processedDataFrame)
 		self.setOutputMessage()
 		self.setOutputAndClean(self.processedDataFrame)

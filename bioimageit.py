@@ -159,7 +159,7 @@ def downloadSources(sources, sha):
     session = getSession()
     response = session.get(url, params={'sha': sha}, proxies=proxies, stream=True, timeout=1)
     totalSize = int(response.headers.get('content-length', 0))
-    blockSize = 100 * 1024  # 100 Kibibyte
+    blockSize = 500 * 1024  # 100 Kibibyte
     downloadedData = io.BytesIO()
 
     gui.progressBar.configure(maximum=totalSize)
@@ -427,7 +427,7 @@ def tailLogFileAndCheckInitialization(filename, stopEvent=None, timeout=10):
             waitTime += 0.5
 
         if not os.path.exists(filename):
-            print(f"Log file {filename} not created by bioimagiet.")
+            logging.error(f"Log file {filename} not created by bioimagiet.")
             return
 
         with open(filename, 'r') as f:
@@ -439,13 +439,12 @@ def tailLogFileAndCheckInitialization(filename, stopEvent=None, timeout=10):
                     time.sleep(0.2)  # Wait for new lines
                     continue
                 log(line)
-
-                if line.strip() == 'Initialization complete':
+                if line.strip().split(':')[-1] == 'Initialization complete':
                     return True
     except FileNotFoundError:
-        print(f"Error - Log file {filename} not found.")
+        logging.error(f"Error - Log file {filename} not found.")
     except Exception as e:
-        print(f"Error tailing log file: {e}")
+        logging.error(f"Error tailing log file: {e}")
     return False
 
 def launchBiit(sources):
@@ -520,7 +519,7 @@ def launchBiit(sources):
                 gui.window.after(0, close_window)
     if not initialized:
         environmentError(condaPath, environment, title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
-    
+
 def close_window():
     """Properly close the Tkinter window."""
     global gui
