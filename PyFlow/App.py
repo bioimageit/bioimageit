@@ -77,7 +77,7 @@ EDITOR_TARGET_FPS = 30
 
 
 logger = logging.getLogger()
-logger.info('Launching BioImageIT...')
+logger.info('Initializing BioImageIT...')
 
 def generateRandomString(numbSymbols=5):
 	result = ""
@@ -874,6 +874,5 @@ class PyFlow(QMainWindow):
 				PreferencesWindow().selectByName("General")
 
 		# This print tells the launcher bioimageit.py to close the loading window
-		print('Initialization complete')
 		logger.info('Initialization complete')
 		return instance
