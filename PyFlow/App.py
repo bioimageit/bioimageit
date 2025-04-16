@@ -875,4 +875,5 @@ class PyFlow(QMainWindow):
 
 		# This print tells the launcher bioimageit.py to close the loading window
 		print('Initialization complete')
+		logger.info('Initialization complete')
 		return instance

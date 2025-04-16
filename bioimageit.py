@@ -14,7 +14,7 @@ import yaml
 
 # Bundle path is bioimageit/_internal when frozen, and bioimageit/ otherwise, only used to copy files for windows
 def getBundlePath():
-	return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
+    return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
 
 # Root path is bioimageit/ in all cases
 def getRootPath():
@@ -403,6 +403,36 @@ def logError(message, exception):
     for line in traceback.format_tb(exception.__traceback__):
         logger.error(line)
 
+def tailLogFileAndCheckInitialization(filename, stopEvent=None, timeout=10):
+    try:
+        # Ensure file exists, wait a bit if not (child might be starting)
+        waitTime = 0
+        while not os.path.exists(filename) and waitTime < timeout:
+            time.sleep(0.5)
+            waitTime += 0.5
+
+        if not os.path.exists(filename):
+            print(f"Log file {filename} not created by bioimagiet.")
+            return
+
+        with open(filename, 'r') as f:
+            # Optional: Move to the end of the file initially if you only want new lines
+            f.seek(0, os.SEEK_END)
+            while stopEvent is None or not stopEvent.is_set():
+                line = f.readline()
+                if not line:
+                    time.sleep(0.2)  # Wait for new lines
+                    continue
+                log(line)
+
+                if line.strip() == 'Initialization complete':
+                    return True
+    except FileNotFoundError:
+        print(f"Error - Log file {filename} not found.")
+    except Exception as e:
+        print(f"Error tailing log file: {e}")
+    return False
+
 def launchBiit(sources):
 
     if sources is None or not sources.resolve().is_dir():
@@ -455,17 +485,24 @@ def launchBiit(sources):
             Path(pythonSymlink).symlink_to(python)
         executable = './BioImageIT'
 
-    with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py']) as process:
+    kwargs = {
+        "stdout": None,
+        "stderr": None,  # Merge stderr and stdout to handle all them with a single loop
+        "stdin": None,  # Prevent the command to wait for input: instead we want to stop if this happens
+        "encoding": "utf-8",
+        "errors": "replace",  # Determines how encoding and decoding errors should be handled: replaces invalid characters with a placeholder (e.g., ? in ASCII).
+        "bufsize": 1,  # 1 means line buffered
+    }
+    with environmentManager.executeCommands(environmentManager._activateConda() + [f'{environmentManager.condaBin} activate {environment}', f'cd {sources}', f'{executable} -u pyflow.py'], popenKwargs=kwargs) as process:
         
         initialized = False
-        for line in process.stdout:
-            log(line)
-            if line.strip() == 'Initialization complete':
-                initialized = True
-                loading.clear()
-                if gui is not None:
-                    waitGui()
-                    gui.window.after(0, close_window)
+
+        if tailLogFileAndCheckInitialization(sources / 'bioimageit.log'):
+            initialized = True
+            loading.clear()
+            if gui is not None:
+                waitGui()
+                gui.window.after(0, close_window)
     if not initialized:
         environmentError(condaPath, environment, title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
     
@@ -493,7 +530,7 @@ def updateVersionAndLaunchBiit():
         logError('An error occured while launching BioImageIT', e)
         waitGui()
         from tkinter import messagebox
-        gui.window.after(0, lambda: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files (in {str(getRootPath())}) for more information.") )
+        gui.window.after(0, lambda e=e: messagebox.showwarning("showwarning", f"An error occurred while launching BioImageIT; \n{e}\n\nCheck the logs in the initialize.log and environment.log files (in {str(getRootPath())}) for more information.") )
 
 # Start the task in a separate thread to keep the GUI responsive
 thread = threading.Thread(target=lambda: updateVersionAndLaunchBiit(), daemon=True) # deamon could be False because of thread.join() at the end

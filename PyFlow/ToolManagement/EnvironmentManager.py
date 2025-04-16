@@ -280,7 +280,7 @@ class EnvironmentManager:
 		
 	# If launchMessage is defined: execute until launchMessage is print
 	# else: execute completely (blocking)
-	def executeCommands(self, commands: list[str], launchedMessage:str|None=None, env:dict[str, str]|None=None, exitIfCommandError=True, waitComplete=False, log=True):
+	def executeCommands(self, commands: list[str], launchedMessage:str|None=None, env:dict[str, str]|None=None, exitIfCommandError=True, waitComplete=False, log=True, popenKwargs: dict[str, Any] ={}):
 		print('executeCommands', commands, launchedMessage)
 		rawCommands = commands.copy()
 		with tempfile.NamedTemporaryFile(suffix='.ps1' if self._isWindows() else '.sh', mode='w', delete=False) as tmp:
@@ -293,8 +293,18 @@ class EnvironmentManager:
 			if not self._isWindows():
 				subprocess.run(['chmod', 'u+x', tmp.name])
 			print(tmp.name)
+			defaultPopenKwargs = {
+				"stdout": subprocess.PIPE,
+				"stderr": subprocess.STDOUT,  # Merge stderr and stdout to handle all them with a single loop
+				"stdin": subprocess.DEVNULL,  # Prevent the command to wait for input: instead we want to stop if this happens
+				"encoding": "utf-8",
+				"errors": "replace",  # Determines how encoding and decoding errors should be handled: replaces invalid characters with a placeholder (e.g., ? in ASCII).
+				"bufsize": 1,  # 1 means line buffered
+				"env": env,
+			}
+
 			# We should be able to use UTF-8 encoding since it's the default on Linux, Mac, and Powershell on Windows ; but it does not work.
-			process = subprocess.Popen(executeFile, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, encoding='utf-8', errors='replace', bufsize=1)
+			process = subprocess.Popen(executeFile, **(defaultPopenKwargs | popenKwargs))
 			if waitComplete:
 				with process:
 					return self._getOutput(process, rawCommands, log=log)
