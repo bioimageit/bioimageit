@@ -1,5 +1,4 @@
 from pathlib import Path
-from matplotlib.image import thumbnail
 import pandas
 
 class Tool:

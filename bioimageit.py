@@ -2,6 +2,8 @@ import sys
 import os
 import platform
 import json
+from tempfile import tempdir
+import tempfile
 import time
 import webbrowser
 import threading
@@ -150,14 +152,14 @@ def getVersions():
 def getLatestVersion():
     return getVersions()[0]
 
-def downloadSources(versionName):
+def downloadSources(sources, sha):
     
     import zipfile, io
     url = f'https://gitlab.inria.fr/api/v4/projects/{projectId}/repository/archive.zip'
     session = getSession()
-    response = session.get(url, params={'sha': versionName}, proxies=proxies, stream=True, timeout=1)
+    response = session.get(url, params={'sha': sha}, proxies=proxies, stream=True, timeout=1)
     totalSize = int(response.headers.get('content-length', 0))
-    blockSize = 1024  # 1 Kibibyte
+    blockSize = 100 * 1024  # 100 Kibibyte
     downloadedData = io.BytesIO()
 
     gui.progressBar.configure(maximum=totalSize)
@@ -177,7 +179,12 @@ def downloadSources(versionName):
     updateLabel("Extracting files...")
     downloadedData.seek(0)
     with zipfile.ZipFile(downloadedData, 'r') as z:
-        z.extractall(getRootPath())
+        with tempfile.TemporaryDirectory() as temp:
+            z.extractall(temp)
+            dirs = [d for d in list(Path(temp).iterdir()) if d.is_dir()]
+            if len(dirs)<1:
+                raise Exception('Could not find any directory after downloading and extracting archive.')
+            dirs[0].rename(sources)
     
 def waitGui():
     if gui is None:
@@ -185,10 +192,18 @@ def waitGui():
     while not guiCreated.is_set():
         time.sleep(0.01)
 
-def downloadLatestVersion():
-    tag = getLatestVersion()
+def downloadVersion(versionInfo=None):
+    versionName = None
+    sha = None
+    version = versionInfo.get('version')
+    if version:
+        vs = version.split('-')
+        if len(vs)==3:
+            _, versionName, sha = vs
+    tag = getLatestVersion() if versionInfo.get('autoUpdate') is None or (versionName is None and sha is None) else dict(commit=dict(id=sha), name=versionName)
     versionName = tag['name']
-    sources = Path(f"bioimageit-{versionName}-{tag['target']}")
+    sha = tag['commit']['id']
+    sources = Path(f"bioimageit-{versionName}-{sha}")
 
     if not sources.exists():
         waitGui()
@@ -197,7 +212,7 @@ def downloadLatestVersion():
         
         gui.progressBar.step(2)
 
-        downloadSources(versionName)
+        downloadSources(sources, sha)
 
         # gui.window.update_idletasks()
 
@@ -320,15 +335,15 @@ def getProxySettingsFromConda():
 
 
 
-def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
+def tryDownloadVersionOrGetProxySettingsFromGUI(versionInfo):
     import requests
     try:
-        return downloadLatestVersion()
+        return downloadVersion(versionInfo)
     except requests.exceptions.ProxyError as e:
         logging.warning(e)
         getProxySettingsFromGUI()
         try:
-            return downloadLatestVersion()
+            return downloadVersion(versionInfo)
         except requests.exceptions.ProxyError as e:
             from tkinter import messagebox
             logging.warning(e)
@@ -337,15 +352,15 @@ def tryDownloadLatestVersionOrGetProxySettingsFromGUI():
             messagebox.showwarning("Error while checking BioImageIT version", "Unable to check BioImageIT version. Please check your proxy settings. Some BioImageIT features (omero connections, installation of dependencies, etc.) might not function properly.") 
             return None
 
-def tryDownloadLatestVersionOrGetProxySettingsFromConda():
+def tryDownloadVersionOrGetProxySettingsFromConda(versionInfo):
     import requests
     try:
-        return downloadLatestVersion()
+        return downloadVersion(versionInfo)
     except requests.exceptions.ProxyError as e:
         logging.warning(e)
         logging.warning('Searching for proxy settings in conda, mamba or micromamba configuration files...')
         getProxySettingsFromConda()
-        return tryDownloadLatestVersionOrGetProxySettingsFromGUI()
+        return tryDownloadVersionOrGetProxySettingsFromGUI(versionInfo)
 
 def createEnvironment(sources, environmentManager, environment):
     import tomllib
@@ -366,22 +381,22 @@ def updateVersion():
         with open(versionPath, 'r') as f:
             versionInfo = json.load(f)
     else:
-        versionInfo = dict(autoUpdate=True, version='unknown', proxies=None)
+        versionInfo = dict(autoUpdate=True, version='unknown', sha=None, proxies=None)
 
     sources = Path(versionInfo['version'])
     setProxies(versionInfo['proxies'] if 'proxies' in versionInfo else None)
 
     # If the selected version does not exist: auto update
-    if versionInfo['autoUpdate']:
-        try:
-            newSources = tryDownloadLatestVersionOrGetProxySettingsFromConda()
-            sources = newSources if newSources is not None else sources
-        except Exception as e:
-            logging.warning('Could not get the BioImageIT versions:')
-            logging.warning(e)
-            if versionInfo['version'] == 'unknown':
-                sys.exit(f'The bioimageit sources could not be downloaded.')
-        
+
+    try:
+        newSources = tryDownloadVersionOrGetProxySettingsFromConda(versionInfo)
+        sources = newSources if newSources is not None else sources
+    except Exception as e:
+        logging.warning('Could not get the BioImageIT versions:')
+        logging.warning(e)
+        if versionInfo['version'] == 'unknown':
+            sys.exit(f'The bioimageit sources could not be downloaded.')
+
     return sources
 
 def environmentErrorDialog(condaPath, environment, title, message):
