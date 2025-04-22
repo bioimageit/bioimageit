@@ -15,7 +15,6 @@ Here is the different processing steps of the workflow:
 - Split the 3 channels
 - Detect spots on channels 1 & 2
 - Compute connected components to differenciate each spot
-- Remove components which are too small
 - Segment nuclei on channel 3 with SAM
 - Compute the overlaps between detected spots and the nuclei
 - Count the average number of spots per nuclei
@@ -81,7 +80,7 @@ In Napari, you can see that the 3 components of the image are seperated in diffe
 
 Drag a "Convert image" node on the workflow, but don't connect it yet to the "List files" node.
 
-Select the "Convert image" node, go to the "Properties" tab and use the browse button "..." to select the first FISH image for the "input_image" parameter. Open the advanced parameters and hover the "merge" parameter with your mouse for a second. A tooltip provides more information about the parameter: "Combine seperate channels into RGB image". Tick the parameter and execute the workflow by clicking the "Run unexecuted nodes" in the "Execution" tab. BioImageIT will execute the "Convert image" node on the selected image, and generate a new thumbnail for the resulting image. As you can see, the thumbnail (in the "Convert image: output_image" column) is now in color and much more informative.
+Select the "Convert image" node, go to the "Properties" tab and use the browse button "..." to select the first FISH image for the "input_image" parameter. Open the advanced parameters and hover the "merge" parameter with your mouse for a second. A tooltip provides more information about the parameter: "Combine seperate channels into RGB image". Tick the parameter and execute the workflow by clicking the "Run unexecuted nodes" in the "Execution" tab. BioImageIT will execute the "Convert image" node on the selected image, and generate a new thumbnail for the resulting image. As you can see, the thumbnail (in the "Convert image: output_image" column) is now in color and much more informative. The node has turned green to indicate that the execution succeeded. It will turn orange if you modify its parameters to indicate that its output data is not up-to-date with the parameters anymore.
 
 Connect the two nodes by draging the output pin of the first node to the input pin of the second node.
 
@@ -101,10 +100,19 @@ You can also notice that the output DataFrame of the "Convert image" node has tw
 - and "Convert image: output_image" which is the output image paths of the "Convert image" node.
 The "output_image" parameter is "{input_image.stem}_ome.tiff" by default. BioImageIT will replace the value "{input_image.stem}" by the stem value (file name without extension) at the column "input_image". See more in the [Automatic output values]() section.
 
-
 Execute the workflow to convert the 4 images.
 
 Add 3 "Extract channel" nodes and connect them after the "Convert image" node. Set their "channel" parameter to a constant value of 0, 1 and 2 respectively ; and rename them accordingly by double-clicking on their name (on the node header on the canvas). Execute the workflow to extract the 3 images.
 
 Create two "Atlas" nodes (from the "Detection" category), put them after the "Extract channel 0" & "Extract channel 1" nodes, and rename them accordingly. Set their "gaussian_std" parameters to 120, and their "p_value" parameters to 0,00001. See the [Finding optimal parameters in BioImageIT]() section to learn more about searching the parameters space.
+
+Execute the workflow to detect the spots in channels 1 & 2.
+
+Create two "Connected components" nodes (from the "SimpleITK > Custom" category), put them after the "Atlas 0" and "Atlas 1" nodes and rename them accordingly. Execute the workflow to detect the connected components.
+
+Create a "Sam" node (from the "Segmentation" category) and put it after the "Extract channel 2" node. Execute the workflow to compute the sam detections.
+
+Create two "Label overlaps" nodes (from "SimpleITK > Custom" category), put them after the "Connected components 0" and "Connected components 1" nodes, and rename them accordingly. Connect the output of the "Sam" node to their inputs. Make sure the input parameter "label1" is set to the "Sam: segmentation" column for both "Label overlaps" nodes, and "label2" is set to the "Connected component N: labeled_image" column (and not "Connected component N: labeled_image_rgb"). Execute the workflow to compute the overlaps. 
+
+Note that unlike the nodes we used until now, the "Label overlaps" nodes do not generate new images. Yet, the DataFrame they generate is not filled with the output image paths, but with the details of the label overlaps. The "label 1" column lists the connected components of the first input image (the Sam segmentation of the nuclei in our case), the "label 2" column lists the connected components of the second input image (the Atlas spot detections) overlapping those nuclei. The "overlap" column corresponds to the number of pixels shared by the two connected components. Note that there are numerous connected components overlapping the label 1 in the Sam segmentation since it corresponds to the background. We will see how to filter those out in the next step.
 
