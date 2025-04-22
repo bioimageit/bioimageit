@@ -27,3 +27,7 @@ PyFlow/Tools/Fiji/fiji.zip
 all-test-data.zip
 all-test-data/
 .aider*
+Makefile
+make.bat
+docs/documentation/images
+docs/documentation/raw_images

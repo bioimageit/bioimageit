@@ -25,11 +25,15 @@ dependencies = ["simpleitk>=2.3.1, <2.4",
                 ]
 
 [project.optional-dependencies]
-install = ["pyinstaller"]
+install = ["pyinstaller>=6.11.1,<6.12"]
 package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7", "pyyaml>=6.0.2,<7"]
-ipython = ["ipython", "ipdb"]
+dev = ["ipython", "ipdb"]
+docs = ["sphinx", "sphinx-autobuild", "myst-parser", "furo"]
 
 [tool.pixi.feature.package.dependencies]
+python = "3.12.*"
+
+[tool.pixi.feature.docs.dependencies]
 python = "3.12.*"
 
 [tool.pixi.dependencies]
@@ -50,8 +54,9 @@ platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 [tool.pixi.environments]
 default = { solve-group = "default" }
 install = { features = ["install"], solve-group = "default" }
-dev = { features = ["ipython"], solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
 package = { features = ["install", "package"], no-default-feature = true }
+docs = { features = ["docs"], no-default-feature = true }
 
 [tool.pixi.feature.package.tasks]
 build = "pyinstaller bioimageit.spec"

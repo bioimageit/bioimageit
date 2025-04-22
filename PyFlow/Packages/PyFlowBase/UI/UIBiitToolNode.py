@@ -46,7 +46,7 @@ class ColumnValueWidget(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.typeSelector = QComboBox()
         self.typeSelector.addItem('Column')
-        self.typeSelector.addItem('Value')
+        self.typeSelector.addItem('Constant')
         self.layout.addWidget(self.typeSelector)
         self.layout.addWidget(self.inputWidget)
         data = node.getInputDataFrame()

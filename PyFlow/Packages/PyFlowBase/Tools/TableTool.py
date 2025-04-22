@@ -208,8 +208,8 @@ class TableTool(DockTool):
 
 	@staticmethod
 	def toolTip():
-		return "Current Data Frame"
+		return "Current DataFrame"
 
 	@staticmethod
 	def name():
-		return "Data frame"
+		return "DataFrame"

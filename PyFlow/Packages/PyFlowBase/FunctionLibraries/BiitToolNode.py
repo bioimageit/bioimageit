@@ -342,7 +342,8 @@ class BiitToolNode(NodeBase):
 			if output['dataType'] != 'Path': continue
 			columnName = self.getColumnName(outputName)
 			series = pandas.Series(data={}, index=data.index, dtype=str)
-			for index, row in data.iterrows():
+			irs = data.iterrows() if not data.empty else [(0, None)]
+			for index, row in irs:
 
 				if output.get('value') is None:
 					extension = output.get('extension', '') or ''
@@ -351,7 +352,8 @@ class BiitToolNode(NodeBase):
 					series.at[index] = self.replaceOutputKeywords(output['value'], outputName, output, row, index)
 				
 			# Remove duplicates by adding [index] before the file extension
-			for index, row in data.iterrows():
+			irs = data.iterrows() if not data.empty else [(0, None)]
+			for index, row in irs:
 				value = series.at[index]
 				# If the value appears more than once in the row: suffix it with index
 				if series.value_counts()[value] > 1:
@@ -371,7 +373,8 @@ class BiitToolNode(NodeBase):
 
 	# Create a dataFrame from the parameters
 	def createDataFrameFromParameters(self):
-		return pandas.DataFrame({key: [value['value']] for key, value in self.parameters['inputs'].items()})
+		# return pandas.DataFrame({key: [value['value']] for key, value in self.parameters['inputs'].items()})
+		return pandas.DataFrame({})
 	
 	def getInputDataFrame(self):
 		if self.inputDataFrame is not None: return self.inputDataFrame

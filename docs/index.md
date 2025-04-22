@@ -1,4 +1,35 @@
+---
+hide-toc: true
+---
+
 # BioImageIT
+
+BioImageIT is a workflow management system designed to drastically simplify the creation, execution and duplication of data science experiments. It has sepcialized features for image analysis. Goal: Make image analysis FAIR: Findable Accessible Interoperable Reproducible.
+
+Features :
+
+- Interface: 
+    - Nodal programming interface: easily create workflows with a simple GUI
+    - Python programming interface: easily create workflows with code
+- Tools & Environment management: 
+    - Plenty of processing tools, each isolated in its own environment, no conflict dependencies, automatic environment creation and dependencies installation, transparent for the user
+    - Easily integrate processing tools made in Java, C++, R or Python
+    - Easily create custom tools, with the simple python template
+    - Tool versionning (comming soon)
+- Image visualization: 
+    - Napari integration to display advanced imagery like 3D + time volumes
+    - Automatic & parallel image thumbnails generation
+- Performance: 
+    - Nodes are processed in parallel, easy to run on compute clusters (coming soon)
+- Data management:
+    - Dataframe based data flow: data management is handled by Pandas, standard and powerful
+    - Parameterize your tools based on data flow or fixed parameters
+    - Omero interface: benefit from the widespread bioimage database
+    - FAIR: Findable Accessible Interoperable Reproducible
+- Installation and update:
+    - Install with a double click, manage your versions with a dropdown
+
+
 
 A FAIR data management and image analysis framework. FAIR stands for Findable, Accessible, Interoperable and Reusable.
 
@@ -39,54 +70,13 @@ You might need to restart your terminal or source your shell for the changes to 
 
 Run the project with `pixi python run pyflow.py`.
 
-## Development
 
-It is possible to run and debug the project with Visual Studio Code by selecting the environment interpreter (run the `Python: Select Interpreter` command and enter the path `.pixi/envs/default/`), and creating a launch file (`.vscode/launch.json`) with the following configuration:
+```{toctree}
+:hidden:
 
+download.md
+documentation/getting_started.md
+tutorials.md
+events.md
+community.md
 ```
-{
-    "configurations": [
-        {
-            "name": "BioImageIT",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/pyflow.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "autoReload": {"enable": true }
-        },
-    ]
-}
-```
-
-## Tests
-
-Run `python -m unittest PyFlow/Tests/Test_Tools.py` in the defaut env (run `pixi shell` to activate the default env) to execute the Tools tests.
-Or use `ipython -m unittest --pdb PyFlow/Tests/Test_Tools.py` in the dev env (`pixi shell -e dev`) but ipython will not exactly break on exception when running unit tests.
-
-## Packaging
-
-The command `pixi run build` packages BioImageIT in the `dist/` repository. 
-It runs "`pyinstaller bioimageit.spec`" in the `package` environment defined in `pyproject.toml`.
-This environment only requires `requests` and `pyinstaller` with Python 3.12.
-
-## Sign the app
-
-Once a release is ready:
-- Create an archive: `tar czf bioimageit_macOS_arm64_vVERSION_NUMBER.app.tar.gz BioImage-IT.app` with the proper version number
-- Upload it on Gitlab-int with `python update_release.py -f bioimageit_macOS_arm64_vVERSION_NUMBER.app.tar.gz -pid 474 -s gitlab-int.inria.fr ` (see `Scripts/`).
-- Modify the `.gitlab-ci.yml` to target the proper release file and version.
-- Run the prod job tagged with codesign.inria.fr from `https://gitlab-int.inria.fr/amasson/bioimageit/-/jobs`.
-
-## Upload a release
-
-Once a release is signed, upload it on Gitlab with `python update_release.py -f release_name.zip -p 54065` (see `Scripts/`).
-
-## Debug Modules
-
-- Open ToolManagement/ in a new VSCode window: `code PyFlow/ToolManagement`
-- Choose the proper python environment to debug (open a python file, then choose the env at the bottom right of the screen)
-- Run Debug
-- Copy the port number printed in the output: "Listening port 62996"
-- Back in bioimageit: EnvironmentManager.launch, set Debug to True when the environment is the one to debug (for example), and past the port number
-- Debug BioImageIT
