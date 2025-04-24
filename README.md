@@ -80,7 +80,7 @@ Once a release is ready:
 
 ## Upload a release
 
-Once a release is signed, upload it on Gitlab with `python update_release.py -f release_name.zip -p 54065` (see `Scripts/`).
+Once a release is signed, upload it on Gitlab with `python update_release.py -f release_name.zip -pid 54065` (see `Scripts/`).
 
 ## Debug Modules
 
