@@ -43,6 +43,11 @@ Finally add an "Atlas" node and connect it to the "Merge" output. Set its `input
 
 ![Atlas parameters](/docs/documentation/images/atlas_parameters.png)
 
-Execute the workflow to perform the 9 Atlas detections on the input image with the generated parameters. Open the resulting images in Napari by clicking on the obtained thumbnails to determine which parameter combination is best for the input image.
+Execute the workflow to perform the 9 Atlas detections on the input image with the generated parameters.
+Finally, open the resulting images in Napari by clicking on the obtained thumbnails to determine which parameter combination is best for the input image!
 
-Done!
+!!! note Note on the output names
+    By default, the Atlas `output_image` is defined as `{input_image.stem}_detections{input_image.exts}`. Thus, our images are named `13432_orig_detections0.tiff`.
+    BioImageIT automatically suffixed the output paths with indices to avoid collisions (which would result in overwriting the generated files).
+    This is good because our images have different names, but it would be even better if we had the parameter names in our filename to make them more explicit. For this purpose, we can rename the "Atlas" output to `{input_image.stem}_detections_gaussianstd{gaussian_std}_pvalue{p_value}{input_image.ext}`.
+    See the [outputs documentation]() for more information.
