@@ -43,9 +43,9 @@ path/to/workflow/
 │   ├── Node 1                    # Output data of node 1
 │   ├── Node 2                    # Output data of node 2
 │   └── ...
-├── Metadata
-│   ├── Node 1                    # Parameters and dataframe of node 1
-│   ├── Node 2                    # Parameters and dataframe of node 1
+├── Metadata                      # Note that this is not exactly metadata
+│   ├── Node 1                    # Parameters and dataframe of node 1 (parameters.json and output_dataframe.csv)
+│   ├── Node 2                    # Parameters and dataframe of node 2 (parameters.json and output_dataframe.csv)
 │   └── ...
 ├── Thumbnails
 │   ├── Node 1                    # Thumbnails of node 1 outputs
