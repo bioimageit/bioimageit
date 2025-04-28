@@ -70,6 +70,7 @@ You might need to restart your terminal or source your shell for the changes to 
 
 Run the project with `pixi python run pyflow.py`.
 
+Generate doc with `sphinx-autobuild  docs build` (docs/ is the source directory, build/ the destination).
 
 ```{toctree}
 :hidden:
@@ -79,4 +80,9 @@ documentation/getting_started.md
 tutorials.md
 events.md
 community.md
+documentation/gui.md
+documentation/settings.md
+documentation/api.md
+documentation/nodes/list_files.md
+documentation/tutorial_bonus.md
 ```

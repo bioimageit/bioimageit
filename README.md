@@ -90,3 +90,7 @@ Once a release is signed, upload it on Gitlab with `python update_release.py -f 
 - Copy the port number printed in the output: "Listening port 62996"
 - Back in bioimageit: EnvironmentManager.launch, set Debug to True when the environment is the one to debug (for example), and past the port number
 - Debug BioImageIT
+
+## Documentation
+
+Generate doc with `sphinx-autobuild  docs build` (docs/ is the source directory, build/ the destination).

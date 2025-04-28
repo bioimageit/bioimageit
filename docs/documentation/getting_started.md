@@ -160,7 +160,6 @@ One can see numerous connected components overlapping the label 1 in the Sam seg
 Now, we must process the DataFrames we obtained to count the average number of spots per nucleus. Create a custom tool for this purpose by clicking the "Create tool" button in the Tools tab. Enter "Average number of spots per nucleus" for the name and click "OK". This will create a definition file for the tool and open it in a code editor (defined in the Preferences > "External code editor"). 
 
 
-
 Modify the file to set a proper name and description (for example "Average number of spots per nucleus" and "Compute the average number of spots per nucleus.").
 
 The `categories` attribute defines where the tool will appear in the "Tools" tab.
@@ -280,3 +279,5 @@ Save the file. You will see the new "Convert average number of spots per nucleus
 ![Final workflow](/docs/documentation/images/final_fish_workflow.png)
 
 We completed our workflow to compute the number of spots per nuclei!
+
+You can now share your workflow with the "Export workflow" button of the "Workflows" tab. This will create a zip archive containing all files required to execute the workflow on another machine.
