@@ -9,7 +9,7 @@ build:
   jobs:
     pre_build:
       - curl -fsSL https://pixi.sh/install.sh | bash
-      - export PATH="$HOME/.pixi/bin:$PATH"
+      - export PATH="/home/docs/.pixi/bin:$PATH"
     build:
       html: 
         - pixi run -e docs sphinx-build -b html website build/html
