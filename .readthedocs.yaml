@@ -17,7 +17,3 @@ build:
 
 sphinx:
   configuration: website/conf.py
-
-python:
-  install:
-    - requirements: false
