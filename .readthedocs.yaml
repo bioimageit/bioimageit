@@ -12,7 +12,7 @@ build:
       - export PATH="$HOME/.pixi/bin:$PATH"
       - pixi install -e docs
     build:
-      - pixi run -e docs sphinx-build -b html website build/html
+      cmd: pixi run -e docs sphinx-build -b html website build/html
 
 sphinx:
   configuration: website/conf.py
