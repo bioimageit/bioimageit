@@ -50,6 +50,8 @@ class TestGeneral(unittest.TestCase):
         print("\t[BEGIN TEST]", self._testMethodName)
 
     def test_tools(self):
+        mainEnvironment = environmentManager.launch('bioimageit', direct=True)
+
         toolValidationPath = Path(__file__).parent / 'validated_tools.json'
         validated_tools = []
         if toolValidationPath.exists():

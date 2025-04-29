@@ -120,7 +120,9 @@ class ColumnValueWidget(QWidget):
     
     def updateNodeParameterValue(self, value):
         parameter = self.node.parameters['inputs'][self.name]
-        parameter['value'] = int(value) if 'dataType' in parameter and parameter['dataType'] == 'int' else value
+        finalValue = int(value) if 'dataType' in parameter and parameter['dataType'] == 'int' else value
+        if 'value' in parameter and parameter['value'] == finalValue: return
+        parameter['value'] = finalValue
         self.node.setNodeDirtyAndProcess()
         EditorHistory().saveState("Update parameter", modify=True)
     
@@ -136,6 +138,7 @@ class ColumnValueWidget(QWidget):
         elif index==1:
             self.inputWidget.show()
             type = 'value'
+        if self.node.parameters['inputs'][self.name]['type'] == type: return
         self.node.parameters['inputs'][self.name]['type'] = type
         if sendChanged:
             self.node.setNodeDirtyAndProcess()
@@ -143,6 +146,7 @@ class ColumnValueWidget(QWidget):
 
     def changeColumnValue(self, index):
         data = self.node.getInputDataFrame()
+        if self.node.parameters['inputs'][self.name]['columnName'] == data.columns[index]: return
         self.node.parameters['inputs'][self.name]['columnName'] = data.columns[index]
         self.node.setNodeDirtyAndProcess()
         EditorHistory().saveState("Update parameter column", modify=True)

@@ -4,7 +4,7 @@ import pandas
 class Tool:
     
     name = "List Files"
-    description = "Reads a folder and create a pandas DataFrame from the file list."
+    description = "Reads a folder and creates a pandas DataFrame from the file list."
     environment = 'bioimageit'
     categories = ['Data']
 
@@ -18,7 +18,7 @@ class Tool:
         ),
         dict(
             name = 'filter',
-            help = 'Filter',
+            help = 'Filter the files',
             type = 'str',
             default = '*',
         ),

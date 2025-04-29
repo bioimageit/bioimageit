@@ -1,3 +1,10 @@
+# BioImageIT API
+
+BioImageIT allows you to create and execute workflows in pure Python.
+
+Here is an example usage:
+
+```
 from pathlib import Path
 from PyFlow.WorkflowManager import WorkflowManager
 
@@ -56,3 +63,4 @@ extractChannel1.parameters['inputs']['channel']['value'] = 1
 
 workflowManager.computeNodes()
 workflowManager.executeWorkflow()
+```
