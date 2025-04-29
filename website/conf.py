@@ -14,6 +14,8 @@ author = 'Arthur Masson, Sylvain Prigent, Léo Maury, Charles Kervrann'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["myst_parser"]
+myst_heading_anchors = 3
+myst_enable_extensions = ["colon_fence"]
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -23,5 +25,9 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+html_title = 'BioImageIT'
 html_theme = 'furo'
 html_static_path = ['_static']
+
+html_logo = '../PyFlow/UI/resources/Logo.png'
+html_favicon = '../PyFlow/UI/resources/Logo.png'

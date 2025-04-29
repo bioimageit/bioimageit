@@ -29,5 +29,4 @@ all-test-data/
 .aider*
 Makefile
 make.bat
-docs/documentation/images
-docs/documentation/raw_images
+website/documentation/raw_images

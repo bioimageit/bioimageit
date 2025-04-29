@@ -1,6 +1,6 @@
-# Tutorial Bonus
+# Distance to contours computation
 
-This bonus tutorial explains how to extend the *Getting started* workflow to compute the average distance of the spots to the nuclei contours.
+This second tutorial explains how to extend the *Getting started* workflow to compute the average distance of the spots to the nuclei contours.
 
 SimpleITK provides the function [`sitk.SignedMaurerDistanceMap()`](https://simpleitk.org/doxygen/v2_0/html/namespaceitk_1_1simple.html#a756e4bd805e8f8fc75091162f1f2c1fb) which returns the distance of all pixels of a binary image to the closest contour. 
 

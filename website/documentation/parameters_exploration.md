@@ -1,6 +1,6 @@
 # Parameters exploration
 
-![Parameters exploration](/docs/documentation/images/parameters_exploration.png)
+![Parameters exploration](images/parameters_exploration.png)
 
 BioImageIT provides a way to find to explore the parameter space of a tool to find the best combination for a given application.
 
@@ -20,7 +20,7 @@ We will use the "Generate" node to create a matrix of values to feed the "Atlas"
 
 Add two "Generate" nodes and rename them "Generate gaussian_std" and "Generate pvalue". Set the `values` parameter of the "Generate gaussian_std" to `30,60,120`. Set the `logspace` parameter of the "Generate pvalue" to `-3,-5,3` to generale the values `[0.001, 0.0001, 0.00001]`.
 
-Add "List files" node to open the FISH folder from the [Getting Started tutorial](). Filter the images to obtain a single image by entering `13432*` in the `filter` parameter.
+Add "List files" node to open the FISH folder from the [FISH analysis tutorial](tutorials/FOLS2_and_CSF1R_detection.md). Filter the images to obtain a single image by entering `13432*` in the `filter` parameter.
 
 Add a "Merge" node. This node enables to merge its input DataFrames using the [pandas DataFrame.merge() method](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html#pandas.DataFrame.merge). Select "Merge" and set its `how` parameter to `cross` in order to creates the cartesian product from input DataFrames. Connect the outputs of the three first nodes to the "Merge" input. 
 
@@ -41,13 +41,17 @@ You will see that you obtain a DataFrame with all possible combinations of the v
 
 Finally add an "Atlas" node and connect it to the "Merge" output. Set its `input_image` parameter to the `path` column (this should be automatic), its `gaussian_std` parameter to the `gaussian_std` column, and its `pvalue` to the `pvalue` column.
 
-![Atlas parameters](/docs/documentation/images/atlas_parameters.png)
+![Atlas parameters](images/atlas_parameters.png)
 
 Execute the workflow to perform the 9 Atlas detections on the input image with the generated parameters.
 Finally, open the resulting images in Napari by clicking on the obtained thumbnails to determine which parameter combination is best for the input image!
 
-!!! note Note on the output names
-    By default, the Atlas `output_image` is defined as `{input_image.stem}_detections{input_image.exts}`. Thus, our images are named `13432_orig_detections0.tiff`.
-    BioImageIT automatically suffixed the output paths with indices to avoid collisions (which would result in overwriting the generated files).
-    This is good because our images have different names, but it would be even better if we had the parameter names in our filename to make them more explicit. For this purpose, we can rename the "Atlas" output to `{input_image.stem}_detections_gaussianstd{gaussian_std}_pvalue{p_value}{input_image.ext}`.
-    See the [outputs documentation]() for more information.
+
+:::{admonition} Note on the output names
+:class: tip
+
+By default, the Atlas `output_image` is defined as `{input_image.stem}_detections{input_image.exts}`. Thus, our images are named `13432_orig_detections0.tiff`.
+BioImageIT automatically suffixed the output paths with indices to avoid collisions (which would result in overwriting the generated files).
+This is good because our images have different names, but it would be even better if we had the parameter names in our filename to make them more explicit. For this purpose, we can rename the "Atlas" output to `{input_image.stem}_detections_gaussianstd{gaussian_std}_pvalue{p_value}{input_image.ext}`.
+See the [outputs documentation](outputs.md) for more information.
+:::

@@ -1,4 +1,6 @@
-# Data flow
+# Tool integration and creation
+
+## Data flow
 
 BioImageIT propagates data in the workflow with DataFrames. The DataFrames describe the data of the Workflow and points to associated data files.
 The DataFrames are sent from nodes to nodes, each node extends the incoming DataFrames or generate new ones to contribute to the objective of the workflow.
@@ -21,7 +23,7 @@ More precisely, the processData() of the "Cellpose_segmentation" node will be ca
 The args argument of the processData() is generated from the current row of the DataFrame (the value of the "path" column at the current row for the `input_image` argument) and the constant rameters of the node for the other arguments (`{"model_type": "cyto", "use_gpu": False, "auto_diameter": False, "diameter": 30, "channels": [0,0]}`).
 BioImageIT will generate the thumbnails at the end of the node execution.
 
-# Update methods and processing methods
+## Update methods and processing methods
 
 BioImageIT will call mergeDataFrames() then processDataFrame() when the node is clicked or one of its parameter is modified.
 Those *update methods* process the DataFrames.
@@ -39,11 +41,11 @@ In our example, each image is described by a row, so the "Cellpose_segmentation"
 processAllData() is usefull to process all data at once. 
 For example, this is necessary for the Omero upload node to open a connection to the Omero database once for all items (and not open and close connection for each DataFrame row). It is also used by the "ExoDeepFinder train" node to train a model from all data described by the final DataFrame.
 
-## The output message
+### The output message
 
 The `self.outputMessage` can be set in the *update and processing methods* to display a message to the user in the DataFrame view. This is used by the `label_statistics` tool to explain that the DataFrame is empty during the workflow creation and will be updated only once the workflow is executed. The processDataFrame() just sets the `self.outputMessage` to "Label statistics will be computed on execution.". Then, the processData() method resets this `self.outputMessage` to an empty string since the DataFrame will be generated and visible.
 
-# Custom tools
+## Custom tools
 
 Integrating existing tools and creating new ones is quite easy in BioImageIT. It's just about creating one python script which defines the tool.
 

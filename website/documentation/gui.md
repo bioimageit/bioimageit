@@ -4,7 +4,7 @@
 
 The "Tools" tab shows the tool library organized by categories, with a search bar to find specific tools by name, and a "Create tool" button.
 To add a node to your workflow, drag a tool from the library and drop it on the canvas. You can also right-click on the canvas to access the tool library directly in your workflow.
-To create a new tool, use the "Create tool" button (see the [Create tool section]()), enter a name and validate, and fill the template script which opens in the code editor.
+To create a new tool, use the "Create tool" button (see [Creating and integrating tools](tool_integration.md)), enter a name and validate, and fill the template script which opens in the code editor.
 
 ## Canvas
 

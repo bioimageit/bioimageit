@@ -1,4 +1,4 @@
-# BioImageIT programmatic API
+# BioImageIT API
 
 BioImageIT allows you to create and execute workflows in pure Python.
 
