@@ -1,0 +1,33 @@
+# pixi environments
+.pixi
+.atlas
+*.egg-info
+*.pyc
+**/.DS_Store
+**/test-data/
+PyFlow/Tools/*/data/
+**/Fiji.app/
+Workflows
+BioImage-IT.data/
+__pycache__/
+micromamba/
+micromamba_bckp/
+BioImage-IT.data/
+bioimageit-v*/
+PyFlow/Configs/
+*.ini
+*.log
+build/
+dist/
+version.json
+PyFlow/Tests/validated_tools.json
+PyFlow/Tests/validated_tools_*.json
+PyFlow/Tools/Convert image/bftools/
+PyFlow/Tools/Fiji/fiji.zip
+all-test-data.zip
+all-test-data/
+.aider*
+Makefile
+make.bat
+docs/documentation/images
+docs/documentation/raw_images

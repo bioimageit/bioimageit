@@ -1,0 +1,15 @@
+ads--CTitleBarButton {
+    background-color: rgb(255, 255, 255);
+}
+/* ads--CDockWidgetTab:not(:focus) {
+    background-color: rgb(255, 0, 0);
+}
+ads--CDockWidgetTab {
+    background-color: rgb(255, 33, 0);
+}
+ads--CTitleBarButton:not(:focus) {
+    background-color: rgb(255, 0, 0);
+} */
+ads--CDockWidgetTab {
+	background: palette(window);
+}
