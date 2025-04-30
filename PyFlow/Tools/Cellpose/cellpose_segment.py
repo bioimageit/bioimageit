@@ -4,7 +4,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
+    dependencies = dict(conda=[], pip=['pandas==2.1.4', 'cellpose==3.1.0']) # cellpose or other package needs numpy < 2 (on macOS x86) so install pandas 2.1.4 which required numpy < 2 before installing cellpose
     environment = 'cellpose'
     test = ['--input_image', 'img02.png', '--segmentation', 'img02_segmentation.png', '--visualization', 'img02_segmentation.npy']
     modelType = None

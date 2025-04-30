@@ -4,7 +4,7 @@ from pathlib import Path
 class Tool:
 
     categories = ['Detection']
-    dependencies = dict(conda=['bioimageit::atlas'], pip=[])
+    dependencies = dict(conda=['bioimageit::atlas|win-64,linux-64,osx-arm64'], pip=[])
     environment = 'atlas'
     test = ['--input_image', 'M10.tif', '--output_image', 'M10_detections.tif']
     
