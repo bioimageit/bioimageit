@@ -2,7 +2,7 @@ import subprocess
 import platform
 from pathlib import Path
 
-dataPath = Path(__file__).parent.resolve() / 'path'
+dataPath = Path(__file__).parent.resolve() / 'data'
 dataPath.mkdir(exist_ok=True)
 
 class Tool:
