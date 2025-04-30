@@ -178,6 +178,9 @@ class GeneralPreferences(CategoryWidgetBase):
         return getRootPath() / 'version.json'
 
     def getInstalledVersion(self):
+        if not self.getVersionPath().exists():
+            with open(self.getVersionPath(), 'w') as f:
+                json.dump({"autoUpdate": True, "version": "dev", "proxies": None}, f)
         with open(self.getVersionPath(), 'r') as f:
             return json.load(f)
     
