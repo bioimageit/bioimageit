@@ -64,7 +64,7 @@ class Tool:
         print(f'[[1/1]] Run Fiji macro')
         import subprocess
         import platform
-        fijiExecutable = 'Fiji.app/Contents/MacOS/ImageJ-macosx' if platform.system() == 'Darwin' else 'Fiji.app/fiji' if platform.system() == 'Linux' else 'fiji\Fiji.app\ImageJ-win64.exe'
+        fijiExecutable = 'Fiji.app/Contents/MacOS/ImageJ-macosx' if platform.system() == 'Darwin' else 'Fiji.app/ImageJ-linux64' if platform.system() == 'Linux' else 'fiji\Fiji.app\ImageJ-win64.exe'
         fijiPath = str(Path(__file__).parent.resolve() / fijiExecutable)
         macroPath = str(Path(__file__).parent.resolve() / 'StackReg' / 'stackreg.ijm')
         transformation = args.transformation.replace(' ', '_')
