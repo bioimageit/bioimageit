@@ -2,7 +2,7 @@
 
 Use the File menu (BioImageIT menu on macOS) > Preferences... to open the preferences panel.
 
-## *General* settings
+## General settings
 
 ### Common
 

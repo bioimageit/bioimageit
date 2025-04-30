@@ -2,7 +2,7 @@
 
 We often want to name the outputs of a node from its inputs. 
 
-For example, when we segment the image `cell.tiff`, we often want to name the output `cell_segmentation.tiff`.
+For example, when we segment the image `cell.tiff`, we might want to name the output `cell_segmentation.tiff`.
 
 BioImageIT provides a template feature for this purpose. 
 
