@@ -18,7 +18,7 @@ class Tool:
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'], 
                                      mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"',
                                             f'cd {Path(__file__).parent.resolve()}',
-                                            'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-macosx.zip',
+                                            'curl -Ls https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-macosx.zip',
                                             'unzip -o fiji-2.14.0-macosx.zip',
                                             'rm fiji-2.14.0-macosx.zip',
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'])
