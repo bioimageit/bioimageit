@@ -21,7 +21,7 @@ class Tool:
                                             'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'], 
                                      mac=[f'cd {dataPath}',
-                                            'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
+                                            'curl -Ls https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
                                             'unzip -o bftools.zip',
                                             'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'])
