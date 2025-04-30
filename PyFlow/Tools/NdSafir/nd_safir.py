@@ -71,6 +71,7 @@ class Tool:
                 shortname = 'nfr',
                 help = 'Number of frames to process in a batch. Use 0 to process everything at once (for 4D only).',
                 default = 0,
+                type = 'int',
             ),
     ]
     outputs = [

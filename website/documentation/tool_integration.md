@@ -98,7 +98,23 @@ class Tool():
                 choices = ['', 'Uncompressed', 'LZW', 'JPEG-2000', 'JPEG-2000 Lossy', 'JPEG', 'zlib'],  # The possible values for the parameter. This will create a dropdown menu in the GUI
                 type = 'str',
                 advanced = True,
-            )]
+            ),
+            dict(
+                name = 'columnName',
+                help = 'Column name',
+                type = 'str',
+                default = 'values',
+                static = True,          # The input is always constant, cannot be set to column
+            ),
+            dict(
+                name = 'p_value',
+                shortname = 'pval',
+                help = 'P-value to account for the probability of false detection.',
+                default = 0.001,
+                decimals = 6,
+                type = 'float',          # The number of decimals this value can take (for the Qt spin box input)
+            ),
+        ]
     # The outputs of the tools
     outputs = [dict(name='output_image', help='The output image.', 
                     default='{input_image.stem}_detections{input_image.exts}', type='Path')]

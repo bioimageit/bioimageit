@@ -67,9 +67,9 @@ class Tool:
                 type = 'bool',
             ),
             dict(
-                name = 'skip_normalizaton',
+                name = 'skip_normalization',
                 shortname = 'sn',
-                help = 'Whether to sktip the data normalization.',
+                help = 'Whether to skip the data normalization.',
                 default = True,
                 type = 'bool'
             ),

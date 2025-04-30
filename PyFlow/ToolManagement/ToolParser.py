@@ -2,12 +2,12 @@ import argparse
 from pathlib import Path
 from pydoc import locate
 
-specialKeys = ['name', 'autoColumn', 'autoIncrement', 'shortname', 'advanced', 'decimals']
+specialKeys = ['name', 'autoColumn', 'autoIncrement', 'shortname', 'advanced', 'decimals', 'static']
 
 def add_argument(parser: argparse._ArgumentGroup, arg: dict):
     if 'type' in arg and arg['type'] == 'bool':
         arg = arg.copy()
-        arg['action'] = 'store_true' if arg.get('default', False) else 'store_false'
+        arg['action'] = 'store_false' if arg.get('default', False) else 'store_true'
         del arg['type']
         if 'default' in arg:
             del arg['default']
