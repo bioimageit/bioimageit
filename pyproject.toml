@@ -10,7 +10,6 @@ dependencies = ["simpleitk>=2.3.1, <2.4",
                 "qtpy>=2.4.1,<3",
                 "blinker>=1.8.2,<2",
                 "keyring>=25.2.1,<26",
-                "numpy>=2.0.1,<3",
                 "pandas>=2.2.2,<3",
                 "pyside6>=6.7.2,<7", 
                 "pyside6-qtads>=4.3.0.2,<5", 
@@ -26,8 +25,8 @@ dependencies = ["simpleitk>=2.3.1, <2.4",
 
 [project.optional-dependencies]
 install = ["pyinstaller>=6.11.1,<6.12"]
-package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7", "pyyaml>=6.0.2,<7"]
-dev = ["ipython", "ipdb"]
+package = ["requests>=2.32.3, <2.33", "psutil>=6.1.0,<7", "pyyaml>=6.0.2,<7", "typing-extensions==4.12.2"]
+dev = ["ipython", "ipdb", "pip", "setuptools"]
 docs = ["sphinx", "sphinx-autobuild", "myst-parser", "furo"]
 
 [tool.pixi.feature.package.dependencies]

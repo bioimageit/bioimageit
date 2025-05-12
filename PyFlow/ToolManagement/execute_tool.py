@@ -20,7 +20,19 @@ tool = module.Tool()
 
 parser = create_parser(tool)
 
+
+class DictToObject(object):
+    def __init__(self, d):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                setattr(self, key, DictToObject(value))
+            else:
+                setattr(self, key, value)
+
+
 args = vars(parser.parse_args(sys.argv[2:]))
+args = DictToObject(args)
+
 if hasattr(tool, 'initialize') and callable(tool.initialize):
     tool.initialize(args)
 

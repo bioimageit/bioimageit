@@ -181,6 +181,9 @@ class PyFlow(QMainWindow):
 
 	def getVersionInfo(self):
 		versionJson = getRootPath() / 'version.json'
+		if not versionJson.exists():
+			with open(versionJson, 'w') as f:
+				json.dump({"autoUpdate": True, "version": "dev", "proxies": None}, f)
 		with open(versionJson, 'r') as f:
 			return json.load(f)
 		

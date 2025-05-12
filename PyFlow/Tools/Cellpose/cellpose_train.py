@@ -3,7 +3,7 @@ import json
 class Tool:
 
     categories = ['Segmentation']
-    dependencies = dict(conda=[], pip=['cellpose==3.1.0', 'pandas==2.2.2'])
+    dependencies = dict(conda=[], pip=['pandas==2.1.4', 'cellpose==3.1.0']) # cellpose or other package needs numpy < 2 (on macOS x86) so install pandas 2.1.4 which required numpy < 2 before installing cellpose
     environment = 'cellpose'
     
     name = "Cellpose"
@@ -67,9 +67,9 @@ class Tool:
                 type = 'bool',
             ),
             dict(
-                name = 'skip_normalizaton',
+                name = 'skip_normalization',
                 shortname = 'sn',
-                help = 'Whether to sktip the data normalization.',
+                help = 'Whether to skip the data normalization.',
                 default = True,
                 type = 'bool'
             ),
@@ -126,33 +126,30 @@ class Tool:
             ),
     ]
 
-    def initialize(self, args):
-        print('Loading libraries...')
-        import cellpose
-        self.cellpose = cellpose
-    
     def processData(self, args):
+        import cellpose
+
         if not args.train_directory.exists():
             raise Exception(f'Error: train directory {args.train_directory} does not exist.')
 
         print(f'[[1/4]] Load data {args.train_directory}')
 
-        self.cellpose.io.logger_setup()
+        cellpose.io.logger_setup()
 
-        output = self.cellpose.io.load_train_test_data(str(args.train_directory), str(args.test_directory), image_filter=args.image_filter,
+        output = cellpose.io.load_train_test_data(str(args.train_directory), str(args.test_directory), image_filter=args.image_filter,
                                         mask_filter=args.mask_filter, look_one_level_down=args.look_one_level_down)
         images, labels, image_names, test_images, test_labels, image_names_test = output
 
         print(f'[[2/4]] Load model {args.model_type}')
 
         # e.g. retrain a Cellpose model
-        model = self.cellpose.models.CellposeModel(model_type=args.model_type)
+        model = cellpose.models.CellposeModel(model_type=args.model_type)
 
         channels = json.loads(args.channels)
 
         print(f'[[3/4]] Train model {args.model_name}')
 
-        model_path, train_losses, test_losses = self.cellpose.train.train_seg(model.net,
+        model_path, train_losses, test_losses = cellpose.train.train_seg(model.net,
                                     train_data=images, train_labels=labels,
                                     channels=channels, normalize=not args.skip_normalization,
                                     test_data=test_images, test_labels=test_labels,
@@ -167,14 +164,14 @@ class Tool:
             print(f'[[4/4]] Evaluate model {args.model_name}')
 
             # get files (during training, test_data is transformed so we will load it again)
-            output = self.cellpose.io.load_train_test_data(str(args.test_directory), mask_filter='_seg.npy')
+            output = cellpose.io.load_train_test_data(str(args.test_directory), mask_filter='_seg.npy')
             test_data, test_labels = output[:2]
 
             # run model on test images
             masks = model.eval(test_data, channels=channels, diameter=diam_labels)[0]
 
             # check performance using ground truth labels
-            ap = self.cellpose.metrics.average_precision(test_labels, masks)[0]
+            ap = cellpose.metrics.average_precision(test_labels, masks)[0]
 
             print(f'>>> average precision at iou threshold 0.5 = {ap[:,0].mean():.3f}')
         else:

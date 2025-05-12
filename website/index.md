@@ -115,7 +115,7 @@ This project currently heavily relies on [PyFlow](https://github.com/wonderworks
 
 BioImageIT was made possible thanks to [omero-py](https://github.com/ome/omero-py), [pandas](https://pandas.pydata.org/), [Qt](https://doc.qt.io/), [Conda](https://conda.anaconda.org/), and many others.
 
-BioImageIT is tested on *Windows*, *macOS* and *Linux* operating systems. 
+BioImageIT is tested on Windows (x86_64 and arm64), macOS (x86_64 and arm64) and Linux (x86_64) operating systems. 
 
 ## Overview
 

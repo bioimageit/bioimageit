@@ -18,4 +18,4 @@ for tool in sorted(list(source.iterdir())):
     tool_destination.mkdir(exist_ok=True, parents=True)
     test_data = tool / 'test-data'
     if not test_data.exists(): continue
-    shutil.copytree(test_data, tool_destination / 'test-data')
+    shutil.copytree(test_data, tool_destination / 'test-data', dirs_exist_ok=True)

@@ -2,7 +2,7 @@ import subprocess
 import platform
 from pathlib import Path
 
-dataPath = Path(__file__).parent.resolve() / 'path'
+dataPath = Path(__file__).parent.resolve() / 'data'
 dataPath.mkdir(exist_ok=True)
 
 class Tool:
@@ -21,7 +21,7 @@ class Tool:
                                             'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'], 
                                      mac=[f'cd {dataPath}',
-                                            'wget https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
+                                            'curl -Ls https://downloads.openmicroscopy.org/bio-formats/8.0.1/artifacts/bftools.zip',
                                             'unzip -o bftools.zip',
                                             'chmod u+x bftools/bfconvert',
                                             'rm bftools.zip'])

@@ -9,7 +9,7 @@ class Tool:
                                      windows=[f'Set-Location -Path "{Path(__file__).parent.resolve()}"',
                                               f'Invoke-WebRequest -URI https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-win64.zip -OutFile fiji.zip',
                                               f'Expand-Archive -Force fiji.zip',
-                                              f'Remove-Item fiji.zip'
+                                              f'Remove-Item fiji.zip',
                                               f'Copy-Item "{(Path(__file__).parent / "StackReg").resolve()}" -Destination "{Path("fiji/Fiji.app/plugins").resolve()}"'],
                                      linux=[f'cd {Path(__file__).parent.resolve()}',
                                             'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-linux64.zip',
@@ -18,7 +18,7 @@ class Tool:
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'], 
                                      mac=['export DYLD_LIBRARY_PATH="/usr/local/lib/"',
                                             f'cd {Path(__file__).parent.resolve()}',
-                                            'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-macosx.zip',
+                                            'curl -Ls https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-macosx.zip',
                                             'unzip -o fiji-2.14.0-macosx.zip',
                                             'rm fiji-2.14.0-macosx.zip',
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'])
@@ -64,7 +64,7 @@ class Tool:
         print(f'[[1/1]] Run Fiji macro')
         import subprocess
         import platform
-        fijiExecutable = 'Fiji.app/Contents/MacOS/ImageJ-macosx' if platform.system() == 'Darwin' else 'Fiji.app/fiji' if platform.system() == 'Linux' else 'fiji\Fiji.app\ImageJ-win64.exe'
+        fijiExecutable = 'Fiji.app/Contents/MacOS/ImageJ-macosx' if platform.system() == 'Darwin' else 'Fiji.app/ImageJ-linux64' if platform.system() == 'Linux' else 'fiji\Fiji.app\ImageJ-win64.exe'
         fijiPath = str(Path(__file__).parent.resolve() / fijiExecutable)
         macroPath = str(Path(__file__).parent.resolve() / 'StackReg' / 'stackreg.ijm')
         transformation = args.transformation.replace(' ', '_')

@@ -6,17 +6,27 @@ A FAIR data management and image analysis framework. FAIR stands for Findable, A
 
 BioImageIT provides a node programming interface to create processing workflows from Conda packaged tools. Each tool is run in its own conda environment to avoid dependency conflicts. Data is transfered from node to node in the form of [pandas](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.attrs.html) DataFrames.
 
-See [the documentation](https://bioimageit.github.io/) for more information.
+See [the documentation](https://bioimageit.readthedocs.io/en/latest/index.html) for more information.
 
 This project currently heavily relies on [PyFlow](https://github.com/wonderworks-software/PyFlow).
 
 BioImageIT was made possible thanks to [omero-py](https://github.com/ome/omero-py), [pandas](https://pandas.pydata.org/), [Qt](https://doc.qt.io/), [Conda](https://conda.anaconda.org/), and many others.
 
-*BioImageIT* is tested on *Windows*, *macOS* and *Linux* operating systems. 
+BioImageIT is tested on Windows (x86_64 and arm64), macOS (x86_64 and arm64) and Linux (x86_64) operating systems. 
 
 ## Overview
 
 Open science and FAIR principles are major topics in the field of modern microscopy for biology. This is due to both new data acquisition technologies like super-resolution and light sheet microscopy that generate large datasets but also to the new data analysis methodologies such as deep learning that automate data mining with high accuracy. Nevertheless data are still rarely shared and annotated because this implies a lot of manual and tedious work and software packaging. We present BioImageIT an open source framework that integrates automation of image data management with data processing. Scientists then only need to import their data once in BioImageIT, which automatically generates and manages the metadata every time an operation is performed on the data. This accelerates the data mining process with no need any more to deal with IT integration and manual analysis and annotations required to build training sets for machine learning techniques. BioImageIT then automatically implements FAIR principles. The interest of bioImageIT is thus twofold. 
+
+## Mission statement
+
+BioImageIT aims to be the **integration middleware to ease the interoperability between data management and data analysis software** for bio-imaging. The mission of BioImageIT is to provide a graphical user interface (GUI) that allows any scientist without coding skills to annotate and analyze datasets using various software. We hope to accomplish this by:
+
+- Being **user-focused**. The user experience is the main objective of the BioImageIT project. GUI design, core development, software integration and documentation should be guided by the wish to make bioimage management and analysis easy for all scientists.
+- Being **cross-platform**. BioImageIT should run on the most used **operating systems** (Windows, MacOS, Linux) and integrate existing tools without distinguishing their original **programming language** (C++, Java, Python…).
+- **Not reinventing the wheel**. All database management systems or data analysis tools should not be developed in the core code of BioImageIT but implemented as external plugins or wrappers to connect BioImageIT with existing open source software.
+- Providing **a stable API** to enable standardization of communication with data management databases and data analysis tools.
+- Being **well-documented** and **accessible**. The core code and plugins have to be documented for developers and users. We expect core code and plugins to be documented with docstrings and wrappers to be documented with a tutorial that is accessible to non-data science experts using real world examples.
 
 ## Usage
 
@@ -48,7 +58,7 @@ Then, select the "List files" and use the browse button of the `folderPath` para
 
 Finally, execute the workflow with the "Run unexecuted nodes" from the "Execution" tab to compute your segmentations. BioImageIT will create an environment for Cellpose, install its dependencies, and run the segmentation on the images you selected.
 
-To go further, see [the documentation](https://bioimageit.github.io/).
+To go further, see [the documentation](https://bioimageit.readthedocs.io/en/latest/index.html).
 
 ## Development 
 
@@ -108,16 +118,6 @@ Once a release is signed, upload it on Gitlab with `python update_release.py -f 
 
 Generate doc with `sphinx-autobuild -a website build` (website/ is the source directory, build/ the destination, `-a` disables cache).
 
-
-## Mission statement
-
-BioImageIT aims to be the **integration middleware to ease the interoperability between data management and data analysis software** for bio-imaging. The mission of BioImageIT is to provide a graphical user interface (GUI) that allows any scientist without coding skills to annotate and analyze datasets using various software. We hope to accomplish this by:
-
-- Being **user-focused**. The user experience is the main objective of the BioImageIT project. GUI design, core development, software integration and documentation should be guided by the wish to make bioimage management and analysis easy for all scientists.
-- Being **cross-platform**. BioImageIT should run on the most used **operating systems** (Windows, MacOS, Linux) and integrate existing tools without distinguishing their original **programming language** (C++, Java, Python…).
-- **Not reinventing the wheel**. All database management systems or data analysis tools should not be developed in the core code of BioImageIT but implemented as external plugins or wrappers to connect BioImageIT with existing open source software.
-- Providing **a stable API** to enable standardization of communication with data management databases and data analysis tools.
-- Being **well-documented** and **accessible**. The core code and plugins have to be documented for developers and users. We expect core code and plugins to be documented with docstrings and wrappers to be documented with a tutorial that is accessible to non-data science experts using real world examples.
 
 ## Steering Council
 

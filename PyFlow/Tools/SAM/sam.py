@@ -8,7 +8,7 @@ class Tool:
     categories = ['Segmentation']
     dependencies = dict(conda=[], pip=['sam2==1.1.0', 'huggingface_hub==0.29.2'])
     environment = 'sam'
-    test = []
+    test = ['--image', 'img02.jpeg', '--segmentation', 'img02_segmentation.tiff']
     
     inputs = [
         dict(
