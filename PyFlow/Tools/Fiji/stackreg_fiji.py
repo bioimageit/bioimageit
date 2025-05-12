@@ -9,7 +9,7 @@ class Tool:
                                      windows=[f'Set-Location -Path "{Path(__file__).parent.resolve()}"',
                                               f'Invoke-WebRequest -URI https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-win64.zip -OutFile fiji.zip',
                                               f'Expand-Archive -Force fiji.zip',
-                                              f'Remove-Item fiji.zip'
+                                              f'Remove-Item fiji.zip',
                                               f'Copy-Item "{(Path(__file__).parent / "StackReg").resolve()}" -Destination "{Path("fiji/Fiji.app/plugins").resolve()}"'],
                                      linux=[f'cd {Path(__file__).parent.resolve()}',
                                             'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-linux64.zip',

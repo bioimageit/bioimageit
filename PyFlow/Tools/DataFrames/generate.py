@@ -10,7 +10,6 @@ class Tool:
     categories = ['Data']
     dependencies = dict(conda=[], pip=[])
     environment = 'bioimageit'
-    test = []
     
     inputs = [
         dict(
