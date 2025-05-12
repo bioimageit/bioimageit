@@ -184,7 +184,7 @@ def downloadSources(sources, sha):
             dirs = [d for d in list(Path(temp).iterdir()) if d.is_dir()]
             if len(dirs)<1:
                 raise Exception('Could not find any directory after downloading and extracting archive.')
-            dirs[0].rename(sources)
+            shutil.move(dirs[0], sources)
     
 def waitGui():
     if gui is None:

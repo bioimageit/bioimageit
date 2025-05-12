@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import shutil
 
 class Tool:
 
@@ -110,7 +111,7 @@ class Tool:
             # save results so you can load in gui
             cellpose.io.masks_flows_to_seg(image, masks, flows, input_image, diams, channels)
             if args.visualization.exists(): args.visualization.unlink()
-            (input_image.parent / f'{input_image.stem}_seg.npy').rename(args.visualization)
+            shutil.move(input_image.parent / f'{input_image.stem}_seg.npy', args.visualization)
             print(f'Saved visualization: {args.visualization}')
 
         if args.segmentation:
@@ -120,7 +121,7 @@ class Tool:
             output_mask = input_image.parent / f'{input_image.stem}_cp_masks.png'
             if output_mask.exists():
                 if args.segmentation.exists(): args.segmentation.unlink()
-                (output_mask).rename(args.segmentation)
+                shutil.move(output_mask, args.segmentation)
                 print(f'Saved out: {args.segmentation}')
             else:
                 print('Segmentation was not generated because no masks were found.')

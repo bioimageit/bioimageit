@@ -249,7 +249,7 @@ class WorkflowTool(DockTool):
             send2trash(newPath)
         
         # Rename directory
-        path.rename(newPath)
+        shutil.move(path, newPath)  # use shutil.move(path, newPath) instead of path.rename(newPath) in case the newPath is on a different filesystem
         
         # Update listWidget: remove old path & add new path
         for item in self.listWidget.findItems(str(path), QtCore.Qt.MatchExactly):
