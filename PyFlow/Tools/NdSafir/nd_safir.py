@@ -7,7 +7,7 @@ class Tool:
     categories = ['Denoising']
     dependencies = dict(python='3.9', conda=['bioimageit::ndsafir|osx-64,win-64,linux-64'], pip=[])
     environment = 'ndsafir'
-    test = ['--input_image', '03_rab_bruite.tif', '--type', '3D', '-n', 'Adaptive-Gauss', '-nf', '2', '--output_image', 'DN.tif']
+    test = ['--input_image', '03_rab_bruite.tif', '--type', '3D', '--noise', 'Adaptive-Gauss', '--noise_factor', '2', '--output_image', 'DN.tif']
 
     noiseChoices = ['Gauss', 'Poisson-Gauss', 'Adaptive-Gauss']
     
