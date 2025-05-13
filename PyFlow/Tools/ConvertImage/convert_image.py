@@ -290,7 +290,7 @@ class Tool:
         # argumentList += [f'"{args.input_image}"', f'"{args.output_image}"']
         argumentList += [args.input_image, args.output_image]
         bftools = Path(__file__).parent.resolve() / 'data' / 'bftools'
-        command = [str(bftools / 'bfconvert')] if platform.system() != 'Windows' else [str(bftools / 'bfconvert.bat')]
+        command = [str(bftools / 'bfconvert')] if platform.system() != 'Windows' else [str(bftools / 'bftools' / 'bfconvert.bat')]
         command += [str(c) for c in argumentList]
         print('command:')
         print(command)
