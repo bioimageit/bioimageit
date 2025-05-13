@@ -385,7 +385,7 @@ class EnvironmentManager:
 			commands += [f'Set-Location -Path "{condaPath}"', 
 					# Download and install the latest Visual C++ Redistributables silently
 					f'echo "Installing Visual C++ Redistributable if necessary..."',
-					'$installer = "$env:Temp\vc_redist.x64.exe"',
+					'$installer = "$env:Temp\\vc_redist.x64.exe"',
 					'Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile $installer',
 					'$proc = Start-Process -FilePath $installer -ArgumentList "/quiet /norestart" -PassThru',
 					'$proc.WaitForExit()',

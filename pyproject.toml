@@ -59,3 +59,6 @@ docs = { features = ["docs"], no-default-feature = true }
 
 [tool.pixi.feature.package.tasks]
 build = "pyinstaller bioimageit.spec"
+
+[tool.pixi.feature.dev.tasks]
+test = "ipython -m unittest --pdb PyFlow/Tests/Test_Tools.py"
