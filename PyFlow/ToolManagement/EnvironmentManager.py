@@ -385,7 +385,11 @@ class EnvironmentManager:
 			commands += [f'Set-Location -Path "{condaPath}"', 
 					# Download and install the latest Visual C++ Redistributables silently
 					f'echo "Installing Visual C++ Redistributable if necessary..."',
-					f'Invoke-WebRequest {proxyArgs} -URI "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "$env:Temp\\vc_redist.x64.exe"; Start-Process "$env:Temp\\vc_redist.x64.exe" -ArgumentList "/quiet /norestart" -Wait; Remove-Item "$env:Temp\\vc_redist.x64.exe"',
+					'$installer = "$env:Temp\vc_redist.x64.exe"',
+					'Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile $installer',
+					'$proc = Start-Process -FilePath $installer -ArgumentList "/quiet /norestart" -PassThru',
+					'$proc.WaitForExit()',
+					'try { Remove-Item $installer -Force } catch { Write-Host "Warning: Could not delete installer. Try manually deleting: $installer" -ForegroundColor Yellow }',
 					f'echo "Installing micromamba..."',
 					f'Invoke-Webrequest {proxyArgs} -URI https://github.com/mamba-org/micromamba-releases/releases/download/2.0.4-0/micromamba-win-64 -OutFile micromamba.exe']
 		else:
