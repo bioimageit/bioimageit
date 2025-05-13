@@ -18,6 +18,10 @@ import yaml
 def getBundlePath():
     return Path(sys._MEIPASS) if getattr(sys, 'frozen', False) else Path(__file__).parent
 
+# Resources path is bioimageit/_internal/resources when frozen, and bioimageit/PyFlow/UI/resources otherwise
+def getResourcesPath():
+    return Path(sys._MEIPASS) / 'resources' if getattr(sys, 'frozen', False) else Path(__file__).parent / 'PyFlow' / 'UI' / 'resources'
+
 # Root path is bioimageit/ in all cases
 def getRootPath():
     if getattr(sys, 'frozen', False):
@@ -77,6 +81,7 @@ class Gui:
 
         # Create the install window
         self.window = tk.Tk()
+        self.window.iconbitmap(getResourcesPath() / "Logo.ico")
         self.window.title("BioImageIT")
 
         width, height = 800, 500

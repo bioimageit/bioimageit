@@ -5,7 +5,7 @@ a = Analysis(
     ['bioimageit.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[(PyFlow/UI/resources/Logo.ico, resources/Logo.ico)],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
