@@ -200,7 +200,7 @@ def downloadVersion(versionInfo=None):
         vs = version.split('-')
         if len(vs)==3:
             _, versionName, sha = vs
-    tag = getLatestVersion() if versionInfo.get('autoUpdate') is None or (versionName is None and sha is None) else dict(commit=dict(id=sha), name=versionName)
+    tag = getLatestVersion() if versionInfo.get('autoUpdate') is True or (versionName is None and sha is None) else dict(commit=dict(id=sha), name=versionName)
     versionName = tag['name']
     sha = tag['commit']['id']
     sources = Path(f"bioimageit-{versionName}-{sha}")
