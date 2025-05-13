@@ -232,7 +232,27 @@ class WorkflowTool(DockTool):
         if shouldSave == QtWidgets.QMessageBox.Cancel:
             return path
         workflowDirectory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open Workflow', str(path), QtWidgets.QFileDialog.ShowDirsOnly)
-        if workflowDirectory is None or not Path(workflowDirectory).is_dir(): return
+        if workflowDirectory is None or workflowDirectory == '': return
+        workflowFile = Path(workflowDirectory) / WorkflowTool.graphFileName
+        if not workflowFile.exists():
+            # Extracting an archive can lead to a nested directory (especially on Windows)
+            # Check if the workflowFolder/workflowFolder/workflow.pygraph exists and use workflowFolder/workflowFolder if so
+            nestedWorkflowDirectory = Path(workflowDirectory) / Path(workflowDirectory).name
+            workflowFile = nestedWorkflowDirectory / WorkflowTool.graphFileName
+            # If workflow file exists in nested folder: use it if parent folder only has one child
+            if (not workflowFile.exists()):
+                QtWidgets.QMessageBox.warning(self, "Warning: Workflow not found", f'The workflow file "{workflowFile}" does not exist. Please make sure to select a workflow folder.', QtWidgets.QMessageBox.Ok)
+                return
+            else:
+                answer = QtWidgets.QMessageBox.warning(
+                    self,
+                    "Found nested folder",
+                    f'The folder you selected ({workflowDirectory}) is not a workflow folder (it does not contain the {WorkflowTool.graphFileName} file), but it contains a workflow folder ({nestedWorkflowDirectory}). Would you like to load this one instead?',
+                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                )
+                if answer == QtWidgets.QMessageBox.No:
+                    return
+                workflowDirectory = str(nestedWorkflowDirectory)
         self.loadWorkflowNoDialog(workflowDirectory)
         # Update listWidget (add new path and select it) and Update settings (update workflows and set current workflow)
         self.addWorkflow(workflowDirectory, setCurrentItem=True)
