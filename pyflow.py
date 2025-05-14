@@ -41,10 +41,6 @@ def main(instance=None):
 	
 	app = QApplication(sys.argv)
 	icon = QtGui.QIcon()
-	icon.addFile('PyFlow/UI/resources/Logo_16x16.ico', QtCore.QSize(16,16))
-	icon.addFile('PyFlow/UI/resources/Logo_32x32.ico', QtCore.QSize(32,32))
-	icon.addFile('PyFlow/UI/resources/Logo_48x48.ico', QtCore.QSize(48,48))
-	icon.addFile('PyFlow/UI/resources/Logo_64x64.ico', QtCore.QSize(64,64))
 	icon.addFile('PyFlow/UI/resources/Logo.ico', QtCore.QSize(128,128))
 	app.setWindowIcon(icon)
 	app.setApplicationDisplayName('BioImageIT')
