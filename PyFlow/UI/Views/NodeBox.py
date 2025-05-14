@@ -716,7 +716,7 @@ class NodesBox(QFrame):
             graphManager = self.pyFlowInstance.graphManager.get()
             workflowPath = Path(graphManager.workflowPath).resolve()
             customToolsPath = workflowPath / 'Tools'
-            toolPath = customToolsPath / toolName / f'{toolName}.py'
+            toolPath = customToolsPath / f'biit_{toolName}' / f'{toolName}.py'
             toolPath.parent.mkdir(exist_ok=True, parents=True)
             templatePath = Path('PyFlow/ToolManagement') / 'ToolTemplate.py'
             with open(toolPath, 'w') as destinationFile, open(templatePath, 'r') as exampleFile:
@@ -731,5 +731,5 @@ class NodesBox(QFrame):
 
             # Open script file in code editor
             editCmd = ConfigManager().getPrefsValue("PREFS", "General/EditorCmd")
-            editCmd = editCmd.replace("@FILE", f'"{toolPath.resolve()}"')
+            editCmd = editCmd.replace("@FILE", f'"{toolPath.resolve()}"') if "@FILE" in editCmd else f'{editCmd} {toolPath.resolve()}'
             subprocess.Popen(editCmd, shell=True)

@@ -15,7 +15,7 @@
 
 import sys
 from qtpy.QtWidgets import QApplication
-from qtpy import QtCore
+from qtpy import QtCore, QtGui
 import argparse
 import os
 import json
@@ -40,7 +40,9 @@ def main(instance=None):
 	QApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
 	
 	app = QApplication(sys.argv)
-	
+	app.setWindowIcon(QtGui.QIcon('PyFlow/UI/resources/Logo.ico'))
+	app.setApplicationDisplayName('BioImageIT')
+
 	instance = PyFlow.instance(software="standalone")
 
 	instance.updateCSS()
