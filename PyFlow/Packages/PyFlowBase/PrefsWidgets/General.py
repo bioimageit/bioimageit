@@ -46,7 +46,7 @@ class GeneralPreferences(CategoryWidgetBase):
         self.layout.addWidget(commonCategory)
 
         # Code editor
-        self.lePythonEditor = QLineEdit("sublime_text.exe @FILE")
+        self.lePythonEditor = QLineEdit("code @FILE")
         commonCategory.addWidget("External code editor", self.lePythonEditor)
 
         # Napari
@@ -114,7 +114,7 @@ class GeneralPreferences(CategoryWidgetBase):
         self.layout.addItem(spacerItem)
 
     def initDefaults(self, settings):
-        settings.setValue("EditorCmd", "sublime_text.exe @FILE")
+        settings.setValue("EditorCmd", "code @FILE")
         settings.setValue("HistoryDepth", 50)
         
         settings.setValue("BioImageITVersion", self.autoUpdateString)
