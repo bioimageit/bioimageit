@@ -859,7 +859,7 @@ class PyFlow(QMainWindow):
 		PyFlow.appInstance = instance
 
 		# for toolName in ['Workflow', 'Tools', 'Properties', 'Table viewer', 'Logger']:
-		for toolName in ['Tools', 'Workflow', 'Execution', 'Properties', 'Data frame', 'Logger']:
+		for toolName in ['Tools', 'Workflow', 'Execution', 'Properties', 'DataFrame', 'Logger']:
 			tool = instance.getToolByClassName(toolName)
 			if tool is None or toolName == 'Logger':
 				instance.invokeDockToolByName("PyFlowBase", toolName)
