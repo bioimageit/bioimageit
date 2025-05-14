@@ -119,7 +119,7 @@ class ProgressDialog(QWidget):
         if message == self.allNodesProcessedMessage:
             inmain(lambda: self.progress(message, int(100)))
         # Find progess prints: string in the format [[current/total]] where current is the current node, row or process step ; and total the total number of nodes, rows or process steps.
-        progressPrints = re.findall(r'\[\[(\d)\/(\d)\]\]', message)
+        progressPrints = re.findall(r'\[\[(\d+)\/(\d+)\]\]', message)
         if len(progressPrints) > 0:
             # Remove the [[ and ]] sequences from message
             message = re.sub(r'\[\[|\]\]', '', message)
