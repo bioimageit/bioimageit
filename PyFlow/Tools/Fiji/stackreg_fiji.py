@@ -12,7 +12,7 @@ class Tool:
                                               f'Remove-Item fiji.zip',
                                               f'Copy-Item "{(Path(__file__).parent / "StackReg").resolve()}" -Destination "{Path("fiji/Fiji.app/plugins").resolve()}"'],
                                      linux=[f'cd {Path(__file__).parent.resolve()}',
-                                            'wget https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-linux64.zip',
+                                            'curl -Ls https://downloads.imagej.net/fiji/releases/2.14.0/fiji-2.14.0-linux64.zip',
                                             'unzip -o fiji-2.14.0-linux64.zip',
                                             'rm fiji-2.14.0-linux64.zip',
                                             f'cp -a {Path(__file__).parent.resolve()}/StackReg/. ./Fiji.app/plugins'], 

@@ -445,7 +445,7 @@ class EnvironmentManager:
 	
 	def getProxyEnvironmentVariablesCommands(self):
 		if self.proxies is None: return []
-		return [f'export {name.lower()}_proxy="{value}"' if not self._isWindows() else f'$Env:{name.lower()}_proxy="{value}"' for name, value in self.proxies.items()]
+		return [f'export {name.lower()}_proxy="{value}"' if not self._isWindows() else f'$Env:{name.upper()}_PROXY="{value}"' for name, value in self.proxies.items()]
 	
 	def getProxyString(self):
 		if self.proxies is None: return None
