@@ -2,7 +2,6 @@ import sys
 import os
 import platform
 import json
-from tempfile import tempdir
 import tempfile
 import time
 import webbrowser
@@ -25,12 +24,11 @@ def getResourcesPath():
 # Root path is bioimageit/ in all cases
 def getRootPath():
     if getattr(sys, 'frozen', False):
-        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path(sys._MEIPASS).parent.parent.parent / 'BioImage-IT.data'
+        return Path(sys._MEIPASS).parent if platform.system() != 'Darwin' else Path.home() / 'Library' / 'Application Support' / 'BioImageIT'
     else:
         return Path(__file__).parent
 
 getRootPath().mkdir(exist_ok=True, parents=True)
-os.chdir(getRootPath())
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,6 +40,8 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 logger.info('Initializing BioImageIT...')
+
+os.chdir(getRootPath())
 
 # Import EnvironmentManager to make its modules available in bundle
 from PyFlow import getSourcesPath
@@ -516,11 +516,14 @@ def launchBiit(sources):
         
         initialized = False
 
+        logging.info(f'Waiting for initialization logs...')
         if tailLogFileAndCheckInitialization(sources / 'bioimageit.log'):
             initialized = True
             loading.clear()
             if gui is not None:
+                logging.info(f'Waiting GUI before closing...')
                 waitGui()
+                logging.info(f'Closing GUI...')
                 gui.window.after(0, close_window)
     if not initialized:
         environmentError(condaPath, environment, title='Initialization error', message=f"BioImageIT was not initialized properly. This might happen when the bioimageit environment was not properly created.\nWould you like to delete the BioImageIT environment ({condaPath / 'envs/' / environment})?\nJust restart BioImageIT to recreate it.") # BioImageIT will recreate it at launch time if necessary.
@@ -528,11 +531,13 @@ def launchBiit(sources):
 def close_window():
     """Properly close the Tkinter window."""
     global gui
+    logging.info(f'Closing GUI...')
     gui.window.quit()
     gui.window.destroy()
     gui.window.update()
     gui.window.update_idletasks()
     gui = None
+    logging.info(f'GUI Closed.')
 
 environmentExists = Path('micromamba/envs/bioimageit').exists()
 versionExists = versionPath.exists()
@@ -567,11 +572,14 @@ while time.time() < timeout_start + timeout:
 
 # If still loading after timeout seconds: create GUI
 if loading.is_set() and gui is None:
+    logging.info(f'Still loading after {timeout} seconds, creating GUI...')
     gui = Gui()
 
 if gui is not None:
     guiCreated.set()
+    logging.info(f'GUI main loop')
     gui.window.mainloop()
     gui = None
+    logging.info(f'GUI closed')
 
 thread.join()

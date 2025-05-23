@@ -490,7 +490,7 @@ class ExportWorkflowTool(ShelfTool):
         dataFramePath = outputFolder / 'input_data_frame.csv'
         dataFrame = node.processedDataFrame # node.getProcessedDataFrame()
         if isinstance(dataFrame, pandas.DataFrame):
-            dataFrame.to_csv(dataFramePath)
+            dataFrame.to_csv(dataFramePath, index=False)
             return dataFramePath.relative_to(workflowPath)
         else:
             raise Exception(f'Error: the input data frame of node "{node.name}" is empty wheares it has input connections.')

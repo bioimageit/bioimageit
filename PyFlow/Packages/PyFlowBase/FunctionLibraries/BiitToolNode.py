@@ -522,7 +522,7 @@ class BiitToolNode(NodeBase):
 		self.regenerateThumbnails(outputData)
 
 		if isinstance(outputData, pandas.DataFrame):
-			outputData.to_csv(outputFolder / OUTPUT_DATAFRAME_PATH)
+			outputData.to_csv(outputFolder / OUTPUT_DATAFRAME_PATH, index=False)
 		
 		self.saveArgsList(argsList, outputFolder)
 		self.setExecuted(True)

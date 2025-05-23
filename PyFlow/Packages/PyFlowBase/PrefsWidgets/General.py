@@ -15,6 +15,7 @@
 
 from pathlib import Path
 import keyring
+import subprocess
 import requests
 import sys
 import json
@@ -75,6 +76,11 @@ class GeneralPreferences(CategoryWidgetBase):
         self.updateVersionSelector()
 
         commonCategory.addWidget("BioImageIT version", self.versionSelector)
+
+        # Add button to open BioImageIT data folder
+        self.openDataFolderBtn = QPushButton("Open BioImageIT Data Folder")
+        self.openDataFolderBtn.clicked.connect(self.openDataFolder)
+        commonCategory.addWidget("", self.openDataFolderBtn)  # empty label to align properly
 
         # Error reports
         errorReportsCategory = CollapsibleFormWidget(headName="Error reports")
@@ -174,6 +180,16 @@ class GeneralPreferences(CategoryWidgetBase):
         except:
             pass
     
+    def openDataFolder(self):
+
+        if sys.platform == "darwin":  # macOS
+            path = Path.home() / 'Library' / 'Application Support' / 'BioImageIT'
+            subprocess.call(["open", str(path)])
+        elif sys.platform == "win32":  # Windows
+            os.startfile(str(getRootPath()))
+        elif sys.platform == "linux":  # Linux
+            subprocess.call(["xdg-open", str(getRootPath())])
+
     def getVersionPath(self):
         return getRootPath() / 'version.json'
 

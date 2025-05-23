@@ -14,7 +14,9 @@
 
 from pathlib import Path
 import shutil
+import json
 import tempfile
+import pandas
 from blinker import Signal
 from send2trash import send2trash
 from qtpy import QtCore, QtWidgets
@@ -195,6 +197,8 @@ class WorkflowTool(DockTool):
         self.pyFlowInstance.currentFileName = str(path / WorkflowTool.graphFileName)
         if not self.pyFlowInstance.save(save_as=False, deleteData=True):
             self.pyFlowInstance.currentFileName = tmpCurrentFileName
+            return False
+        return True
 
     def createWorkflowDialog(self):
         fileName, answer = QtWidgets.QFileDialog.getSaveFileName(self, 'Create workflow directory', options=QtWidgets.QFileDialog.ShowDirsOnly, dir=str(Path.home()))
@@ -292,22 +296,23 @@ class WorkflowTool(DockTool):
         shutil.copytree(path, newPath)
         return
 
-    def removeExternalPaths(self):
-        import json
+    def getGraphWithoutExternalPaths(self):
+        workflowPath = self.getCurrentWorkflow()
         with open(self.pyFlowInstance.currentFileName, 'r') as f:
             graph = json.load(f)
             for node in graph['nodes']:
                 if 'folderDataFramePath' in node:
                     node['folderDataFramePath'] = None
                 # Todo: check parameters
-        with open(self.pyFlowInstance.currentFileName, 'w') as f:
-            json.dump(graph, f)
-        return
+                # for parameter in node.parameters.inputs + node.parameters.outputs:
+                #     if parameter['dataType'] == 'Path':
+                #         if Path(parameter['value']).is_relative_to(workflowPath):
+                #             parameter['value'] = ''
+        return graph
     
     def exportWorkflow(self):
         path = self.getCurrentWorkflow()
-        self.saveGraph(path)
-        self.removeExternalPaths()
+        if not self.saveGraph(path): return
         zipFilePath, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Export Workflow (create .zip file)', dir= str(path.parent / f'{path.name}.zip'), filter='Zip files (*.zip)')
         if zipFilePath is None or len(zipFilePath) == 0: return
         zipFilePath = Path(zipFilePath)
@@ -317,6 +322,7 @@ class WorkflowTool(DockTool):
         with tempfile.TemporaryDirectory() as tmp:
             workflowFolder = Path(tmp) / zipFilePath.stem
             workflowFolder.mkdir(parents=True, exist_ok=True)
+
             # Copy the Tools and Scripts folder
             for name in ['Tools', 'Scripts']:
                 if (path / name).exists():
@@ -327,10 +333,21 @@ class WorkflowTool(DockTool):
                 metadataFolder.mkdir()
                 for folder in sorted(list((path / 'Metadata').iterdir())):
                     (metadataFolder / folder.name).mkdir()
+
+                    # df = pandas.read_csv(folder / OUTPUT_DATAFRAME_PATH)
+                    # The following could lead to errors ( if Path(x).exists() and not Path(x).is_relative_to(path) and x is not a path but a value ), so we need types in DataFrames for this features:
+                    # df.map(lambda x: '' if Path(x).exists() and not Path(x).is_relative_to(path) else x) # Nullify all Path which are not relative to the workflow path
+                    # df.to_csv(metadataFolder / folder.name / OUTPUT_DATAFRAME_PATH, index=False)
+
                     for fileName in [PARAMETERS_PATH, OUTPUT_DATAFRAME_PATH]:
                         if (folder / fileName).exists():
                             shutil.copyfile(folder / fileName, metadataFolder / folder.name / fileName)
-            shutil.copyfile(path / WorkflowTool.graphFileName, workflowFolder / WorkflowTool.graphFileName)
+
+            # shutil.copyfile(path / WorkflowTool.graphFileName, workflowFolder / WorkflowTool.graphFileName)
+            graph = self.getGraphWithoutExternalPaths()
+            with open(workflowFolder / WorkflowTool.graphFileName, 'w') as f:
+                json.dump(graph, f)
+            
             shutil.make_archive(zipFilePath.with_suffix(''), 'zip', tmp)
         return
     
