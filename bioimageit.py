@@ -81,7 +81,8 @@ class Gui:
 
         # Create the install window
         self.window = tk.Tk()
-        self.window.iconbitmap(getResourcesPath() / "Logo.ico")
+        if platform.system() != "Linux":
+            self.window.iconbitmap(getResourcesPath() / "Logo.ico")
         self.window.title("BioImageIT")
 
         width, height = 800, 500
