@@ -89,7 +89,7 @@ class Tool:
         if self.modelType != args.model_type:
             print('Loading model...')
             self.modelType = args.model_type
-            self.model = cellpose.models.Cellpose(gpu=True if args.use_gpu == 'True' else False, model_type=self.modelType)
+            self.model = cellpose.models.Cellpose(gpu=True if args.use_gpu == 'True' else args.use_gpu, model_type=self.modelType)
 
         print(f'[[2/5]] Load image {input_image}')
         channels = json.loads(args.channels)
@@ -97,11 +97,7 @@ class Tool:
         auto_diameter = args.auto_diameter if type(args.auto_diameter) is bool else args.auto_diameter == 'True'
 
         print('[[3/5]] Compute segmentation', image.shape)
-        try:
-            masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
-        except Exception as e:
-            print(e)
-            raise e
+        masks, flows, styles, diams = self.model.eval(image, diameter=None if auto_diameter else int(args.diameter), channels=channels)
         print('segmentation finished.')
         
         input_image = Path(input_image)

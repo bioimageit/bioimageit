@@ -147,7 +147,7 @@ class BiitToolNode(NodeBase):
 		if 'outputDataFramePath' in jsonTemplate and jsonTemplate['outputDataFramePath'] is not None:
 			outputFolder = self.getOutputMetadataFolderPath()
 			if Path(outputFolder / jsonTemplate['outputDataFramePath']).exists():
-				self.setOutputAndClean(pandas.read_csv(outputFolder / jsonTemplate['outputDataFramePath'], index_col=0), False)
+				self.setOutputAndClean(pandas.read_csv(outputFolder / jsonTemplate['outputDataFramePath']), False)
 				if 'executed' in jsonTemplate:
 					self.setExecuted(True)
 			else:
@@ -272,6 +272,11 @@ class BiitToolNode(NodeBase):
 	def getStem(self, filename):
 		return Path(filename).stem
 	
+	def getAbsoluteStem(self, filename):
+		filename = Path(filename)
+		suffixes = "".join(filename.suffixes)
+		return str(filename.name)[:-len(suffixes)]
+	
 	def getSuffixes(self, filename):
 		return filename[filename.index('.'):] if '.' in filename else ''
 
@@ -286,6 +291,10 @@ class BiitToolNode(NodeBase):
 			input = inputGetterStr(name)
 			if input is not None:
 				outputValue = outputValue.replace(f'{{{name}.stem}}', self.getStem(input))
+		for name in re.findall(r'\{([a-zA-Z0-9_-]+).astem\}', outputValue):
+			input = inputGetterStr(name)
+			if input is not None:
+				outputValue = outputValue.replace(f'{{{name}.astem}}', self.getAbsoluteStem(input))
 		for name in re.findall(r'\{([a-zA-Z0-9_-]+).name\}', outputValue):
 			input = inputGetterStr(name)
 			if input is not None:
@@ -313,7 +322,7 @@ class BiitToolNode(NodeBase):
 				raise Exception(f'Error: the special string "{name}" can only be used at the beginning of the output {outputName}.')
 		
 		# Check for {inputName}|.stem|.name.|.parent.name|.ext|.exts and replace by the real input value|file stem|file name|parent folder name|extension|extensions
-		finalValue = self.replaceInputArgs(finalValue, (lambda name, row=row: self.getParameter(name, row)) )
+		finalValue = self.replaceInputArgs(finalValue, (lambda iname, row=row: self.getParameter(iname, row)) )
 		
 		# Check for (columnName) and replace by the row value at this column
 		for columnName in re.findall(r'\(([a-zA-Z0-9_-]+)\)', finalValue):

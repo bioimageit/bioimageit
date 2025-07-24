@@ -76,7 +76,7 @@ You might need to restart your terminal or source your shell for the changes to 
 
 `pixi` automatically creates a conda environment for the project and install the dependencies when necessary.
 
-Run the project with `pixi python run pyflow.py`.
+Run the project with `pixi run python pyflow.py`.
 
 ### Run & debug
 

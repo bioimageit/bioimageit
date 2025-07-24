@@ -18,10 +18,23 @@ class Tool():
     # - the pip packages which will be installed with 'pip install packageName'
     dependencies = dict(python='==3.10', conda=[], pip=[])
     # The inputs
-    inputs = [dict(name='input_image', help='The input image path.', 
-                   required=True, type='Path', autoColumn=True)]
-    outputs = [dict(name='output_image', help='The output image.', 
-                    default='{input_image.stem}_detections{input_image.exts}', type='Path')]
+    inputs = [
+            dict(
+                name = 'input_image',
+                help = 'The input image path.',
+                required = True,
+                type = 'Path',
+                autoColumn = True,
+            ),
+            ]
+    outputs = [
+            dict(
+                name = 'output_image',
+                help = 'The output image path.',
+                default = '{input_image.astem}_processed{input_image.exts}',
+                type = 'Path',
+            ),
+            ]
     
     # Merge the input DataFrames (optional)
     def mergeDataFrames(self, dataFrames, argsList):

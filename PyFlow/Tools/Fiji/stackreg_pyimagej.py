@@ -50,6 +50,7 @@ class Tool:
         # initialize imagej
         self.ij = imagej.init('sc.fiji:fiji:2.15.0', mode='headless')
         print(f"ImageJ version: {self.ij.getVersion()}")
+        
     def processData(self, args):
         if not args.input_image.exists():
             raise Exception(f'Error: input image {args.input_image} does not exist.')

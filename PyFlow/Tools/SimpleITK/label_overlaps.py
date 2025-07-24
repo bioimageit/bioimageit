@@ -41,8 +41,12 @@ class Tool:
         label1Data = sitk.GetArrayFromImage(label1).astype(np.uint64)
         label2Data = sitk.GetArrayFromImage(label2).astype(np.uint64)
         records = []
+        print('Label 1 image: ', label1Data.shape)
+        print('Label 2 image: ', label2Data.shape)
         for i in range(label1Data.max()):
+            print('label', i, 'counting uniques values of label 2 underneath...')
             uniques, counts = np.unique(label2Data[label1Data == i], return_counts=True)
+            print('found', len(uniques), 'labels')
             for u, c in zip(uniques, counts):
                 if u>0:
                     records.append(dict(image1=args.label1, image2=args.label2, label1=i, label2=u, overlap=c))
