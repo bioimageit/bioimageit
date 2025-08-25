@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'BioImageIT'
-copyright = '2025, Arthur Masson, Sylvain Prigent, Léo Maury, Charles Kervrann'
-author = 'Arthur Masson, Sylvain Prigent, Léo Maury, Charles Kervrann'
+copyright = '2025, Arthur Masson, Sylvain Prigent, Léo Maury, Ludovic Leconte, Cesar Augusto Valades-Cruz, Jean Salamero, Charles Kervrann'
+author = 'Arthur Masson, Sylvain Prigent, Léo Maury, Ludovic Leconte, Cesar Augusto Valades-Cruz, Jean Salamero, Charles Kervrann'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
